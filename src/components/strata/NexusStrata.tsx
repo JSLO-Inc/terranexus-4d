@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { GEOLOGICAL_FORMATIONS, AUTHENTIC_BOREHOLES } from '../../data/strataData';
 import { INDIA_LOCATIONS } from '../../data/locationsIndia';
@@ -8,9 +8,25 @@ import { Mountain, FileText, Layers, GitCompare, ShieldAlert, ArrowDown } from '
 export const NexusStrata: React.FC = () => {
   const { selectedLocation, depthMeters, setDepthMeters } = useTerranexusStore();
   const [compareLocationId, setCompareLocationId] = useState<string>('locus-deccan-pune');
+  const [dynamicTerrane, setDynamicTerrane] = useState<any>(null);
 
-  const formations = GEOLOGICAL_FORMATIONS[selectedLocation.id] || [];
-  const borehole = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id);
+  useEffect(() => {
+    if (selectedLocation && !GEOLOGICAL_FORMATIONS[selectedLocation.id]) {
+      fetch(`/api/providers/geology/terrane?lat=${selectedLocation.latitude}&lon=${selectedLocation.longitude}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json?.success && json?.terrane) {
+            setDynamicTerrane(json.terrane);
+          }
+        })
+        .catch(() => {});
+    } else {
+      setDynamicTerrane(null);
+    }
+  }, [selectedLocation]);
+
+  const formations = GEOLOGICAL_FORMATIONS[selectedLocation.id] || dynamicTerrane?.formations || GEOLOGICAL_FORMATIONS['locus-deccan-pune'] || [];
+  const borehole = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id) || dynamicTerrane?.borehole || AUTHENTIC_BOREHOLES[0];
   const compareFormations = GEOLOGICAL_FORMATIONS[compareLocationId] || [];
   const compareLocation = INDIA_LOCATIONS.find(l => l.id === compareLocationId) || INDIA_LOCATIONS[1];
 
@@ -121,7 +137,14 @@ export const NexusStrata: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60 font-sans">
-                    {borehole.strataIntervals.map((interval, i) => (
+                    {((borehole as any).strataIntervals || (borehole as any).layers?.map((l: any) => ({
+                      fromDepth: l.depthFromM,
+                      toDepth: l.depthToM,
+                      lithology: l.lithology,
+                      description: `Water strike: ${l.waterStrike ? 'Yes' : 'No'} | Fractures: ${l.fractureIntensity} | Permeability: ${l.permeabilityMPerDay} m/day`,
+                      color: l.color,
+                      permeability: l.permeabilityMPerDay > 3 ? 'High' : l.permeabilityMPerDay > 0.5 ? 'Medium' : 'Low'
+                    })) || []).map((interval: any, i: number) => (
                       <tr key={i} className="hover:bg-slate-900/40">
                         <td className="py-2.5 font-mono text-[11px] text-amber-400 whitespace-nowrap">
                           {interval.fromDepth}m - {interval.toDepth}m

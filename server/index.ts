@@ -1,7 +1,7 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import { locationRouter } from './routes/locationRoutes';
+import { providerRouter } from './routes/providerRoutes';
 import { generateScientificExplanation } from './aiService';
 import { getHeatmapLayerData, calculateAreaStatistics } from './services/heatmapRasterService';
 import { getLabelsForViewport, NATIONWIDE_HIERARCHICAL_LABELS } from './services/spatialLabelService';
@@ -10,17 +10,34 @@ import {
   getHydroPipelineStatus,
   runHydroIngestion
 } from './ingestion';
+import { applySecurityHeaders } from './security/securityHeaders';
+import { hardenedCors } from './security/originGuard';
+import { generalApiLimiter, locationSearchLimiter, ingestionLimiter } from './security/rateLimiter';
+import { validateOutboundUrl } from './security/urlValidator';
+import { validateAndSanitizeFilename } from './security/pathGuard';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
+// 1. Mandatory HTTP Security Headers (XSS, CSP, nosniff, frame-ancestors)
+app.use(applySecurityHeaders);
 
-// Universal Location & Discovery API
-app.use('/api/location', locationRouter);
+// 2. Hardened CORS with strict domain checking
+app.use(hardenedCors);
+
+// 3. Request-size limitation (1MB max payload to prevent memory exhaustion)
+app.use(express.json({ limit: '1mb' }));
+
+// 4. Global sliding-window rate limiting
+app.use(generalApiLimiter);
+
+// 5. Scientific Data Providers API (CGWB, GSI, CWC, NASA, Copernicus)
+app.use('/api/providers', providerRouter);
+
+// 6. Universal Location & Discovery API (with dedicated rate limiting)
+app.use('/api/location', locationSearchLimiter, locationRouter);
 
 // Health & System Status Endpoint
 app.get('/api/health', (req, res) => {
@@ -127,15 +144,37 @@ app.get('/api/hydro/nasa/granules', async (req, res) => {
   }
 });
 
-// Execute controlled download of authentic NASA Granule
-app.post('/api/hydro/nasa/download', async (req, res) => {
+// Execute controlled download of authentic NASA Granule (Hardened against SSRF & Path Traversal)
+app.post('/api/hydro/nasa/download', ingestionLimiter, async (req, res) => {
   try {
     const { downloadNasaGranuleFile } = await import('./ingestion/nasaGraceClient');
+    const { RAW_DIR } = await import('./ingestion/cacheManager');
     const { url, filename, metadata } = req.body;
     if (!url || !filename) {
       return res.status(400).json({ success: false, error: 'Missing required "url" or "filename" parameter' });
     }
-    const result = await downloadNasaGranuleFile(url, filename, metadata);
+
+    // 1. SSRF Protection: Ensure target URL is in approved NASA/PO.DAAC domain whitelist
+    const urlValidation = validateOutboundUrl(url);
+    if (!urlValidation.isValid) {
+      return res.status(400).json({
+        success: false,
+        error: `Outbound download blocked by SSRF Security Guard: ${urlValidation.error}`,
+        code: 'SSRF_SECURITY_REJECTION'
+      });
+    }
+
+    // 2. Path Traversal Protection: Ensure target filename cannot escape RAW_DIR
+    const pathValidation = validateAndSanitizeFilename(filename, RAW_DIR);
+    if (!pathValidation.isValid || !pathValidation.sanitizedFilename) {
+      return res.status(400).json({
+        success: false,
+        error: `Filename rejected by Path Traversal Guard: ${pathValidation.error}`,
+        code: 'PATH_TRAVERSAL_REJECTION'
+      });
+    }
+
+    const result = await downloadNasaGranuleFile(urlValidation.sanitizedUrl!, pathValidation.sanitizedFilename, metadata);
     res.json({ success: result.downloadStatus === 'SUCCESS', result });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -193,9 +232,19 @@ app.post('/api/hydro/nasa/process-raw', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing required "filename" parameter' });
     }
 
-    const filePath = path.join(RAW_DIR, filename);
+    // Path Traversal Guard
+    const pathValidation = validateAndSanitizeFilename(filename, RAW_DIR);
+    if (!pathValidation.isValid || !pathValidation.safeAbsolutePath) {
+      return res.status(400).json({
+        success: false,
+        error: `Filename rejected by Path Traversal Guard: ${pathValidation.error}`,
+        code: 'PATH_TRAVERSAL_REJECTION'
+      });
+    }
+
+    const filePath = pathValidation.safeAbsolutePath;
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ success: false, error: `File not found in server/data/raw/: ${filename}` });
+      return res.status(404).json({ success: false, error: `File not found in server/data/raw/: ${pathValidation.sanitizedFilename}` });
     }
 
     // Load sidecar provenance

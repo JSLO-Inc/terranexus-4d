@@ -52,6 +52,41 @@ export interface GroundedApplicationContext {
         isDirectObservation: boolean;
       } | null;
     };
+    cgwbAssessment?: {
+      stateName: string;
+      annualRechargeBcm: number;
+      extractableResourceBcm: number;
+      totalExtractionBcm: number;
+      stageOfExtractionPercent: number;
+      categorisation: string;
+      primaryAquiferSystem: string;
+      assessmentYear: string;
+    };
+    geologicalTerrane?: {
+      terraneId: string;
+      name: string;
+      cratonicAffiliation: string;
+      ageEpoch: string;
+      primaryLithology: string;
+      crustalThicknessKm: number;
+      dominantAquiferType: string;
+      mineralPotential: string[];
+    };
+    metallogenicBelt?: {
+      beltId: string;
+      name: string;
+      depositStyle: string;
+      geologicalHostRock: string;
+      targetCommodities: string[];
+      regionalProspectivityScore: string;
+    };
+    riverBasinDetails?: {
+      basinId: string;
+      name: string;
+      drainageAreaSqKm: number;
+      origin: string;
+      outflow: string;
+    };
   };
   depthMeters: number;
   timeStep: string;
@@ -170,6 +205,9 @@ CURRENT PLATFORM SPATIOTEMPORAL CONTEXT:
 - Coordinates: ${loc.latitude.toFixed(4)}°N, ${loc.longitude.toFixed(4)}°E (Elevation: ${loc.elevationMeters}m ASL)
 - Geological Basin: ${loc.basin}
 - Tectonic Province: ${loc.geologicalProvince}
+- GSI Lithotectonic Terrane: ${loc.geologicalTerrane ? `${loc.geologicalTerrane.name} (${loc.geologicalTerrane.cratonicAffiliation}, Age: ${loc.geologicalTerrane.ageEpoch}, Crust: ${loc.geologicalTerrane.crustalThicknessKm} km)` : 'Regional Terrane'}
+- CGWB Groundwater Assessment: ${loc.cgwbAssessment ? `State of ${loc.cgwbAssessment.stateName} [${loc.cgwbAssessment.categorisation}]: Stage of Extraction ${loc.cgwbAssessment.stageOfExtractionPercent}% (Recharge: ${loc.cgwbAssessment.annualRechargeBcm} BCM/yr, Extraction: ${loc.cgwbAssessment.totalExtractionBcm} BCM/yr, Primary: ${loc.cgwbAssessment.primaryAquiferSystem})` : 'National Baseline'}
+- CWC Major River Basin: ${loc.riverBasinDetails ? `${loc.riverBasinDetails.name} (Drainage: ${loc.riverBasinDetails.drainageAreaSqKm.toLocaleString()} sq km, Origin: ${loc.riverBasinDetails.origin})` : 'Regional Catchment'}
 - Current Depth Slice: -${context.depthMeters} meters below surface
 - Timeline Observation Step: ${context.timeStep}
 - Evidence Coverage Tier: ${loc.coverage ? `${loc.coverage.tier} (${loc.coverage.confidenceScorePercent}% confidence)` : 'HIGH (Regional Reference)'}
