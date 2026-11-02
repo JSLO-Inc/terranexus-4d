@@ -45,41 +45,81 @@ export function ingestLocationHydro(locationId: string, force: boolean = false):
   // 1. Ingest NASA GRACE/GRACE-FO (checks for genuine processed extractions first)
   const { records: graceRecords, provenance: graceProv } = extractGraceTimeseries(locationId);
   
-  // Check if genuine processed data exists for this location in PROCESSED_DIR
+  // Check if historical processed data exists for this location in PROCESSED_DIR
   let dataSourceTier: DataSourceTier = 'DEMONSTRATION';
   let genuineGranuleMeta: GenuineNasaGranuleMetadata | undefined = undefined;
+  let finalGraceRecords = graceRecords;
+  let finalGraceProv = graceProv;
+  let finalGraceStats = computeGraceStats(graceRecords);
 
-  const processedPath = path.join(PROCESSED_DIR, `grace_extracted_${locationId}.json`);
-  if (fs.existsSync(processedPath)) {
+  const historicalPath = path.join(PROCESSED_DIR, `grace_historical_${locationId}.json`);
+  if (fs.existsSync(historicalPath)) {
     try {
-      const rawProcessed = fs.readFileSync(processedPath, 'utf-8');
-      const processedJson = JSON.parse(rawProcessed);
-      if (processedJson.success && processedJson.extractions?.[locationId]) {
-        dataSourceTier = 'GENUINE_NASA_PROCESSED';
-        genuineGranuleMeta = processedJson.granuleMetadata;
-        
-        // Merge genuine observation into time series
-        const obsDate = processedJson.observationDate; // e.g. "2017-05"
-        const ext = processedJson.extractions[locationId];
-        const matchIdx = graceRecords.findIndex(r => r.date === obsDate);
-        if (matchIdx !== -1 && ext.twsAnomalyCm !== null) {
-          // If raw units are 'm' (meters), convert to 'cm' (centimeters) for time-series display consistency
-          const convertedVal = ext.units === 'm' ? Math.round(ext.twsAnomalyCm * 100 * 10) / 10 : ext.twsAnomalyCm;
-          const convertedUnc = ext.units === 'm' && ext.uncertaintyCm !== null ? Math.round(ext.uncertaintyCm * 100 * 10) / 10 : ext.uncertaintyCm;
-          graceRecords[matchIdx] = {
-            ...graceRecords[matchIdx],
-            twsAnomalyCm: convertedVal,
-            uncertaintyCm: convertedUnc,
-            status: 'OBSERVED'
-          };
-        }
+      const rawHist = fs.readFileSync(historicalPath, 'utf-8');
+      const histJson = JSON.parse(rawHist);
+      if (histJson.records && histJson.records.length > 0) {
+        dataSourceTier = 'GENUINE_NASA_HISTORICAL';
+        finalGraceRecords = histJson.records.map((r: any) => ({
+          date: r.date,
+          year: r.year,
+          month: r.month,
+          twsAnomalyCm: r.twsAnomalyCm,
+          uncertaintyCm: r.uncertaintyCm,
+          satellite: r.satellite,
+          status: r.status
+        }));
+        finalGraceStats = histJson.stats;
+        finalGraceProv = {
+          ...graceProv,
+          id: 'nasa-grace-tellus-rl06-historical',
+          name: 'NASA GRACE & GRACE-FO Level-3 JPL Tellus Monthly Land Water-Equivalent-Thickness',
+          provider: 'NASA JPL / PO.DAAC (Physical Oceanography Distributed Active Archive Center)',
+          officialDocsUrl: 'https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/',
+          accessUrl: 'https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04',
+          doi: 'https://doi.org/10.5067/TELND-3AJ64',
+          format: 'NetCDF-4 Classic (CF-1.6)',
+          processingLineage: 'Authentic NASA PO.DAAC Level-3 Land Mass Grids (RL06 v04 & RL06.3 v04) spanning 2014-01 through 2024-12. Nearest centroid Haversine extraction with 300 km Gaussian smoothing footprint.',
+          knownLimitations: [
+            'GRACE/GRACE-FO measures vertically integrated column mass anomaly (liquid water equivalent in cm), combining groundwater, vadose zone soil moisture, surface water, and biomass.',
+            'Coarse spatial resolution (~300 km Gaussian footprint); MUST NOT be interpreted directly as single-borewell water table elevation without independent mass decoupling.',
+            'The 11-month inter-mission gap (2017-07 to 2018-05) and spacecraft battery conservation outages are strictly preserved as unobserved null discontinuities.'
+          ]
+        };
       }
     } catch (err) {
-      console.warn(`Failed to read processed NASA data for ${locationId}:`, err);
+      console.warn(`Failed to read historical NASA data for ${locationId}:`, err);
+    }
+  } else {
+    const processedPath = path.join(PROCESSED_DIR, `grace_extracted_${locationId}.json`);
+    if (fs.existsSync(processedPath)) {
+      try {
+        const rawProcessed = fs.readFileSync(processedPath, 'utf-8');
+        const processedJson = JSON.parse(rawProcessed);
+        if (processedJson.success && processedJson.extractions?.[locationId]) {
+          dataSourceTier = 'GENUINE_NASA_PROCESSED';
+          genuineGranuleMeta = processedJson.granuleMetadata;
+          
+          // Merge genuine observation into time series
+          const obsDate = processedJson.observationDate; // e.g. "2017-05"
+          const ext = processedJson.extractions[locationId];
+          const matchIdx = finalGraceRecords.findIndex(r => r.date === obsDate);
+          if (matchIdx !== -1 && ext.twsAnomalyCm !== null) {
+            const convertedVal = ext.units === 'm' ? Math.round(ext.twsAnomalyCm * 100 * 10) / 10 : ext.twsAnomalyCm;
+            const convertedUnc = ext.units === 'm' && ext.uncertaintyCm !== null ? Math.round(ext.uncertaintyCm * 100 * 10) / 10 : ext.uncertaintyCm;
+            finalGraceRecords[matchIdx] = {
+              ...finalGraceRecords[matchIdx],
+              twsAnomalyCm: convertedVal,
+              uncertaintyCm: convertedUnc,
+              status: 'OBSERVED'
+            };
+          }
+          finalGraceStats = computeGraceStats(finalGraceRecords);
+        }
+      } catch (err) {
+        console.warn(`Failed to read processed NASA data for ${locationId}:`, err);
+      }
     }
   }
-
-  const graceStats = computeGraceStats(graceRecords);
 
   // 2. Ingest NASA GPM IMERG Rainfall
   const { records: rainRecords, provenance: rainProv } = extractRainfallTimeseries(locationId);
@@ -98,10 +138,10 @@ export function ingestLocationHydro(locationId: string, force: boolean = false):
       longitude: meta.longitude
     },
     grace: {
-      provenance: graceProv,
+      provenance: finalGraceProv,
       genuineNasaGranule: genuineGranuleMeta,
-      records: graceRecords,
-      stats: graceStats
+      records: finalGraceRecords,
+      stats: finalGraceStats
     },
     precipitation: {
       provenance: rainProv,

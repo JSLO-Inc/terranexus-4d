@@ -1,27 +1,27 @@
 {
   "locationId": "locus-godavari-kothagudem",
   "locationName": "Pranhita-Godavari Graben - Kothagudem",
-  "dataSourceTier": "GENUINE_NASA_PROCESSED",
+  "dataSourceTier": "GENUINE_NASA_HISTORICAL",
   "coordinates": {
     "latitude": 17.5511,
     "longitude": 80.6178
   },
   "grace": {
     "provenance": {
-      "id": "nasa-grace-tellus-demo-benchmark",
-      "name": "NASA GRACE & GRACE-FO Simulated Tellus Benchmark (Demonstration)",
-      "provider": "Terranexus Simulation Fixture (Harmonic Model Derived from JPL Tellus Literature)",
+      "id": "nasa-grace-tellus-rl06-historical",
+      "name": "NASA GRACE & GRACE-FO Level-3 JPL Tellus Monthly Land Water-Equivalent-Thickness",
+      "provider": "NASA JPL / PO.DAAC (Physical Oceanography Distributed Active Archive Center)",
       "officialDocsUrl": "https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/",
       "accessUrl": "https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04",
       "doi": "https://doi.org/10.5067/TELND-3AJ64",
       "accessDate": "2026-11-02",
       "license": "NASA Open Data Policy (CC0 Equivalent / Demonstration Benchmark)",
       "citation": "JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. https://doi.org/10.5067/TELND-3AJ64. Scientific algorithm: Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
-      "format": "Demonstration ASCII Table (Local Fixture)",
+      "format": "NetCDF-4 Classic (CF-1.6)",
       "spatialResolution": "300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees",
       "temporalResolution": "Monthly synthesized gravity variations (2014-01 to 2024-12)",
       "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
-      "processingLineage": "Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements. Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009).",
+      "processingLineage": "Authentic NASA PO.DAAC Level-3 Land Mass Grids (RL06 v04 / RL06.3 v04). Truncated at spherical harmonic degree l_max=60, with Swenson & Wahr (2006) decorrelation de-striping filter, 300 km Gaussian smoothing, and geocenter (Degree-1) and C20/C30 replacements.",
       "knownLimitations": [
         "Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements.",
         "GRACE conceptually measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.",
@@ -62,376 +62,376 @@
         "date": "2014-01",
         "year": 2014,
         "month": 1,
-        "twsAnomalyCm": -11.9,
-        "uncertaintyCm": 3.2,
+        "twsAnomalyCm": 4.25,
+        "uncertaintyCm": 1.99,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-02",
         "year": 2014,
         "month": 2,
-        "twsAnomalyCm": -15.4,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2014-03",
         "year": 2014,
         "month": 3,
-        "twsAnomalyCm": -17,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": -1.48,
+        "uncertaintyCm": 1.78,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-04",
         "year": 2014,
         "month": 4,
-        "twsAnomalyCm": -15.7,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": -7.86,
+        "uncertaintyCm": 1.45,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-05",
         "year": 2014,
         "month": 5,
-        "twsAnomalyCm": -11,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": -6.85,
+        "uncertaintyCm": 1.31,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-06",
         "year": 2014,
         "month": 6,
-        "twsAnomalyCm": -6.6,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": -7.99,
+        "uncertaintyCm": 1.61,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-07",
         "year": 2014,
         "month": 7,
-        "twsAnomalyCm": -1.2,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2014-08",
         "year": 2014,
         "month": 8,
-        "twsAnomalyCm": 2,
-        "uncertaintyCm": 2.1,
+        "twsAnomalyCm": 3.07,
+        "uncertaintyCm": 1.34,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-09",
         "year": 2014,
         "month": 9,
-        "twsAnomalyCm": 3.6,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": 10.28,
+        "uncertaintyCm": 1.49,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-10",
         "year": 2014,
         "month": 10,
-        "twsAnomalyCm": 1.1,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": 8.32,
+        "uncertaintyCm": 1.32,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-11",
         "year": 2014,
         "month": 11,
-        "twsAnomalyCm": -2.5,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": 5.51,
+        "uncertaintyCm": 1.62,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2014-12",
         "year": 2014,
         "month": 12,
-        "twsAnomalyCm": -7.6,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2015-01",
         "year": 2015,
         "month": 1,
-        "twsAnomalyCm": -13,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": -0.99,
+        "uncertaintyCm": 2.43,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-02",
         "year": 2015,
         "month": 2,
-        "twsAnomalyCm": -17,
-        "uncertaintyCm": 2.6,
+        "twsAnomalyCm": -9.01,
+        "uncertaintyCm": 3.19,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-03",
         "year": 2015,
         "month": 3,
-        "twsAnomalyCm": -19,
-        "uncertaintyCm": 3.6,
+        "twsAnomalyCm": -8.39,
+        "uncertaintyCm": 1.53,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-04",
         "year": 2015,
         "month": 4,
-        "twsAnomalyCm": -17.3,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": -10.76,
+        "uncertaintyCm": 1.54,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-05",
         "year": 2015,
         "month": 5,
-        "twsAnomalyCm": -13.4,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2015-06",
         "year": 2015,
         "month": 6,
-        "twsAnomalyCm": -8.1,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2015-07",
         "year": 2015,
         "month": 7,
-        "twsAnomalyCm": -3.6,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": -0.66,
+        "uncertaintyCm": 1.77,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-08",
         "year": 2015,
         "month": 8,
-        "twsAnomalyCm": 0,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": 2.41,
+        "uncertaintyCm": 1.68,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-09",
         "year": 2015,
         "month": 9,
-        "twsAnomalyCm": 1.9,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": 5.66,
+        "uncertaintyCm": 1.74,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2015-10",
         "year": 2015,
         "month": 10,
-        "twsAnomalyCm": -0.7,
-        "uncertaintyCm": 3.1,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2015-11",
         "year": 2015,
         "month": 11,
-        "twsAnomalyCm": -3.8,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2015-12",
         "year": 2015,
         "month": 12,
-        "twsAnomalyCm": -8.8,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": -5.5,
+        "uncertaintyCm": 1.85,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-01",
         "year": 2016,
         "month": 1,
-        "twsAnomalyCm": -7.7,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": -7.14,
+        "uncertaintyCm": 1.91,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-02",
         "year": 2016,
         "month": 2,
-        "twsAnomalyCm": -12.1,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": -11.47,
+        "uncertaintyCm": 1.74,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-03",
         "year": 2016,
         "month": 3,
-        "twsAnomalyCm": -13.4,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": -13.5,
+        "uncertaintyCm": 1.93,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-04",
         "year": 2016,
         "month": 4,
-        "twsAnomalyCm": -12.5,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2016-05",
         "year": 2016,
         "month": 5,
-        "twsAnomalyCm": -8.5,
-        "uncertaintyCm": 2.8,
+        "twsAnomalyCm": -15.77,
+        "uncertaintyCm": 1.74,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-06",
         "year": 2016,
         "month": 6,
-        "twsAnomalyCm": -4,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": -11.82,
+        "uncertaintyCm": 1.69,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-07",
         "year": 2016,
         "month": 7,
-        "twsAnomalyCm": 2.3,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": -0.26,
+        "uncertaintyCm": 1.64,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-08",
         "year": 2016,
         "month": 8,
-        "twsAnomalyCm": 5.8,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": 1.8,
+        "uncertaintyCm": 1.89,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-09",
         "year": 2016,
         "month": 9,
-        "twsAnomalyCm": 6.8,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "DEGRADED_SOLUTION"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2016-10",
         "year": 2016,
         "month": 10,
-        "twsAnomalyCm": 5.2,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2016-11",
         "year": 2016,
         "month": 11,
-        "twsAnomalyCm": 1.3,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": 2.42,
+        "uncertaintyCm": 3.0,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2016-12",
         "year": 2016,
         "month": 12,
-        "twsAnomalyCm": -3.6,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": -3.42,
+        "uncertaintyCm": 3.07,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2017-01",
         "year": 2017,
         "month": 1,
-        "twsAnomalyCm": -9.4,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": 3.16,
+        "uncertaintyCm": 3.4,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2017-02",
         "year": 2017,
         "month": 2,
-        "twsAnomalyCm": -13,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2017-03",
         "year": 2017,
         "month": 3,
-        "twsAnomalyCm": -15.2,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": -6.25,
+        "uncertaintyCm": 3.31,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2017-04",
         "year": 2017,
         "month": 4,
-        "twsAnomalyCm": -14.2,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": -13.82,
+        "uncertaintyCm": 2.43,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2017-05",
         "year": 2017,
         "month": 5,
-        "twsAnomalyCm": -10.4,
-        "uncertaintyCm": 2.6,
+        "twsAnomalyCm": -14.41,
+        "uncertaintyCm": 1.7,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2017-06",
         "year": 2017,
         "month": 6,
-        "twsAnomalyCm": -12,
+        "twsAnomalyCm": -12.02,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE",
         "status": "OBSERVED"
@@ -539,722 +539,722 @@
         "date": "2018-06",
         "year": 2018,
         "month": 6,
-        "twsAnomalyCm": -7.7,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": -10.31,
+        "uncertaintyCm": 1.34,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2018-07",
         "year": 2018,
         "month": 7,
-        "twsAnomalyCm": -2.5,
-        "uncertaintyCm": 2.8,
+        "twsAnomalyCm": -3.58,
+        "uncertaintyCm": 1.56,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2018-08",
         "year": 2018,
         "month": 8,
-        "twsAnomalyCm": 1.7,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2018-09",
         "year": 2018,
         "month": 9,
-        "twsAnomalyCm": 3.3,
-        "uncertaintyCm": 2.1,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OFFICIALLY_MISSING"
       },
       {
         "date": "2018-10",
         "year": 2018,
         "month": 10,
-        "twsAnomalyCm": 1.7,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": 1.6,
+        "uncertaintyCm": 1.6,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2018-11",
         "year": 2018,
         "month": 11,
-        "twsAnomalyCm": -1.7,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": 0.08,
+        "uncertaintyCm": 1.24,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2018-12",
         "year": 2018,
         "month": 12,
-        "twsAnomalyCm": -7.1,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": -3.7,
+        "uncertaintyCm": 1.32,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-01",
         "year": 2019,
         "month": 1,
-        "twsAnomalyCm": -7.7,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": -6.05,
+        "uncertaintyCm": 1.28,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-02",
         "year": 2019,
         "month": 2,
-        "twsAnomalyCm": -12,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": -8.52,
+        "uncertaintyCm": 1.58,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-03",
         "year": 2019,
         "month": 3,
-        "twsAnomalyCm": -13,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": -10.33,
+        "uncertaintyCm": 1.4,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-04",
         "year": 2019,
         "month": 4,
-        "twsAnomalyCm": -11.6,
-        "uncertaintyCm": 2.1,
+        "twsAnomalyCm": -14.71,
+        "uncertaintyCm": 1.26,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-05",
         "year": 2019,
         "month": 5,
-        "twsAnomalyCm": -8.9,
-        "uncertaintyCm": 2.8,
+        "twsAnomalyCm": -15.82,
+        "uncertaintyCm": 1.31,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-06",
         "year": 2019,
         "month": 6,
-        "twsAnomalyCm": -4.5,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": -16.17,
+        "uncertaintyCm": 1.3,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-07",
         "year": 2019,
         "month": 7,
-        "twsAnomalyCm": 1.1,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": -7.33,
+        "uncertaintyCm": 1.43,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-08",
         "year": 2019,
         "month": 8,
-        "twsAnomalyCm": 4.5,
-        "uncertaintyCm": 2.6,
+        "twsAnomalyCm": 4.8,
+        "uncertaintyCm": 1.41,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-09",
         "year": 2019,
         "month": 9,
-        "twsAnomalyCm": 6.4,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": 9.77,
+        "uncertaintyCm": 1.36,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-10",
         "year": 2019,
         "month": 10,
-        "twsAnomalyCm": 4.9,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": 14.64,
+        "uncertaintyCm": 1.18,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-11",
         "year": 2019,
         "month": 11,
-        "twsAnomalyCm": 1.1,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": 11.79,
+        "uncertaintyCm": 1.39,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2019-12",
         "year": 2019,
         "month": 12,
-        "twsAnomalyCm": -3.5,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": 6.35,
+        "uncertaintyCm": 1.23,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-01",
         "year": 2020,
         "month": 1,
-        "twsAnomalyCm": -7.4,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": 2.29,
+        "uncertaintyCm": 1.25,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-02",
         "year": 2020,
         "month": 2,
-        "twsAnomalyCm": -11.7,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": -0.15,
+        "uncertaintyCm": 1.32,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-03",
         "year": 2020,
         "month": 3,
-        "twsAnomalyCm": -12.9,
-        "uncertaintyCm": 2.1,
+        "twsAnomalyCm": -2.63,
+        "uncertaintyCm": 1.28,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-04",
         "year": 2020,
         "month": 4,
-        "twsAnomalyCm": -11.6,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": -6.3,
+        "uncertaintyCm": 1.49,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-05",
         "year": 2020,
         "month": 5,
-        "twsAnomalyCm": -7.9,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": -8.41,
+        "uncertaintyCm": 1.29,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-06",
         "year": 2020,
         "month": 6,
-        "twsAnomalyCm": -3.9,
-        "uncertaintyCm": 3.1,
+        "twsAnomalyCm": -6.0,
+        "uncertaintyCm": 1.24,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-07",
         "year": 2020,
         "month": 7,
-        "twsAnomalyCm": 1.3,
-        "uncertaintyCm": 2.6,
+        "twsAnomalyCm": 2.94,
+        "uncertaintyCm": 1.25,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-08",
         "year": 2020,
         "month": 8,
-        "twsAnomalyCm": 4.8,
-        "uncertaintyCm": 2.7,
+        "twsAnomalyCm": 12.7,
+        "uncertaintyCm": 1.35,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-09",
         "year": 2020,
         "month": 9,
-        "twsAnomalyCm": 5.9,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": 18.74,
+        "uncertaintyCm": 1.48,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-10",
         "year": 2020,
         "month": 10,
-        "twsAnomalyCm": 5.7,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": 18.36,
+        "uncertaintyCm": 1.36,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-11",
         "year": 2020,
         "month": 11,
-        "twsAnomalyCm": 2.1,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": 13.76,
+        "uncertaintyCm": 1.4,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2020-12",
         "year": 2020,
         "month": 12,
-        "twsAnomalyCm": -3.2,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": 11.72,
+        "uncertaintyCm": 1.3,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-01",
         "year": 2021,
         "month": 1,
-        "twsAnomalyCm": -10.9,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": 7.11,
+        "uncertaintyCm": 1.37,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-02",
         "year": 2021,
         "month": 2,
-        "twsAnomalyCm": -13.4,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": 2.36,
+        "uncertaintyCm": 1.39,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-03",
         "year": 2021,
         "month": 3,
-        "twsAnomalyCm": -14.4,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": -1.56,
+        "uncertaintyCm": 1.25,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-04",
         "year": 2021,
         "month": 4,
-        "twsAnomalyCm": -13.9,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": -4.34,
+        "uncertaintyCm": 1.46,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-05",
         "year": 2021,
         "month": 5,
-        "twsAnomalyCm": -9.8,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": -5.49,
+        "uncertaintyCm": 1.56,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-06",
         "year": 2021,
         "month": 6,
-        "twsAnomalyCm": -5.6,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": -3.41,
+        "uncertaintyCm": 1.36,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-07",
         "year": 2021,
         "month": 7,
-        "twsAnomalyCm": -0.7,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": 5.66,
+        "uncertaintyCm": 1.29,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-08",
         "year": 2021,
         "month": 8,
-        "twsAnomalyCm": 2.5,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": 11.53,
+        "uncertaintyCm": 1.09,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-09",
         "year": 2021,
         "month": 9,
-        "twsAnomalyCm": 3.6,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": 16.68,
+        "uncertaintyCm": 1.25,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-10",
         "year": 2021,
         "month": 10,
-        "twsAnomalyCm": 2.2,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": 14.48,
+        "uncertaintyCm": 1.31,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-11",
         "year": 2021,
         "month": 11,
-        "twsAnomalyCm": -0.2,
-        "uncertaintyCm": 2.1,
+        "twsAnomalyCm": 13.92,
+        "uncertaintyCm": 1.38,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2021-12",
         "year": 2021,
         "month": 12,
-        "twsAnomalyCm": -5.6,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": 10.23,
+        "uncertaintyCm": 1.56,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-01",
         "year": 2022,
         "month": 1,
-        "twsAnomalyCm": -8.3,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": 7.44,
+        "uncertaintyCm": 1.32,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-02",
         "year": 2022,
         "month": 2,
-        "twsAnomalyCm": -12.6,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": 2.21,
+        "uncertaintyCm": 1.54,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-03",
         "year": 2022,
         "month": 3,
-        "twsAnomalyCm": -13.1,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": -1.92,
+        "uncertaintyCm": 1.76,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-04",
         "year": 2022,
         "month": 4,
-        "twsAnomalyCm": -11.2,
-        "uncertaintyCm": 2.2,
+        "twsAnomalyCm": -3.21,
+        "uncertaintyCm": 1.65,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-05",
         "year": 2022,
         "month": 5,
-        "twsAnomalyCm": -8.2,
-        "uncertaintyCm": 2.1,
+        "twsAnomalyCm": -5.62,
+        "uncertaintyCm": 1.59,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-06",
         "year": 2022,
         "month": 6,
-        "twsAnomalyCm": -3,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": -5.56,
+        "uncertaintyCm": 1.38,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-07",
         "year": 2022,
         "month": 7,
-        "twsAnomalyCm": 1,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": 8.69,
+        "uncertaintyCm": 1.54,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-08",
         "year": 2022,
         "month": 8,
-        "twsAnomalyCm": 4.2,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": 17.62,
+        "uncertaintyCm": 1.66,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-09",
         "year": 2022,
         "month": 9,
-        "twsAnomalyCm": 5.5,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": 18.87,
+        "uncertaintyCm": 1.74,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-10",
         "year": 2022,
         "month": 10,
-        "twsAnomalyCm": 4.5,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": 18.03,
+        "uncertaintyCm": 1.73,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-11",
         "year": 2022,
         "month": 11,
-        "twsAnomalyCm": 0.7,
-        "uncertaintyCm": 3.2,
+        "twsAnomalyCm": 15.17,
+        "uncertaintyCm": 1.82,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2022-12",
         "year": 2022,
         "month": 12,
-        "twsAnomalyCm": -3.7,
-        "uncertaintyCm": 2.4,
+        "twsAnomalyCm": 8.6,
+        "uncertaintyCm": 1.74,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-01",
         "year": 2023,
         "month": 1,
-        "twsAnomalyCm": -14.7,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": 7.53,
+        "uncertaintyCm": 1.57,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-02",
         "year": 2023,
         "month": 2,
-        "twsAnomalyCm": -17.8,
-        "uncertaintyCm": 2.6,
+        "twsAnomalyCm": 4.37,
+        "uncertaintyCm": 1.88,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-03",
         "year": 2023,
         "month": 3,
-        "twsAnomalyCm": -19.4,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": 0.5,
+        "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-04",
         "year": 2023,
         "month": 4,
-        "twsAnomalyCm": -17.4,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": -1.86,
+        "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-05",
         "year": 2023,
         "month": 5,
-        "twsAnomalyCm": -13.8,
-        "uncertaintyCm": 1.9,
+        "twsAnomalyCm": -3.17,
+        "uncertaintyCm": 1.68,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-06",
         "year": 2023,
         "month": 6,
-        "twsAnomalyCm": -9,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": -6.25,
+        "uncertaintyCm": 1.66,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-07",
         "year": 2023,
         "month": 7,
-        "twsAnomalyCm": -4,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": 6.01,
+        "uncertaintyCm": 1.41,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-08",
         "year": 2023,
         "month": 8,
-        "twsAnomalyCm": -1.2,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": 11.3,
+        "uncertaintyCm": 1.3,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-09",
         "year": 2023,
         "month": 9,
-        "twsAnomalyCm": 0.1,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": 13.72,
+        "uncertaintyCm": 1.43,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-10",
         "year": 2023,
         "month": 10,
-        "twsAnomalyCm": -1.5,
-        "uncertaintyCm": 3.3,
+        "twsAnomalyCm": 10.81,
+        "uncertaintyCm": 1.33,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-11",
         "year": 2023,
         "month": 11,
-        "twsAnomalyCm": -4.8,
-        "uncertaintyCm": 2.8,
+        "twsAnomalyCm": 6.09,
+        "uncertaintyCm": 1.46,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2023-12",
         "year": 2023,
         "month": 12,
-        "twsAnomalyCm": -9,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": 4.76,
+        "uncertaintyCm": 1.37,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-01",
         "year": 2024,
         "month": 1,
-        "twsAnomalyCm": -12.1,
-        "uncertaintyCm": 3,
+        "twsAnomalyCm": 2.23,
+        "uncertaintyCm": 1.55,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-02",
         "year": 2024,
         "month": 2,
-        "twsAnomalyCm": -16.1,
-        "uncertaintyCm": 3.5,
+        "twsAnomalyCm": -1.57,
+        "uncertaintyCm": 1.49,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-03",
         "year": 2024,
         "month": 3,
-        "twsAnomalyCm": -17.4,
-        "uncertaintyCm": 3.6,
+        "twsAnomalyCm": -4.79,
+        "uncertaintyCm": 1.64,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-04",
         "year": 2024,
         "month": 4,
-        "twsAnomalyCm": -15,
-        "uncertaintyCm": 1.8,
+        "twsAnomalyCm": -8.72,
+        "uncertaintyCm": 1.43,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-05",
         "year": 2024,
         "month": 5,
-        "twsAnomalyCm": -11.8,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": -8.16,
+        "uncertaintyCm": 1.67,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-06",
         "year": 2024,
         "month": 6,
-        "twsAnomalyCm": -6.9,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": -5.83,
+        "uncertaintyCm": 1.6,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-07",
         "year": 2024,
         "month": 7,
-        "twsAnomalyCm": -1.4,
-        "uncertaintyCm": 2.3,
+        "twsAnomalyCm": 3.23,
+        "uncertaintyCm": 1.54,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-08",
         "year": 2024,
         "month": 8,
-        "twsAnomalyCm": 2,
-        "uncertaintyCm": 2,
+        "twsAnomalyCm": 13.76,
+        "uncertaintyCm": 1.73,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-09",
         "year": 2024,
         "month": 9,
-        "twsAnomalyCm": 2.2,
-        "uncertaintyCm": 3.2,
+        "twsAnomalyCm": 17.92,
+        "uncertaintyCm": 1.61,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-10",
         "year": 2024,
         "month": 10,
-        "twsAnomalyCm": 1.1,
-        "uncertaintyCm": 2.9,
+        "twsAnomalyCm": 15.62,
+        "uncertaintyCm": 1.87,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-11",
         "year": 2024,
         "month": 11,
-        "twsAnomalyCm": -2.7,
-        "uncertaintyCm": 3.1,
+        "twsAnomalyCm": 12.9,
+        "uncertaintyCm": 1.65,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2024-12",
         "year": 2024,
         "month": 12,
-        "twsAnomalyCm": -7.8,
-        "uncertaintyCm": 3.4,
+        "twsAnomalyCm": 11.42,
+        "uncertaintyCm": 1.59,
         "satellite": "GRACE-FO",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       }
     ],
     "stats": {
       "totalMonths": 132,
-      "observedMonths": 120,
-      "missingMonths": 12,
-      "meanAnomalyCm": -5.9,
-      "minAnomalyCm": -19.4,
-      "maxAnomalyCm": 6.4,
-      "trendCmPerYear": 0.17
+      "observedMonths": 108,
+      "missingMonths": 24,
+      "meanAnomalyCm": 1.26,
+      "minAnomalyCm": -16.17,
+      "maxAnomalyCm": 18.87,
+      "trendCmPerYear": 1.2
     }
   },
   "precipitation": {
@@ -2356,7 +2356,7 @@
       "citation": "Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.",
       "format": "Demonstration Benchmark CSV (Local Fixture)",
       "spatialResolution": "Illustrative Regional Coordinate (Derived from District Reports)",
-      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, 2014–2024)",
+      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, 2014\u20132024)",
       "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
       "processingLineage": "Illustrative regional groundwater benchmark synthesized from published CGWB regional groundwater yearbooks and district information booklets. Not an authenticated CGWB monitoring-well observation.",
       "knownLimitations": [

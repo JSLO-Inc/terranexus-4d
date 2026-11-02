@@ -14,7 +14,8 @@ export type DataSourceTier =
   | 'CMR_METADATA_DISCOVERED'
   | 'RAW_FILE_DOWNLOADED'
   | 'RAW_FILE_VALIDATED'
-  | 'GENUINE_NASA_PROCESSED';
+  | 'GENUINE_NASA_PROCESSED'
+  | 'GENUINE_NASA_HISTORICAL';
 
 export interface GenuineNasaGranuleMetadata {
   granuleId: string;
@@ -70,7 +71,7 @@ export interface GraceRecord {
   twsAnomalyCm: number | null; // Null if mission gap or missing
   uncertaintyCm: number | null; // Formal error estimate (+/- cm)
   satellite: 'GRACE' | 'GRACE-FO' | null;
-  status: 'OBSERVED' | 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION';
+  status: 'OBSERVED' | 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION' | 'OFFICIALLY_MISSING';
 }
 
 export interface PrecipitationRecord {
