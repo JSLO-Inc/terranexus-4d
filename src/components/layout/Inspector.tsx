@@ -163,6 +163,54 @@ export const Inspector: React.FC = () => {
               </div>
             </div>
 
+            {/* Authentic CGWB National Assessment Card */}
+            {(selectedLocation as any).cgwbAssessment && (
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-emerald-400 font-mono text-[10px] font-semibold">
+                    <Droplet className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>CGWB GROUNDWATER ASSESSMENT</span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                    (selectedLocation as any).cgwbAssessment.categorisation === 'OVER_EXPLOITED'
+                      ? 'bg-red-950/80 border-red-500/60 text-red-300'
+                      : (selectedLocation as any).cgwbAssessment.categorisation === 'CRITICAL'
+                      ? 'bg-orange-950/80 border-orange-500/60 text-orange-300'
+                      : (selectedLocation as any).cgwbAssessment.categorisation === 'SEMI_CRITICAL'
+                      ? 'bg-amber-950/80 border-amber-500/60 text-amber-300'
+                      : 'bg-emerald-950/80 border-emerald-500/60 text-emerald-300'
+                  }`}>
+                    {(selectedLocation as any).cgwbAssessment.categorisation.replace('_', ' ')}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
+                  <div>
+                    <span className="text-slate-500 block text-[9px]">Stage of Extraction:</span>
+                    <span className="text-slate-100 font-bold font-mono">
+                      {(selectedLocation as any).cgwbAssessment.stageOfExtractionPercent}%
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block text-[9px]">Annual Recharge:</span>
+                    <span className="text-cyan-300 font-mono">
+                      {(selectedLocation as any).cgwbAssessment.annualRechargeBcm} BCM/yr
+                    </span>
+                  </div>
+                  <div className="col-span-2 pt-1 border-t border-slate-800/60">
+                    <span className="text-slate-500 block text-[9px]">Primary Aquifer System:</span>
+                    <span className="text-slate-300 text-[10px] leading-tight block">
+                      {(selectedLocation as any).cgwbAssessment.primaryAquiferSystem}
+                    </span>
+                  </div>
+                </div>
+
+                <span className="text-[9px] text-slate-500">
+                  Source: CGWB & Ministry of Jal Shakti (GEC-2015 Compilation)
+                </span>
+              </div>
+            )}
+
             {/* Module Status Telemetry Rows */}
             <div className="flex flex-col gap-2 bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/80">
               <div

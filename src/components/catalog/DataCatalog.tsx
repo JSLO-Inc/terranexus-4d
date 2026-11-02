@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DATASET_REGISTRY } from '../../data/datasetsRegistry';
 import { StatusBadge } from '../common/StatusBadge';
 import { ScientificStatus } from '../../types/datasets';
-import { Database, Search, ExternalLink, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Database, Search, ExternalLink, ShieldCheck, AlertCircle, Activity, CheckCircle2 } from 'lucide-react';
 
 export const DataCatalog: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
+  const [providers, setProviders] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/providers/status')
+      .then(res => res.json())
+      .then(json => {
+        if (json?.success && Array.isArray(json.providers)) {
+          setProviders(json.providers);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filtered = DATASET_REGISTRY.filter((d) => {
     const matchesSearch =
@@ -60,6 +72,49 @@ export const DataCatalog: React.FC = () => {
           </select>
         </div>
       </div>
+
+      {/* Operational Provider Health Grid */}
+      {providers.length > 0 && (
+        <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col gap-3">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+              <Activity className="w-4 h-4 text-emerald-400" />
+              <span>LIVE SCIENTIFIC DATA PROVIDERS ({providers.length} ACTIVE ENGINES)</span>
+            </div>
+            <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-950/60 border border-emerald-600/30 px-2 py-0.5 rounded-full">
+              PROVIDER-INDEPENDENT ARCHITECTURE
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {providers.map((p) => (
+              <div key={p.id} className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex flex-col justify-between gap-2">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-mono text-cyan-400 font-medium">{p.category}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${
+                      p.health?.status === 'ONLINE'
+                        ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
+                        : p.health?.status === 'AUTHENTICATION_REQUIRED'
+                        ? 'bg-amber-950/60 border-amber-500/50 text-amber-300'
+                        : 'bg-red-950/60 border-red-500/50 text-red-300'
+                    }`}>
+                      {p.health?.status}
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-100 leading-snug">{p.name}</h4>
+                  <p className="text-[10px] text-slate-400 mt-1">{p.providerAgency}</p>
+                </div>
+
+                <div className="text-[9px] font-mono text-slate-500 pt-1.5 border-t border-slate-800/60 flex items-center justify-between">
+                  <span>Licence: {p.licence.split('(')[0]}</span>
+                  <StatusBadge status={p.dataClassification as any} size="sm" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Dataset Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -7,8 +7,65 @@ import { parseUniversalCoordinates, isCoordinateWithinIndia } from '../services/
 import { searchPlacesInIndia, reverseGeocodeCoordinate } from '../services/geocodingService';
 import { evaluateNationwideDataCoverage } from '../services/dataCoverageService';
 import { SelectedLocation } from '../../src/types/location';
+import { providerRegistry } from '../providers/providerRegistry';
 
 export const locationRouter = Router();
+
+function enrichLocationWithProviders(baseLoc: Partial<SelectedLocation>, lat: number, lon: number, stateName: string): Partial<SelectedLocation> {
+  const cgwb = providerRegistry.getGroundwater().getStateAssessment(stateName);
+  const terrane = providerRegistry.getGeology().getGeologicalTerraneForCoordinate(lat, lon);
+  const belt = providerRegistry.getMineral().getMetallogenicBeltForCoordinate(lat, lon);
+  const basin = providerRegistry.getBoundaries().getBasinForCoordinate(lat, lon);
+  const aquifer = providerRegistry.getGroundwater().getAquiferSystemForCoordinate(lat, lon);
+
+  return {
+    ...baseLoc,
+    basin: basin ? basin.name : baseLoc.basin,
+    geologicalProvince: terrane.name,
+    cgwbAssessment: cgwb ? {
+      stateName: cgwb.stateName,
+      annualRechargeBcm: cgwb.annualRechargeBcm,
+      extractableResourceBcm: cgwb.extractableResourceBcm,
+      totalExtractionBcm: cgwb.totalExtractionBcm,
+      stageOfExtractionPercent: cgwb.stageOfExtractionPercent,
+      categorisation: cgwb.categorisation,
+      primaryAquiferSystem: cgwb.primaryAquiferSystem,
+      assessmentYear: cgwb.assessmentYear
+    } : undefined,
+    geologicalTerrane: {
+      terraneId: terrane.terraneId,
+      name: terrane.name,
+      cratonicAffiliation: terrane.cratonicAffiliation,
+      ageEpoch: terrane.ageEpoch,
+      primaryLithology: terrane.primaryLithology,
+      crustalThicknessKm: terrane.crustalThicknessKm,
+      dominantAquiferType: terrane.dominantAquiferType,
+      mineralPotential: terrane.mineralPotential
+    },
+    metallogenicBelt: {
+      beltId: belt.beltId,
+      name: belt.name,
+      depositStyle: belt.depositStyle,
+      geologicalHostRock: belt.geologicalHostRock,
+      targetCommodities: belt.targetCommodities,
+      regionalProspectivityScore: belt.regionalProspectivityScore
+    },
+    riverBasinDetails: basin ? {
+      basinId: basin.basinId,
+      name: basin.name,
+      drainageAreaSqKm: basin.drainageAreaSqKm,
+      origin: basin.origin,
+      outflow: basin.outflow
+    } : undefined,
+    aquiferDetails: {
+      aquiferId: aquifer.aquiferId,
+      name: aquifer.name,
+      lithologyType: aquifer.lithologyType,
+      permeabilityRangeMPerDay: aquifer.permeabilityRangeMPerDay,
+      typicalYieldLitersPerSec: aquifer.typicalYieldLitersPerSec
+    }
+  };
+}
 
 /**
  * POST /api/location/resolve
@@ -39,7 +96,7 @@ locationRouter.post('/resolve', async (req: Request, res: Response) => {
       const stateName = admin.state || 'India';
       const districtName = admin.district || admin.city || 'Regional Sector';
 
-      const resolved: SelectedLocation = {
+      const baseResolved: SelectedLocation = {
         id: `loc-${lat.toFixed(4)}-${lon.toFixed(4)}`,
         name: admin.city || admin.town || admin.village || admin.district || `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`,
         displayName: admin.formattedAddress,
@@ -60,6 +117,8 @@ locationRouter.post('/resolve', async (req: Request, res: Response) => {
         resolvedAt: new Date().toISOString()
       };
 
+      const resolved = enrichLocationWithProviders(baseResolved, lat, lon, stateName) as SelectedLocation;
+
       return res.json({ success: true, location: resolved });
     }
 
@@ -73,7 +132,7 @@ locationRouter.post('/resolve', async (req: Request, res: Response) => {
       const stateName = best.state || admin.state || 'India';
       const districtName = best.district || admin.district || best.name;
 
-      const resolved: SelectedLocation = {
+      const baseResolved: SelectedLocation = {
         id: best.id,
         name: best.name,
         displayName: best.displayName,
@@ -93,6 +152,8 @@ locationRouter.post('/resolve', async (req: Request, res: Response) => {
         coverage,
         resolvedAt: new Date().toISOString()
       };
+
+      const resolved = enrichLocationWithProviders(baseResolved, best.latitude, best.longitude, stateName) as SelectedLocation;
 
       return res.json({
         success: true,
@@ -153,7 +214,7 @@ locationRouter.get('/reverse', async (req: Request, res: Response) => {
     const stateName = admin.state || 'India';
     const districtName = admin.district || admin.city || 'Regional Sector';
 
-    const location: SelectedLocation = {
+    const baseLocation: SelectedLocation = {
       id: `click-${lat.toFixed(4)}-${lon.toFixed(4)}`,
       name: admin.city || admin.town || admin.village || admin.district || `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`,
       displayName: admin.formattedAddress,
@@ -172,6 +233,8 @@ locationRouter.get('/reverse', async (req: Request, res: Response) => {
       coverage,
       resolvedAt: new Date().toISOString()
     };
+
+    const location = enrichLocationWithProviders(baseLocation, lat, lon, stateName) as SelectedLocation;
 
     return res.json({ success: true, location });
   } catch (err: any) {

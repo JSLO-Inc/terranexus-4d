@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { MINERAL_INDICATORS } from '../../data/mineralData';
 import { StatusBadge } from '../common/StatusBadge';
@@ -6,7 +6,24 @@ import { Sparkles, AlertOctagon, Scan, Target, ShieldCheck, CheckCircle2 } from 
 
 export const NexusMineral: React.FC = () => {
   const { selectedLocation } = useTerranexusStore();
-  const mineralSummary = MINERAL_INDICATORS[selectedLocation.id] || MINERAL_INDICATORS['locus-khetri-rajasthan'];
+  const [dynamicBelt, setDynamicBelt] = useState<any>(null);
+
+  useEffect(() => {
+    if (selectedLocation && !MINERAL_INDICATORS[selectedLocation.id]) {
+      fetch(`/api/providers/mineral/belt?lat=${selectedLocation.latitude}&lon=${selectedLocation.longitude}`)
+        .then(res => res.json())
+        .then(json => {
+          if (json?.success && json?.belt) {
+            setDynamicBelt(json.belt);
+          }
+        })
+        .catch(() => {});
+    } else {
+      setDynamicBelt(null);
+    }
+  }, [selectedLocation]);
+
+  const mineralSummary = MINERAL_INDICATORS[selectedLocation.id] || dynamicBelt || MINERAL_INDICATORS['locus-khetri-rajasthan'];
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#080c14] text-slate-100 flex flex-col gap-6">

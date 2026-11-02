@@ -28,7 +28,7 @@
         "The 11-month inter-mission gap (2017-07 to 2018-05) and spacecraft battery conservation outages are strictly preserved as unobserved null discontinuities."
       ],
       "sha256": "325f75d57ddc8394f63965c3d87273b1031c68fcdab9a1a128752afbaeb35a16",
-      "lastIngested": "2026-11-02T13:09:30.226Z"
+      "lastIngested": "2026-11-02T13:35:16.848Z"
     },
     "records": [
       {
@@ -1252,7 +1252,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "6d0474173f37245f0ce99d1fdda4f6d7371d97aafde822a066b3567a6f1516a6",
-      "lastIngested": "2026-11-02T13:09:30.230Z"
+      "lastIngested": "2026-11-02T13:35:16.861Z"
     },
     "records": [
       {
@@ -2339,7 +2339,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "84c48c1db56f6cbb56b9cbf1e0e6cf2f9776716e7fba7f8c5a1821fcf016d38e",
-      "lastIngested": "2026-11-02T13:09:30.232Z"
+      "lastIngested": "2026-11-02T13:35:16.863Z"
     },
     "records": [
       {

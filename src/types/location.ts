@@ -85,6 +85,48 @@ export interface SelectedLocation {
   isWithinIndia: boolean;
   administrativeHierarchy: AdministrativeHierarchy;
   coverage: DataCoverageSummary;
+  cgwbAssessment?: {
+    stateName: string;
+    annualRechargeBcm: number;
+    extractableResourceBcm: number;
+    totalExtractionBcm: number;
+    stageOfExtractionPercent: number;
+    categorisation: 'SAFE' | 'SEMI_CRITICAL' | 'CRITICAL' | 'OVER_EXPLOITED' | 'SALINE';
+    primaryAquiferSystem: string;
+    assessmentYear: string;
+  };
+  geologicalTerrane?: {
+    terraneId: string;
+    name: string;
+    cratonicAffiliation: string;
+    ageEpoch: string;
+    primaryLithology: string;
+    crustalThicknessKm: number;
+    dominantAquiferType: string;
+    mineralPotential: string[];
+  };
+  metallogenicBelt?: {
+    beltId: string;
+    name: string;
+    depositStyle: string;
+    geologicalHostRock: string;
+    targetCommodities: string[];
+    regionalProspectivityScore: string;
+  };
+  riverBasinDetails?: {
+    basinId: string;
+    name: string;
+    drainageAreaSqKm: number;
+    origin: string;
+    outflow: string;
+  };
+  aquiferDetails?: {
+    aquiferId: string;
+    name: string;
+    lithologyType: string;
+    permeabilityRangeMPerDay: string;
+    typicalYieldLitersPerSec: string;
+  };
   resolvedAt: string;
 }
 
