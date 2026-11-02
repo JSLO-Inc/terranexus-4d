@@ -24,8 +24,8 @@ In accordance with international scientific reporting standards and the TERRANEX
 - **Official Documentation URL:** [https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/](https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/)
 - **Data Access Portal:** [https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04](https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04)
 - **Publication Reference:** Landerer, F. W. and S. C. Swenson (2012), *Accuracy of scaled GRACE terrestrial water storage estimates.* Water Resources Research, 48(4), W04531.
-- **Integration Tier:** **LIVE INGESTED SATELLITE GRAVIMETRY (MODELLED)**
-- **Raw File Repository:** `server/data/raw/grace_tellus_<locationId>.txt`
+- **Integration Tier:** **DEMONSTRATION SATELLITE GRAVIMETRY (MODELLED)**
+- **Raw File Repository:** `server/data/demo/grace_tellus_demo_<locationId>.txt`
 - **Cached Extract:** `server/data/cache/hydro_<locationId>.json` (`grace.records`)
 - **Spatial Resolution:** ~300 km Gaussian filter (~3 degrees spherical equivalent), gridded to 0.5 degrees.
 - **Temporal Resolution:** Monthly solutions (132 months, 2014-01 to 2024-12).
@@ -43,8 +43,8 @@ In accordance with international scientific reporting standards and the TERRANEX
 - **Official Documentation URL:** [https://gpm.nasa.gov/data/imerg](https://gpm.nasa.gov/data/imerg)
 - **Data Access Portal:** [https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary](https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary)
 - **Publication Reference:** Huffman, G. J., et al. (2020), *GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07*, Greenbelt, MD, GES DISC.
-- **Integration Tier:** **LIVE INGESTED PRECIPITATION (OBSERVED)**
-- **Raw File Repository:** `server/data/raw/rainfall_gpm_<locationId>.csv`
+- **Integration Tier:** **DEMONSTRATION PRECIPITATION BENCHMARK (DEMONSTRATION)**
+- **Raw File Repository:** `server/data/demo/rainfall_gpm_demo_<locationId>.csv`
 - **Cached Extract:** `server/data/cache/hydro_<locationId>.json` (`precipitation.records`)
 - **Spatial Resolution:** $0.1^\circ \times 0.1^\circ$ (~10 km at equator).
 - **Temporal Resolution:** Monthly accumulated precipitation (132 months, 2014-01 to 2024-12).
@@ -61,8 +61,8 @@ In accordance with international scientific reporting standards and the TERRANEX
 - **Official Documentation URL:** [https://indiawris.gov.in/wris/#/groundWater](https://indiawris.gov.in/wris/#/groundWater)
 - **Data Access Portal:** [https://indiawris.gov.in/wris/#/groundWaterLevelReports](https://indiawris.gov.in/wris/#/groundWaterLevelReports)
 - **Publication Reference:** Central Ground Water Board (2024), *Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024)*, Ministry of Jal Shakti, New Delhi.
-- **Integration Tier:** **IN-SITU OBSERVATION WELL TELEMETRY (OBSERVED)**
-- **Raw File Repository:** `server/data/raw/cgwb_wris_<locationId>.csv`
+- **Integration Tier:** **REGIONAL BENCHMARK OBSERVATION WELLS (DEMONSTRATION)**
+- **Raw File Repository:** `server/data/demo/cgwb_wris_demo_<locationId>.csv`
 - **Cached Extract:** `server/data/cache/hydro_<locationId>.json` (`wells.records`)
 - **Spatial Resolution:** Point monitoring stations with designated WGS84 coordinates.
 - **Temporal Resolution:** Seasonal monitoring cycles (Pre-monsoon May, Post-monsoon November, 2014–2024).

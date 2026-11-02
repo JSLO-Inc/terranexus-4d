@@ -6,16 +6,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const CACHE_DIR = path.resolve(__dirname, '../data/cache');
-const RAW_DIR = path.resolve(__dirname, '../data/raw');
+export const CACHE_DIR = path.resolve(__dirname, '../data/cache');
+export const RAW_DIR = path.resolve(__dirname, '../data/raw');
+export const DEMO_DIR = path.resolve(__dirname, '../data/demo');
+export const PROCESSED_DIR = path.resolve(__dirname, '../data/processed');
 
-// Ensure cache directories exist
-if (!fs.existsSync(CACHE_DIR)) {
-  fs.mkdirSync(CACHE_DIR, { recursive: true });
-}
-if (!fs.existsSync(RAW_DIR)) {
-  fs.mkdirSync(RAW_DIR, { recursive: true });
-}
+// Ensure all distinct data directories exist
+[CACHE_DIR, RAW_DIR, DEMO_DIR, PROCESSED_DIR].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 export function computeSha256(content: string | Buffer): string {
   return crypto.createHash('sha256').update(content).digest('hex');
@@ -73,6 +74,26 @@ export function getCacheInfo(key: string): { exists: boolean; filePath: string; 
   };
 }
 
+// ==========================================
+// DEMONSTRATION FIXTURES STORAGE
+// ==========================================
+export function saveDemoFile(filename: string, content: string | Buffer): { filePath: string; sha256: string } {
+  const filePath = path.join(DEMO_DIR, filename);
+  fs.writeFileSync(filePath, content);
+  const sha256 = computeSha256(content);
+  return { filePath, sha256 };
+}
+
+export function readDemoFile(filename: string): { content: string; sha256: string } | null {
+  const filePath = path.join(DEMO_DIR, filename);
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath, 'utf-8');
+  return { content, sha256: computeSha256(content) };
+}
+
+// ==========================================
+// GENUINE RAW SATELLITE DOWNLOADS STORAGE
+// ==========================================
 export function saveRawFile(filename: string, content: string | Buffer): { filePath: string; sha256: string } {
   const filePath = path.join(RAW_DIR, filename);
   fs.writeFileSync(filePath, content);
@@ -82,6 +103,23 @@ export function saveRawFile(filename: string, content: string | Buffer): { fileP
 
 export function readRawFile(filename: string): { content: string; sha256: string } | null {
   const filePath = path.join(RAW_DIR, filename);
+  if (!fs.existsSync(filePath)) return null;
+  const content = fs.readFileSync(filePath, 'utf-8');
+  return { content, sha256: computeSha256(content) };
+}
+
+// ==========================================
+// GENUINE SCIENTIFIC PROCESSED DATASETS
+// ==========================================
+export function saveProcessedFile(filename: string, content: string | Buffer): { filePath: string; sha256: string } {
+  const filePath = path.join(PROCESSED_DIR, filename);
+  fs.writeFileSync(filePath, content);
+  const sha256 = computeSha256(content);
+  return { filePath, sha256 };
+}
+
+export function readProcessedFile(filename: string): { content: string; sha256: string } | null {
+  const filePath = path.join(PROCESSED_DIR, filename);
   if (!fs.existsSync(filePath)) return null;
   const content = fs.readFileSync(filePath, 'utf-8');
   return { content, sha256: computeSha256(content) };

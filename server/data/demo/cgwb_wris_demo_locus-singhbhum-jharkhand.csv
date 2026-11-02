@@ -1,0 +1,15 @@
+# TERRANEXUS 4D Groundwater Benchmark Fixture
+# NOTICE: Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.
+Station_Code,Station_Name,State,District,Latitude,Longitude,Well_Type,Agency,Elevation_m,Date,Season,Water_Level_Depth_mbgl,Status
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2014-05,"Pre-Monsoon (May)",8.8,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2014-11,"Post-Monsoon (Nov)",2.9,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2016-05,"Pre-Monsoon (May)",9.4,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2016-11,"Post-Monsoon (Nov)",2.8,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2018-05,"Pre-Monsoon (May)",9.9,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2018-11,"Post-Monsoon (Nov)",3.1,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2020-05,"Pre-Monsoon (May)",9.2,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2020-11,"Post-Monsoon (Nov)",2.4,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2022-05,"Pre-Monsoon (May)",9.6,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2022-11,"Post-Monsoon (Nov)",2.7,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2024-05,"Pre-Monsoon (May)",10.2,DEMONSTRATION
+DEMO-JH-SNG-01,"Mosabani Crystalline (Demonstration Well Benchmark)",Jharkhand,East Singhbhum,22.532,86.452,Dug Well,"CGWB (Benchmark Reference)",112,2024-11,"Post-Monsoon (Nov)",3,DEMONSTRATION

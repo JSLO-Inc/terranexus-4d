@@ -1,36 +1,37 @@
 import { ObservationWellRecord, DatasetProvenance } from './types';
-import { saveRawFile } from './cacheManager';
+import { saveDemoFile } from './cacheManager';
 
 export const WRIS_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'lastIngested'> = {
-  id: 'india-wris-groundwater-levels',
-  name: 'Central Ground Water Board (CGWB) & India-WRIS National Observation Well Network',
-  provider: 'Central Ground Water Board (CGWB) & National Water Informatics Centre (NWIC)',
+  id: 'cgwb-groundwater-benchmark',
+  name: 'Central Ground Water Board (CGWB) Regional Benchmark Records (Demonstration)',
+  provider: 'Terranexus Demonstration Fixture (Calibrated to CGWB Published Regional Yearbooks)',
   officialDocsUrl: 'https://indiawris.gov.in/wris/#/groundWater',
   accessUrl: 'https://indiawris.gov.in/wris/#/groundWaterLevelReports',
-  license: 'Government of India Open Data License (GODL-India)',
+  license: 'Government of India Open Data License (GODL-India) / Demonstration Benchmark',
   citation: 'Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.',
-  format: 'Tabular CSV / GeoJSON / DWLR Telemetry',
-  spatialResolution: 'Point observation stations (Exact WGS84 coordinates)',
-  temporalResolution: 'Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, Jan, Aug)',
-  geographicCoverage: 'Pan-India (>25,000 national monitoring stations)',
-  processingLineage: 'Curated representative seasonal piezometric dipping sequence synthesized from published CGWB regional groundwater yearbooks and district information booklets; not a direct automated database export from India-WRIS.',
+  format: 'Demonstration Benchmark CSV (Local Fixture)',
+  spatialResolution: 'Illustrative Regional Coordinate (Derived from District Reports)',
+  temporalResolution: 'Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, 2014–2024)',
+  geographicCoverage: 'Representative Indian Study Sites (7 Regions)',
+  processingLineage: 'Illustrative regional groundwater benchmark synthesized from published CGWB regional groundwater yearbooks and district information booklets. Not an authenticated CGWB monitoring-well observation.',
   knownLimitations: [
-    'Point measurements reflect localized hydraulic head at the well screen depth only.',
-    'Local drawdown cones from adjacent private agricultural tubewells can introduce temporary seasonal drawdown bias.',
-    'Piezometric head indicates water table elevation, not total volumetric storage capacity of the aquifer.'
+    'Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.',
+    'Point measurements reflect localized conceptual hydraulic head at the well screen depth only.',
+    'Station codes are prefixed with DEMO- and do not represent verified CGWB National Hydrograph Network site identifiers.',
+    'Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer.'
   ]
 };
 
-const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
+const DEMO_BENCHMARK_WELL_RECORDS: Record<string, ObservationWellRecord> = {
   'locus-indogangetic-ludhiana': {
-    stationCode: 'W-PB-LUD-012',
-    stationName: 'PAU Campus Piezometer No. 3',
+    stationCode: 'DEMO-PB-LUD-01',
+    stationName: 'Ludhiana PAU Campus (Demonstration Well Benchmark)',
     state: 'Punjab',
     district: 'Ludhiana',
     latitude: 30.9025,
     longitude: 75.8080,
     wellType: 'Piezometer (DWLR)',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 247,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 26.5, status: 'DEMONSTRATION' },
@@ -58,14 +59,14 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
     ]
   },
   'locus-khetri-rajasthan': {
-    stationCode: 'W-RJ-JJN-045',
-    stationName: 'Singhana Piezometer Station',
+    stationCode: 'DEMO-RJ-JJN-01',
+    stationName: 'Singhana Khetri Belt (Demonstration Well Benchmark)',
     state: 'Rajasthan',
     district: 'Jhunjhunu',
     latitude: 28.0580,
     longitude: 75.8310,
     wellType: 'Piezometer (DWLR)',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 375,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 41.2, status: 'DEMONSTRATION' },
@@ -93,14 +94,14 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
     ]
   },
   'locus-deccan-pune': {
-    stationCode: 'W-MH-PUN-024',
-    stationName: 'Shivajinagar Weathered Basalt Piezometer',
+    stationCode: 'DEMO-MH-PUN-01',
+    stationName: 'Shivajinagar Basalt (Demonstration Well Benchmark)',
     state: 'Maharashtra',
     district: 'Pune',
     latitude: 18.5312,
     longitude: 73.8445,
     wellType: 'Piezometer (DWLR)',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 558,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 9.2, status: 'DEMONSTRATION' },
@@ -128,14 +129,14 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
     ]
   },
   'locus-zawar-udaipur': {
-    stationCode: 'W-RJ-UDP-018',
-    stationName: 'Tiri Valley Carbonate Dug Well',
+    stationCode: 'DEMO-RJ-UDP-01',
+    stationName: 'Tiri Valley Carbonate (Demonstration Well Benchmark)',
     state: 'Rajasthan',
     district: 'Udaipur',
     latitude: 24.3610,
     longitude: 73.7250,
     wellType: 'Dug Well',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 398,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 14.2, status: 'DEMONSTRATION' },
@@ -155,14 +156,14 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
     ]
   },
   'locus-dharwar-kolar': {
-    stationCode: 'W-KA-KOL-031',
-    stationName: 'Bangarapet Granitic Piezometer',
+    stationCode: 'DEMO-KA-KOL-01',
+    stationName: 'Bangarapet Granitic (Demonstration Well Benchmark)',
     state: 'Karnataka',
     district: 'Kolar',
     latitude: 12.9820,
     longitude: 78.2040,
     wellType: 'Piezometer (DWLR)',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 835,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 22.4, status: 'DEMONSTRATION' },
@@ -180,14 +181,14 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
     ]
   },
   'locus-singhbhum-jharkhand': {
-    stationCode: 'W-JH-SNG-009',
-    stationName: 'Mosabani Crystalline Dug Well',
+    stationCode: 'DEMO-JH-SNG-01',
+    stationName: 'Mosabani Crystalline (Demonstration Well Benchmark)',
     state: 'Jharkhand',
     district: 'East Singhbhum',
     latitude: 22.5320,
     longitude: 86.4520,
     wellType: 'Dug Well',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 112,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 8.8, status: 'DEMONSTRATION' },
@@ -205,14 +206,14 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
     ]
   },
   'locus-godavari-kothagudem': {
-    stationCode: 'W-TG-KGM-021',
-    stationName: 'Paloncha Sandstone Piezometer',
+    stationCode: 'DEMO-TG-KGM-01',
+    stationName: 'Paloncha Sandstone (Demonstration Well Benchmark)',
     state: 'Telangana',
     district: 'Bhadradri Kothagudem',
     latitude: 17.5920,
     longitude: 80.6840,
     wellType: 'Piezometer (DWLR)',
-    agency: 'CGWB',
+    agency: 'CGWB (Benchmark Reference)',
     elevationM: 92,
     readings: [
       { date: '2014-05', season: 'Pre-Monsoon (May)', waterLevelDepthM: 11.2, status: 'DEMONSTRATION' },
@@ -234,19 +235,21 @@ const OFFICIAL_WELL_RECORDS: Record<string, ObservationWellRecord> = {
 export function extractWellObservations(locationId: string): {
   records: ObservationWellRecord[];
   provenance: DatasetProvenance;
-  rawCsv: string;
+  demoCsv: string;
 } {
-  const well = OFFICIAL_WELL_RECORDS[locationId] || OFFICIAL_WELL_RECORDS['locus-indogangetic-ludhiana'];
+  const well = DEMO_BENCHMARK_WELL_RECORDS[locationId] || DEMO_BENCHMARK_WELL_RECORDS['locus-indogangetic-ludhiana'];
   
-  let rawCsv = `Station_Code,Station_Name,State,District,Latitude,Longitude,Well_Type,Agency,Elevation_m,Date,Season,Water_Level_Depth_mbgl,Status\n`;
+  let demoCsv = `# TERRANEXUS 4D Groundwater Benchmark Fixture
+# NOTICE: Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.
+Station_Code,Station_Name,State,District,Latitude,Longitude,Well_Type,Agency,Elevation_m,Date,Season,Water_Level_Depth_mbgl,Status\n`;
 
   well.readings.forEach(r => {
-    rawCsv += `${well.stationCode},"${well.stationName}",${well.state},${well.district},${well.latitude},${well.longitude},${well.wellType},${well.agency},${well.elevationM},${r.date},"${r.season}",${r.waterLevelDepthM},${r.status}\n`;
+    demoCsv += `${well.stationCode},"${well.stationName}",${well.state},${well.district},${well.latitude},${well.longitude},${well.wellType},"${well.agency}",${well.elevationM},${r.date},"${r.season}",${r.waterLevelDepthM},${r.status}\n`;
   });
 
-  // Save raw file with SHA-256
-  const rawFilename = `cgwb_wris_${locationId}.csv`;
-  const { sha256 } = saveRawFile(rawFilename, rawCsv);
+  // Save to demo folder with SHA-256
+  const demoFilename = `cgwb_wris_demo_${locationId}.csv`;
+  const { sha256 } = saveDemoFile(demoFilename, demoCsv);
 
   const provenance: DatasetProvenance = {
     ...WRIS_PROVENANCE_TEMPLATE,
@@ -254,7 +257,7 @@ export function extractWellObservations(locationId: string): {
     lastIngested: new Date().toISOString()
   };
 
-  return { records: [well], provenance, rawCsv };
+  return { records: [well], provenance, demoCsv };
 }
 
 export function computeWellStats(records: ObservationWellRecord[]) {

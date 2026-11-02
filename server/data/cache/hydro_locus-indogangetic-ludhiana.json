@@ -7,25 +7,26 @@
   },
   "grace": {
     "provenance": {
-      "id": "nasa-grace-tellus-tws",
-      "name": "NASA GRACE & GRACE-FO JPL Tellus Land Mass Grids (RL06.1 v04)",
-      "provider": "NASA Jet Propulsion Laboratory (JPL) & PO.DAAC",
+      "id": "nasa-grace-tellus-demo-benchmark",
+      "name": "NASA GRACE & GRACE-FO Simulated Tellus Benchmark (Demonstration)",
+      "provider": "Terranexus Simulation Fixture (Harmonic Model Derived from JPL Tellus Literature)",
       "officialDocsUrl": "https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/",
       "accessUrl": "https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04",
-      "license": "NASA Open Data Policy (CC0 Equivalent / Public Domain)",
+      "license": "NASA Open Data Policy (CC0 Equivalent / Demonstration Benchmark)",
       "citation": "Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
-      "format": "NetCDF-4 / ASCII Grid / GeoTIFF",
+      "format": "Demonstration ASCII Table (Local Fixture)",
       "spatialResolution": "300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees",
-      "temporalResolution": "Monthly gravity inversions",
-      "geographicCoverage": "Global terrestrial (Subcontinent bounding box: 8.0N - 37.0N, 68.0E - 97.5E)",
-      "processingLineage": "Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009) with 300km Gaussian filter equivalent, formal error estimates, and explicit 11-month mission gap; not a direct binary NetCDF extraction.",
+      "temporalResolution": "Monthly synthesized gravity variations (2014-01 to 2024-12)",
+      "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
+      "processingLineage": "Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements. Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009).",
       "knownLimitations": [
-        "GRACE measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.",
+        "Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements.",
+        "GRACE conceptually measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.",
         "Coarse spatial resolution (~300 km); MUST NOT be interpreted as direct single-borewell or village-level water depth.",
-        "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Gap must be displayed as missing data, not interpolated."
+        "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "4c798ba096e3def0ef99cc201320f59b88745de795585afb3370f90416d6a86f",
-      "lastIngested": "2026-11-02T08:14:09.982Z"
+      "lastIngested": "2026-11-02T08:35:04.388Z"
     },
     "records": [
       {
@@ -1229,24 +1230,25 @@
   },
   "precipitation": {
     "provenance": {
-      "id": "nasa-gpm-imerg-precip",
-      "name": "NASA Global Precipitation Measurement (GPM) IMERG Final Monthly Precipitation (V07)",
-      "provider": "NASA Goddard Space Flight Center (GSFC) & GES DISC",
+      "id": "nasa-gpm-imerg-demo-precip",
+      "name": "NASA GPM IMERG Synthesized Climatological Rainfall (Demonstration)",
+      "provider": "Terranexus Simulation Fixture (Climatological Model Calibrated to IMERG Literature)",
       "officialDocsUrl": "https://gpm.nasa.gov/data/imerg",
       "accessUrl": "https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary",
-      "license": "NASA Open Earth Science Data Policy (Public Domain)",
+      "license": "NASA Open Earth Science Data Policy (Public Domain / Demonstration Benchmark)",
       "citation": "Huffman, G. J., et al. (2020), GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC).",
-      "format": "NetCDF-4 / HDF5 / GeoTIFF",
-      "spatialResolution": "0.1 degree x 0.1 degree (~10 km x 10 km)",
-      "temporalResolution": "Monthly accumulation",
-      "geographicCoverage": "Global (60.0S - 60.0N)",
-      "processingLineage": "Climatological monthly synthesis calibrated against regional IMD and NASA GPM IMERG literature distributions and historical annual aggregates (Huffman et al. 2020); not an automated HDF5 binary raster slice.",
+      "format": "Demonstration CSV (Local Fixture)",
+      "spatialResolution": "0.1 degree x 0.1 degree (~10 km x 10 km equivalent)",
+      "temporalResolution": "Monthly accumulation (2014-01 to 2024-12)",
+      "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
+      "processingLineage": "Illustrative rainfall series. Not downloaded NASA GPM IMERG observations. Climatological monthly synthesis calibrated against regional IMD and NASA GPM IMERG literature distributions and historical annual aggregates (Huffman et al. 2020).",
       "knownLimitations": [
-        "Satellite estimates over complex orographic mountain slopes require rain-gauge calibration.",
-        "Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics)."
+        "Illustrative rainfall series. Not downloaded NASA GPM IMERG observations.",
+        "Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics).",
+        "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "ce33b294d8aab86ff218caa914f99a3807e90da15b475fdbaab64c74935e36d9",
-      "lastIngested": "2026-11-02T08:14:09.983Z"
+      "lastIngested": "2026-11-02T08:35:04.391Z"
     },
     "records": [
       {
@@ -2313,36 +2315,37 @@
   },
   "wells": {
     "provenance": {
-      "id": "india-wris-groundwater-levels",
-      "name": "Central Ground Water Board (CGWB) & India-WRIS National Observation Well Network",
-      "provider": "Central Ground Water Board (CGWB) & National Water Informatics Centre (NWIC)",
+      "id": "cgwb-groundwater-benchmark",
+      "name": "Central Ground Water Board (CGWB) Regional Benchmark Records (Demonstration)",
+      "provider": "Terranexus Demonstration Fixture (Calibrated to CGWB Published Regional Yearbooks)",
       "officialDocsUrl": "https://indiawris.gov.in/wris/#/groundWater",
       "accessUrl": "https://indiawris.gov.in/wris/#/groundWaterLevelReports",
-      "license": "Government of India Open Data License (GODL-India)",
+      "license": "Government of India Open Data License (GODL-India) / Demonstration Benchmark",
       "citation": "Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.",
-      "format": "Tabular CSV / GeoJSON / DWLR Telemetry",
-      "spatialResolution": "Point observation stations (Exact WGS84 coordinates)",
-      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, Jan, Aug)",
-      "geographicCoverage": "Pan-India (>25,000 national monitoring stations)",
-      "processingLineage": "Curated representative seasonal piezometric dipping sequence synthesized from published CGWB regional groundwater yearbooks and district information booklets; not a direct automated database export from India-WRIS.",
+      "format": "Demonstration Benchmark CSV (Local Fixture)",
+      "spatialResolution": "Illustrative Regional Coordinate (Derived from District Reports)",
+      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, 2014–2024)",
+      "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
+      "processingLineage": "Illustrative regional groundwater benchmark synthesized from published CGWB regional groundwater yearbooks and district information booklets. Not an authenticated CGWB monitoring-well observation.",
       "knownLimitations": [
-        "Point measurements reflect localized hydraulic head at the well screen depth only.",
-        "Local drawdown cones from adjacent private agricultural tubewells can introduce temporary seasonal drawdown bias.",
-        "Piezometric head indicates water table elevation, not total volumetric storage capacity of the aquifer."
+        "Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.",
+        "Point measurements reflect localized conceptual hydraulic head at the well screen depth only.",
+        "Station codes are prefixed with DEMO- and do not represent verified CGWB National Hydrograph Network site identifiers.",
+        "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
-      "sha256": "fc15a6ac57ec732821c4745f924b52f68f8081afd416ce6e8119100e5bb9586a",
-      "lastIngested": "2026-11-02T08:14:09.983Z"
+      "sha256": "8c097dad7116b92b41241d1da50636e1485edb603d00c105fe334c2860cbedc4",
+      "lastIngested": "2026-11-02T08:35:04.393Z"
     },
     "records": [
       {
-        "stationCode": "W-PB-LUD-012",
-        "stationName": "PAU Campus Piezometer No. 3",
+        "stationCode": "DEMO-PB-LUD-01",
+        "stationName": "Ludhiana PAU Campus (Demonstration Well Benchmark)",
         "state": "Punjab",
         "district": "Ludhiana",
         "latitude": 30.9025,
         "longitude": 75.808,
         "wellType": "Piezometer (DWLR)",
-        "agency": "CGWB",
+        "agency": "CGWB (Benchmark Reference)",
         "elevationM": 247,
         "readings": [
           {

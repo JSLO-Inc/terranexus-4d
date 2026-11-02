@@ -43,6 +43,28 @@ app.get('/api/hydro/status', (req, res) => {
   }
 });
 
+// Official NASA PO.DAAC / CMR Pipeline Readiness & Live Discovery
+app.get('/api/hydro/nasa/readiness', async (req, res) => {
+  try {
+    const { checkNasaPipelineReadiness } = await import('./ingestion/nasaGraceClient');
+    const readiness = await checkNasaPipelineReadiness();
+    res.json({ success: true, data: readiness });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/hydro/nasa/granules', async (req, res) => {
+  try {
+    const { queryNasaCmrGranules } = await import('./ingestion/nasaGraceClient');
+    const limit = parseInt(req.query.limit as string) || 10;
+    const granules = await queryNasaCmrGranules('C2077042612-POCLOUD', limit);
+    res.json({ success: true, count: granules.length, granules });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Full Hydro Location Dataset (GRACE + Rainfall + Wells + Provenance)
 app.get('/api/hydro/location/:locationId', (req, res) => {
   try {

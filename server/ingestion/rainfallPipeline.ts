@@ -1,22 +1,23 @@
 import { PrecipitationRecord, DatasetProvenance } from './types';
-import { saveRawFile } from './cacheManager';
+import { saveDemoFile } from './cacheManager';
 
 export const RAINFALL_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'lastIngested'> = {
-  id: 'nasa-gpm-imerg-precip',
-  name: 'NASA Global Precipitation Measurement (GPM) IMERG Final Monthly Precipitation (V07)',
-  provider: 'NASA Goddard Space Flight Center (GSFC) & GES DISC',
+  id: 'nasa-gpm-imerg-demo-precip',
+  name: 'NASA GPM IMERG Synthesized Climatological Rainfall (Demonstration)',
+  provider: 'Terranexus Simulation Fixture (Climatological Model Calibrated to IMERG Literature)',
   officialDocsUrl: 'https://gpm.nasa.gov/data/imerg',
   accessUrl: 'https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary',
-  license: 'NASA Open Earth Science Data Policy (Public Domain)',
+  license: 'NASA Open Earth Science Data Policy (Public Domain / Demonstration Benchmark)',
   citation: 'Huffman, G. J., et al. (2020), GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC).',
-  format: 'NetCDF-4 / HDF5 / GeoTIFF',
-  spatialResolution: '0.1 degree x 0.1 degree (~10 km x 10 km)',
-  temporalResolution: 'Monthly accumulation',
-  geographicCoverage: 'Global (60.0S - 60.0N)',
-  processingLineage: 'Climatological monthly synthesis calibrated against regional IMD and NASA GPM IMERG literature distributions and historical annual aggregates (Huffman et al. 2020); not an automated HDF5 binary raster slice.',
+  format: 'Demonstration CSV (Local Fixture)',
+  spatialResolution: '0.1 degree x 0.1 degree (~10 km x 10 km equivalent)',
+  temporalResolution: 'Monthly accumulation (2014-01 to 2024-12)',
+  geographicCoverage: 'Representative Indian Study Sites (7 Regions)',
+  processingLineage: 'Illustrative rainfall series. Not downloaded NASA GPM IMERG observations. Climatological monthly synthesis calibrated against regional IMD and NASA GPM IMERG literature distributions and historical annual aggregates (Huffman et al. 2020).',
   knownLimitations: [
-    'Satellite estimates over complex orographic mountain slopes require rain-gauge calibration.',
-    'Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics).'
+    'Illustrative rainfall series. Not downloaded NASA GPM IMERG observations.',
+    'Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics).',
+    'Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry.'
   ]
 };
 
@@ -155,9 +156,9 @@ export function extractRainfallTimeseries(locationId: string): {
     }
   }
 
-  // Save raw CSV file with SHA-256
-  const rawFilename = `rainfall_gpm_${profile.locationId}.csv`;
-  const { sha256 } = saveRawFile(rawFilename, rawCsv);
+  // Save demonstration CSV file with SHA-256
+  const demoFilename = `rainfall_gpm_demo_${profile.locationId}.csv`;
+  const { sha256 } = saveDemoFile(demoFilename, rawCsv);
 
   const provenance: DatasetProvenance = {
     ...RAINFALL_PROVENANCE_TEMPLATE,

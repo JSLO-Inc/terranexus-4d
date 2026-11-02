@@ -61,7 +61,7 @@ export interface ObservationWellRecord {
   latitude: number;
   longitude: number;
   wellType: 'Piezometer (DWLR)' | 'Dug Well';
-  agency: 'CGWB' | 'State GWD';
+  agency: 'CGWB' | 'State GWD' | 'CGWB (Benchmark Reference)';
   elevationM: number;
   readings: WellObservationReading[];
 }

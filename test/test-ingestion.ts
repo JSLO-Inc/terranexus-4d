@@ -54,21 +54,26 @@ EXPECTED_LOCATIONS.forEach(locId => {
 });
 
 // ========================================================
-// TEST SUITE 2: Raw Data Files & Checksum Verification
+// TEST SUITE 2: Demonstration Fixtures & Checksum Verification
 // ========================================================
-console.log('\n[Test Suite 2: Raw Storage & SHA-256 Cryptographic Verification]');
+console.log('\n[Test Suite 2: Demonstration Fixture Storage & SHA-256 Verification]');
+const demoDir = path.resolve(__dirname, '../server/data/demo');
 const rawDir = path.resolve(__dirname, '../server/data/raw');
 const cacheDir = path.resolve(__dirname, '../server/data/cache');
 
+// Verify that raw directory does not contain synthetic files
+const rawFiles = fs.readdirSync(rawDir);
+assert(rawFiles.length === 0, `Raw directory is reserved for genuine external downloads (currently ${rawFiles.length} files)`);
+
 EXPECTED_LOCATIONS.forEach(locId => {
-  const graceFile = path.join(rawDir, `grace_tellus_${locId}.txt`);
-  const rainFile = path.join(rawDir, `rainfall_gpm_${locId}.csv`);
-  const wellFile = path.join(rawDir, `cgwb_wris_${locId}.csv`);
+  const graceFile = path.join(demoDir, `grace_tellus_demo_${locId}.txt`);
+  const rainFile = path.join(demoDir, `rainfall_gpm_demo_${locId}.csv`);
+  const wellFile = path.join(demoDir, `cgwb_wris_demo_${locId}.csv`);
   const cacheFile = path.join(cacheDir, `hydro_${locId}.json`);
 
-  assert(fs.existsSync(graceFile), `Raw GRACE ASCII file exists for ${locId}`);
-  assert(fs.existsSync(rainFile), `Raw GPM rainfall CSV exists for ${locId}`);
-  assert(fs.existsSync(wellFile), `Raw CGWB well CSV exists for ${locId}`);
+  assert(fs.existsSync(graceFile), `Demonstration GRACE ASCII file exists in server/data/demo for ${locId}`);
+  assert(fs.existsSync(rainFile), `Demonstration GPM rainfall CSV exists in server/data/demo for ${locId}`);
+  assert(fs.existsSync(wellFile), `Demonstration CGWB well CSV exists in server/data/demo for ${locId}`);
   assert(fs.existsSync(cacheFile), `Processed JSON cache exists for ${locId}`);
 
   // Cryptographic checksum verification
@@ -153,6 +158,7 @@ EXPECTED_LOCATIONS.forEach(locId => {
   assert(wells.records.length >= 1, `${locId}: Has monitored well records`);
   const well = wells.records[0];
   assert(Boolean(well.stationCode && well.stationName && well.district && well.state), `${locId}: Well has station code (${well.stationCode})`);
+  assert(well.stationCode.startsWith('DEMO-'), `${locId}: Station code carries explicit DEMO- prefix (${well.stationCode})`);
   assert(well.readings.length >= 10, `${locId}: Well has >= 10 seasonal dipping readings`);
   assert(well.latitude >= 8.0 && well.latitude <= 37.0, `${locId}: Well latitude within India`);
   assert(well.longitude >= 68.0 && well.longitude <= 97.5, `${locId}: Well longitude within India`);

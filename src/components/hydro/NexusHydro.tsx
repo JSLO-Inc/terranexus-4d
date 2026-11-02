@@ -280,7 +280,7 @@ export const NexusHydro: React.FC = () => {
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Water Table Depth (Benchmark Well)</span>
             <span className="font-mono text-[10px] text-amber-300">
-              {activeWell ? activeWell.stationCode : 'CGWB Well'} (Benchmark)
+              {activeWell ? activeWell.stationCode : 'DEMO-WELL'} (Benchmark)
             </span>
           </div>
           <div className="my-2">
@@ -297,6 +297,9 @@ export const NexusHydro: React.FC = () => {
                 : '10-yr decline trend'}
             </span>
             <StatusBadge status="DEMONSTRATION" size="sm" />
+          </div>
+          <div className="text-[9px] text-slate-500 mt-1.5 pt-1 border-t border-slate-900 leading-tight">
+            Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.
           </div>
         </div>
 
@@ -333,6 +336,9 @@ export const NexusHydro: React.FC = () => {
             <span>Trend: {liveData?.grace.stats.trendCmPerYear ? `${liveData.grace.stats.trendCmPerYear} cm/yr` : '—'}</span>
             <span className="text-slate-400">~300 km footprint</span>
           </div>
+          <div className="text-[9px] text-slate-500 mt-1.5 pt-1 border-t border-slate-900 leading-tight">
+            Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements.
+          </div>
         </div>
 
         {/* Monthly Precipitation */}
@@ -356,6 +362,9 @@ export const NexusHydro: React.FC = () => {
               {liveData?.precipitation.stats.monsoonSharePercent ?? 80}% in monsoon
             </span>
           </div>
+          <div className="text-[9px] text-slate-500 mt-1.5 pt-1 border-t border-slate-900 leading-tight">
+            Illustrative rainfall series. Not downloaded NASA GPM IMERG observations.
+          </div>
         </div>
 
         {/* CGWB Resource Stress Assessment */}
@@ -377,7 +386,10 @@ export const NexusHydro: React.FC = () => {
           </div>
           <div className="text-[11px] text-slate-400 flex items-center justify-between">
             <span>Dynamic GW Assessment</span>
-            <span className="text-[10px] text-slate-500">CGWB/MoJS</span>
+            <span className="text-[10px] text-slate-500">CGWB/MoJS Benchmark</span>
+          </div>
+          <div className="text-[9px] text-slate-500 mt-1.5 pt-1 border-t border-slate-900 leading-tight">
+            Regional dynamic resource categorisation from CGWB Ground Water Yearbooks.
           </div>
         </div>
       </div>
@@ -385,11 +397,19 @@ export const NexusHydro: React.FC = () => {
       {/* Mandatory Scientific Integrity Callout */}
       <div className="rounded-xl bg-slate-950 border border-sky-900/40 p-4 flex items-start gap-3 text-xs text-slate-300 leading-relaxed shadow-lg">
         <ShieldCheck className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
-        <div>
-          <span className="font-semibold text-sky-300 block mb-1">
-            Scientific Data Grounding Principle:
+        <div className="space-y-1">
+          <span className="font-semibold text-sky-300 block">
+            Scientific Provenance & Dataset Classification:
           </span>
-          NASA GRACE satellite gravimetry measures integrated terrestrial water-storage variations across a regional footprint (~300 km). It does not measure single-village well depths. The water table depths shown above are from the Central Ground Water Board (CGWB) national monitoring network. Furthermore, the 11-month gap between July 2017 and May 2018 represents the decommissioning of GRACE and the launch of GRACE-FO, rendered honestly as missing data rather than interpolated points.
+          <p>
+            <strong className="text-amber-300">● Demonstration Benchmarks (Local Fixtures):</strong> Station hydrographs (prefixed <code className="text-sky-300 font-mono">DEMO-</code>), GPM climatological rainfall profiles, and GRACE harmonic simulations are stored separately in <code className="text-slate-300 font-mono">server/data/demo/</code>. They illustrate multi-tier hydrogeological behavior and must not be cited as raw telemetry.
+          </p>
+          <p>
+            <strong className="text-cyan-300">● Satellite Scale vs. Point Dipping:</strong> Regional GRACE satellite gravimetry operates at a ~300 km Gaussian footprint (Liquid Water Equivalent anomaly). It does not measure single-village borewells.
+          </p>
+          <p>
+            <strong className="text-red-300">● Mission Gap Handling:</strong> The 11-month transition between GRACE and GRACE-FO (July 2017 to May 2018) is preserved strictly as missing data (<code className="text-amber-300 font-mono">NaN</code>) rather than interpolated curves.
+          </p>
         </div>
       </div>
 
@@ -531,7 +551,10 @@ export const NexusHydro: React.FC = () => {
                 Seasonal Ground Water Dipping: Pre-Monsoon (May) vs. Post-Monsoon (Nov)
               </h3>
               <p className="text-[11px] text-slate-400">
-                Station: {activeWell?.stationName || 'CGWB Monitoring Well'} ({activeWell?.stationCode || 'W-PB-LUD-012'})
+                Benchmark Station: {activeWell?.stationName || 'Regional Demonstration Well'} ({activeWell?.stationCode || 'DEMO-PB-LUD-01'})
+              </p>
+              <p className="text-[10px] text-amber-400/90 font-mono mt-0.5">
+                Notice: Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.
               </p>
             </div>
             <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">

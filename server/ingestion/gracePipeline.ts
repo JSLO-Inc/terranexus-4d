@@ -1,23 +1,24 @@
 import { GraceRecord, DatasetProvenance } from './types';
-import { saveRawFile } from './cacheManager';
+import { saveDemoFile } from './cacheManager';
 
 export const GRACE_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'lastIngested'> = {
-  id: 'nasa-grace-tellus-tws',
-  name: 'NASA GRACE & GRACE-FO JPL Tellus Land Mass Grids (RL06.1 v04)',
-  provider: 'NASA Jet Propulsion Laboratory (JPL) & PO.DAAC',
+  id: 'nasa-grace-tellus-demo-benchmark',
+  name: 'NASA GRACE & GRACE-FO Simulated Tellus Benchmark (Demonstration)',
+  provider: 'Terranexus Simulation Fixture (Harmonic Model Derived from JPL Tellus Literature)',
   officialDocsUrl: 'https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/',
   accessUrl: 'https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04',
-  license: 'NASA Open Data Policy (CC0 Equivalent / Public Domain)',
+  license: 'NASA Open Data Policy (CC0 Equivalent / Demonstration Benchmark)',
   citation: 'Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.',
-  format: 'NetCDF-4 / ASCII Grid / GeoTIFF',
+  format: 'Demonstration ASCII Table (Local Fixture)',
   spatialResolution: '300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees',
-  temporalResolution: 'Monthly gravity inversions',
-  geographicCoverage: 'Global terrestrial (Subcontinent bounding box: 8.0N - 37.0N, 68.0E - 97.5E)',
-  processingLineage: 'Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009) with 300km Gaussian filter equivalent, formal error estimates, and explicit 11-month mission gap; not a direct binary NetCDF extraction.',
+  temporalResolution: 'Monthly synthesized gravity variations (2014-01 to 2024-12)',
+  geographicCoverage: 'Representative Indian Study Sites (7 Regions)',
+  processingLineage: 'Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements. Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009).',
   knownLimitations: [
-    'GRACE measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.',
+    'Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements.',
+    'GRACE conceptually measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.',
     'Coarse spatial resolution (~300 km); MUST NOT be interpreted as direct single-borewell or village-level water depth.',
-    'Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Gap must be displayed as missing data, not interpolated.'
+    'Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values.'
   ]
 };
 
@@ -227,9 +228,9 @@ export function extractGraceTimeseries(locationId: string): {
     }
   }
 
-  // Save raw ASCII file with SHA-256
-  const rawFilename = `grace_tellus_${cfg.locationId}.txt`;
-  const { sha256 } = saveRawFile(rawFilename, rawAscii);
+  // Save demonstration ASCII file with SHA-256
+  const demoFilename = `grace_tellus_demo_${cfg.locationId}.txt`;
+  const { sha256 } = saveDemoFile(demoFilename, rawAscii);
 
   const provenance: DatasetProvenance = {
     ...GRACE_PROVENANCE_TEMPLATE,
