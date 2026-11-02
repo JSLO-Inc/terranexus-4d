@@ -30,6 +30,8 @@ dist-ssr
 .env.*.local
 *.pem
 *.key
+.netrc
+_netrc
 
 # Temporary / Cache
 .cache
