@@ -63,10 +63,13 @@ export function ingestLocationHydro(locationId: string, force: boolean = false):
         const ext = processedJson.extractions[locationId];
         const matchIdx = graceRecords.findIndex(r => r.date === obsDate);
         if (matchIdx !== -1 && ext.twsAnomalyCm !== null) {
+          // If raw units are 'm' (meters), convert to 'cm' (centimeters) for time-series display consistency
+          const convertedVal = ext.units === 'm' ? Math.round(ext.twsAnomalyCm * 100 * 10) / 10 : ext.twsAnomalyCm;
+          const convertedUnc = ext.units === 'm' && ext.uncertaintyCm !== null ? Math.round(ext.uncertaintyCm * 100 * 10) / 10 : ext.uncertaintyCm;
           graceRecords[matchIdx] = {
             ...graceRecords[matchIdx],
-            twsAnomalyCm: ext.twsAnomalyCm,
-            uncertaintyCm: ext.uncertaintyCm,
+            twsAnomalyCm: convertedVal,
+            uncertaintyCm: convertedUnc,
             status: 'OBSERVED'
           };
         }

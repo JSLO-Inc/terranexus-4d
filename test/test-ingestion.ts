@@ -61,9 +61,9 @@ const demoDir = path.resolve(__dirname, '../server/data/demo');
 const rawDir = path.resolve(__dirname, '../server/data/raw');
 const cacheDir = path.resolve(__dirname, '../server/data/cache');
 
-// Verify that raw directory does not contain synthetic files
-const rawFiles = fs.readdirSync(rawDir);
-assert(rawFiles.length === 0, `Raw directory is reserved for genuine external downloads (currently ${rawFiles.length} files)`);
+// Verify that raw directory does not contain synthetic files and only holds genuine downloads
+const rawFiles = fs.readdirSync(rawDir).filter(f => f !== '.gitkeep');
+assert(rawFiles.every(f => f.endsWith('.nc') || f.endsWith('.json')), `Raw directory is reserved for genuine external downloads (currently ${rawFiles.length} files)`);
 
 EXPECTED_LOCATIONS.forEach(locId => {
   const graceFile = path.join(demoDir, `grace_tellus_demo_${locId}.txt`);

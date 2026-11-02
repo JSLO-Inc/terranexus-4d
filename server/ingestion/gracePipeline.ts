@@ -242,7 +242,7 @@ export function extractGraceTimeseries(locationId: string): {
 }
 
 export function computeGraceStats(records: GraceRecord[]) {
-  const observed = records.filter(r => r.twsAnomalyCm !== null && r.status === 'MODELLED');
+  const observed = records.filter(r => r.twsAnomalyCm !== null && (r.status === 'OBSERVED' || r.status === 'MODELLED'));
   const values = observed.map(r => r.twsAnomalyCm as number);
 
   const totalMonths = records.length;
