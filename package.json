@@ -12,6 +12,7 @@
     "test": "tsx test/test-system.ts",
     "test:ingestion": "tsx test/test-ingestion.ts",
     "test:nasa": "tsx test/test-nasa-pipeline.ts",
+    "check:env": "tsx scripts/check-config.ts",
     "preview": "vite preview"
   },
   "dependencies": {

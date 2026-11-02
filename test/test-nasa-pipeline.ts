@@ -84,12 +84,23 @@ async function runNasaPipelineTests() {
     const testGranule = granules[0];
     const probeResult = await performControlledDownloadTest(testGranule.downloadUrl, 'probe_test.nc');
     
-    assert(probeResult.httpStatus === 400 || probeResult.httpStatus === 302 || probeResult.httpStatus === 401 || probeResult.httpStatus === 403,
-      `NASA PO.DAAC returned expected authentication challenge status (HTTP ${probeResult.httpStatus}: ${probeResult.statusText})`);
-    assert(probeResult.requiresEarthdataAuth === true,
-      `Client correctly identified that NASA Earthdata Login authentication is required`);
-    assert(Boolean(probeResult.error && probeResult.error.includes('Earthdata Login')),
-      `Diagnostic error message clearly explains Earthdata authorization requirement`);
+    if (probeResult.httpStatus === 200) {
+      assert(probeResult.httpStatus === 200, `NASA PO.DAAC authenticated endpoint reached successfully (HTTP 200: ${probeResult.statusText})`);
+      assert(probeResult.downloadStatus === 'SUCCESS', `Authenticated download completed with valid file signature`);
+      assert(Boolean(probeResult.sha256), `Calculated SHA-256 hash for probe download: ${probeResult.sha256}`);
+      // Clean up temporary probe test files from raw storage
+      const probeNc = path.join(RAW_DIR, 'probe_test.nc');
+      const probeJson = path.join(RAW_DIR, 'probe_test.nc.provenance.json');
+      if (fs.existsSync(probeNc)) fs.unlinkSync(probeNc);
+      if (fs.existsSync(probeJson)) fs.unlinkSync(probeJson);
+    } else {
+      assert(probeResult.httpStatus === 400 || probeResult.httpStatus === 302 || probeResult.httpStatus === 401 || probeResult.httpStatus === 403,
+        `NASA PO.DAAC returned expected authentication challenge status (HTTP ${probeResult.httpStatus}: ${probeResult.statusText})`);
+      assert(probeResult.requiresEarthdataAuth === true,
+        `Client correctly identified that NASA Earthdata Login authentication is required`);
+      assert(Boolean(probeResult.error && probeResult.error.includes('Earthdata Login')),
+        `Diagnostic error message clearly explains Earthdata authorization requirement`);
+    }
   } else {
     console.log('  ⚠ Skipped download probe: No granules retrieved from CMR.');
   }
@@ -293,9 +304,9 @@ async function runNasaPipelineTests() {
   assert(gapSteps.every(g => g.val === null), 'Mission gap steps strictly preserve null anomalies');
 
   // Storage directory isolation
-  const rawContents = fs.readdirSync(RAW_DIR);
-  assert(rawContents.length === 0,
-    `server/data/raw is reserved strictly for genuine downloaded source files (currently ${rawContents.length} files)`);
+  const rawContents = fs.readdirSync(RAW_DIR).filter(f => f !== '.gitkeep');
+  assert(rawContents.every(f => f.endsWith('.nc') || f.endsWith('.json')),
+    `server/data/raw is reserved strictly for genuine downloaded source files and provenance sidecars (currently ${rawContents.length} files)`);
 
   const demoContents = fs.readdirSync(DEMO_DIR);
   assert(demoContents.length >= 21,
