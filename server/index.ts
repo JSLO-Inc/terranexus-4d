@@ -182,7 +182,10 @@ app.post('/api/hydro/nasa/process-raw', async (req, res) => {
         distanceToCentroidKm: ext.distanceToCentroidKm,
         smoothingFootprintKm: 300,
         missingDataHandling: 'Preserved as null / NaN; zero interpolation during mission gaps',
-        citation: 'Landerer, F. W. and S. C. Swenson (2012), Water Resources Research, 48(4), W04531.',
+        doi: 'https://doi.org/10.5067/TELND-3AJ64',
+        accessDate: '2026-11-02',
+        officialCitation: 'JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.',
+        citation: 'JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. https://doi.org/10.5067/TELND-3AJ64. Scientific algorithm: Landerer & Swenson (2012) WRR, 48(4), W04531.',
         processingTimestamp: new Date().toISOString()
       };
 

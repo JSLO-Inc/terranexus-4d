@@ -63,9 +63,12 @@ export const DATASET_REGISTRY: DatasetMetadata[] = [
       'Total water storage reflects the sum of groundwater, soil moisture, surface water reservoirs, and biomass water.',
       'Spatial resolution is coarse (~300 km) and cannot distinguish property-level dynamics without local downscaling.'
     ],
-    status: 'MODELLED',
+    status: 'OBSERVED',
     confidence: 'High',
-    units: 'cm Liquid Water Equivalent (LWE) deviation from 2004-2009 mean baseline'
+    units: 'cm Liquid Water Equivalent (LWE) deviation from 2004-2009 mean baseline',
+    doi: 'https://doi.org/10.5067/TELND-3AJ64',
+    citation: 'JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.',
+    accessDate: '2026-11-02'
   },
   {
     id: 'gsi-bhukosh-geology',
@@ -153,6 +156,9 @@ export const DATASET_REGISTRY: DatasetMetadata[] = [
     ],
     status: 'OBSERVED',
     confidence: 'High',
-    units: 'mm/month and mm/day'
+    units: 'mm/month and mm/day',
+    doi: 'https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07',
+    citation: 'Huffman, G. J., et al. (2020), GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), Accessed 2026-11-02, https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07.',
+    accessDate: '2026-11-02'
   }
 ];

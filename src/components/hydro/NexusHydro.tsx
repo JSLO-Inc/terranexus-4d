@@ -49,6 +49,8 @@ export interface GenuineNasaGranuleMetadata {
   productShortName: string;
   productVersion: string;
   sourceUrl: string;
+  doi?: string;
+  accessDate?: string;
   fileSizeBytes: number;
   originalSha256: string;
   downloadTimestamp: string;
@@ -60,6 +62,7 @@ export interface GenuineNasaGranuleMetadata {
   smoothingFootprintKm: number;
   missingDataHandling: string;
   citation: string;
+  officialCitation?: string;
   processingTimestamp: string;
 }
 
@@ -255,7 +258,9 @@ export const NexusHydro: React.FC = () => {
     header += `# Responsible Agency: ${prov.provider}\n`;
     header += `# Official Portal: ${prov.officialDocsUrl}\n`;
     header += `# License: ${prov.license}\n`;
-    header += `# Academic Citation: ${prov.citation}\n`;
+    header += `# Official PO.DAAC DOI: https://doi.org/10.5067/TELND-3AJ64\n`;
+    header += `# Official PO.DAAC Citation: JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.\n`;
+    header += `# Academic Method Paper: Landerer, F. W. and S. C. Swenson (2012), Water Resources Research, 48(4), W04531.\n`;
     header += `# Spatial Resolution: ${prov.spatialResolution}\n`;
     header += `# SHA-256 Provenance Checksum: ${prov.sha256}\n`;
     if (liveData.grace.genuineNasaGranule) {
@@ -267,8 +272,9 @@ export const NexusHydro: React.FC = () => {
       header += `# Extraction Method: ${g.extractionMethod}\n`;
     }
     header += `# Export Timestamp: ${new Date().toISOString()}\n`;
-    header += `# Scientific Notice: ${isGenuine ? 'Contains genuine NASA Level-3 satellite gravimetry observations.' : 'Values are curated scientific benchmark models for demonstration and evaluation, synthesized from published regional literature baselines and trends; not direct raw uncalibrated telemetry.'}\n`;
+    header += `# Scientific Notice: ${isGenuine ? 'Contains genuine NASA Level-3 satellite gravimetry observations (Month 2017-06 marked OBSERVED).' : 'Values are curated scientific benchmark models for demonstration and evaluation, synthesized from published regional literature baselines and trends; not direct raw uncalibrated telemetry.'}\n`;
     header += `# Mission Gap Notice: Values of NaN represent the 11-month GRACE to GRACE-FO Mission Gap (2017-07 to 2018-05).\n`;
+    header += `# Legal Notice: NASA has not partnered with, approved, certified, sponsored, or endorsed TERRANEXUS 4D. Data redistributed in accordance with the NASA Open Data Policy.\n`;
     header += `# =========================================================================\n`;
     header += `Date,Year,Month,Satellite_Platform,GRACE_TWS_Anomaly_cm,GRACE_Uncertainty_cm,GPM_Precipitation_mm,In_Situ_Well_Depth_mbgl,Data_Status\n`;
 
@@ -856,6 +862,37 @@ export const NexusHydro: React.FC = () => {
                   <strong className="text-slate-300">Demonstration Well Benchmarks:</strong> All monitoring stations carrying <code className="text-sky-300 font-mono">DEMO-</code> prefixes are illustrative models, not verbatim CGWB telemetry.
                 </li>
               </ul>
+            </div>
+
+            {/* Official Legal Compliance, Attribution & Non-Endorsement Notice */}
+            <div className="rounded-xl bg-slate-900/90 border border-slate-800 p-3.5 space-y-2.5 text-xs">
+              <span className="font-bold text-emerald-400 block flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" /> Official NASA Data Policy, PO.DAAC Citation & Legal Notice
+              </span>
+              <div className="space-y-1.5 text-[11px] text-slate-400">
+                <div>
+                  <span className="text-slate-500 font-semibold block text-[10px]">Official PO.DAAC Citation:</span>
+                  <p className="font-mono text-slate-300 bg-slate-950 p-2 rounded border border-slate-800 text-[10px] leading-relaxed">
+                    JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.
+                  </p>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-slate-500 font-semibold text-[10px]">Official DOI:</span>
+                  <a
+                    href="https://doi.org/10.5067/TELND-3AJ64"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 text-[11px]"
+                  >
+                    https://doi.org/10.5067/TELND-3AJ64 <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <p className="text-[10px] text-slate-400 leading-relaxed border-t border-slate-800 pt-2">
+                  <strong className="text-slate-300">NASA Non-Endorsement Notice:</strong> TERRANEXUS 4D is an independent scientific research platform developed by JSLO-Inc. 
+                  NASA and PO.DAAC datasets are used in accordance with the NASA Open Data Policy (17 U.S.C. § 105). NASA has not partnered with, approved, certified, sponsored, or endorsed TERRANEXUS 4D. 
+                  No NASA logos, insignias, or seals are used (14 CFR § 1221.1).
+                </p>
+              </div>
             </div>
 
             <div className="flex justify-end pt-2 border-t border-slate-800">

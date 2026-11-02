@@ -7,6 +7,7 @@ export const WRIS_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'lastI
   provider: 'Terranexus Demonstration Fixture (Calibrated to CGWB Published Regional Yearbooks)',
   officialDocsUrl: 'https://indiawris.gov.in/wris/#/groundWater',
   accessUrl: 'https://indiawris.gov.in/wris/#/groundWaterLevelReports',
+  accessDate: '2026-11-02',
   license: 'Government of India Open Data License (GODL-India) / Demonstration Benchmark',
   citation: 'Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.',
   format: 'Demonstration Benchmark CSV (Local Fixture)',
