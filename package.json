@@ -12,10 +12,13 @@
     "test": "tsx test/test-system.ts",
     "test:ingestion": "tsx test/test-ingestion.ts",
     "test:nasa": "tsx test/test-nasa-pipeline.ts",
+    "test:phase4": "tsx test/test-phase4-suite.ts",
+    "test:all": "tsx test/test-system.ts && tsx test/test-ingestion.ts && tsx test/test-nasa-pipeline.ts && tsx test/test-api-routes.ts && tsx test/test-phase4-suite.ts",
     "check:env": "tsx scripts/check-config.ts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^2.32.0",
     "@google/generative-ai": "^0.24.1",
     "cesium": "^1.121.0",
     "clsx": "^2.1.1",

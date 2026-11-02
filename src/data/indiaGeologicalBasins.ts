@@ -1,24 +1,64 @@
 /**
  * TERRANEXUS 4D — Regional Geological & Hydrological Basin GeoJSON
- * Represents authentic regional basin and tectonic province boundaries
- * corresponding to the seven primary Indian study loci.
  * 
- * Compliant with GeoJSON RFC 7946 specification for Cesium.GeoJsonDataSource ingestion.
+ * SCIENTIFIC CLASSIFICATION: DEMONSTRATION / ILLUSTRATIVE REGIONAL APPROXIMATIONS
+ * 
+ * Coordinate Reference System: urn:ogc:def:crs:OGC:1.3:CRS84 (WGS 84 lon/lat)
+ * 
+ * SCIENTIFIC INTEGRITY AUDIT NOTICE:
+ * The polygons below represent generalized bounding convex envelopes surrounding
+ * the primary Indian regional study loci. They are curated for digital twin 3D spatial
+ * contextualization and visualization in CesiumJS.
+ * 
+ * DISCLAIMER & LIMITATIONS:
+ * 1. These boundaries are NOT official statutory administrative borders or surveyed
+ *    cadastral lithostratigraphic contact shapefiles from the Geological Survey of India (GSI)
+ *    or Central Ground Water Board (CGWB).
+ * 2. Quantitative scientific parameters (such as decadal TWSA trends, storage coefficients,
+ *    or borehole hydrographs) are NOT hardcoded polygon properties; they are computed dynamically
+ *    from authentic NASA PO.DAAC NetCDF-4 Level-3 grids and CGWB monitoring records.
+ * 3. Spatial resolution of underlying satellite gravimetry is governed by a ~300 km Gaussian
+ *    smoothing kernel (~282,743 km² area), extending significantly beyond any single localized polygon.
  */
+
+export interface GeologicalBasinFeatureProperties {
+  id: string;
+  locusId: string;
+  name: string;
+  locusName: string;
+  province: string;
+  hydrogeologicalClass: string;
+  boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION';
+  status: 'DEMONSTRATION';
+  sourceReference: string;
+  crs: string;
+  scientificCaveat: string;
+}
 
 export const INDIAN_STUDY_BASINS_GEOJSON = {
   type: 'FeatureCollection',
+  crs: {
+    type: 'name',
+    properties: {
+      name: 'urn:ogc:def:crs:OGC:1.3:CRS84'
+    }
+  },
   features: [
     {
       type: 'Feature',
       id: 'basin-indogangetic-ludhiana',
       properties: {
         id: 'locus-indogangetic-ludhiana',
+        locusId: 'locus-indogangetic-ludhiana',
         name: 'Indo-Gangetic Alluvial Foreland Basin (Sutlej-Beas Sector)',
         locusName: 'Ludhiana - Central Punjab Plain',
-        province: 'Quaternary Alluvium',
-        category: 'Alluvial Aquifer System',
-        twsaTrend: -2.81
+        province: 'Quaternary Alluvium (Indo-Gangetic Foredeep)',
+        hydrogeologicalClass: 'Multi-Tier Unconfined to Confined Porous Alluvial Aquifer',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'CGWB NAQUIM Punjab Regional Aquifer Atlas (2018) & GSI 1:2M Stratigraphic Map of India',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative bounding envelope for regional study context. Underlying NASA GRACE observations represent ~300 km Gaussian smoothed mass variation, not discrete polygon limits.'
       },
       geometry: {
         type: 'Polygon',
@@ -41,11 +81,16 @@ export const INDIAN_STUDY_BASINS_GEOJSON = {
       id: 'basin-khetri-rajasthan',
       properties: {
         id: 'locus-khetri-rajasthan',
+        locusId: 'locus-khetri-rajasthan',
         name: 'North Delhi Fold Belt / Shekhawati Arid Basin',
         locusName: 'Khetri Copper Belt - Jhunjhunu',
-        province: 'Proterozoic Delhi Supergroup Metasediments',
-        category: 'Mineralized Shear Zone',
-        twsaTrend: -2.55
+        province: 'Proterozoic Delhi Supergroup (Alwar & Ajabgarh Groups)',
+        hydrogeologicalClass: 'Fissured & Weathered Metasedimentary Aquifer (Quartzite/Schist)',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'GSI Special Publication 77 (Basement Tectonics of Aravalli-Delhi Fold Belt)',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative structural corridor bounding the Khetri mineralized shear zone. Surface alteration represents top microns; does not prove deep buried ore geometry.'
       },
       geometry: {
         type: 'Polygon',
@@ -67,11 +112,16 @@ export const INDIAN_STUDY_BASINS_GEOJSON = {
       id: 'basin-deccan-pune',
       properties: {
         id: 'locus-deccan-pune',
+        locusId: 'locus-deccan-pune',
         name: 'Upper Bhima River Basin (Western Deccan Plateau)',
         locusName: 'Upper Bhima Basin - Pune Deccan Traps',
-        province: 'Deccan Volcanic Province (Continental Flood Basalts)',
-        category: 'Fissured Volcanic Aquifer',
-        twsaTrend: 1.29
+        province: 'Deccan Volcanic Province (Upper Cretaceous-Paleocene Basalt Flows)',
+        hydrogeologicalClass: 'Stratified Volcanic Flow-Tops & Fissured Compact Basalt',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'GSDA Maharashtra Groundwater Atlas & Central Ground Water Board NAQUIM Pune District Report (2020)',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative catchment polygon. Basalt lava flows exhibit localized permeability contrast between vesicular flow-tops and massive columnar jointed flow interiors.'
       },
       geometry: {
         type: 'Polygon',
@@ -93,11 +143,16 @@ export const INDIAN_STUDY_BASINS_GEOJSON = {
       id: 'basin-zawar-udaipur',
       properties: {
         id: 'locus-zawar-udaipur',
-        name: 'Aravalli Supergroup Carbonate Basin',
+        locusId: 'locus-zawar-udaipur',
+        name: 'Aravalli Supergroup Carbonate Basin (Zawar Belt)',
         locusName: 'Zawar Mineral Belt - Udaipur',
         province: 'Early Proterozoic Aravalli Dolomite & Phyllite Belt',
-        category: 'Stratabound Carbonate Host',
-        twsaTrend: 0.24
+        hydrogeologicalClass: 'Stratabound Karstic & Fractured Dolomite Formations',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'GSI Memoir 123 (Geology of Aravalli Supergroup, Southern Rajasthan)',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative host formation envelope. Lead-zinc-silver stratabound mineralization is restricted to specific dolomitic facies, not distributed uniformly across the envelope.'
       },
       geometry: {
         type: 'Polygon',
@@ -119,11 +174,16 @@ export const INDIAN_STUDY_BASINS_GEOJSON = {
       id: 'basin-dharwar-kolar',
       properties: {
         id: 'locus-dharwar-kolar',
+        locusId: 'locus-dharwar-kolar',
         name: 'Kolar Greenstone Belt (Eastern Dharwar Craton)',
         locusName: 'Kolar Schist Belt - Robertsonpet',
-        province: 'Archean Cratonic Amphibolite & BIF Belt',
-        category: 'Crystalline Hard-Rock Basin',
-        twsaTrend: 0.91
+        province: 'Archean Dharwar Craton (Metavolcanic Amphibolites & BIF)',
+        hydrogeologicalClass: 'Crystalline Hard-Rock Secondary Fractures & Deep Underground Workings',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'GSI Golden Jubilee Monograph (Precambrian Geology of Dharwar Craton, 2001)',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative greenstone synformal belt. Historic gold workings exceed 3 km depth; surface gravimetry integrates over massive cratonic basement.'
       },
       geometry: {
         type: 'Polygon',
@@ -145,11 +205,16 @@ export const INDIAN_STUDY_BASINS_GEOJSON = {
       id: 'basin-singhbhum-jharkhand',
       properties: {
         id: 'locus-singhbhum-jharkhand',
-        name: 'Singhbhum Mobile Belt & Subarnarekha Basin',
+        locusId: 'locus-singhbhum-jharkhand',
+        name: 'Singhbhum Mobile Belt & Subarnarekha Catchment',
         locusName: 'Singhbhum Shear Zone - Ghatsila',
-        province: 'Proterozoic Craton Margin Thrust Belt',
-        category: 'Metamorphic Shear Zone',
-        twsaTrend: 0.28
+        province: 'Proterozoic Singhbhum Shear Zone (Metamorphic Thrust Belt)',
+        hydrogeologicalClass: 'Weathered Regolith & Tectonized Crystalline Basement',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'GSI Miscellaneous Publication 30 (Geology and Mineral Resources of Jharkhand)',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative thrust belt envelope. Target locus is 22.5804°N, 86.4800°E (East Singhbhum, Jharkhand). Not to be confused with western coordinates.'
       },
       geometry: {
         type: 'Polygon',
@@ -171,11 +236,16 @@ export const INDIAN_STUDY_BASINS_GEOJSON = {
       id: 'basin-godavari-kothagudem',
       properties: {
         id: 'locus-godavari-kothagudem',
+        locusId: 'locus-godavari-kothagudem',
         name: 'Pranhita-Godavari Intracratonic Gondwana Graben',
         locusName: 'Pranhita-Godavari Graben - Kothagudem',
-        province: 'Permian-Triassic Sedimentary Rift Graben',
-        category: 'Gondwana Sandstone Basin',
-        twsaTrend: 1.20
+        province: 'Permian-Triassic Gondwana Sedimentary Graben (Barakar & Kamthi Sandstones)',
+        hydrogeologicalClass: 'Multi-Tier High-Permeability Sandstone Aquifer System',
+        boundaryType: 'ILLUSTRATIVE_STUDY_AREA_APPROXIMATION',
+        status: 'DEMONSTRATION',
+        sourceReference: 'GSI Memoirs Vol. 107 (Coal Resources of Pranhita-Godavari Valley, 1977)',
+        crs: 'WGS 84 (EPSG:4326 / CRS84)',
+        scientificCaveat: 'Illustrative graben fault-bounded envelope. Features artesian multi-tier aquifers in sandstone valleys with thick coal measures.'
       },
       geometry: {
         type: 'Polygon',
