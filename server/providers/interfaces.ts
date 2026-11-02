@@ -14,12 +14,22 @@ export type DataClassificationTier =
   | 'UNVERIFIED';
 
 export type ProviderHealthStatus = 'ONLINE' | 'OFFLINE' | 'AUTHENTICATION_REQUIRED' | 'DEGRADED';
+export type ConfigurationStatus = 'CONFIGURED' | 'UNCONFIGURED' | 'PARTIAL';
+export type ActualDataAvailability = 'GENUINE_LIVE' | 'GENUINE_LOCAL_ARCHIVE' | 'SYNTHETIC_SIMULATED' | 'DEMONSTRATION' | 'UNAVAILABLE';
+export type IntegrationStatus = 'OPERATIONAL' | 'DEGRADED' | 'STANDIN_SIMULATED' | 'OFFLINE';
 
 export interface ProviderHealthReport {
   status: ProviderHealthStatus;
   message: string;
   lastChecked: string;
   latencyMs?: number;
+  configurationStatus: ConfigurationStatus;
+  endpointAvailable: boolean;
+  authValid: boolean | null;
+  dataAvailability: ActualDataAvailability;
+  lastAcquisition: string | null;
+  lastValidation: string | null;
+  currentIntegrationStatus: IntegrationStatus;
 }
 
 export interface BaseDataProvider {
@@ -82,6 +92,8 @@ export interface MajorRiverBasin {
   majorStates: string[];
   centroid: [number, number];
   bounds: [number, number, number, number]; // [minLon, minLat, maxLon, maxLat]
+  polygon?: [number, number][]; // Authentic catchment boundary polygon vertices [lon, lat]
+  isCatchmentPolygon?: boolean;
 }
 
 export interface IAdministrativeBoundaryProvider extends BaseDataProvider {
@@ -108,6 +120,10 @@ export interface CgwbStateAssessment {
   primaryAquiferSystem: string;
   assessmentYear: string;
   officialCitation: string;
+  sourcePublication?: string;
+  sourceTable?: string;
+  spatialAggregationLevel?: 'STATE_ADMINISTRATIVE_COMPILATION';
+  disclaimer?: string;
 }
 
 export interface MajorAquiferSystem {
@@ -169,20 +185,23 @@ export interface BoreholeCoreLayer {
   depthToM: number;
   lithology: string;
   color: string;
-  waterStrike: boolean;
-  fractureIntensity: 'Low' | 'Moderate' | 'High' | 'None';
-  permeabilityMPerDay: number;
+  waterStrike?: boolean;
+  fractureIntensity?: 'Low' | 'Moderate' | 'High' | 'None';
+  permeabilityMPerDay?: number;
+  hydrogeologicalCharacter?: string;
 }
 
 export interface RepresentativeBorehole {
   wellCode: string;
   sourceAgency: string;
   totalDepthM: number;
-  waterTableMbgl: number;
-  dischargeLps: number;
-  drillYear: number;
+  waterTableMbgl?: number;
+  dischargeLps?: number;
+  drillYear?: number;
   status: DataClassificationTier;
   layers: BoreholeCoreLayer[];
+  isEducationalCrossSection?: boolean;
+  disclaimer?: string;
 }
 
 export interface GeologicalTerrane {

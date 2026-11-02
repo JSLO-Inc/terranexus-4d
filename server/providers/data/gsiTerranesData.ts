@@ -4,6 +4,13 @@
  * Source: Geological Survey of India (GSI) Bhukosh 1:2,000,000 & 1:50,000 Lithostratigraphic Map
  * Classification: Geological Terranes and Cratons of India
  * Licence: Government Open Data License - India (GODL) / Public Scientific Domain
+ * 
+ * FORENSIC SCIENTIFIC NOTICE (Phase 5D):
+ * 1. Geographic bounds define approximate regional extents from GSI 1:2,000,000 mapping,
+ *    NOT official surveyed cadastral boundaries or sharp contact lines.
+ * 2. Borehole lithologs are EDUCATIONAL COMPOSITE STRATIGRAPHIC SECTIONS synthesized from
+ *    published GSI geological memoirs and regional lithological models. They are classified
+ *    strictly as SIMULATED, NOT authentic drilled exploratory core measurements at individual coordinates.
  */
 
 import { GeologicalTerrane } from '../interfaces';
@@ -53,18 +60,17 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
       }
     ],
     borehole: {
-      wellCode: 'BH-GSI-DHW-EXP-08',
-      sourceAgency: 'Geological Survey of India (GSI) Exploration Division',
+      wellCode: 'EDU-SYNTH-DHW-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI South Indian Shield Memoirs)',
       totalDepthM: 350,
-      waterTableMbgl: 38.6,
-      dischargeLps: 4.8,
-      drillYear: 2021,
-      status: 'MODELLED',
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
       layers: [
-        { depthFromM: 0, depthToM: 14, lithology: 'Lateritic Soil & Saprolite', color: '#b45309', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 4.2 },
-        { depthFromM: 14, depthToM: 42, lithology: 'Weathered Granodiorite Gneiss', color: '#94a3b8', waterStrike: true, fractureIntensity: 'Moderate', permeabilityMPerDay: 2.8 },
-        { depthFromM: 42, depthToM: 120, lithology: 'Fractured Biotite Gneiss with Pegmatite Veins', color: '#64748b', waterStrike: true, fractureIntensity: 'High', permeabilityMPerDay: 1.6 },
-        { depthFromM: 120, depthToM: 350, lithology: 'Massive Amphibolite / Charnockitic Basement', color: '#334155', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 0.05 }
+        { depthFromM: 0, depthToM: 14, lithology: 'Lateritic Soil & Saprolite Regolith', color: '#b45309', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Shallow weathered zone with seasonal moisture variation' },
+        { depthFromM: 14, depthToM: 42, lithology: 'Weathered Granodiorite Gneiss (Sheet Joints)', color: '#94a3b8', fractureIntensity: 'Moderate', hydrogeologicalCharacter: 'Secondary porosity along horizontal exfoliation joints' },
+        { depthFromM: 42, depthToM: 120, lithology: 'Fractured Biotite Gneiss with Pegmatite Veinlets', color: '#64748b', fractureIntensity: 'High', hydrogeologicalCharacter: 'Sub-vertical fracture networks with localized hydrostatic head' },
+        { depthFromM: 120, depthToM: 350, lithology: 'Massive Amphibolite / Charnockitic Cratonic Basement', color: '#334155', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Extremely dense crystalline basement; negligible primary or secondary porosity' }
       ]
     }
   },
@@ -112,18 +118,17 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
       }
     ],
     borehole: {
-      wellCode: 'BH-GSI-ADFB-CORE-14',
-      sourceAgency: 'Geological Survey of India (GSI) Western Region',
+      wellCode: 'EDU-SYNTH-ADFB-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI Western Region Memoirs)',
       totalDepthM: 420,
-      waterTableMbgl: 41.2,
-      dischargeLps: 3.2,
-      drillYear: 2020,
-      status: 'MODELLED',
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
       layers: [
-        { depthFromM: 0, depthToM: 18, lithology: 'Aeolian Sand & Alluvial Calcrete', color: '#d97706', waterStrike: false, fractureIntensity: 'None', permeabilityMPerDay: 5.5 },
-        { depthFromM: 18, depthToM: 65, lithology: 'Weathered Quartz-Chlorite Schist', color: '#059669', waterStrike: true, fractureIntensity: 'Moderate', permeabilityMPerDay: 2.1 },
-        { depthFromM: 65, depthToM: 195, lithology: 'Mineralized Biotite-Chlorite Schist with Chalcopyrite', color: '#0d9488', waterStrike: true, fractureIntensity: 'High', permeabilityMPerDay: 1.4 },
-        { depthFromM: 195, depthToM: 420, lithology: 'Compact Sericitic Quartzite Bedrock', color: '#b45309', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 0.08 }
+        { depthFromM: 0, depthToM: 18, lithology: 'Aeolian Sand & Alluvial Calcrete Mantle', color: '#d97706', fractureIntensity: 'None', hydrogeologicalCharacter: 'Unconsolidated permeable surficial sand and caliche crust' },
+        { depthFromM: 18, depthToM: 65, lithology: 'Weathered Quartz-Chlorite Schist', color: '#059669', fractureIntensity: 'Moderate', hydrogeologicalCharacter: 'Foliation-plane cleavage providing unconfined water movement' },
+        { depthFromM: 65, depthToM: 195, lithology: 'Mineralized Biotite-Chlorite Schist with Chalcopyrite Stringers', color: '#0d9488', fractureIntensity: 'High', hydrogeologicalCharacter: 'Hydrothermal shear zone host rock with moderate secondary permeability' },
+        { depthFromM: 195, depthToM: 420, lithology: 'Massive Sericitic Quartzite Bedrock', color: '#b45309', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Vitreous, highly indurated quartzite acting as regional groundwater barrier' }
       ]
     }
   },
@@ -147,7 +152,7 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
         primaryLithology: 'Compound Pahoehoe Basalts with Zeolitic Infill (Heulandite, Stilbite)',
         colorHex: '#475569',
         typicalThicknessMeters: 320,
-        hydrogeologicalSignificance: 'Vesicular tops provide excellent lateral permeability (3 - 12 m/day).'
+        hydrogeologicalSignificance: 'Vesicular tops provide excellent lateral permeability.'
       },
       {
         id: 'fmt-dt-02',
@@ -171,19 +176,18 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
       }
     ],
     borehole: {
-      wellCode: 'BH-GSDA-DVP-DEEP-02',
-      sourceAgency: 'Groundwater Surveys and Development Agency (GSDA) Maharashtra',
+      wellCode: 'EDU-SYNTH-DVP-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI Central Region Memoirs & GSDA)',
       totalDepthM: 220,
-      waterTableMbgl: 8.7,
-      dischargeLps: 8.5,
-      drillYear: 2022,
-      status: 'MODELLED',
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
       layers: [
-        { depthFromM: 0, depthToM: 6, lithology: 'Black Cotton Soil (Regur)', color: '#1c1917', waterStrike: false, fractureIntensity: 'None', permeabilityMPerDay: 0.1 },
-        { depthFromM: 6, depthToM: 28, lithology: 'Highly Weathered Vesicular Basalt', color: '#78716c', waterStrike: true, fractureIntensity: 'High', permeabilityMPerDay: 6.8 },
-        { depthFromM: 28, depthToM: 78, lithology: 'Hard Compact Basalt (Flow Interior Aquiclude)', color: '#292524', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 0.02 },
-        { depthFromM: 78, depthToM: 95, lithology: 'Fractured Zeolitic Basalt (Confined Aquifer-II)', color: '#57534e', waterStrike: true, fractureIntensity: 'Moderate', permeabilityMPerDay: 4.5 },
-        { depthFromM: 95, depthToM: 220, lithology: 'Dense Massive Doleritic Basalt', color: '#1c1917', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 0.01 }
+        { depthFromM: 0, depthToM: 6, lithology: 'Black Cotton Soil (Regur Clay)', color: '#1c1917', fractureIntensity: 'None', hydrogeologicalCharacter: 'Smectite-rich expansive soil with seasonal desiccation cracking' },
+        { depthFromM: 6, depthToM: 28, lithology: 'Highly Weathered Vesicular Basalt (Murrum Layer)', color: '#78716c', fractureIntensity: 'High', hydrogeologicalCharacter: 'Primary dugwell unconfined aquifer horizon' },
+        { depthFromM: 28, depthToM: 78, lithology: 'Hard Compact Basalt (Flow Interior Aquiclude)', color: '#292524', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Impermeable basalt flow core acting as confining cap' },
+        { depthFromM: 78, depthToM: 95, lithology: 'Fractured Zeolitic Basalt (Flow Boundary Horizon)', color: '#57534e', fractureIntensity: 'Moderate', hydrogeologicalCharacter: 'Secondary calcite-zeolite amygdales with horizontal cooling fractures' },
+        { depthFromM: 95, depthToM: 220, lithology: 'Dense Massive Doleritic Basalt', color: '#1c1917', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Thick lower basalt flow with low fractured porosity' }
       ]
     }
   },
@@ -231,19 +235,18 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
       }
     ],
     borehole: {
-      wellCode: 'BH-CGWB-PUN-LUD-101',
-      sourceAgency: 'Central Ground Water Board (CGWB) North Western Region',
+      wellCode: 'EDU-SYNTH-IGB-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI Northern Region & CGWB Memoirs)',
       totalDepthM: 300,
-      waterTableMbgl: 32.4,
-      dischargeLps: 35.0,
-      drillYear: 2023,
-      status: 'OBSERVED',
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI/CGWB memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
       layers: [
-        { depthFromM: 0, depthToM: 12, lithology: 'Brown Fine Sandy Silt (Soil Horizon)', color: '#a16207', waterStrike: false, fractureIntensity: 'None', permeabilityMPerDay: 8.5 },
-        { depthFromM: 12, depthToM: 48, lithology: 'Fine to Medium Micaceous Quartz Sand (Depleted Aquifer-I)', color: '#ca8a04', waterStrike: true, fractureIntensity: 'None', permeabilityMPerDay: 28.0 },
-        { depthFromM: 48, depthToM: 74, lithology: 'Sticky Yellowish-Grey Clay with Kankar (Aquitard-I)', color: '#713f12', waterStrike: false, fractureIntensity: 'None', permeabilityMPerDay: 0.005 },
-        { depthFromM: 74, depthToM: 142, lithology: 'Coarse Sand with Gravel & Quartz Pebbles (Productive Aquifer-II)', color: '#eab308', waterStrike: true, fractureIntensity: 'None', permeabilityMPerDay: 45.0 },
-        { depthFromM: 142, depthToM: 300, lithology: 'Dense Silty Clay & Deep Confined Sand Lenses (Aquifer-III)', color: '#854d0e', waterStrike: true, fractureIntensity: 'None', permeabilityMPerDay: 18.0 }
+        { depthFromM: 0, depthToM: 12, lithology: 'Brown Fine Sandy Silt (Surface Alluvium)', color: '#a16207', fractureIntensity: 'None', hydrogeologicalCharacter: 'High infiltration sandy loam topsoil' },
+        { depthFromM: 12, depthToM: 48, lithology: 'Fine to Medium Micaceous Quartz Sand (Shallow Aquifer)', color: '#ca8a04', fractureIntensity: 'None', hydrogeologicalCharacter: 'Unconfined alluvial sand with extensive tube-well exploitation' },
+        { depthFromM: 48, depthToM: 74, lithology: 'Sticky Yellowish-Grey Lacustrine Clay with Kankar (Regional Aquitard)', color: '#713f12', fractureIntensity: 'None', hydrogeologicalCharacter: 'Impermeable clay aquitard separating upper and deeper aquifers' },
+        { depthFromM: 74, depthToM: 142, lithology: 'Coarse Quartz Sand with Gravel & Quartz Pebbles (Confined Aquifer)', color: '#eab308', fractureIntensity: 'None', hydrogeologicalCharacter: 'High transmissivity semi-confined alluvial aquifer' },
+        { depthFromM: 142, depthToM: 300, lithology: 'Dense Silty Clay & Deep Channel Sand Lenses (Deep Multi-Tier Aquifer)', color: '#854d0e', fractureIntensity: 'None', hydrogeologicalCharacter: 'Regional deep alluvial foreland infill under piezometric pressure' }
       ]
     }
   },
@@ -291,18 +294,17 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
       }
     ],
     borehole: {
-      wellCode: 'BH-GSI-ER-JAD-CORE-04',
-      sourceAgency: 'Geological Survey of India (GSI) Eastern Region',
+      wellCode: 'EDU-SYNTH-SSZ-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI Eastern Region Memoirs)',
       totalDepthM: 380,
-      waterTableMbgl: 6.2,
-      dischargeLps: 5.4,
-      drillYear: 2021,
-      status: 'MODELLED',
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
       layers: [
-        { depthFromM: 0, depthToM: 8, lithology: 'Residual Lateritic Red Loam', color: '#b91c1c', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 3.5 },
-        { depthFromM: 8, depthToM: 35, lithology: 'Weathered Sericite-Chlorite Schist', color: '#047857', waterStrike: true, fractureIntensity: 'Moderate', permeabilityMPerDay: 2.2 },
-        { depthFromM: 35, depthToM: 140, lithology: 'Mylonitized Quartz-Chlorite-Apatite Schist', color: '#0f766e', waterStrike: true, fractureIntensity: 'High', permeabilityMPerDay: 1.8 },
-        { depthFromM: 140, depthToM: 380, lithology: 'Compact Singhbhum Granite Basement', color: '#334155', waterStrike: false, fractureIntensity: 'Low', permeabilityMPerDay: 0.04 }
+        { depthFromM: 0, depthToM: 8, lithology: 'Residual Lateritic Red Loam & Saprolite', color: '#b91c1c', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Thin weathered mantle on dissected plateau' },
+        { depthFromM: 8, depthToM: 35, lithology: 'Weathered Sericite-Chlorite Schist (Cleaved Zone)', color: '#047857', fractureIntensity: 'Moderate', hydrogeologicalCharacter: 'Cleavage foliation provides shallow secondary permeability' },
+        { depthFromM: 35, depthToM: 140, lithology: 'Mylonitized Quartz-Chlorite-Apatite-Magnetite Shear Zone', color: '#0f766e', fractureIntensity: 'High', hydrogeologicalCharacter: 'Anisotropic permeability along the north-dipping Singhbhum Thrust' },
+        { depthFromM: 140, depthToM: 380, lithology: 'Compact Singhbhum Granite Basement Complex', color: '#334155', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Mesoarchean cratonic granitoid with tight orthogonal joints' }
       ]
     }
   },
@@ -350,19 +352,18 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
       }
     ],
     borehole: {
-      wellCode: 'BH-SCCL-KGM-COAL-07',
-      sourceAgency: 'Singareni Collieries / GSI Exploration Wing',
+      wellCode: 'EDU-SYNTH-GON-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI Coal Wing Memoirs)',
       totalDepthM: 320,
-      waterTableMbgl: 18.2,
-      dischargeLps: 14.2,
-      drillYear: 2022,
-      status: 'MODELLED',
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
       layers: [
-        { depthFromM: 0, depthToM: 10, lithology: 'Riverine Alluvial Soil & Sand', color: '#ca8a04', waterStrike: false, fractureIntensity: 'None', permeabilityMPerDay: 7.2 },
-        { depthFromM: 10, depthToM: 52, lithology: 'Weathered Kamthi Sandstone', color: '#b45309', waterStrike: true, fractureIntensity: 'Moderate', permeabilityMPerDay: 8.5 },
-        { depthFromM: 52, depthToM: 110, lithology: 'Coarse Porous Barakar Sandstone (Main Aquifer)', color: '#475569', waterStrike: true, fractureIntensity: 'Low', permeabilityMPerDay: 12.4 },
-        { depthFromM: 110, depthToM: 128, lithology: 'Thick Coal Seam (Bottom Seam III)', color: '#0f172a', waterStrike: false, fractureIntensity: 'Moderate', permeabilityMPerDay: 0.8 },
-        { depthFromM: 128, depthToM: 320, lithology: 'Compacted Barakar Sandstone & Shale Interbeds', color: '#334155', waterStrike: true, fractureIntensity: 'Low', permeabilityMPerDay: 3.1 }
+        { depthFromM: 0, depthToM: 10, lithology: 'Riverine Alluvial Soil & Sand Overburden', color: '#ca8a04', fractureIntensity: 'None', hydrogeologicalCharacter: 'Recent fluvial alluvium in rift valley depression' },
+        { depthFromM: 10, depthToM: 52, lithology: 'Weathered Kamthi Ferruginous Sandstone', color: '#b45309', fractureIntensity: 'Moderate', hydrogeologicalCharacter: 'Porous intergranular sandstone unconfined aquifer' },
+        { depthFromM: 52, depthToM: 110, lithology: 'Coarse Porous Barakar Feldspathic Sandstone (Main Aquifer)', color: '#475569', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Artisan-to-semi-confined porous sandstone yielding significant groundwater' },
+        { depthFromM: 110, depthToM: 128, lithology: 'Workable Coal Seam & Carbonaceous Shale', color: '#0f172a', fractureIntensity: 'Moderate', hydrogeologicalCharacter: 'Low vertical permeability with localized cleat fractures' },
+        { depthFromM: 128, depthToM: 320, lithology: 'Compacted Barakar Sandstone & Talchir Tillite Bedrock', color: '#334155', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Basal Gondwana glacial marine tillite acting as regional aquiclude' }
       ]
     }
   }
