@@ -36,8 +36,15 @@ export class CgwbGroundwaterProvider implements IGroundwaterProvider {
   async getHealth(): Promise<ProviderHealthReport> {
     return {
       status: 'ONLINE',
-      message: `Active with 36 Indian States/UT assessments and ${MAJOR_AQUIFER_SYSTEMS.length} major aquifer systems.`,
-      lastChecked: new Date().toISOString()
+      message: `Active with 36 Indian States/UT assessments and ${MAJOR_AQUIFER_SYSTEMS.length} major aquifer systems (GEC-2015 / 2023 National Compilation).`,
+      lastChecked: new Date().toISOString(),
+      configurationStatus: 'CONFIGURED',
+      endpointAvailable: true,
+      authValid: null,
+      dataAvailability: 'GENUINE_LOCAL_ARCHIVE',
+      lastAcquisition: '2023-12-01T00:00:00.000Z',
+      lastValidation: '2023-12-01T00:00:00.000Z',
+      currentIntegrationStatus: 'OPERATIONAL'
     };
   }
 
@@ -57,22 +64,9 @@ export class CgwbGroundwaterProvider implements IGroundwaterProvider {
       }
     }
 
-    // Default to national average composite if an unlisted UT is queried
-    return {
-      stateName,
-      stateCode: 'IND',
-      annualRechargeBcm: 12.5,
-      naturalDischargeBcm: 1.1,
-      extractableResourceBcm: 11.4,
-      totalExtractionBcm: 6.8,
-      stageOfExtractionPercent: 59.26,
-      categorisation: 'SAFE',
-      overExploitedUnitsCount: 0,
-      totalAssessmentUnits: 50,
-      primaryAquiferSystem: 'Regional Hydrogeological Formations',
-      assessmentYear: '2023',
-      officialCitation: 'CGWB & Ministry of Jal Shakti. 2023. National Compilation on Dynamic Ground Water Resources of India.'
-    };
+    // Scientific honesty (Phase 5D): Return null when no matching assessment exists.
+    // Never fabricate a national average composite as an authentic state measurement.
+    return null;
   }
 
   getNationalAssessmentSummary() {

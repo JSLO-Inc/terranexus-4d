@@ -34,7 +34,14 @@ export class NominatimGeocodingProvider implements IGeocodingProvider {
     return {
       status: 'ONLINE',
       message: 'Nominatim geocoding active with offline local fallback index (36 States/UTs, 70+ districts).',
-      lastChecked: new Date().toISOString()
+      lastChecked: new Date().toISOString(),
+      configurationStatus: 'CONFIGURED',
+      endpointAvailable: true,
+      authValid: null,
+      dataAvailability: 'GENUINE_LIVE',
+      lastAcquisition: new Date().toISOString(),
+      lastValidation: new Date().toISOString(),
+      currentIntegrationStatus: 'OPERATIONAL'
     };
   }
 

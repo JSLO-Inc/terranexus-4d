@@ -45,6 +45,11 @@ raw-private-data/
 # Preserves pristine directory isolation and prevents binary satellite files from entering Git
 server/data/raw/*
 server/data/processed/*
+server/data/cache/hydro_click-*
+server/data/cache/hydro_loc-*
+server/data/demo/cgwb_wris_demo_click-*
+server/data/demo/cgwb_wris_demo_loc-*
+
 
 # 5. Build Artifacts & Dependencies
 node_modules/

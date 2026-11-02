@@ -18,7 +18,7 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       formula: 'B4 / B2 (Red 665nm / Blue 490nm)',
       geologicalRationale: 'Ferric iron (Fe3+) absorption in blue with high reflectance in red; delineates oxidized hematite/goethite gossans.',
       detectionTarget: 'Goethite, Hematite, Jarosite surface cappings',
-      status: 'OBSERVED',
+      status: 'MODELLED',
       confidencePercent: 88,
       spatialResolutionMeters: 10
     },
@@ -64,7 +64,7 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       formula: 'B4 / B2',
       geologicalRationale: 'Supergene oxidation of sphalerite-galena-pyrite ore creating limonitic staining.',
       detectionTarget: 'Limonite / Jarosite capping over massive sulfides',
-      status: 'OBSERVED',
+      status: 'MODELLED',
       confidencePercent: 86,
       spatialResolutionMeters: 10
     }
@@ -77,7 +77,7 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       formula: 'B4 / B3 (Red / Green)',
       geologicalRationale: 'Distinguishes high-grade hematite from surrounding shale and quartzite.',
       detectionTarget: 'High-Grade Banded Hematite Ore (BHO / BHQ)',
-      status: 'OBSERVED',
+      status: 'MODELLED',
       confidencePercent: 92,
       spatialResolutionMeters: 10
     }

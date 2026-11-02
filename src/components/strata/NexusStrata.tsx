@@ -101,28 +101,36 @@ export const NexusStrata: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-amber-400" />
                   <h3 className="text-sm font-bold text-slate-100">
-                    Borehole Core Litholog: {borehole.wellCode}
+                    Stratigraphic Litholog: {borehole.wellCode}
                   </h3>
                 </div>
-                <StatusBadge status={borehole.status} size="sm" />
+                <StatusBadge status={borehole.status || 'SIMULATED'} size="sm" />
+              </div>
+
+              {/* Scientific Honesty Notice (Phase 5D) */}
+              <div className="text-[11px] bg-amber-950/30 border border-amber-800/40 text-amber-300/90 rounded-lg p-2.5 flex items-start gap-2">
+                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <span>
+                  <strong>Educational Stratigraphic Section:</strong> Synthesized from published GSI geological memoirs and regional lithological models. NOT an authentic drilled exploratory borehole core at this exact coordinate.
+                </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono bg-slate-900/90 p-2.5 rounded-lg border border-slate-800">
                 <div>
-                  <span className="text-slate-500 block text-[10px]">Agency:</span>
-                  <span className="text-slate-200">{borehole.sourceAgency}</span>
+                  <span className="text-slate-500 block text-[10px]">Source Reference:</span>
+                  <span className="text-slate-200 truncate block">{borehole.sourceAgency || 'GSI Memoirs'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px]">Drill Year:</span>
-                  <span className="text-slate-200">{borehole.drillingYear}</span>
+                  <span className="text-slate-500 block text-[10px]">Synthesis Type:</span>
+                  <span className="text-slate-200">Educational Composite</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px]">Total Depth:</span>
-                  <span className="text-amber-300 font-bold">{borehole.totalDepthMeters} m</span>
+                  <span className="text-slate-500 block text-[10px]">Column Depth:</span>
+                  <span className="text-amber-300 font-bold">{borehole.totalDepthMeters || (borehole as any).totalDepthM || 300} m</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 block text-[10px]">Water Strike:</span>
-                  <span className="text-cyan-300 font-bold">{borehole.waterTableDepthMeters} mbgl</span>
+                  <span className="text-slate-500 block text-[10px]">Classification:</span>
+                  <span className="text-cyan-300 font-bold">{borehole.status || 'SIMULATED'}</span>
                 </div>
               </div>
 
@@ -141,9 +149,9 @@ export const NexusStrata: React.FC = () => {
                       fromDepth: l.depthFromM,
                       toDepth: l.depthToM,
                       lithology: l.lithology,
-                      description: `Water strike: ${l.waterStrike ? 'Yes' : 'No'} | Fractures: ${l.fractureIntensity} | Permeability: ${l.permeabilityMPerDay} m/day`,
+                      description: l.hydrogeologicalCharacter || `Fractures: ${l.fractureIntensity || 'Variable'} | Regional Stratum`,
                       color: l.color,
-                      permeability: l.permeabilityMPerDay > 3 ? 'High' : l.permeabilityMPerDay > 0.5 ? 'Medium' : 'Low'
+                      permeability: l.hydrogeologicalCharacter?.toLowerCase().includes('aquifer') || l.permeabilityMPerDay > 3 ? 'High' : l.permeabilityMPerDay > 0.5 ? 'Medium' : 'Low'
                     })) || []).map((interval: any, i: number) => (
                       <tr key={i} className="hover:bg-slate-900/40">
                         <td className="py-2.5 font-mono text-[11px] text-amber-400 whitespace-nowrap">

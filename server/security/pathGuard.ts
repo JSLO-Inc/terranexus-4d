@@ -2,10 +2,11 @@
  * TERRANEXUS 4D — Path Traversal Protection & Safe File Handler
  * 
  * Guards against directory traversal attacks (e.g. `../../etc/passwd`, `..\..\Windows\System32`),
- * unsafe filename injection, and unauthorized file access on server disk storage.
+ * unsafe filename injection, symlink redirection attacks, and unauthorized file access on server disk storage.
  */
 
 import path from 'path';
+import fs from 'fs';
 
 // Whitelist of permitted file extensions for scientific datasets
 const PERMITTED_EXTENSIONS = new Set([
@@ -19,22 +20,37 @@ const PERMITTED_EXTENSIONS = new Set([
   '.tif'
 ]);
 
+export interface PathValidationOptions {
+  allowedExtensions?: Set<string>;
+  rejectSymlinks?: boolean;
+  disallowOverwrite?: boolean;
+}
+
 export interface PathValidationResult {
   isValid: boolean;
   sanitizedFilename?: string;
   safeAbsolutePath?: string;
   error?: string;
+  isExistingFile?: boolean;
 }
 
 /**
  * Validates and sanitizes a filename intended to be saved or read within a specific directory.
- * Ensures the resolved path cannot escape the target root directory.
+ * Ensures the resolved path cannot escape the target root directory and prevents symlink exploits.
  */
 export function validateAndSanitizeFilename(
   rawFilename: string,
   targetDirectory: string,
-  allowedExtensions: Set<string> = PERMITTED_EXTENSIONS
+  optionsOrExtensions: Set<string> | PathValidationOptions = PERMITTED_EXTENSIONS
 ): PathValidationResult {
+  const options: PathValidationOptions = optionsOrExtensions instanceof Set
+    ? { allowedExtensions: optionsOrExtensions }
+    : optionsOrExtensions;
+
+  const allowedExtensions = options.allowedExtensions ?? PERMITTED_EXTENSIONS;
+  const rejectSymlinks = options.rejectSymlinks ?? true;
+  const disallowOverwrite = options.disallowOverwrite ?? false;
+
   if (!rawFilename || typeof rawFilename !== 'string') {
     return { isValid: false, error: 'Filename must be a non-empty string.' };
   }
@@ -76,7 +92,7 @@ export function validateAndSanitizeFilename(
   const resolvedTargetDir = path.resolve(targetDirectory);
   const resolvedFilePath = path.resolve(resolvedTargetDir, trimmed);
 
-  // Verification: The resolved path must strictly start with the resolved target directory + separator
+  // Verification 1: The resolved path must strictly start with the resolved target directory + separator
   if (!resolvedFilePath.startsWith(resolvedTargetDir + path.sep) && resolvedFilePath !== resolvedTargetDir) {
     return {
       isValid: false,
@@ -84,9 +100,33 @@ export function validateAndSanitizeFilename(
     };
   }
 
+  // Verification 2: Symlink detection
+  let fileExists = false;
+  try {
+    const stat = fs.lstatSync(resolvedFilePath);
+    fileExists = true;
+    if (rejectSymlinks && stat.isSymbolicLink()) {
+      return {
+        isValid: false,
+        error: 'Target file is a symbolic link (Symlink traversal protection).'
+      };
+    }
+  } catch {
+    // File does not exist yet (normal for write operations)
+  }
+
+  // Verification 3: Overwrite protection check
+  if (disallowOverwrite && fileExists) {
+    return {
+      isValid: false,
+      error: `Target file "${trimmed}" already exists and overwrite is disallowed.`
+    };
+  }
+
   return {
     isValid: true,
     sanitizedFilename: trimmed,
-    safeAbsolutePath: resolvedFilePath
+    safeAbsolutePath: resolvedFilePath,
+    isExistingFile: fileExists
   };
 }

@@ -1,45 +1,90 @@
 /**
- * TERRANEXUS 4D — In-Memory Sliding Window Rate Limiter
+ * TERRANEXUS 4D — In-Memory Bounded Sliding Window Rate Limiter
  * 
  * Protects API routes from abuse, DoS, and automated scraping while ensuring
  * normal user interaction is smooth and responsive.
+ * 
+ * Hardened Features (Phase 5D):
+ * - Bounded memory storage (MAX_CLIENT_ENTRIES = 5000) with LRU eviction to prevent heap exhaustion.
+ * - Safe client IP extraction preventing header spoofing via untrusted X-Forwarded-For.
+ * - Automatic sliding-window stale entry cleanup.
  */
 
 import { Request, Response, NextFunction } from 'express';
+
+const MAX_CLIENT_ENTRIES = 5000;
 
 interface RateLimitConfig {
   windowMs: number;
   maxRequests: number;
   tierName: string;
+  trustProxy?: boolean;
 }
 
 interface ClientRecord {
   timestamps: number[];
+  lastSeen: number;
+}
+
+/**
+ * Extracts client IP safely without trusting arbitrary forged X-Forwarded-For headers
+ * unless explicitly deployed behind a trusted reverse proxy.
+ */
+export function extractSafeClientIp(req: Request, trustProxy: boolean = false): string {
+  if (trustProxy && req.headers['x-forwarded-for']) {
+    const xff = req.headers['x-forwarded-for'];
+    const rawIp = Array.isArray(xff) ? xff[0] : xff.split(',')[0].trim();
+    if (/^[\da-fA-F.:]+$/.test(rawIp) && rawIp.length <= 45) {
+      return rawIp;
+    }
+  }
+  const sockIp = req.socket?.remoteAddress || req.ip || '127.0.0.1';
+  return sockIp.replace(/^::ffff:/, ''); // Normalize IPv4-mapped IPv6
 }
 
 export function createRateLimiter(config: RateLimitConfig) {
   const clients = new Map<string, ClientRecord>();
 
-  // Periodically clean up stale client entries every 5 minutes
-  setInterval(() => {
+  // Periodically clean up stale client entries every 2 minutes
+  const cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [ip, record] of clients.entries()) {
       record.timestamps = record.timestamps.filter(ts => now - ts < config.windowMs);
-      if (record.timestamps.length === 0) {
+      if (record.timestamps.length === 0 || now - record.lastSeen > config.windowMs * 2) {
         clients.delete(ip);
       }
     }
-  }, 5 * 60 * 1000).unref();
+  }, 2 * 60 * 1000);
+  cleanupTimer.unref();
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+    const clientIp = extractSafeClientIp(req, config.trustProxy ?? false);
     const now = Date.now();
 
     let record = clients.get(clientIp);
+
     if (!record) {
-      record = { timestamps: [] };
+      // Memory boundary enforcement: prevent unbounded Map growth
+      if (clients.size >= MAX_CLIENT_ENTRIES) {
+        // Evict the oldest entry by lastSeen
+        let oldestIp: string | null = null;
+        let oldestTime = Infinity;
+        for (const [ip, rec] of clients.entries()) {
+          if (rec.lastSeen < oldestTime) {
+            oldestTime = rec.lastSeen;
+            oldestIp = ip;
+          }
+        }
+        if (oldestIp) {
+          clients.delete(oldestIp);
+        }
+      }
+
+      record = { timestamps: [], lastSeen: now };
       clients.set(clientIp, record);
     }
+
+    record.lastSeen = now;
 
     // Keep only timestamps within the sliding window
     record.timestamps = record.timestamps.filter(ts => now - ts < config.windowMs);

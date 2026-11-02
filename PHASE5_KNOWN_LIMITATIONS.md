@@ -1,16 +1,17 @@
-# TERRANEXUS 4D — PHASE 5 KNOWN LIMITATIONS
+# TERRANEXUS 4D — PHASE 5 & 5D KNOWN LIMITATIONS
 ## Scientific Boundaries, Spatial Resolution Constraints & Model Disclaimers
 
-**Document Version:** 1.0.0  
-**Phase:** 5 (Nationwide Location Intelligence, Multi-Layer Heatmaps & Place Discovery)  
-**Date:** November 2026  
+**Document Version:** 1.1.0  
+**Phase:** 5D (Forensic Scientific Data Validation, Provider Corrections & Security Remediation)  
+**Date of Completion:** November 2026  
 **Intended Audience:** Scientific Evaluators, Hydrologists, GIS Analysts, Government Agencies  
+**Governing Standard:** Non-Negotiable Scientific Integrity Framework (Part 13 Compliance)
 
 ---
 
-## 1. Spatial Resolution Discrepancy & Non-Conflation Caveat
+## 1. Spatial Resolution Discrepancy & Non-Conflation Caveats
 
-### 1.1 The Regional Satellite Gravimetry Scale
+### 1.1 The Regional Satellite Gravimetry Scale (NASA GRACE / GRACE-FO)
 NASA GRACE and GRACE-FO Level-3 Land Mass grids (JPL Tellus RL06 / RL06.3) are generated on a $0.5^\circ \times 0.5^\circ$ geographic grid. Due to the physics of satellite-to-satellite tracking at $\sim 450\text{ km}$ orbital altitude and spherical harmonic truncation ($l_{\max} = 60$), the effective spatial resolution is constrained by a **$\sim 300\text{ km}$ Gaussian smoothing filter**.
 - The nominal footprint envelope covers approximately **$282,743\text{ km}^2$**.
 - **Scientific Limitation:** GRACE measures total column mass variations integrated over regional basins (e.g. the entire Upper Ganga or Sutlej-Beas basin). **It does NOT measure water table levels at individual farm borewells, village clusters, or urban wards.**
@@ -24,39 +25,62 @@ NASA GRACE and GRACE-FO Level-3 Land Mass grids (JPL Tellus RL06 / RL06.3) are g
 - **Scientific Limitation:** When an arbitrary coordinate in India is searched (e.g. an agricultural village), the nearest monitoring station might be $15–80\text{ km}$ away. Local pumping cones, fractured crystalline hard-rock heterogeneity, and localized lithological clay lenses mean that nearby well water levels **cannot be inferred as exact local readings**.
 - **Platform Enforcement:** The platform displays the exact Haversine distance and direction to the nearest station and strictly marks `isDirectObservation: false`.
 
+### 1.3 CGWB Dynamic Ground Water Resource Assessment Macro-Scale
+- CGWB dynamic groundwater assessments (GEC-2015 methodology) provide total annual replenishable recharge, extractable resources, and stage of extraction aggregated at the State and Assessment Unit (Block/Mandal/Taluk) scale.
+- **Scientific Limitation:** Macro-administrative figures ($\text{BCM}/\text{year}$) do not indicate whether an unconfined or deep fractured aquifer at a specific plot of land has productive yield.
+- **Platform Enforcement:** Unmatched administrative entities strictly return `null` (`UNAVAILABLE`) without fallback to national averages.
+
 ---
 
-## 2. Sensor Continuity & Mission Gap Handling
+## 2. Geological & Subsurface Stratigraphy Disclaimers
+
+### 2.1 Educational Synthetic Borehole Cross-Sections (`EDU-SYNTH-...`)
+- The deep stratigraphic columns displayed in Nexus Strata are **pedagogical composite cross-sections** illustrating typical regional stratigraphy for the cratonic or orogenic terrane.
+- **Scientific Limitation:** They are **NOT physically drilled exploratory diamond cores** logged at the specific user coordinate. Pseudo-exact water strike depths and specific permeability coefficients have been replaced with qualitative hydrogeological descriptions.
+- **Engineering Notice:** Site-specific diamond core drilling, geophysical logging (gamma, resistivity, caliper), and pumping tests remain mandatory for engineering foundations, tunnel excavation, or mine development.
+
+### 2.2 Rectangular Terrane Bounding Boxes
+- Cratonic, mobile belt, and sedimentary basin boundaries are modeled using regional bounding boxes tagged as `TERRANE-REGIONAL-INTERPRETATION`.
+- **Scientific Limitation:** These geometric boxes do not capture curved structural contacts (such as the Main Central Thrust or Central Indian Tectonic Zone). Coordinates falling outside all bounding boxes return an unassigned regional interpretation rather than defaulting to the Dharwar Craton.
+
+---
+
+## 3. Hydrological Basins & Geometry (CWC 14 Major Basins)
+
+### 3.1 Point-in-Polygon (PIP) Resolution
+- River basin identification is executed via deterministic ray-casting point-in-polygon containment against authentic CWC/NRSC catchment polygons.
+- **Scientific Limitation:** The current dataset models the 14 major river basins covering $76.3\%$ of India's landmass. 
+- **Null Containment:** Locations falling outside these 14 basins (such as West Flowing coastal streams in Kerala/Goa, East Flowing streams in coastal Tamil Nadu, the Luni endorheic basin in Rajasthan, and the Andaman/Lakshadweep islands) strictly return `null` (`UNKNOWN`) rather than guessing a nearest basin centroid.
+
+---
+
+## 4. Remote Sensing & Atmospheric Sensors
+
+### 4.1 Fundamental Law of Remote Sensing (Sentinel-2 MSI Mineral Indices)
+- Optical and shortwave infrared (SWIR) sensors on satellites detect reflected solar radiation strictly from the **outermost sub-millimetre surface layer** of the crust (the top few micrometres of exposed rock, gossan, or soil).
+- **Scientific Limitation:** Satellites cannot penetrate solid rock, dense agricultural crops, transported alluvium, or sand dunes. Surface alteration indices (e.g. ferric iron $B4/B2$, hydroxyl $B11/B12$) are classified as `MODELLED` analytical ratios. They **do not prove the presence of concealed commercial-grade copper, gold, or lithium deposits**.
+
+### 4.2 NASA GPM IMERG Ingestion Status
+- Standby monthly precipitation is calculated via a localized seasonal curve and classified as **`SIMULATED` / `DEMONSTRATION`**.
+- Live ingestion of authentic $0.1^\circ \times 0.1^\circ$ NetCDF-4/HDF5 granules requires NASA GES DISC OAuth2 authentication (`EARTHDATA_TOKEN`), which is supported via the implemented CMR discovery query pipeline (`discoverGpmGranules`).
+
+---
+
+## 5. Sensor Continuity & Mission Gap Handling
 
 1. **The 11-Month GRACE to GRACE-FO Gap (July 2017 – May 2018):**
-   - The primary GRACE mission was decommissioned in June 2017. GRACE-FO was launched on May 22, 2018, with initial science records commencing in June 2018.
-   - **Strict Policy:** TERRANEXUS 4D preserves these 11 months as unobserved null discontinuities ($NaN$). The platform does not interpolate across this gap with splines or regressions. In statistical calculations, these months are tracked in `noDataCount` and excluded from denominators.
+   - The primary GRACE mission ended in June 2017; GRACE-FO operations began in June 2018.
+   - **Strict Policy:** TERRANEXUS 4D preserves these 11 months as unobserved null discontinuities ($NaN$). The platform does not interpolate across this gap with splines or regressions.
 2. **Spacecraft Calibration & Battery Outages:**
-   - 13 official monthly outages occurred between 2014 and 2017 during GRACE accelerometer calibration and orbital shadow cycles. These are similarly treated as discrete unobserved steps.
+   - 11 monthly battery conservation shutdowns (2014–2017) and 2 GRACE-FO in-orbit calibration months (August–September 2018) are similarly treated as discrete unobserved steps ($NaN$).
 
 ---
 
-## 3. Remote Sensing Optical Mineral Alteration Boundaries
+## 6. Digital Twin Infrastructure & Content Security Policy (CSP)
 
-1. **Top-Micron Surface Reflectance:**
-   - Copernicus Sentinel-2 MSI band ratios (e.g. B4/B2 for ferric iron/gossan, B11/B12 for clay/hydroxyl minerals) measure surface reflectance from exposed rock outcrops (the top few microns of the crust).
-   - **Scientific Limitation:** Optical satellite sensors cannot penetrate soil, dense agricultural vegetation, alluvium, or solid bedrock. Surface alteration indices **do not prove the presence of concealed deep economic mineralization** (copper, gold, lithium, or rare earths). Ground geophysical surveys (induced polarization, gravity, magnetics) and diamond core drilling are mandatory.
-
----
-
-## 4. Open Geocoding & Network Boundaries
-
-1. **Nominatim Usage Limits:**
-   - OpenStreetMap Nominatim is a shared community resource. TERRANEXUS 4D adheres strictly to its usage policies by rate-limiting queries to maximum 1 request per second and aggressively caching responses.
-   - For rapid place searches, the platform relies on its built-in local index of 36 States/UTs and 70+ major districts.
-2. **Shortened Google Maps Links (`maps.app.goo.gl`):**
-   - Shortened URLs require HTTP `301/302` redirect unwrapping over a live network. If network conditions block external redirects, the system prompts the user to enter coordinates, town names, or full Google Maps URLs directly.
-
----
-
-## 5. 3D Elevation & Terrain Disclosures
-
-1. **CesiumJS Terrain Baseline:**
-   - To guarantee zero paid API dependencies, the 3D globe defaults to the WGS84 Reference Ellipsoid.
-   - Where Cesium World Terrain is optional (via user-supplied `VITE_CESIUM_ION_TOKEN`), high-resolution photogrammetric elevations are enabled.
-   - Elevation estimates returned by the location inspector represent Survey of India benchmark approximations and ellipsoid heights ($\pm 5\text{ m}$ vertical uncertainty).
+1. **CesiumJS WebGL Shader Compilation (`unsafe-eval`):**
+   - CesiumJS requires `'unsafe-eval'` in its Content Security Policy to compile WebGL GLSL shaders dynamically at runtime in the browser using `new Function()`.
+   - Web Workers for terrain tile decompression require `blob:` script evaluation.
+   - Disabling `'unsafe-eval'` halts WebGL initialization, crashing the 3D digital twin.
+2. **Zero Paid API Dependencies:**
+   - The platform defaults to the WGS84 Reference Ellipsoid to ensure zero paid API dependencies. High-resolution terrain meshes are enabled when an optional user token is supplied.

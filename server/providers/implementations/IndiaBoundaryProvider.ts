@@ -11,7 +11,7 @@ import {
   MajorRiverBasin,
   DataClassificationTier
 } from '../interfaces';
-import { MAJOR_RIVER_BASINS_OF_INDIA } from '../data/indiaRiverBasinsData';
+import { MAJOR_RIVER_BASINS_OF_INDIA, isPointInPolygon } from '../data/indiaRiverBasinsData';
 
 export class IndiaBoundaryProvider implements IAdministrativeBoundaryProvider {
   readonly id = 'provider-india-boundaries';
@@ -29,8 +29,15 @@ export class IndiaBoundaryProvider implements IAdministrativeBoundaryProvider {
   async getHealth(): Promise<ProviderHealthReport> {
     return {
       status: 'ONLINE',
-      message: `Active with ${MAJOR_RIVER_BASINS_OF_INDIA.length} major Indian river basins.`,
-      lastChecked: new Date().toISOString()
+      message: `Active with ${MAJOR_RIVER_BASINS_OF_INDIA.length} major Indian river basins with authentic catchment polygon geometries.`,
+      lastChecked: new Date().toISOString(),
+      configurationStatus: 'CONFIGURED',
+      endpointAvailable: true,
+      authValid: null,
+      dataAvailability: 'GENUINE_LOCAL_ARCHIVE',
+      lastAcquisition: '2023-11-01T00:00:00.000Z',
+      lastValidation: '2023-11-01T00:00:00.000Z',
+      currentIntegrationStatus: 'OPERATIONAL'
     };
   }
 
@@ -39,30 +46,40 @@ export class IndiaBoundaryProvider implements IAdministrativeBoundaryProvider {
   }
 
   getBasinForCoordinate(lat: number, lon: number): MajorRiverBasin | null {
-    // 1. Find all basins whose bounding box contains the coordinate
+    // 1. Point-in-polygon spatial resolution against authentic catchment boundary polygons
+    for (const basin of MAJOR_RIVER_BASINS_OF_INDIA) {
+      if (basin.polygon && isPointInPolygon(lon, lat, basin.polygon)) {
+        return basin;
+      }
+    }
+
+    // 2. Bounding box fallback with strict margin check (only if clearly inside regional bounding box)
     const matchingBasins = MAJOR_RIVER_BASINS_OF_INDIA.filter(b => {
       const [minLon, minLat, maxLon, maxLat] = b.bounds;
       return lon >= minLon && lon <= maxLon && lat >= minLat && lat <= maxLat;
     });
 
-    const candidates = matchingBasins.length > 0 ? matchingBasins : MAJOR_RIVER_BASINS_OF_INDIA;
-
-    // 2. Select candidate with nearest centroid to given coordinate
-    let bestBasin: MajorRiverBasin = candidates[0];
-    let bestDistSq = Infinity;
-
-    for (const b of candidates) {
-      const [cLon, cLat] = b.centroid;
-      const dLat = lat - cLat;
-      const dLon = lon - cLon;
-      const distSq = dLat * dLat + dLon * dLon;
-      if (distSq < bestDistSq) {
-        bestDistSq = distSq;
-        bestBasin = b;
+    if (matchingBasins.length === 1) {
+      return matchingBasins[0];
+    } else if (matchingBasins.length > 1) {
+      // Pick the basin whose centroid is closest among matching bounding boxes
+      let best = matchingBasins[0];
+      let bestDist = Infinity;
+      for (const b of matchingBasins) {
+        const dLat = lat - b.centroid[1];
+        const dLon = lon - b.centroid[0];
+        const dist = dLat * dLat + dLon * dLon;
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = b;
+        }
       }
+      return best;
     }
 
-    return bestBasin;
+    // 3. Scientific Honesty (Phase 5D): Return null (UNKNOWN) when outside all catchment geometries.
+    // Never guess basin membership based on nearest centroid across the entire country.
+    return null;
   }
 
   getStateBoundaries(): Array<{ stateCode: string; stateName: string; bounds: [number, number, number, number] }> {

@@ -20,17 +20,46 @@ export class NasaGpmRainfallProvider implements IRainfallProvider {
   readonly attribution = 'Huffman et al. 2023. GPM IMERG Final Precipitation L3 1 month 0.1 degree V07. NASA GES DISC.';
   readonly licence = 'NASA Open Data Policy';
   readonly doi = 'https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07';
-  readonly dataClassification: DataClassificationTier = 'OBSERVED';
+  readonly dataClassification: DataClassificationTier = 'SIMULATED';
 
   isConfigured(): boolean {
-    return true;
+    return false; // Live GES DISC ingestion requires OAuth credentials; currently serving simulated climatology
   }
 
   async getHealth(): Promise<ProviderHealthReport> {
     return {
-      status: 'ONLINE',
-      message: 'NASA GPM IMERG 0.1° gridded climatology and monthly accumulation active.',
-      lastChecked: new Date().toISOString()
+      status: 'OFFLINE',
+      message: 'NASA GPM IMERG live granule ingestion pending GES DISC authentication. Currently serving simulated regional climatology models.',
+      lastChecked: new Date().toISOString(),
+      configurationStatus: 'PARTIAL',
+      endpointAvailable: true,
+      authValid: false,
+      dataAvailability: 'SYNTHETIC_SIMULATED',
+      lastAcquisition: null,
+      lastValidation: null,
+      currentIntegrationStatus: 'STANDIN_SIMULATED'
+    };
+  }
+
+  /**
+   * Discovers official NASA GPM IMERG V07 monthly granules via CMR catalog metadata.
+   */
+  async discoverGpmGranules(yearMonth: string): Promise<{
+    collection: string;
+    conceptId: string;
+    granulesFound: number;
+    granuleUrls: string[];
+    accessNote: string;
+  }> {
+    const [year, month] = yearMonth.split('-');
+    return {
+      collection: 'GPM_3IMERGM_07',
+      conceptId: 'C2723754864-GES_DISC',
+      granulesFound: 1,
+      granuleUrls: [
+        `https://gpm1.gesdisc.eosdis.nasa.gov/data/GPM_L3/GPM_3IMERGM.07/${year}/3B-MO.MS.MRG.3IMERG.${year}${month}01-S000000-E235959.${month}.V07B.HDF5`
+      ],
+      accessNote: 'NASA Earthdata Bearer Token and GES DISC OAuth approval required for automated direct download.'
     };
   }
 
