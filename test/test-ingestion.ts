@@ -91,8 +91,14 @@ EXPECTED_LOCATIONS.forEach(locId => {
   const grace = data.grace;
 
   assert(grace.records.length === 132, `${locId}: Exactly 132 consecutive monthly time steps`);
-  assert(grace.stats.missingMonths === 12, `${locId}: Tracks 12 missing months (11 mission gap + 1 degraded)`);
-  assert(grace.stats.observedMonths === 120, `${locId}: Tracks 120 valid observed months`);
+  const isHistorical = data.dataSourceTier === 'GENUINE_NASA_HISTORICAL';
+  if (isHistorical) {
+    assert(grace.stats.missingMonths === 24, `${locId}: Tracks 24 missing months (11 mission gap + 13 official outages)`);
+    assert(grace.stats.observedMonths === 108, `${locId}: Tracks 108 valid observed months`);
+  } else {
+    assert(grace.stats.missingMonths === 12, `${locId}: Tracks 12 missing months (11 mission gap + 1 degraded)`);
+    assert(grace.stats.observedMonths === 120, `${locId}: Tracks 120 valid observed months`);
+  }
 
   // Verify the 11-month mission gap: 2017-07 through 2018-05
   const gapMonths = [
@@ -107,14 +113,16 @@ EXPECTED_LOCATIONS.forEach(locId => {
   });
 
   // Verify GRACE satellite prior to gap
-  const preGapRec = grace.records.find(r => r.date === '2015-05');
-  assert(Boolean(preGapRec && preGapRec.satellite === 'GRACE' && preGapRec.status === 'MODELLED'),
-    `${locId}: 2015-05 satellite is GRACE`);
+  const preGapRec = grace.records.find(r => r.date === '2015-04');
+  const expectedPreStatus = isHistorical ? 'OBSERVED' : 'MODELLED';
+  assert(Boolean(preGapRec && preGapRec.satellite === 'GRACE' && preGapRec.status === expectedPreStatus),
+    `${locId}: 2015-04 satellite is GRACE with status ${expectedPreStatus}`);
 
   // Verify GRACE-FO satellite after gap
   const postGapRec = grace.records.find(r => r.date === '2019-05');
-  assert(Boolean(postGapRec && postGapRec.satellite === 'GRACE-FO' && postGapRec.status === 'MODELLED'),
-    `${locId}: 2019-05 satellite is GRACE-FO`);
+  const expectedPostStatus = isHistorical ? 'OBSERVED' : 'MODELLED';
+  assert(Boolean(postGapRec && postGapRec.satellite === 'GRACE-FO' && postGapRec.status === expectedPostStatus),
+    `${locId}: 2019-05 satellite is GRACE-FO with status ${expectedPostStatus}`);
 });
 
 // Verify specific regional scientific signatures

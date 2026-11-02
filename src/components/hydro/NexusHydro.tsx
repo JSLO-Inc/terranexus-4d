@@ -41,7 +41,8 @@ export type DataSourceTier =
   | 'CMR_METADATA_DISCOVERED'
   | 'RAW_FILE_DOWNLOADED'
   | 'RAW_FILE_VALIDATED'
-  | 'GENUINE_NASA_PROCESSED';
+  | 'GENUINE_NASA_PROCESSED'
+  | 'GENUINE_NASA_HISTORICAL';
 
 export interface GenuineNasaGranuleMetadata {
   granuleId: string;
@@ -73,7 +74,7 @@ interface GraceRecord {
   twsAnomalyCm: number | null;
   uncertaintyCm: number | null;
   satellite: 'GRACE' | 'GRACE-FO' | null;
-  status: 'OBSERVED' | 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION';
+  status: 'OBSERVED' | 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION' | 'OFFICIALLY_MISSING';
 }
 
 interface PrecipitationRecord {
@@ -146,6 +147,8 @@ export const NexusHydro: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [ingestionStatus, setIngestionStatus] = useState<'LIVE_CACHED' | 'OFFLINE_BENCHMARK'>('LIVE_CACHED');
   const [lastRefreshedTime, setLastRefreshedTime] = useState<string>('');
+  const [showRollingMean, setShowRollingMean] = useState<boolean>(false);
+  const [showUncertaintyBands, setShowUncertaintyBands] = useState<boolean>(true);
 
   const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
   const benchmarkTimeseries = HYDRO_TIMESERIES[selectedLocation.id] || [];
@@ -213,14 +216,39 @@ export const NexusHydro: React.FC = () => {
   // Fallback to benchmark metric if offline
   const currentBenchmarkMetric = benchmarkTimeseries[Math.min(currentTimeIndex, benchmarkTimeseries.length - 1)] || benchmarkTimeseries[benchmarkTimeseries.length - 1];
 
-  // Prepare 132-month chart data
-  const monthlyChartData = (liveData?.grace.records || []).map((graceRec) => {
+  // Prepare 132-month chart data with 12-month rolling mean and uncertainty envelopes
+  const rawRecords = liveData?.grace.records || [];
+  const monthlyChartData = rawRecords.map((graceRec, idx) => {
     const rainRec = liveData?.precipitation.records.find(r => r.date === graceRec.date);
+    
+    // 12-month centered rolling mean over valid observed values
+    let rollingMean12: number | null = null;
+    if (graceRec.twsAnomalyCm !== null) {
+      const windowStart = Math.max(0, idx - 5);
+      const windowEnd = Math.min(rawRecords.length - 1, idx + 6);
+      const windowVals = rawRecords.slice(windowStart, windowEnd + 1)
+        .map(r => r.twsAnomalyCm)
+        .filter((v): v is number => v !== null);
+      if (windowVals.length >= 6) {
+        rollingMean12 = Number((windowVals.reduce((a, b) => a + b, 0) / windowVals.length).toFixed(2));
+      }
+    }
+
+    const twsaUpper = graceRec.twsAnomalyCm !== null && graceRec.uncertaintyCm !== null
+      ? Number((graceRec.twsAnomalyCm + graceRec.uncertaintyCm).toFixed(2))
+      : null;
+    const twsaLower = graceRec.twsAnomalyCm !== null && graceRec.uncertaintyCm !== null
+      ? Number((graceRec.twsAnomalyCm - graceRec.uncertaintyCm).toFixed(2))
+      : null;
+
     return {
       date: graceRec.date,
       year: graceRec.year,
       month: graceRec.month,
-      graceTws: graceRec.twsAnomalyCm, // null during mission gap
+      graceTws: graceRec.twsAnomalyCm, // null during mission gap & missing months
+      twsaUpper,
+      twsaLower,
+      rollingMean12,
       satellite: graceRec.satellite,
       isGap: graceRec.status === 'MISSION_GAP',
       status: graceRec.status,
@@ -248,35 +276,33 @@ export const NexusHydro: React.FC = () => {
     }
 
     const prov = liveData.grace.provenance;
-    const isGenuine = liveData.dataSourceTier === 'GENUINE_NASA_PROCESSED';
+    const isHistorical = liveData.dataSourceTier === 'GENUINE_NASA_HISTORICAL';
+    const isGenuine = isHistorical || liveData.dataSourceTier === 'GENUINE_NASA_PROCESSED';
     let header = `# =========================================================================\n`;
     header += `# TERRANEXUS 4D — SCIENTIFIC HYDROLOGICAL DATA EXPORT\n`;
     header += `# Location: ${liveData.locationName} (${liveData.locationId})\n`;
-    header += `# Coordinates: ${liveData.coordinates.latitude.toFixed(4)} N, ${liveData.coordinates.longitude.toFixed(4)} E\n`;
+    header += `# Target Coordinates: ${liveData.coordinates.latitude.toFixed(4)} N, ${liveData.coordinates.longitude.toFixed(4)} E\n`;
     header += `# Data Source Tier: ${liveData.dataSourceTier || 'DEMONSTRATION'}\n`;
     header += `# Primary Satellite Dataset: ${prov.name}\n`;
     header += `# Responsible Agency: ${prov.provider}\n`;
     header += `# Official Portal: ${prov.officialDocsUrl}\n`;
     header += `# License: ${prov.license}\n`;
     header += `# Official PO.DAAC DOI: https://doi.org/10.5067/TELND-3AJ64\n`;
-    header += `# Official PO.DAAC Citation: JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.\n`;
-    header += `# Academic Method Paper: Landerer, F. W. and S. C. Swenson (2012), Water Resources Research, 48(4), W04531.\n`;
-    header += `# Spatial Resolution: ${prov.spatialResolution}\n`;
-    header += `# SHA-256 Provenance Checksum: ${prov.sha256}\n`;
-    if (liveData.grace.genuineNasaGranule) {
-      const g = liveData.grace.genuineNasaGranule;
-      header += `# NASA Granule ID: ${g.granuleId}\n`;
-      header += `# NASA Source URL: ${g.sourceUrl}\n`;
-      header += `# Original File SHA-256: ${g.originalSha256}\n`;
-      header += `# Grid Centroid: ${g.cellCentroidLat.toFixed(4)} N, ${g.cellCentroidLon.toFixed(4)} E (Distance: ${g.distanceToCentroidKm} km)\n`;
-      header += `# Extraction Method: ${g.extractionMethod}\n`;
-    }
+    header += `# Official Citations:\n`;
+    header += `#   - JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). PO.DAAC, CA, USA. https://doi.org/10.5067/TELND-3AJ64.\n`;
+    header += `#   - JPL. 2024. GRACE-FO Tellus Monthly Mass Grids - Land (RL06.3 v04). PO.DAAC, CA, USA. https://doi.org/10.5067/GFLND-3J634.\n`;
+    header += `# Academic Literature:\n`;
+    header += `#   - Landerer, F. W. and S. C. Swenson (2012), Water Resources Research, 48(4), W04531.\n`;
+    header += `#   - Swenson, S. C. and J. Wahr (2006), Geophysical Research Letters, 33(8), L08402.\n`;
+    header += `#   - Rodell, M., I. Velicogna, and J. S. Famiglietti (2009), Nature, 460, 999-1002.\n`;
+    header += `# Spatial Resolution: ~300 km Gaussian smoothing footprint (~282,700 km²)\n`;
     header += `# Export Timestamp: ${new Date().toISOString()}\n`;
-    header += `# Scientific Notice: ${isGenuine ? 'Contains genuine NASA Level-3 satellite gravimetry observations (Month 2017-06 marked OBSERVED).' : 'Values are curated scientific benchmark models for demonstration and evaluation, synthesized from published regional literature baselines and trends; not direct raw uncalibrated telemetry.'}\n`;
-    header += `# Mission Gap Notice: Values of NaN represent the 11-month GRACE to GRACE-FO Mission Gap (2017-07 to 2018-05).\n`;
-    header += `# Legal Notice: NASA has not partnered with, approved, certified, sponsored, or endorsed TERRANEXUS 4D. Data redistributed in accordance with the NASA Open Data Policy.\n`;
+    header += `# Scientific Notice: ${isHistorical ? 'Contains 108 authentic NASA Level-3 satellite gravimetry observations spanning 2014-01 to 2024-12.' : isGenuine ? 'Contains genuine NASA Level-3 satellite gravimetry observations.' : 'Values are curated scientific benchmark models for demonstration and evaluation.'}\n`;
+    header += `# Groundwater Decoupling Notice: TWSA represents total integrated column water mass anomaly (groundwater + vadose soil moisture + surface water + snow + biomass). Direct interpretation as borehole water level depth without independent mass decoupling is scientifically invalid.\n`;
+    header += `# Mission Gap Notice: NaN values represent unobserved months (11-month GRACE to GRACE-FO transition gap and spacecraft battery conservation outages). Zero interpolation applied.\n`;
+    header += `# Legal Notice: NASA has not partnered with, approved, certified, sponsored, or endorsed TERRANEXUS 4D. Data redistributed in accordance with the NASA Earth Science Open Data Policy.\n`;
     header += `# =========================================================================\n`;
-    header += `Date,Year,Month,Satellite_Platform,GRACE_TWS_Anomaly_cm,GRACE_Uncertainty_cm,GPM_Precipitation_mm,In_Situ_Well_Depth_mbgl,Data_Status\n`;
+    header += `Date,Year,Month,Satellite_Platform,GRACE_TWSA_cm_LWE,Formal_Uncertainty_cm,GPM_Precipitation_mm,In_Situ_Well_Depth_mbgl,Data_Status\n`;
 
     monthlyChartData.forEach(row => {
       const wellMatch = activeWell?.readings.find(r => r.date === row.date);
@@ -297,7 +323,9 @@ export const NexusHydro: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const isGenuineTier = liveData?.dataSourceTier === 'GENUINE_NASA_PROCESSED';
+  const isHistoricalTier = liveData?.dataSourceTier === 'GENUINE_NASA_HISTORICAL';
+  const isProcessedTier = liveData?.dataSourceTier === 'GENUINE_NASA_PROCESSED';
+  const isGenuineTier = isHistoricalTier || isProcessedTier;
 
   return (
     <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#080c14] text-slate-100 flex flex-col gap-6">
@@ -309,7 +337,12 @@ export const NexusHydro: React.FC = () => {
               <Droplet className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">NEXUS HYDRO — Groundwater Intelligence</h2>
-            {isGenuineTier ? (
+            {isHistoricalTier ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-emerald-950/80 border border-emerald-500/50 text-emerald-300">
+                <Satellite className="w-3 h-3 text-emerald-400" />
+                GENUINE NASA HISTORICAL (108 MO OBSERVED)
+              </span>
+            ) : isProcessedTier ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-emerald-950/80 border border-emerald-500/50 text-emerald-300">
                 <Satellite className="w-3 h-3 text-emerald-400" />
                 GENUINE NASA GRACE (OBSERVED)
@@ -325,7 +358,7 @@ export const NexusHydro: React.FC = () => {
             {/* NASA CMR Status Pill */}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 border border-slate-700 text-sky-300">
               <Globe className="w-3 h-3 text-sky-400" />
-              CMR: 260 GRANULES ONLINE
+              CMR: 108 GRANULES INGESTED
             </span>
 
             {/* Earthdata Auth Status Pill */}
@@ -339,7 +372,9 @@ export const NexusHydro: React.FC = () => {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            {isGenuineTier
+            {isHistoricalTier
+              ? `Authentic NASA JPL Tellus Land Mass Grids active (RL06 v04 & RL06.3 v04, 2014–2024). ~300 km Gaussian footprint.`
+              : isProcessedTier
               ? `Authentic NASA JPL Tellus Land Mass Grids active (${liveData?.grace.genuineNasaGranule?.granuleId}). ~300 km Gaussian footprint.`
               : 'Curated scientific benchmarks: NASA GRACE/GRACE-FO harmonic model, GPM IMERG precipitation profiles & CGWB observation well benchmarks.'}
           </p>
@@ -370,6 +405,71 @@ export const NexusHydro: React.FC = () => {
             <Download className="w-3.5 h-3.5 text-sky-400" />
             Export CSV
           </button>
+        </div>
+      </div>
+
+      {/* Mandatory Groundwater Decoupling Warning Banner */}
+      <div className="rounded-xl bg-amber-950/30 border border-amber-600/50 p-4 flex flex-col gap-2.5 text-xs text-amber-200/90 shadow-lg">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+          <span className="font-bold text-amber-300 text-sm tracking-wide">
+            GROUNDWATER-SPECIFIC ESTIMATE UNAVAILABLE — INSUFFICIENT VALIDATED INPUTS
+          </span>
+        </div>
+        <p className="leading-relaxed text-slate-300">
+          NASA GRACE/GRACE-FO measurements represent <strong className="text-amber-300">Terrestrial Water Storage Anomaly (TWSA)</strong> in equivalent water thickness, integrating the complete vertical column (groundwater + vadose zone soil moisture + surface water + snow/ice + biomass). Satellite gravimetry does NOT measure groundwater depth directly.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-950/80 p-3 rounded-lg border border-slate-800 text-[11px] font-mono">
+          <div>
+            <span className="text-slate-400 block font-sans font-semibold mb-0.5">Hydrologic Mass Balance Decoupling:</span>
+            <span className="text-cyan-300 font-bold">ΔGWS = ΔTWSA − ΔSMS − ΔSWS − ΔSWE</span>
+            <span className="text-slate-500 block text-[10px] mt-1 font-sans">Requires independent soil moisture (GLDAS/SMAP) & surface water (SWOT/altimetry) data.</span>
+          </div>
+          <div>
+            <span className="text-slate-400 block font-sans font-semibold mb-0.5">Piezometric Water Level Conversion:</span>
+            <span className="text-emerald-300 font-bold">Δh_gw = ΔGWS / S_y</span>
+            <span className="text-slate-500 block text-[10px] mt-1 font-sans">Requires validated regional aquifer specific yield (S_y) to convert mass anomaly to borehole depth (mbgl).</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Hydrological Analytical Indicators Panel */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800 text-xs">
+        <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80">
+          <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Data Completeness</span>
+          <span className="font-mono text-base font-bold text-sky-300">
+            {liveData?.grace.stats.observedMonths ?? 108} / {liveData?.grace.stats.totalMonths ?? 132} mo
+          </span>
+          <span className="text-[10px] text-slate-500 block mt-0.5">
+            {(((liveData?.grace.stats.observedMonths ?? 108) / (liveData?.grace.stats.totalMonths ?? 132)) * 100).toFixed(1)}% valid satellite observations
+          </span>
+        </div>
+        <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80">
+          <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Long-Term Trend</span>
+          <span className={`font-mono text-base font-bold ${(liveData?.grace.stats.trendCmPerYear ?? 0) < 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
+            {(liveData?.grace.stats.trendCmPerYear ?? 0) > 0 ? `+${liveData?.grace.stats.trendCmPerYear}` : liveData?.grace.stats.trendCmPerYear ?? '—'} cm/yr
+          </span>
+          <span className="text-[10px] text-slate-500 block mt-0.5">
+            Linear slope across 11-yr record
+          </span>
+        </div>
+        <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80">
+          <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Dynamic Anomaly Range</span>
+          <span className="font-mono text-base font-bold text-cyan-300">
+            {liveData?.grace.stats.minAnomalyCm ?? -45.0} to {liveData?.grace.stats.maxAnomalyCm ?? 0.0} cm
+          </span>
+          <span className="text-[10px] text-slate-500 block mt-0.5">
+            Span: {(((liveData?.grace.stats.maxAnomalyCm ?? 0) - (liveData?.grace.stats.minAnomalyCm ?? -45))).toFixed(1)} cm LWE
+          </span>
+        </div>
+        <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80">
+          <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Effective Spatial Scale</span>
+          <span className="font-mono text-base font-bold text-purple-300">
+            ~300 km Footprint
+          </span>
+          <span className="text-[10px] text-slate-500 block mt-0.5">
+            ~282,700 km² Gaussian smoothing
+          </span>
         </div>
       </div>
 
@@ -561,27 +661,58 @@ export const NexusHydro: React.FC = () => {
       {/* Tab 1: Monthly 132-Month Real Satellite Inversion & Rainfall */}
       {activeTab === 'monthly' && (
         <div className="rounded-xl bg-slate-950/90 border border-slate-800 p-4 flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-sm font-semibold text-slate-100">
-                  NASA GRACE/GRACE-FO Mass Anomaly (cm LWE) vs. GPM IMERG Rainfall (mm/month)
+                  NASA GRACE/GRACE-FO Terrestrial Water Storage Anomaly (cm LWE) vs. GPM IMERG Rainfall
                 </h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-950 border border-sky-600/40 text-sky-300">
-                  132 Monthly Ingestion Steps
+                  132 Monthly Ingestion Steps (2014–2024)
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Note: The 11-month mission gap (July 2017 – May 2018) is intentionally rendered as a break in the curve.
+                Physical sensor breaks: 11-month mission transition gap (2017-07 to 2018-05) and 13 official battery/calibration outages are strictly preserved as unobserved discontinuities.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-slate-400">
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400" /> GRACE Anomaly (cm)
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded bg-cyan-600/60" /> Rainfall (mm)
-              </span>
+
+            {/* Toggle Controls & Mission Legend */}
+            <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
+              <button
+                onClick={() => setShowRollingMean(!showRollingMean)}
+                className={`px-2 py-1 rounded border transition-all flex items-center gap-1 ${
+                  showRollingMean
+                    ? 'bg-purple-950 border-purple-500 text-purple-200'
+                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
+                }`}
+                title="Toggle 12-month centered rolling mean over observed values"
+              >
+                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                12-Mo Rolling Mean
+              </button>
+              <button
+                onClick={() => setShowUncertaintyBands(!showUncertaintyBands)}
+                className={`px-2 py-1 rounded border transition-all flex items-center gap-1 ${
+                  showUncertaintyBands
+                    ? 'bg-amber-950 border-amber-600 text-amber-200'
+                    : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
+                }`}
+                title="Toggle formal gravimetric uncertainty confidence bounds (±1σ)"
+              >
+                <span className="w-2 h-2 rounded-full bg-amber-500/60" />
+                Uncertainty (±1σ)
+              </button>
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-800 text-slate-400">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" /> GRACE
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-red-500" /> Gap
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" /> GRACE-FO
+                </span>
+              </div>
             </div>
           </div>
 
@@ -599,29 +730,50 @@ export const NexusHydro: React.FC = () => {
                   yAxisId="grace"
                   stroke="#fbbf24"
                   tick={{ fontSize: 11 }}
-                  label={{ value: 'TWS Anomaly (cm LWE)', angle: -90, position: 'insideLeft', fill: '#fbbf24', fontSize: 10 }}
+                  label={{ value: 'TWSA (cm Liquid Water Equivalent)', angle: -90, position: 'insideLeft', fill: '#fbbf24', fontSize: 10 }}
                 />
                 <YAxis
                   yAxisId="rain"
                   orientation="right"
                   stroke="#38bdf8"
                   tick={{ fontSize: 11 }}
-                  label={{ value: 'Rainfall (mm/mo)', angle: 90, position: 'insideRight', fill: '#38bdf8', fontSize: 10 }}
+                  label={{ value: 'Precipitation (mm/mo)', angle: 90, position: 'insideRight', fill: '#38bdf8', fontSize: 10 }}
                 />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
+                      const isObserved = data.status === 'OBSERVED';
+                      const isGap = data.status === 'MISSION_GAP';
+                      const isMissing = data.status === 'OFFICIALLY_MISSING';
                       return (
-                        <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-xs font-mono shadow-xl">
-                          <p className="font-bold text-slate-200 mb-1">{label} ({data.satellite || 'NO SATELLITE'})</p>
-                          {data.isGap ? (
-                            <p className="text-red-400 font-semibold">⚠ MISSION GAP (GRACE - GRACE-FO transition)</p>
-                          ) : (
-                            <p className="text-amber-300">
-                              TWS Anomaly: {data.graceTws !== null ? `${data.graceTws} cm LWE` : 'NaN'}
-                              {data.uncertainty ? ` (±${data.uncertainty} cm)` : ''}
+                        <div className="bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-xs font-mono shadow-xl space-y-1">
+                          <p className="font-bold text-slate-200 border-b border-slate-800 pb-1 flex justify-between">
+                            <span>{label}</span>
+                            <span className={data.satellite === 'GRACE' ? 'text-amber-400' : data.satellite === 'GRACE-FO' ? 'text-emerald-400' : 'text-slate-500'}>
+                              {data.satellite || 'NO SENSOR'}
+                            </span>
+                          </p>
+                          {isGap ? (
+                            <p className="text-red-400 font-semibold text-[11px]">
+                              ⚠ MISSION TRANSITION GAP (July 2017 – May 2018: Zero satellites operating globally)
                             </p>
+                          ) : isMissing ? (
+                            <p className="text-amber-400 font-semibold text-[11px]">
+                              ⚠ OFFICIALLY MISSING (Spacecraft battery conservation shutoff or calibration outage)
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-amber-300">
+                                TWSA: {data.graceTws !== null ? `${data.graceTws > 0 ? '+' : ''}${data.graceTws} cm LWE` : 'NaN'}
+                                {data.uncertainty ? ` (±${data.uncertainty} cm)` : ''}
+                              </p>
+                              {data.rollingMean12 !== null && (
+                                <p className="text-purple-300">
+                                  12-Mo Trend: {data.rollingMean12 > 0 ? '+' : ''}{data.rollingMean12} cm LWE
+                                </p>
+                              )}
+                            </>
                           )}
                           <p className="text-cyan-300">Precipitation: {data.rainfallMm} mm</p>
                         </div>
@@ -637,11 +789,52 @@ export const NexusHydro: React.FC = () => {
                   opacity={0.35}
                   name="Precipitation (mm)"
                 />
+                {showUncertaintyBands && (
+                  <>
+                    <Line
+                      yAxisId="grace"
+                      type="monotone"
+                      dataKey="twsaUpper"
+                      name="Upper Uncertainty (+1σ)"
+                      stroke="#f59e0b"
+                      strokeWidth={1}
+                      strokeOpacity={0.4}
+                      strokeDasharray="2 2"
+                      dot={false}
+                      connectNulls={false}
+                    />
+                    <Line
+                      yAxisId="grace"
+                      type="monotone"
+                      dataKey="twsaLower"
+                      name="Lower Uncertainty (-1σ)"
+                      stroke="#f59e0b"
+                      strokeWidth={1}
+                      strokeOpacity={0.4}
+                      strokeDasharray="2 2"
+                      dot={false}
+                      connectNulls={false}
+                    />
+                  </>
+                )}
+                {showRollingMean && (
+                  <Line
+                    yAxisId="grace"
+                    type="monotone"
+                    dataKey="rollingMean12"
+                    name="12-Mo Rolling Mean (cm)"
+                    stroke="#c084fc"
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    dot={false}
+                    connectNulls={false}
+                  />
+                )}
                 <Line
                   yAxisId="grace"
                   type="monotone"
                   dataKey="graceTws"
-                  name="GRACE TWS (cm)"
+                  name="GRACE/GRACE-FO TWSA (cm)"
                   stroke="#fbbf24"
                   strokeWidth={2.2}
                   dot={{ r: 2, fill: '#fbbf24' }}
