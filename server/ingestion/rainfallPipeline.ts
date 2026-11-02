@@ -13,7 +13,7 @@ export const RAINFALL_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'l
   spatialResolution: '0.1 degree x 0.1 degree (~10 km x 10 km)',
   temporalResolution: 'Monthly accumulation',
   geographicCoverage: 'Global (60.0S - 60.0N)',
-  processingLineage: 'Passive microwave precipitation calibrations blended from GPM Core, GCOM-W, MetOp, and NOAA satellites, merged with GEO IR data, and bias-adjusted against GPCC monthly ground rain-gauge analysis.',
+  processingLineage: 'Climatological monthly synthesis calibrated against regional IMD and NASA GPM IMERG literature distributions and historical annual aggregates (Huffman et al. 2020); not an automated HDF5 binary raster slice.',
   knownLimitations: [
     'Satellite estimates over complex orographic mountain slopes require rain-gauge calibration.',
     'Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics).'
@@ -147,11 +147,11 @@ export function extractRainfallTimeseries(locationId: string): {
         year: y,
         month: m,
         precipitationMm: monthlyMm,
-        sensor: 'NASA GPM_3IMERGM v07',
-        status: 'OBSERVED'
+        sensor: 'NASA GPM_3IMERGM v07 (Climatological Model)',
+        status: 'DEMONSTRATION'
       });
 
-      rawCsv += `${dateStr},${y},${m},${monthlyMm.toFixed(1)},GPM_3IMERGM_v07,OBSERVED,NASA_GES_DISC\n`;
+      rawCsv += `${dateStr},${y},${m},${monthlyMm.toFixed(1)},GPM_3IMERGM_v07,DEMONSTRATION,NASA_GES_DISC\n`;
     }
   }
 

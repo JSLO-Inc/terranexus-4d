@@ -103,12 +103,12 @@ EXPECTED_LOCATIONS.forEach(locId => {
 
   // Verify GRACE satellite prior to gap
   const preGapRec = grace.records.find(r => r.date === '2015-05');
-  assert(Boolean(preGapRec && preGapRec.satellite === 'GRACE' && preGapRec.status === 'OBSERVED'),
+  assert(Boolean(preGapRec && preGapRec.satellite === 'GRACE' && preGapRec.status === 'MODELLED'),
     `${locId}: 2015-05 satellite is GRACE`);
 
   // Verify GRACE-FO satellite after gap
   const postGapRec = grace.records.find(r => r.date === '2019-05');
-  assert(Boolean(postGapRec && postGapRec.satellite === 'GRACE-FO' && postGapRec.status === 'OBSERVED'),
+  assert(Boolean(postGapRec && postGapRec.satellite === 'GRACE-FO' && postGapRec.status === 'MODELLED'),
     `${locId}: 2019-05 satellite is GRACE-FO`);
 });
 
@@ -138,7 +138,7 @@ EXPECTED_LOCATIONS.forEach(locId => {
 
   rain.records.forEach(r => {
     assert(r.precipitationMm >= 0, `${locId}: Month ${r.date} rainfall non-negative (${r.precipitationMm} mm)`);
-    assert(r.status === 'OBSERVED', `${locId}: Month ${r.date} rainfall status is OBSERVED`);
+    assert(r.status === 'DEMONSTRATION', `${locId}: Month ${r.date} rainfall status is DEMONSTRATION`);
   });
 });
 
@@ -157,6 +157,9 @@ EXPECTED_LOCATIONS.forEach(locId => {
   assert(well.latitude >= 8.0 && well.latitude <= 37.0, `${locId}: Well latitude within India`);
   assert(well.longitude >= 68.0 && well.longitude <= 97.5, `${locId}: Well longitude within India`);
   assert(wells.latestWaterLevelDepthM > 0, `${locId}: Latest water table depth > 0 (${wells.latestWaterLevelDepthM} mbgl)`);
+  well.readings.forEach(rd => {
+    assert(rd.status === 'DEMONSTRATION', `${locId}: Well reading ${rd.date} status is DEMONSTRATION`);
+  });
 });
 
 assert(ludhiana.wells.tenYearDeclineRateMPerYear > 0.5,

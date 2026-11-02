@@ -1,6 +1,10 @@
 /**
  * TERRANEXUS 4D — Data Ingestion Pipeline Type Definitions
  * Establishes strict data schemas, provenance metadata, uncertainty metrics, and mission gap flags.
+ * Scientific Status Classification strictly enforced under UNFC & GODL guidelines:
+ * - MODELLED: Synthesized parametric gravity/satellite models
+ * - DEMONSTRATION: Curated regional benchmarks for evaluation
+ * - MISSION_GAP: Sensor transition gaps (e.g. GRACE to GRACE-FO)
  */
 
 export type IngestionStatus = 'IDLE' | 'INGESTING' | 'SUCCESS' | 'CACHED' | 'ERROR';
@@ -30,7 +34,7 @@ export interface GraceRecord {
   twsAnomalyCm: number | null; // Null if mission gap or missing
   uncertaintyCm: number | null; // Formal error estimate (+/- cm)
   satellite: 'GRACE' | 'GRACE-FO' | null;
-  status: 'OBSERVED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION';
+  status: 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION';
 }
 
 export interface PrecipitationRecord {
@@ -39,14 +43,14 @@ export interface PrecipitationRecord {
   month: number;
   precipitationMm: number;
   sensor: string;
-  status: 'OBSERVED';
+  status: 'DEMONSTRATION' | 'MODELLED';
 }
 
 export interface WellObservationReading {
   date: string; // 'YYYY-MM'
   season: 'Pre-Monsoon (May)' | 'Post-Monsoon (Nov)' | 'Rabi (Jan)' | 'Mid-Monsoon (Aug)';
   waterLevelDepthM: number; // Positive depth mbgl
-  status: 'OBSERVED' | 'BENCHMARK';
+  status: 'DEMONSTRATION';
 }
 
 export interface ObservationWellRecord {

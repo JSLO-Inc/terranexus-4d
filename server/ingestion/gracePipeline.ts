@@ -13,7 +13,7 @@ export const GRACE_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'last
   spatialResolution: '300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees',
   temporalResolution: 'Monthly gravity inversions',
   geographicCoverage: 'Global terrestrial (Subcontinent bounding box: 8.0N - 37.0N, 68.0E - 97.5E)',
-  processingLineage: 'Level-3 RL06.1 spherical harmonics inversion with degree-1 geocenter corrections, degree-2 zonal harmonics (C20/C30 via SLR), glacial isostatic adjustment (ICE-6G_D), 300km Gaussian filter, and CLM4-based hydrological scaling factor restoration.',
+  processingLineage: 'Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009) with 300km Gaussian filter equivalent, formal error estimates, and explicit 11-month mission gap; not a direct binary NetCDF extraction.',
   knownLimitations: [
     'GRACE measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.',
     'Coarse spatial resolution (~300 km); MUST NOT be interpreted as direct single-borewell or village-level water depth.',
@@ -211,7 +211,7 @@ export function extractGraceTimeseries(locationId: string): {
       const twsValue = Math.round((trend + seasonal + climateMod + noise) * 10) / 10;
       const uncertainty = Math.round((1.8 + Math.abs(noise) * 1.5) * 10) / 10;
 
-      const status = isDegraded ? 'DEGRADED_SOLUTION' : 'OBSERVED';
+      const status = isDegraded ? 'DEGRADED_SOLUTION' : 'MODELLED';
 
       records.push({
         date: dateStr,
@@ -241,7 +241,7 @@ export function extractGraceTimeseries(locationId: string): {
 }
 
 export function computeGraceStats(records: GraceRecord[]) {
-  const observed = records.filter(r => r.twsAnomalyCm !== null && r.status === 'OBSERVED');
+  const observed = records.filter(r => r.twsAnomalyCm !== null && r.status === 'MODELLED');
   const values = observed.map(r => r.twsAnomalyCm as number);
 
   const totalMonths = records.length;

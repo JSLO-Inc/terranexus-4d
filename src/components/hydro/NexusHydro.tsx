@@ -197,7 +197,7 @@ export const NexusHydro: React.FC = () => {
 
     const prov = liveData.grace.provenance;
     let header = `# =========================================================================\n`;
-    header += `# TERRANEXUS 4D — OFFICIAL SCIENTIFIC HYDROLOGICAL INGESTION EXPORT\n`;
+    header += `# TERRANEXUS 4D — SCIENTIFIC HYDROLOGICAL BENCHMARK EXPORT (DEMONSTRATION)\n`;
     header += `# Location: ${liveData.locationName} (${liveData.locationId})\n`;
     header += `# Coordinates: ${liveData.coordinates.latitude.toFixed(4)} N, ${liveData.coordinates.longitude.toFixed(4)} E\n`;
     header += `# Primary Satellite Dataset: ${prov.name}\n`;
@@ -208,7 +208,8 @@ export const NexusHydro: React.FC = () => {
     header += `# Spatial Resolution: ${prov.spatialResolution}\n`;
     header += `# SHA-256 Provenance Checksum: ${prov.sha256}\n`;
     header += `# Export Timestamp: ${new Date().toISOString()}\n`;
-    header += `# Scientific Notice: Values of NaN / empty represent the 11-month GRACE to GRACE-FO Mission Gap (2017-07 to 2018-05).\n`;
+    header += `# Scientific Notice: Values are curated scientific benchmark models for demonstration and evaluation, synthesized from published regional literature baselines and trends; not direct raw uncalibrated telemetry.\n`;
+    header += `# Mission Gap Notice: Values of NaN represent the 11-month GRACE to GRACE-FO Mission Gap (2017-07 to 2018-05).\n`;
     header += `# =========================================================================\n`;
     header += `Date,Year,Month,Satellite_Platform,GRACE_TWS_Anomaly_cm,GRACE_Uncertainty_cm,GPM_Precipitation_mm,In_Situ_Well_Depth_mbgl,Data_Status\n`;
 
@@ -218,7 +219,7 @@ export const NexusHydro: React.FC = () => {
       const tws = row.graceTws !== null ? row.graceTws.toFixed(2) : 'NaN';
       const unc = row.uncertainty !== null ? row.uncertainty.toFixed(2) : 'NaN';
       const sat = row.satellite || 'NONE';
-      const status = row.isGap ? 'MISSION_GAP' : 'OBSERVED';
+      const status = row.isGap ? 'MISSION_GAP' : (row.satellite ? 'MODELLED' : 'DEMONSTRATION');
       header += `${row.date},${row.year},${row.month},${sat},${tws},${unc},${row.rainfallMm.toFixed(1)},${wellDepth},${status}\n`;
     });
 
@@ -226,7 +227,7 @@ export const NexusHydro: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `TERRANEXUS4D_HYDRO_INGESTED_${selectedLocation.id}.csv`;
+    a.download = `TERRANEXUS4D_HYDRO_BENCHMARK_${selectedLocation.id}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -241,21 +242,14 @@ export const NexusHydro: React.FC = () => {
               <Droplet className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">NEXUS HYDRO — Groundwater Intelligence</h2>
-            {ingestionStatus === 'LIVE_CACHED' ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-emerald-950/80 border border-emerald-500/50 text-emerald-300">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                LIVE INGESTED (CACHED)
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-amber-950/80 border border-amber-500/50 text-amber-300">
-                <Database className="w-3 h-3 text-amber-400" />
-                OFFLINE BENCHMARK MODE
-              </span>
-            )}
-            <StatusBadge status="OBSERVED" size="md" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-sky-950/80 border border-sky-500/50 text-sky-300">
+              <Database className="w-3 h-3 text-sky-400" />
+              CURATED BENCHMARK (LOCAL CACHE)
+            </span>
+            <StatusBadge status="DEMONSTRATION" size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Genuine multi-satellite gravimetry (NASA GRACE/GRACE-FO RL06.1), GPM IMERG precipitation & CGWB observation well telemetry.
+            Curated scientific benchmarks: NASA GRACE/GRACE-FO harmonic model, GPM IMERG precipitation profiles & CGWB observation well benchmarks.
           </p>
         </div>
 
@@ -274,7 +268,7 @@ export const NexusHydro: React.FC = () => {
             className="px-3 py-1.5 rounded-lg bg-sky-950 border border-sky-600/60 hover:bg-sky-900 text-sky-200 text-xs font-mono flex items-center gap-1.5 transition-all shadow-md font-semibold"
           >
             <Download className="w-3.5 h-3.5 text-sky-400" />
-            Export Authentic Dataset (CSV)
+            Export Benchmark Dataset (CSV)
           </button>
         </div>
       </div>
@@ -284,9 +278,9 @@ export const NexusHydro: React.FC = () => {
         {/* Measured Water Table Depth */}
         <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Water Table Depth (In-Situ Well)</span>
-            <span className="font-mono text-[10px] text-cyan-400">
-              {activeWell ? activeWell.stationCode : 'CGWB Well'}
+            <span>Water Table Depth (Benchmark Well)</span>
+            <span className="font-mono text-[10px] text-amber-300">
+              {activeWell ? activeWell.stationCode : 'CGWB Well'} (Benchmark)
             </span>
           </div>
           <div className="my-2">
@@ -302,7 +296,7 @@ export const NexusHydro: React.FC = () => {
                 ? `+${liveData.wells.tenYearDeclineRateMPerYear} m/yr decline`
                 : '10-yr decline trend'}
             </span>
-            <span className="text-[10px] text-slate-500">{activeWell?.agency || 'CGWB'}</span>
+            <StatusBadge status="DEMONSTRATION" size="sm" />
           </div>
         </div>
 
@@ -315,9 +309,7 @@ export const NexusHydro: React.FC = () => {
                 GAP
               </span>
             ) : (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-amber-300">
-                {activeGraceRecord?.satellite || 'GRACE'}
-              </span>
+              <StatusBadge status="MODELLED" size="sm" />
             )}
           </div>
           <div className="my-2">
@@ -347,7 +339,7 @@ export const NexusHydro: React.FC = () => {
         <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Precipitation (GPM IMERG)</span>
-            <span className="font-mono text-[10px] text-cyan-400">0.1° Grid</span>
+            <StatusBadge status="DEMONSTRATION" size="sm" />
           </div>
           <div className="my-2">
             <span className="text-3xl font-extrabold font-mono text-cyan-300">
@@ -370,7 +362,7 @@ export const NexusHydro: React.FC = () => {
         <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>IN-GRES Dynamic Stress</span>
-            <StatusBadge status="OBSERVED" size="sm" />
+            <StatusBadge status="DEMONSTRATION" size="sm" />
           </div>
           <div className="my-2">
             <span className={`text-lg font-bold font-mono px-2.5 py-1 rounded-lg border ${

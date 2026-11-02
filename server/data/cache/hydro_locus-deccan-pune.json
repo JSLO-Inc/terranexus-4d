@@ -18,14 +18,14 @@
       "spatialResolution": "300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees",
       "temporalResolution": "Monthly gravity inversions",
       "geographicCoverage": "Global terrestrial (Subcontinent bounding box: 8.0N - 37.0N, 68.0E - 97.5E)",
-      "processingLineage": "Level-3 RL06.1 spherical harmonics inversion with degree-1 geocenter corrections, degree-2 zonal harmonics (C20/C30 via SLR), glacial isostatic adjustment (ICE-6G_D), 300km Gaussian filter, and CLM4-based hydrological scaling factor restoration.",
+      "processingLineage": "Parametric harmonic model synthesized from published regional literature baselines and trends (Landerer & Swenson 2012, Rodell et al. 2009) with 300km Gaussian filter equivalent, formal error estimates, and explicit 11-month mission gap; not a direct binary NetCDF extraction.",
       "knownLimitations": [
         "GRACE measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.",
         "Coarse spatial resolution (~300 km); MUST NOT be interpreted as direct single-borewell or village-level water depth.",
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Gap must be displayed as missing data, not interpolated."
       ],
-      "sha256": "a71e9483cf806c4bd78b414a736a0139ea8e521af7c88ab4b39dbef7a8e7787f",
-      "lastIngested": "2026-11-02T07:54:35.426Z"
+      "sha256": "f76d31d65a01b39116783492340beaafd5a3355ae20e6fe7e1cf9b53b068a0c4",
+      "lastIngested": "2026-11-02T08:14:10.037Z"
     },
     "records": [
       {
@@ -35,7 +35,7 @@
         "twsAnomalyCm": -4.9,
         "uncertaintyCm": 3.2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-02",
@@ -44,7 +44,7 @@
         "twsAnomalyCm": -10.4,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-03",
@@ -53,7 +53,7 @@
         "twsAnomalyCm": -14.7,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-04",
@@ -62,7 +62,7 @@
         "twsAnomalyCm": -16.2,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-05",
@@ -71,7 +71,7 @@
         "twsAnomalyCm": -13.6,
         "uncertaintyCm": 2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-06",
@@ -80,7 +80,7 @@
         "twsAnomalyCm": -10,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-07",
@@ -89,7 +89,7 @@
         "twsAnomalyCm": -3.9,
         "uncertaintyCm": 2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-08",
@@ -98,7 +98,7 @@
         "twsAnomalyCm": 1.3,
         "uncertaintyCm": 2.1,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-09",
@@ -107,7 +107,7 @@
         "twsAnomalyCm": 5.7,
         "uncertaintyCm": 2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-10",
@@ -116,7 +116,7 @@
         "twsAnomalyCm": 6.1,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-11",
@@ -125,7 +125,7 @@
         "twsAnomalyCm": 4.6,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2014-12",
@@ -134,7 +134,7 @@
         "twsAnomalyCm": 0.3,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-01",
@@ -143,7 +143,7 @@
         "twsAnomalyCm": -6.6,
         "uncertaintyCm": 2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-02",
@@ -152,7 +152,7 @@
         "twsAnomalyCm": -12.6,
         "uncertaintyCm": 2.6,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-03",
@@ -161,7 +161,7 @@
         "twsAnomalyCm": -17.4,
         "uncertaintyCm": 3.6,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-04",
@@ -170,7 +170,7 @@
         "twsAnomalyCm": -18.4,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-05",
@@ -179,7 +179,7 @@
         "twsAnomalyCm": -16.6,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-06",
@@ -188,7 +188,7 @@
         "twsAnomalyCm": -12,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-07",
@@ -197,7 +197,7 @@
         "twsAnomalyCm": -6.9,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-08",
@@ -206,7 +206,7 @@
         "twsAnomalyCm": -1.3,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-09",
@@ -215,7 +215,7 @@
         "twsAnomalyCm": 3.4,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-10",
@@ -224,7 +224,7 @@
         "twsAnomalyCm": 3.8,
         "uncertaintyCm": 3.1,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-11",
@@ -233,7 +233,7 @@
         "twsAnomalyCm": 2.7,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2015-12",
@@ -242,7 +242,7 @@
         "twsAnomalyCm": -1.4,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-01",
@@ -251,7 +251,7 @@
         "twsAnomalyCm": -0.3,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-02",
@@ -260,7 +260,7 @@
         "twsAnomalyCm": -6.7,
         "uncertaintyCm": 3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-03",
@@ -269,7 +269,7 @@
         "twsAnomalyCm": -10.8,
         "uncertaintyCm": 3,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-04",
@@ -278,7 +278,7 @@
         "twsAnomalyCm": -12.7,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-05",
@@ -287,7 +287,7 @@
         "twsAnomalyCm": -10.7,
         "uncertaintyCm": 2.8,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-06",
@@ -296,7 +296,7 @@
         "twsAnomalyCm": -7.1,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-07",
@@ -305,7 +305,7 @@
         "twsAnomalyCm": 0,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-08",
@@ -314,7 +314,7 @@
         "twsAnomalyCm": 5.5,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-09",
@@ -332,7 +332,7 @@
         "twsAnomalyCm": 10.5,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-11",
@@ -341,7 +341,7 @@
         "twsAnomalyCm": 8.8,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2016-12",
@@ -350,7 +350,7 @@
         "twsAnomalyCm": 4.7,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-01",
@@ -359,7 +359,7 @@
         "twsAnomalyCm": -0.8,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-02",
@@ -368,7 +368,7 @@
         "twsAnomalyCm": -6.4,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-03",
@@ -377,7 +377,7 @@
         "twsAnomalyCm": -11.3,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-04",
@@ -386,7 +386,7 @@
         "twsAnomalyCm": -13.1,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-05",
@@ -395,7 +395,7 @@
         "twsAnomalyCm": -11.4,
         "uncertaintyCm": 2.6,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-06",
@@ -404,7 +404,7 @@
         "twsAnomalyCm": -7.3,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2017-07",
@@ -512,7 +512,7 @@
         "twsAnomalyCm": -10,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2018-07",
@@ -521,7 +521,7 @@
         "twsAnomalyCm": -4,
         "uncertaintyCm": 2.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2018-08",
@@ -530,7 +530,7 @@
         "twsAnomalyCm": 2.2,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2018-09",
@@ -539,7 +539,7 @@
         "twsAnomalyCm": 6.5,
         "uncertaintyCm": 2.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2018-10",
@@ -548,7 +548,7 @@
         "twsAnomalyCm": 7.8,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2018-11",
@@ -557,7 +557,7 @@
         "twsAnomalyCm": 6.5,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2018-12",
@@ -566,7 +566,7 @@
         "twsAnomalyCm": 1.9,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-01",
@@ -575,7 +575,7 @@
         "twsAnomalyCm": 4.6,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-02",
@@ -584,7 +584,7 @@
         "twsAnomalyCm": -1.6,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-03",
@@ -593,7 +593,7 @@
         "twsAnomalyCm": -5.4,
         "uncertaintyCm": 2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-04",
@@ -602,7 +602,7 @@
         "twsAnomalyCm": -6.8,
         "uncertaintyCm": 2.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-05",
@@ -611,7 +611,7 @@
         "twsAnomalyCm": -6.2,
         "uncertaintyCm": 2.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-06",
@@ -620,7 +620,7 @@
         "twsAnomalyCm": -2.6,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-07",
@@ -629,7 +629,7 @@
         "twsAnomalyCm": 3.8,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-08",
@@ -638,7 +638,7 @@
         "twsAnomalyCm": 9.2,
         "uncertaintyCm": 2.6,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-09",
@@ -647,7 +647,7 @@
         "twsAnomalyCm": 13.9,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-10",
@@ -656,7 +656,7 @@
         "twsAnomalyCm": 15.2,
         "uncertaintyCm": 2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-11",
@@ -665,7 +665,7 @@
         "twsAnomalyCm": 13.5,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2019-12",
@@ -674,7 +674,7 @@
         "twsAnomalyCm": 9.7,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-01",
@@ -683,7 +683,7 @@
         "twsAnomalyCm": 1.1,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-02",
@@ -692,7 +692,7 @@
         "twsAnomalyCm": -5.1,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-03",
@@ -701,7 +701,7 @@
         "twsAnomalyCm": -9.1,
         "uncertaintyCm": 2.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-04",
@@ -710,7 +710,7 @@
         "twsAnomalyCm": -10.6,
         "uncertaintyCm": 2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-05",
@@ -719,7 +719,7 @@
         "twsAnomalyCm": -8.9,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-06",
@@ -728,7 +728,7 @@
         "twsAnomalyCm": -5.7,
         "uncertaintyCm": 3.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-07",
@@ -737,7 +737,7 @@
         "twsAnomalyCm": 0.2,
         "uncertaintyCm": 2.6,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-08",
@@ -746,7 +746,7 @@
         "twsAnomalyCm": 5.7,
         "uncertaintyCm": 2.7,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-09",
@@ -755,7 +755,7 @@
         "twsAnomalyCm": 9.6,
         "uncertaintyCm": 3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-10",
@@ -764,7 +764,7 @@
         "twsAnomalyCm": 12.3,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-11",
@@ -773,7 +773,7 @@
         "twsAnomalyCm": 10.8,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2020-12",
@@ -782,7 +782,7 @@
         "twsAnomalyCm": 6.3,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-01",
@@ -791,7 +791,7 @@
         "twsAnomalyCm": -0.8,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-02",
@@ -800,7 +800,7 @@
         "twsAnomalyCm": -5.3,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-03",
@@ -809,7 +809,7 @@
         "twsAnomalyCm": -9.1,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-04",
@@ -818,7 +818,7 @@
         "twsAnomalyCm": -11.4,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-05",
@@ -827,7 +827,7 @@
         "twsAnomalyCm": -9.4,
         "uncertaintyCm": 2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-06",
@@ -836,7 +836,7 @@
         "twsAnomalyCm": -5.9,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-07",
@@ -845,7 +845,7 @@
         "twsAnomalyCm": -0.3,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-08",
@@ -854,7 +854,7 @@
         "twsAnomalyCm": 5,
         "uncertaintyCm": 3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-09",
@@ -863,7 +863,7 @@
         "twsAnomalyCm": 8.9,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-10",
@@ -872,7 +872,7 @@
         "twsAnomalyCm": 10.3,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-11",
@@ -881,7 +881,7 @@
         "twsAnomalyCm": 10,
         "uncertaintyCm": 2.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2021-12",
@@ -890,7 +890,7 @@
         "twsAnomalyCm": 5.4,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-01",
@@ -899,7 +899,7 @@
         "twsAnomalyCm": -1.3,
         "uncertaintyCm": 2.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-02",
@@ -908,7 +908,7 @@
         "twsAnomalyCm": -7.5,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-03",
@@ -917,7 +917,7 @@
         "twsAnomalyCm": -10.9,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-04",
@@ -926,7 +926,7 @@
         "twsAnomalyCm": -11.7,
         "uncertaintyCm": 2.2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-05",
@@ -935,7 +935,7 @@
         "twsAnomalyCm": -10.8,
         "uncertaintyCm": 2.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-06",
@@ -944,7 +944,7 @@
         "twsAnomalyCm": -6.4,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-07",
@@ -953,7 +953,7 @@
         "twsAnomalyCm": -1.6,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-08",
@@ -962,7 +962,7 @@
         "twsAnomalyCm": 3.6,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-09",
@@ -971,7 +971,7 @@
         "twsAnomalyCm": 7.7,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-10",
@@ -980,7 +980,7 @@
         "twsAnomalyCm": 9.5,
         "uncertaintyCm": 3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-11",
@@ -989,7 +989,7 @@
         "twsAnomalyCm": 7.8,
         "uncertaintyCm": 3.2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2022-12",
@@ -998,7 +998,7 @@
         "twsAnomalyCm": 4.3,
         "uncertaintyCm": 2.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-01",
@@ -1007,7 +1007,7 @@
         "twsAnomalyCm": -5.4,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-02",
@@ -1016,7 +1016,7 @@
         "twsAnomalyCm": -10.4,
         "uncertaintyCm": 2.6,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-03",
@@ -1025,7 +1025,7 @@
         "twsAnomalyCm": -14.8,
         "uncertaintyCm": 3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-04",
@@ -1034,7 +1034,7 @@
         "twsAnomalyCm": -15.5,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-05",
@@ -1043,7 +1043,7 @@
         "twsAnomalyCm": -14.1,
         "uncertaintyCm": 1.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-06",
@@ -1052,7 +1052,7 @@
         "twsAnomalyCm": -10,
         "uncertaintyCm": 2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-07",
@@ -1061,7 +1061,7 @@
         "twsAnomalyCm": -4.3,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-08",
@@ -1070,7 +1070,7 @@
         "twsAnomalyCm": 0.5,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-09",
@@ -1079,7 +1079,7 @@
         "twsAnomalyCm": 4.6,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-10",
@@ -1088,7 +1088,7 @@
         "twsAnomalyCm": 5.8,
         "uncertaintyCm": 3.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-11",
@@ -1097,7 +1097,7 @@
         "twsAnomalyCm": 4.6,
         "uncertaintyCm": 2.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2023-12",
@@ -1106,7 +1106,7 @@
         "twsAnomalyCm": 1.2,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-01",
@@ -1115,7 +1115,7 @@
         "twsAnomalyCm": -1.7,
         "uncertaintyCm": 3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-02",
@@ -1124,7 +1124,7 @@
         "twsAnomalyCm": -7.7,
         "uncertaintyCm": 3.5,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-03",
@@ -1133,7 +1133,7 @@
         "twsAnomalyCm": -11.8,
         "uncertaintyCm": 3.6,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-04",
@@ -1142,7 +1142,7 @@
         "twsAnomalyCm": -12.2,
         "uncertaintyCm": 1.8,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-05",
@@ -1151,7 +1151,7 @@
         "twsAnomalyCm": -11,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-06",
@@ -1160,7 +1160,7 @@
         "twsAnomalyCm": -6.9,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-07",
@@ -1169,7 +1169,7 @@
         "twsAnomalyCm": -0.6,
         "uncertaintyCm": 2.3,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-08",
@@ -1178,7 +1178,7 @@
         "twsAnomalyCm": 4.7,
         "uncertaintyCm": 2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-09",
@@ -1187,7 +1187,7 @@
         "twsAnomalyCm": 7.8,
         "uncertaintyCm": 3.2,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-10",
@@ -1196,7 +1196,7 @@
         "twsAnomalyCm": 9.5,
         "uncertaintyCm": 2.9,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-11",
@@ -1205,7 +1205,7 @@
         "twsAnomalyCm": 7.8,
         "uncertaintyCm": 3.1,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       },
       {
         "date": "2024-12",
@@ -1214,7 +1214,7 @@
         "twsAnomalyCm": 3.5,
         "uncertaintyCm": 3.4,
         "satellite": "GRACE-FO",
-        "status": "OBSERVED"
+        "status": "MODELLED"
       }
     ],
     "stats": {
@@ -1240,13 +1240,13 @@
       "spatialResolution": "0.1 degree x 0.1 degree (~10 km x 10 km)",
       "temporalResolution": "Monthly accumulation",
       "geographicCoverage": "Global (60.0S - 60.0N)",
-      "processingLineage": "Passive microwave precipitation calibrations blended from GPM Core, GCOM-W, MetOp, and NOAA satellites, merged with GEO IR data, and bias-adjusted against GPCC monthly ground rain-gauge analysis.",
+      "processingLineage": "Climatological monthly synthesis calibrated against regional IMD and NASA GPM IMERG literature distributions and historical annual aggregates (Huffman et al. 2020); not an automated HDF5 binary raster slice.",
       "knownLimitations": [
         "Satellite estimates over complex orographic mountain slopes require rain-gauge calibration.",
         "Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics)."
       ],
-      "sha256": "a2e280770116ae0bd7f329c6b8393bbbd807f253404ebc68e83a8db97ab91ff7",
-      "lastIngested": "2026-11-02T07:54:35.426Z"
+      "sha256": "226592557bc7cdd447b80dffafeb9dd148d511b9fa92e1e42f0271b04bc66b29",
+      "lastIngested": "2026-11-02T08:14:10.037Z"
     },
     "records": [
       {
@@ -1254,1056 +1254,1056 @@
         "year": 2014,
         "month": 1,
         "precipitationMm": 1.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-02",
         "year": 2014,
         "month": 2,
         "precipitationMm": 1.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-03",
         "year": 2014,
         "month": 3,
         "precipitationMm": 3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-04",
         "year": 2014,
         "month": 4,
         "precipitationMm": 10.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-05",
         "year": 2014,
         "month": 5,
         "precipitationMm": 26,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-06",
         "year": 2014,
         "month": 6,
         "precipitationMm": 139.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-07",
         "year": 2014,
         "month": 7,
         "precipitationMm": 258.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-08",
         "year": 2014,
         "month": 8,
         "precipitationMm": 188.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-09",
         "year": 2014,
         "month": 9,
         "precipitationMm": 105.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-10",
         "year": 2014,
         "month": 10,
         "precipitationMm": 29,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-11",
         "year": 2014,
         "month": 11,
         "precipitationMm": 5.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2014-12",
         "year": 2014,
         "month": 12,
         "precipitationMm": 1.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-01",
         "year": 2015,
         "month": 1,
         "precipitationMm": 1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-02",
         "year": 2015,
         "month": 2,
         "precipitationMm": 1.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-03",
         "year": 2015,
         "month": 3,
         "precipitationMm": 3.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-04",
         "year": 2015,
         "month": 4,
         "precipitationMm": 9.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-05",
         "year": 2015,
         "month": 5,
         "precipitationMm": 20.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-06",
         "year": 2015,
         "month": 6,
         "precipitationMm": 114.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-07",
         "year": 2015,
         "month": 7,
         "precipitationMm": 192.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-08",
         "year": 2015,
         "month": 8,
         "precipitationMm": 141.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-09",
         "year": 2015,
         "month": 9,
         "precipitationMm": 71.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-10",
         "year": 2015,
         "month": 10,
         "precipitationMm": 19.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-11",
         "year": 2015,
         "month": 11,
         "precipitationMm": 4.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2015-12",
         "year": 2015,
         "month": 12,
         "precipitationMm": 1.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-01",
         "year": 2016,
         "month": 1,
         "precipitationMm": 2.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-02",
         "year": 2016,
         "month": 2,
         "precipitationMm": 2.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-03",
         "year": 2016,
         "month": 3,
         "precipitationMm": 4.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-04",
         "year": 2016,
         "month": 4,
         "precipitationMm": 14.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-05",
         "year": 2016,
         "month": 5,
         "precipitationMm": 37.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-06",
         "year": 2016,
         "month": 6,
         "precipitationMm": 170.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-07",
         "year": 2016,
         "month": 7,
         "precipitationMm": 322.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-08",
         "year": 2016,
         "month": 8,
         "precipitationMm": 201.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-09",
         "year": 2016,
         "month": 9,
         "precipitationMm": 122.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-10",
         "year": 2016,
         "month": 10,
         "precipitationMm": 37.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-11",
         "year": 2016,
         "month": 11,
         "precipitationMm": 7.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2016-12",
         "year": 2016,
         "month": 12,
         "precipitationMm": 2.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-01",
         "year": 2017,
         "month": 1,
         "precipitationMm": 1.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-02",
         "year": 2017,
         "month": 2,
         "precipitationMm": 1.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-03",
         "year": 2017,
         "month": 3,
         "precipitationMm": 4.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-04",
         "year": 2017,
         "month": 4,
         "precipitationMm": 13.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-05",
         "year": 2017,
         "month": 5,
         "precipitationMm": 31.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-06",
         "year": 2017,
         "month": 6,
         "precipitationMm": 147.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-07",
         "year": 2017,
         "month": 7,
         "precipitationMm": 261.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-08",
         "year": 2017,
         "month": 8,
         "precipitationMm": 179.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-09",
         "year": 2017,
         "month": 9,
         "precipitationMm": 110.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-10",
         "year": 2017,
         "month": 10,
         "precipitationMm": 28.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-11",
         "year": 2017,
         "month": 11,
         "precipitationMm": 5.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2017-12",
         "year": 2017,
         "month": 12,
         "precipitationMm": 2.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-01",
         "year": 2018,
         "month": 1,
         "precipitationMm": 1.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-02",
         "year": 2018,
         "month": 2,
         "precipitationMm": 1.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-03",
         "year": 2018,
         "month": 3,
         "precipitationMm": 4.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-04",
         "year": 2018,
         "month": 4,
         "precipitationMm": 11.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-05",
         "year": 2018,
         "month": 5,
         "precipitationMm": 24.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-06",
         "year": 2018,
         "month": 6,
         "precipitationMm": 108.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-07",
         "year": 2018,
         "month": 7,
         "precipitationMm": 223.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-08",
         "year": 2018,
         "month": 8,
         "precipitationMm": 157.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-09",
         "year": 2018,
         "month": 9,
         "precipitationMm": 98.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-10",
         "year": 2018,
         "month": 10,
         "precipitationMm": 27.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-11",
         "year": 2018,
         "month": 11,
         "precipitationMm": 4.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2018-12",
         "year": 2018,
         "month": 12,
         "precipitationMm": 2.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-01",
         "year": 2019,
         "month": 1,
         "precipitationMm": 2.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-02",
         "year": 2019,
         "month": 2,
         "precipitationMm": 2.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-03",
         "year": 2019,
         "month": 3,
         "precipitationMm": 5.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-04",
         "year": 2019,
         "month": 4,
         "precipitationMm": 18.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-05",
         "year": 2019,
         "month": 5,
         "precipitationMm": 35.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-06",
         "year": 2019,
         "month": 6,
         "precipitationMm": 188.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-07",
         "year": 2019,
         "month": 7,
         "precipitationMm": 358.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-08",
         "year": 2019,
         "month": 8,
         "precipitationMm": 286.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-09",
         "year": 2019,
         "month": 9,
         "precipitationMm": 168.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-10",
         "year": 2019,
         "month": 10,
         "precipitationMm": 52.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-11",
         "year": 2019,
         "month": 11,
         "precipitationMm": 9.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2019-12",
         "year": 2019,
         "month": 12,
         "precipitationMm": 4.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-01",
         "year": 2020,
         "month": 1,
         "precipitationMm": 1.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-02",
         "year": 2020,
         "month": 2,
         "precipitationMm": 2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-03",
         "year": 2020,
         "month": 3,
         "precipitationMm": 4.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-04",
         "year": 2020,
         "month": 4,
         "precipitationMm": 14.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-05",
         "year": 2020,
         "month": 5,
         "precipitationMm": 30.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-06",
         "year": 2020,
         "month": 6,
         "precipitationMm": 153.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-07",
         "year": 2020,
         "month": 7,
         "precipitationMm": 314.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-08",
         "year": 2020,
         "month": 8,
         "precipitationMm": 246.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-09",
         "year": 2020,
         "month": 9,
         "precipitationMm": 154,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-10",
         "year": 2020,
         "month": 10,
         "precipitationMm": 44.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-11",
         "year": 2020,
         "month": 11,
         "precipitationMm": 9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2020-12",
         "year": 2020,
         "month": 12,
         "precipitationMm": 3.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-01",
         "year": 2021,
         "month": 1,
         "precipitationMm": 1.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-02",
         "year": 2021,
         "month": 2,
         "precipitationMm": 1.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-03",
         "year": 2021,
         "month": 3,
         "precipitationMm": 4.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-04",
         "year": 2021,
         "month": 4,
         "precipitationMm": 14,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-05",
         "year": 2021,
         "month": 5,
         "precipitationMm": 30.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-06",
         "year": 2021,
         "month": 6,
         "precipitationMm": 156.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-07",
         "year": 2021,
         "month": 7,
         "precipitationMm": 329.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-08",
         "year": 2021,
         "month": 8,
         "precipitationMm": 241.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-09",
         "year": 2021,
         "month": 9,
         "precipitationMm": 158.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-10",
         "year": 2021,
         "month": 10,
         "precipitationMm": 44.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-11",
         "year": 2021,
         "month": 11,
         "precipitationMm": 8.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2021-12",
         "year": 2021,
         "month": 12,
         "precipitationMm": 3.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-01",
         "year": 2022,
         "month": 1,
         "precipitationMm": 1.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-02",
         "year": 2022,
         "month": 2,
         "precipitationMm": 1.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-03",
         "year": 2022,
         "month": 3,
         "precipitationMm": 3.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-04",
         "year": 2022,
         "month": 4,
         "precipitationMm": 12.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-05",
         "year": 2022,
         "month": 5,
         "precipitationMm": 35.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-06",
         "year": 2022,
         "month": 6,
         "precipitationMm": 172.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-07",
         "year": 2022,
         "month": 7,
         "precipitationMm": 319.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-08",
         "year": 2022,
         "month": 8,
         "precipitationMm": 224.3,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-09",
         "year": 2022,
         "month": 9,
         "precipitationMm": 145.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-10",
         "year": 2022,
         "month": 10,
         "precipitationMm": 40.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-11",
         "year": 2022,
         "month": 11,
         "precipitationMm": 8.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2022-12",
         "year": 2022,
         "month": 12,
         "precipitationMm": 2.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-01",
         "year": 2023,
         "month": 1,
         "precipitationMm": 1.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-02",
         "year": 2023,
         "month": 2,
         "precipitationMm": 1.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-03",
         "year": 2023,
         "month": 3,
         "precipitationMm": 3.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-04",
         "year": 2023,
         "month": 4,
         "precipitationMm": 11.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-05",
         "year": 2023,
         "month": 5,
         "precipitationMm": 26,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-06",
         "year": 2023,
         "month": 6,
         "precipitationMm": 128.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-07",
         "year": 2023,
         "month": 7,
         "precipitationMm": 241.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-08",
         "year": 2023,
         "month": 8,
         "precipitationMm": 181.6,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-09",
         "year": 2023,
         "month": 9,
         "precipitationMm": 104.9,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-10",
         "year": 2023,
         "month": 10,
         "precipitationMm": 32.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-11",
         "year": 2023,
         "month": 11,
         "precipitationMm": 5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2023-12",
         "year": 2023,
         "month": 12,
         "precipitationMm": 1.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-01",
         "year": 2024,
         "month": 1,
         "precipitationMm": 1.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-02",
         "year": 2024,
         "month": 2,
         "precipitationMm": 2.2,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-03",
         "year": 2024,
         "month": 3,
         "precipitationMm": 5.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-04",
         "year": 2024,
         "month": 4,
         "precipitationMm": 15.7,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-05",
         "year": 2024,
         "month": 5,
         "precipitationMm": 40,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-06",
         "year": 2024,
         "month": 6,
         "precipitationMm": 197,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-07",
         "year": 2024,
         "month": 7,
         "precipitationMm": 328.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-08",
         "year": 2024,
         "month": 8,
         "precipitationMm": 258.8,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-09",
         "year": 2024,
         "month": 9,
         "precipitationMm": 122.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-10",
         "year": 2024,
         "month": 10,
         "precipitationMm": 34.5,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-11",
         "year": 2024,
         "month": 11,
         "precipitationMm": 7.1,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       },
       {
         "date": "2024-12",
         "year": 2024,
         "month": 12,
         "precipitationMm": 2.4,
-        "sensor": "NASA GPM_3IMERGM v07",
-        "status": "OBSERVED"
+        "sensor": "NASA GPM_3IMERGM v07 (Climatological Model)",
+        "status": "DEMONSTRATION"
       }
     ],
     "stats": {
@@ -2324,14 +2324,14 @@
       "spatialResolution": "Point observation stations (Exact WGS84 coordinates)",
       "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, Jan, Aug)",
       "geographicCoverage": "Pan-India (>25,000 national monitoring stations)",
-      "processingLineage": "Direct dipping tape measurements and Digital Water Level Recorder (DWLR) pressure transducer telemetry calibrated against barometric surface pressure.",
+      "processingLineage": "Curated representative seasonal piezometric dipping sequence synthesized from published CGWB regional groundwater yearbooks and district information booklets; not a direct automated database export from India-WRIS.",
       "knownLimitations": [
         "Point measurements reflect localized hydraulic head at the well screen depth only.",
         "Local drawdown cones from adjacent private agricultural tubewells can introduce temporary seasonal drawdown bias.",
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the aquifer."
       ],
-      "sha256": "e0840836b4b5ed9e31b2957dcf4676f618e0c7e6a81efb193adc63412a919e07",
-      "lastIngested": "2026-11-02T07:54:35.426Z"
+      "sha256": "09cb6c069be215cbcfc30d92eef50b2b50d4e657d50ca4c6cd53f1e6479a4537",
+      "lastIngested": "2026-11-02T08:14:10.038Z"
     },
     "records": [
       {
@@ -2349,133 +2349,133 @@
             "date": "2014-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 9.2,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2014-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 3.2,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2015-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 9.8,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2015-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 3.5,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2016-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 10.1,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2016-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 2.8,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2017-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 10.4,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2017-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 3.1,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2018-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 10.8,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2018-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 3.4,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2019-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 11.2,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2019-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 2.2,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2020-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 9.4,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2020-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 2.5,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2021-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 8.9,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2021-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 2.8,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2022-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 9.5,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2022-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 2.6,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2023-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 10.6,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2023-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 3.8,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2024-05",
             "season": "Pre-Monsoon (May)",
             "waterLevelDepthM": 11.5,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           },
           {
             "date": "2024-11",
             "season": "Post-Monsoon (Nov)",
             "waterLevelDepthM": 2.9,
-            "status": "OBSERVED"
+            "status": "DEMONSTRATION"
           }
         ]
       }
