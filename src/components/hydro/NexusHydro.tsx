@@ -33,8 +33,12 @@ import {
   Key,
   Globe,
   Lock,
-  Check
+  Check,
+  Target
 } from 'lucide-react';
+import { HeatmapLayerSelector, AVAILABLE_HYDRO_HEATMAP_LAYERS } from './HeatmapLayerSelector';
+import { HeatmapLegend } from './HeatmapLegend';
+import { AreaAnalysisTool } from './AreaAnalysisTool';
 
 export type DataSourceTier = 
   | 'DEMONSTRATION'
@@ -140,8 +144,15 @@ interface IngestedHydroDataset {
 }
 
 export const NexusHydro: React.FC = () => {
-  const { selectedLocation, currentTimeIndex } = useTerranexusStore();
-  const [activeTab, setActiveTab] = useState<'monthly' | 'seasonal' | 'aquifers'>('monthly');
+  const {
+    selectedLocation,
+    currentTimeIndex,
+    heatmapConfig,
+    setHeatmapConfig,
+    isAreaAnalysisOpen,
+    setIsAreaAnalysisOpen
+  } = useTerranexusStore();
+  const [activeTab, setActiveTab] = useState<'monthly' | 'seasonal' | 'aquifers' | 'heatmaps'>('monthly');
   const [liveData, setLiveData] = useState<IngestedHydroDataset | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -656,6 +667,16 @@ export const NexusHydro: React.FC = () => {
         >
           <Layers className="w-3.5 h-3.5" /> NAQUIM Aquifer Geometry
         </button>
+        <button
+          onClick={() => setActiveTab('heatmaps')}
+          className={`pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+            activeTab === 'heatmaps'
+              ? 'border-cyan-400 text-cyan-300'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Target className="w-3.5 h-3.5 text-cyan-400" /> Multi-Layer Heatmaps & Zonal Analysis
+        </button>
       </div>
 
       {/* Tab 1: Monthly 132-Month Real Satellite Inversion & Rainfall */}
@@ -958,6 +979,85 @@ export const NexusHydro: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Tab 4: Multi-Layer Scientific Heatmaps & Spatial Zonal Analysis */}
+      {activeTab === 'heatmaps' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Column 1: Layer Selector & Thematic Color Ramp Legend */}
+            <div className="lg:col-span-1 space-y-4">
+              <HeatmapLayerSelector
+                config={heatmapConfig}
+                onChangeConfig={setHeatmapConfig}
+                onToggleAreaAnalysis={() => setIsAreaAnalysisOpen(!isAreaAnalysisOpen)}
+                isAreaAnalysisOpen={isAreaAnalysisOpen}
+              />
+
+              {(() => {
+                const cur = AVAILABLE_HYDRO_HEATMAP_LAYERS.find(l => l.id === heatmapConfig.layerId) || AVAILABLE_HYDRO_HEATMAP_LAYERS[0];
+                return (
+                  <HeatmapLegend
+                    layerId={cur.id}
+                    unit={cur.unit}
+                    minScale={cur.min}
+                    maxScale={cur.max}
+                    colorRampType={cur.colorRampType}
+                    dataTier={cur.dataTier}
+                    scientificCaveat={cur.caveat}
+                  />
+                );
+              })()}
+            </div>
+
+            {/* Column 2 & 3: Interactive Zonal Statistics Area Analysis Tool */}
+            <div className="lg:col-span-2 space-y-4">
+              <AreaAnalysisTool
+                centerLat={selectedLocation.latitude}
+                centerLon={selectedLocation.longitude}
+                layerId={heatmapConfig.layerId}
+                timeStep={heatmapConfig.timeStep}
+                onClose={() => setIsAreaAnalysisOpen(false)}
+              />
+
+              {/* Location Regional Context Card */}
+              <div className="p-4 bg-slate-950/90 rounded-2xl border border-slate-800 text-xs space-y-2 text-slate-300">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <span className="font-semibold text-slate-100 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                    Spatial Zonal Statistics Calculation Methodology:
+                  </span>
+                  <span className="font-mono text-[10px] text-cyan-400 px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/50">
+                    Valid Cells Only
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-slate-400">
+                  Zonal statistics evaluate all 0.5° raster grid nodes within the geodesic radius (50–600 km) using the Haversine formula. Missing mission cells (e.g. GRACE gap nulls) are strictly tracked in the <code className="text-amber-300 font-mono">noDataCount</code> and excluded from mathematical mean, median, and standard deviation ($\sigma$) denominators.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 font-mono text-[11px]">
+                  <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
+                    <span className="text-slate-500 text-[10px] block">Location:</span>
+                    <span className="text-slate-200 truncate block">{selectedLocation.name.split(' - ')[0]}</span>
+                  </div>
+                  <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
+                    <span className="text-slate-500 text-[10px] block">State / Basin:</span>
+                    <span className="text-slate-200 truncate block">{selectedLocation.state}</span>
+                  </div>
+                  <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
+                    <span className="text-slate-500 text-[10px] block">Coordinates:</span>
+                    <span className="text-cyan-300 block">{selectedLocation.latitude.toFixed(2)}°N, {selectedLocation.longitude.toFixed(2)}°E</span>
+                  </div>
+                  <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
+                    <span className="text-slate-500 text-[10px] block">3D Globe Heatmap:</span>
+                    <span className={heatmapConfig.isVisible ? 'text-emerald-400 font-semibold' : 'text-slate-500'}>
+                      {heatmapConfig.isVisible ? 'VISIBLE (ON)' : 'HIDDEN (OFF)'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

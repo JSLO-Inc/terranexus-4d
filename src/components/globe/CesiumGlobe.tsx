@@ -4,6 +4,9 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import { useTerranexusStore, TIME_STEPS } from '../../state/useTerranexusStore';
 import { INDIA_LOCATIONS } from '../../data/locationsIndia';
 import { INDIAN_STUDY_BASINS_GEOJSON } from '../../data/indiaGeologicalBasins';
+import { NATIONWIDE_HIERARCHICAL_LABELS } from '../../data/nationwideLabels';
+import { reverseGeocodeMapClick } from '../../services/locationResolver';
+import { AVAILABLE_HYDRO_HEATMAP_LAYERS } from '../hydro/HeatmapLayerSelector';
 import {
   Layers,
   Crosshair,
@@ -16,8 +19,61 @@ import {
   Globe as GlobeIcon,
   RotateCcw,
   ShieldCheck,
-  Activity
+  Activity,
+  MapPin,
+  Target
 } from 'lucide-react';
+
+/**
+ * Calculates thematic color for gridded scientific heatmaps
+ */
+function getHeatmapColor(
+  layerId: string,
+  value: number,
+  minScale: number,
+  maxScale: number,
+  opacity: number
+): Cesium.Color {
+  const norm = Math.max(0, Math.min(1, (value - minScale) / (maxScale - minScale || 1)));
+  if (layerId === 'layer-grace-twsa') {
+    // Diverging: negative (red/orange) -> 0 (pale white) -> positive (cyan/blue)
+    const zeroNorm = (0 - minScale) / (maxScale - minScale);
+    if (norm < zeroNorm) {
+      const t = norm / (zeroNorm || 0.001);
+      const r = 239;
+      const g = Math.round(68 + t * (240 - 68));
+      const b = Math.round(68 + t * (240 - 68));
+      return Cesium.Color.fromBytes(r, g, b, Math.round(opacity * 200));
+    } else {
+      const t = (norm - zeroNorm) / (1 - zeroNorm || 0.001);
+      const r = Math.round(240 - t * 240);
+      const g = Math.round(240 - t * (240 - 180));
+      const b = 255;
+      return Cesium.Color.fromBytes(r, g, b, Math.round(opacity * 200));
+    }
+  } else if (layerId === 'layer-groundwater-depth' || layerId === 'layer-water-quality-tds') {
+    // Green (low/good) -> Yellow (mid) -> Red (high/critical)
+    let r = 0, g = 0, b = 0;
+    if (norm < 0.5) {
+      const t = norm / 0.5;
+      r = Math.round(16 + t * (245 - 16));
+      g = Math.round(185 + t * (158 - 185));
+      b = Math.round(129 - t * 100);
+    } else {
+      const t = (norm - 0.5) / 0.5;
+      r = Math.round(245 + t * (239 - 245));
+      g = Math.round(158 - t * 110);
+      b = Math.round(29 - t * 29);
+    }
+    return Cesium.Color.fromBytes(r, g, b, Math.round(opacity * 200));
+  } else {
+    // Sequential Blue (Rainfall, Recharge)
+    const r = Math.round(186 - norm * (186 - 14));
+    const g = Math.round(230 - norm * (230 - 116));
+    const b = Math.round(253 - norm * (253 - 144));
+    return Cesium.Color.fromBytes(r, g, b, Math.round(opacity * 200));
+  }
+}
 
 /**
  * Safely initialize 3D Tileset for subsurface or surface features
@@ -89,11 +145,19 @@ export const CesiumGlobe: React.FC = () => {
   const basinDataSourceRef = useRef<Cesium.GeoJsonDataSource | null>(null);
   const handlerRef = useRef<Cesium.ScreenSpaceEventHandler | null>(null);
 
+  const selectedPinEntityRef = useRef<Cesium.Entity | null>(null);
+  const areaAnalysisCircleRef = useRef<Cesium.Entity | null>(null);
+  const heatmapEntitiesRef = useRef<Cesium.Entity[]>([]);
+  const labelEntitiesRef = useRef<Cesium.Entity[]>([]);
+
   const {
     selectedLocation,
     setSelectedLocation,
     currentTimeIndex,
-    layers
+    layers,
+    heatmapConfig,
+    setHeatmapConfig,
+    isAreaAnalysisOpen
   } = useTerranexusStore();
 
   const [mouseCoords, setMouseCoords] = useState<{ lat: number; lon: number; height: number } | null>(null);
@@ -101,6 +165,7 @@ export const CesiumGlobe: React.FC = () => {
   const [imageryMode, setImageryMode] = useState<'satellite' | 'osm'>('satellite');
   const [showFootprint, setShowFootprint] = useState<boolean>(true);
   const [showBasins, setShowBasins] = useState<boolean>(true);
+  const [showNationwideLabels, setShowNationwideLabels] = useState<boolean>(true);
 
   // Initialize Cesium Viewer with high-performance official settings
   useEffect(() => {
@@ -187,6 +252,49 @@ export const CesiumGlobe: React.FC = () => {
       }
     }).catch(err => {
       console.warn('[GeoJsonDataSource] Basin loading error:', err);
+    });
+
+    // Ingest Nationwide Hierarchical Place Labels (States, Cities, Districts, Field Stations)
+    labelEntitiesRef.current = [];
+    NATIONWIDE_HIERARCHICAL_LABELS.forEach((lbl) => {
+      const color = lbl.type === 'STATE'
+        ? Cesium.Color.fromCssColorString('#38bdf8') // Sky blue
+        : lbl.type === 'CITY'
+        ? Cesium.Color.fromCssColorString('#facc15') // Amber/Yellow
+        : lbl.type === 'TOWN'
+        ? Cesium.Color.fromCssColorString('#34d399') // Emerald
+        : Cesium.Color.fromCssColorString('#a78bfa'); // Purple
+
+      const ent = viewer.entities.add({
+        id: `geo-lbl-${lbl.id}`,
+        name: lbl.name,
+        position: Cesium.Cartesian3.fromDegrees(lbl.longitude, lbl.latitude, 200),
+        point: {
+          pixelSize: lbl.type === 'STATE' ? 6 : lbl.type === 'CITY' ? 5 : 4,
+          color: color.withAlpha(0.85),
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 1.5,
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(lbl.minAltitudeMeters, lbl.maxAltitudeMeters),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        },
+        label: {
+          text: lbl.name,
+          font: lbl.type === 'STATE'
+            ? 'bold 11px "JetBrains Mono", sans-serif'
+            : lbl.type === 'CITY'
+            ? 'bold 11px sans-serif'
+            : '10px "JetBrains Mono", monospace',
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          fillColor: color,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2.5,
+          verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+          pixelOffset: new Cesium.Cartesian2(0, -6),
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(lbl.minAltitudeMeters, lbl.maxAltitudeMeters),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        }
+      });
+      labelEntitiesRef.current.push(ent);
     });
 
     // Add High-Tech Pin Entities for all 7 Indian Regional Study Loci
@@ -302,7 +410,7 @@ export const CesiumGlobe: React.FC = () => {
       }
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
-    // Interactive Object Picking on Globe (Entity Locus or GeoJSON Basin)
+    // Interactive Object Picking on Globe (Entity Locus, GeoJSON Basin, Geo-Label, or Map Click)
     handler.setInputAction((click: any) => {
       if (!viewerRef.current || viewerRef.current.isDestroyed()) return;
       const pickedObject = viewer.scene.pick(click.position);
@@ -321,6 +429,40 @@ export const CesiumGlobe: React.FC = () => {
           const matchedBasinLoc = INDIA_LOCATIONS.find(l => l.id === basinLocusId);
           if (matchedBasinLoc) {
             setSelectedLocation(matchedBasinLoc);
+            return;
+          }
+        }
+
+        // Hierarchical geo-label clicked
+        if (typeof pickedId === 'string' && pickedId.startsWith('geo-lbl-')) {
+          const rawId = pickedId.replace('geo-lbl-', '');
+          const matchedLabel = NATIONWIDE_HIERARCHICAL_LABELS.find(lbl => lbl.id === rawId);
+          if (matchedLabel) {
+            reverseGeocodeMapClick(matchedLabel.latitude, matchedLabel.longitude).then(resolved => {
+              if (resolved) {
+                setSelectedLocation(resolved);
+              }
+            });
+            return;
+          }
+        }
+      }
+
+      // Universal Click-to-Inspect anywhere on Indian globe territory
+      const ray = viewer.camera.getPickRay(click.position);
+      if (ray) {
+        const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
+        if (cartesian) {
+          const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+          const clickLat = Cesium.Math.toDegrees(cartographic.latitude);
+          const clickLon = Cesium.Math.toDegrees(cartographic.longitude);
+          // Check if coordinate is strictly within India territory bounds (Lat 6.0–38.0°N, Lon 67.0–98.0°E)
+          if (clickLat >= 6.0 && clickLat <= 38.0 && clickLon >= 67.0 && clickLon <= 98.0) {
+            reverseGeocodeMapClick(clickLat, clickLon).then(resolved => {
+              if (resolved) {
+                setSelectedLocation(resolved);
+              }
+            });
           }
         }
       }
@@ -337,6 +479,13 @@ export const CesiumGlobe: React.FC = () => {
         viewerRef.current.dataSources.remove(basinDataSourceRef.current, true);
         basinDataSourceRef.current = null;
       }
+      heatmapEntitiesRef.current.forEach(e => {
+        if (viewerRef.current && !viewerRef.current.isDestroyed()) {
+          viewerRef.current.entities.remove(e);
+        }
+      });
+      heatmapEntitiesRef.current = [];
+      labelEntitiesRef.current = [];
       if (viewerRef.current && !viewerRef.current.isDestroyed()) {
         viewerRef.current.destroy();
         viewerRef.current = null;
@@ -377,6 +526,7 @@ export const CesiumGlobe: React.FC = () => {
     });
 
     // Update marker styling and selection highlight
+    const isStandardLocus = INDIA_LOCATIONS.some(l => l.id === selectedLocation.id);
     markersRef.current.forEach((entity) => {
       if (entity.point) {
         const isSelected = entity.id === selectedLocation.id;
@@ -386,6 +536,49 @@ export const CesiumGlobe: React.FC = () => {
         entity.point.pixelSize = new Cesium.ConstantProperty(isSelected ? 16 : 12);
       }
     });
+
+    // If selected location is an arbitrary nationwide point (not standard 7), maintain dedicated pin
+    if (!isStandardLocus) {
+      if (!selectedPinEntityRef.current) {
+        selectedPinEntityRef.current = viewer.entities.add({
+          id: 'dynamic-selected-location-pin',
+          name: selectedLocation.name,
+          position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 600),
+          point: {
+            pixelSize: 18,
+            color: Cesium.Color.fromCssColorString('#f59e0b'),
+            outlineColor: Cesium.Color.WHITE,
+            outlineWidth: 2.5,
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+          },
+          label: {
+            text: `📍 ${selectedLocation.name.split(' - ')[0]}\n(${selectedLocation.district || selectedLocation.state})`,
+            font: 'bold 12px "JetBrains Mono", monospace',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: Cesium.Color.WHITE,
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 3,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            pixelOffset: new Cesium.Cartesian2(0, -18),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+          }
+        });
+      } else {
+        selectedPinEntityRef.current.position = new Cesium.ConstantPositionProperty(
+          Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 600)
+        );
+        if (selectedPinEntityRef.current.label) {
+          selectedPinEntityRef.current.label.text = new Cesium.ConstantProperty(
+            `📍 ${selectedLocation.name.split(' - ')[0]}\n(${selectedLocation.district || selectedLocation.state})`
+          );
+        }
+        selectedPinEntityRef.current.show = true;
+      }
+    } else {
+      if (selectedPinEntityRef.current) {
+        selectedPinEntityRef.current.show = false;
+      }
+    }
 
     // Update Scientific Footprint Entity Position & Label
     if (footprintEntityRef.current) {
@@ -411,6 +604,118 @@ export const CesiumGlobe: React.FC = () => {
       }
     }
   }, [selectedLocation]);
+
+  // Toggle Nationwide Labels Visibility
+  useEffect(() => {
+    labelEntitiesRef.current.forEach(entity => {
+      entity.show = showNationwideLabels;
+    });
+  }, [showNationwideLabels]);
+
+  // Synchronize Thematic Multi-Layer Heatmap Grid
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    // Clear previous raster cells
+    heatmapEntitiesRef.current.forEach(e => viewer.entities.remove(e));
+    heatmapEntitiesRef.current = [];
+
+    if (!heatmapConfig.isVisible) return;
+
+    let isSubscribed = true;
+    fetch(`/api/hydro/heatmap/grid?layerId=${heatmapConfig.layerId}&timeStep=${heatmapConfig.timeStep}`)
+      .then(res => res.json())
+      .then(json => {
+        if (!isSubscribed || !json?.success || !json?.dataset?.cells) return;
+        const dataset = json.dataset;
+        const cells = dataset.cells;
+        const halfDeg = 0.25;
+
+        cells.forEach((cell: any) => {
+          if (cell.value === null || cell.qualityFlag === 'NO_DATA') return;
+          const color = getHeatmapColor(
+            heatmapConfig.layerId,
+            cell.value,
+            dataset.minScale,
+            dataset.maxScale,
+            heatmapConfig.opacity
+          );
+
+          const cellEntity = viewer.entities.add({
+            id: `heatmap-cell-${cell.latitude}-${cell.longitude}`,
+            rectangle: {
+              coordinates: Cesium.Rectangle.fromDegrees(
+                cell.longitude - halfDeg,
+                cell.latitude - halfDeg,
+                cell.longitude + halfDeg,
+                cell.latitude + halfDeg
+              ),
+              material: color,
+              height: 120.0
+            }
+          });
+          heatmapEntitiesRef.current.push(cellEntity);
+        });
+      })
+      .catch(err => {
+        console.warn('[CesiumGlobe] Heatmap raster fetch failed:', err);
+      });
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [heatmapConfig.layerId, heatmapConfig.isVisible, heatmapConfig.opacity, heatmapConfig.timeStep]);
+
+  // Synchronize Spatial Zonal Area Analysis Circle Entity
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    if (isAreaAnalysisOpen) {
+      if (!areaAnalysisCircleRef.current) {
+        areaAnalysisCircleRef.current = viewer.entities.add({
+          id: 'area-analysis-circle',
+          name: 'Spatial Zonal Analysis Area',
+          position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude),
+          ellipse: {
+            semiMajorAxis: 300000.0,
+            semiMinorAxis: 300000.0,
+            height: 300.0,
+            material: Cesium.Color.fromCssColorString('#06b6d4').withAlpha(0.20),
+            outline: true,
+            outlineColor: Cesium.Color.fromCssColorString('#22d3ee'),
+            outlineWidth: 3
+          },
+          label: {
+            text: `🎯 Spatial Zonal Analysis Envelope (300 km Radius)\nCenter: ${selectedLocation.name.split(' - ')[0]}`,
+            font: '11px "JetBrains Mono", monospace',
+            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+            fillColor: Cesium.Color.fromCssColorString('#22d3ee'),
+            outlineColor: Cesium.Color.BLACK,
+            outlineWidth: 2.5,
+            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            pixelOffset: new Cesium.Cartesian2(0, -25),
+            disableDepthTestDistance: Number.POSITIVE_INFINITY
+          }
+        });
+      } else {
+        areaAnalysisCircleRef.current.position = new Cesium.ConstantPositionProperty(
+          Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude)
+        );
+        if (areaAnalysisCircleRef.current.label) {
+          areaAnalysisCircleRef.current.label.text = new Cesium.ConstantProperty(
+            `🎯 Spatial Zonal Analysis Envelope (300 km Radius)\nCenter: ${selectedLocation.name.split(' - ')[0]}`
+          );
+        }
+        areaAnalysisCircleRef.current.show = true;
+      }
+    } else {
+      if (areaAnalysisCircleRef.current) {
+        areaAnalysisCircleRef.current.show = false;
+      }
+    }
+  }, [isAreaAnalysisOpen, selectedLocation]);
 
   // Toggle ~300 km Footprint Visibility
   useEffect(() => {
@@ -560,8 +865,21 @@ export const CesiumGlobe: React.FC = () => {
           </div>
         </div>
 
+        {/* Active Heatmap Status Indicator */}
+        {heatmapConfig.isVisible && (
+          <div className="flex items-center justify-between bg-cyan-950/60 border border-cyan-700/50 rounded p-1.5 text-[10px]">
+            <span className="text-cyan-300 flex items-center gap-1 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              Heatmap:
+            </span>
+            <span className="font-mono text-cyan-200 truncate max-w-[140px]">
+              {AVAILABLE_HYDRO_HEATMAP_LAYERS.find(l => l.id === heatmapConfig.layerId)?.name || 'Active'}
+            </span>
+          </div>
+        )}
+
         {/* Layer Quick Toggles */}
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-800/80">
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-800/80">
           <button
             onClick={() => setShowFootprint(!showFootprint)}
             className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 border transition-all ${
@@ -572,7 +890,33 @@ export const CesiumGlobe: React.FC = () => {
             title="Toggle illustrative ~300 km Gaussian smoothing footprint disc"
           >
             <Activity className="w-3 h-3" />
-            Footprint Disc
+            Footprint
+          </button>
+
+          <button
+            onClick={() => setShowNationwideLabels(!showNationwideLabels)}
+            className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 border transition-all ${
+              showNationwideLabels
+                ? 'bg-amber-950/80 border-amber-500/60 text-amber-200'
+                : 'bg-slate-900 border-slate-700 text-slate-400'
+            }`}
+            title="Toggle nationwide hierarchical place discovery labels (States, Metros, Districts, Mining Sectors)"
+          >
+            <MapPin className="w-3 h-3" />
+            Labels
+          </button>
+
+          <button
+            onClick={() => setHeatmapConfig({ isVisible: !heatmapConfig.isVisible })}
+            className={`px-2 py-1 rounded text-[10px] font-mono flex items-center gap-1 border transition-all ${
+              heatmapConfig.isVisible
+                ? 'bg-purple-950/80 border-purple-500/60 text-purple-200'
+                : 'bg-slate-900 border-slate-700 text-slate-400'
+            }`}
+            title="Toggle multi-layer scientific gridded heatmap on the 3D globe"
+          >
+            <Layers className="w-3 h-3" />
+            Heatmap
           </button>
 
           <button
@@ -585,7 +929,7 @@ export const CesiumGlobe: React.FC = () => {
             title="Toggle Geological Basin GeoJSON boundaries (Demonstration/Approximations)"
           >
             <Layers className="w-3 h-3" />
-            Basin Outlines
+            Basins
           </button>
 
           <button
@@ -594,7 +938,7 @@ export const CesiumGlobe: React.FC = () => {
             title="Toggle between Satellite and OpenStreetMap base imagery"
           >
             <Satellite className="w-3 h-3 text-cyan-400" />
-            Map Mode
+            Satellite/OSM
           </button>
         </div>
       </div>
