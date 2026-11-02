@@ -23,6 +23,9 @@ export interface DatasetMetadata {
   status: ScientificStatus;
   units?: string;
   confidence?: 'High' | 'Medium' | 'Low' | 'Experimental';
+  doi?: string;
+  citation?: string;
+  accessDate?: string;
 }
 
 export interface LayerDefinition {

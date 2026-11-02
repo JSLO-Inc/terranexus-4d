@@ -22,6 +22,8 @@ export interface GenuineNasaGranuleMetadata {
   productShortName: string;
   productVersion: string;
   sourceUrl: string;
+  doi?: string;
+  accessDate?: string;
   fileSizeBytes: number;
   originalSha256: string;
   downloadTimestamp: string;
@@ -31,8 +33,13 @@ export interface GenuineNasaGranuleMetadata {
   cellCentroidLon: number;
   distanceToCentroidKm: number;
   smoothingFootprintKm: number;
+  sourceUnits?: string;
+  twsaRawValue?: number;
+  twsaValueCm?: number;
+  uncertaintyCm?: number;
   missingDataHandling: string;
   citation: string;
+  officialCitation?: string;
   processingTimestamp: string;
 }
 
@@ -42,6 +49,8 @@ export interface DatasetProvenance {
   provider: string;
   officialDocsUrl: string;
   accessUrl: string;
+  doi?: string;
+  accessDate?: string;
   license: string;
   citation: string;
   format: string;

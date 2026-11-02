@@ -111,11 +111,41 @@ export const DataCatalog: React.FC = () => {
                 <span className="text-slate-500 block text-[10px]">Access Method:</span>
                 <span className="text-slate-200">{dataset.accessMethod}</span>
               </div>
+              {dataset.doi && (
+                <div className="col-span-2 border-t border-slate-800 pt-1.5 mt-0.5">
+                  <span className="text-slate-500 block text-[10px]">Digital Object Identifier (DOI):</span>
+                  <a
+                    href={dataset.doi}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-400 hover:text-sky-300 flex items-center gap-1 font-mono text-[10px] break-all"
+                  >
+                    {dataset.doi} <ExternalLink className="w-3 h-3 shrink-0" />
+                  </a>
+                </div>
+              )}
               <div className="col-span-2 border-t border-slate-800 pt-1.5 mt-0.5">
                 <span className="text-slate-500 block text-[10px]">Licence / Rights:</span>
                 <span className="text-slate-300">{dataset.license}</span>
               </div>
             </div>
+
+            {/* Official Citation & Attribution */}
+            {dataset.citation && (
+              <div className="text-xs text-slate-300 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60 font-mono text-[10px]">
+                <span className="text-slate-400 uppercase block mb-1 font-bold">
+                  Official Dataset Citation & Attribution:
+                </span>
+                <p className="text-slate-300 leading-relaxed font-sans text-[11px]">
+                  {dataset.citation}
+                </p>
+                {dataset.accessDate && (
+                  <span className="text-slate-500 text-[10px] block mt-1">
+                    Access Date: {dataset.accessDate}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Processing Method */}
             <div className="text-xs text-slate-300 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60">
@@ -141,6 +171,32 @@ export const DataCatalog: React.FC = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Official Legal Compliance, Non-Endorsement & Attribution Charter */}
+      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-3">
+        <div className="flex items-center gap-2 text-slate-200 font-bold text-sm">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span>Legal Compliance, Open Data Policies & Non-Endorsement Disclaimers</span>
+        </div>
+        <p className="text-slate-400 text-xs leading-relaxed">
+          TERRANEXUS 4D is an independent scientific geospatial research and visualization system developed by JSLO-Inc. 
+          Scientific datasets from NASA, PO.DAAC, CGWB, India-WRIS, GSI, and the European Space Agency are integrated strictly 
+          in compliance with their individual governing open data policies (NASA Open Data Policy / 17 U.S.C. § 105, Government of India 
+          National Data Sharing and Accessibility Policy / GODL-India, and EU Copernicus Regulation No 377/2014).
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] text-slate-400 bg-slate-900/80 p-3 rounded-xl border border-slate-800/80">
+          <div>
+            <strong className="text-slate-300 block mb-1">1. NASA Non-Endorsement & Logo Restriction (14 CFR § 1221.1):</strong>
+            NASA has not endorsed, certified, approved, partnered with, or sponsored TERRANEXUS 4D. No NASA logos, insignias, or seals 
+            are used. Original NASA Level-3 satellite observations are strictly segregated from processed, interpolated, or simulated models.
+          </div>
+          <div>
+            <strong className="text-slate-300 block mb-1">2. Third-Party & Indian Government Data Rights:</strong>
+            CGWB and GSI materials are utilized in accordance with GODL-India. Demonstration benchmark hydrographs and boreholes are 
+            explicitly marked to prevent misrepresentation. Third-party rights are evaluated independently.
+          </div>
+        </div>
       </div>
     </div>
   );

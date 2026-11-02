@@ -13,8 +13,10 @@
       "provider": "Terranexus Simulation Fixture (Harmonic Model Derived from JPL Tellus Literature)",
       "officialDocsUrl": "https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/",
       "accessUrl": "https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04",
+      "doi": "https://doi.org/10.5067/TELND-3AJ64",
+      "accessDate": "2026-11-02",
       "license": "NASA Open Data Policy (CC0 Equivalent / Demonstration Benchmark)",
-      "citation": "Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
+      "citation": "JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. https://doi.org/10.5067/TELND-3AJ64. Scientific algorithm: Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
       "format": "Demonstration ASCII Table (Local Fixture)",
       "spatialResolution": "300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees",
       "temporalResolution": "Monthly synthesized gravity variations (2014-01 to 2024-12)",
@@ -27,7 +29,7 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "4c798ba096e3def0ef99cc201320f59b88745de795585afb3370f90416d6a86f",
-      "lastIngested": "2026-11-02T10:41:34.379Z"
+      "lastIngested": "2026-11-02T10:53:10.178Z"
     },
     "genuineNasaGranule": {
       "granuleId": "GRD-3_2017143-2017180_GRAC_JPLEM_BA01_0600_LND_v04",
@@ -49,8 +51,11 @@
       "twsaValueCm": -23.2,
       "uncertaintyCm": 2.6,
       "missingDataHandling": "Preserved as null / NaN; zero interpolation during mission gaps",
-      "citation": "Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
-      "processingTimestamp": "2026-11-02T10:41:34.376Z"
+      "doi": "https://doi.org/10.5067/TELND-3AJ64",
+      "accessDate": "2026-11-02",
+      "officialCitation": "JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.",
+      "citation": "JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. https://doi.org/10.5067/TELND-3AJ64. Scientific algorithm: Landerer & Swenson (2012) WRR, 48(4), W04531.",
+      "processingTimestamp": "2026-11-02T10:53:10.175Z"
     },
     "records": [
       {
@@ -1259,8 +1264,10 @@
       "provider": "Terranexus Simulation Fixture (Climatological Model Calibrated to IMERG Literature)",
       "officialDocsUrl": "https://gpm.nasa.gov/data/imerg",
       "accessUrl": "https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary",
+      "doi": "https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07",
+      "accessDate": "2026-11-02",
       "license": "NASA Open Earth Science Data Policy (Public Domain / Demonstration Benchmark)",
-      "citation": "Huffman, G. J., et al. (2020), GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC).",
+      "citation": "Huffman, G. J., et al. (2020), GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC), https://doi.org/10.5067/GPM/IMERG/3B-MONTH/07.",
       "format": "Demonstration CSV (Local Fixture)",
       "spatialResolution": "0.1 degree x 0.1 degree (~10 km x 10 km equivalent)",
       "temporalResolution": "Monthly accumulation (2014-01 to 2024-12)",
@@ -1272,7 +1279,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "ce33b294d8aab86ff218caa914f99a3807e90da15b475fdbaab64c74935e36d9",
-      "lastIngested": "2026-11-02T10:41:34.390Z"
+      "lastIngested": "2026-11-02T10:53:10.188Z"
     },
     "records": [
       {
@@ -2344,6 +2351,7 @@
       "provider": "Terranexus Demonstration Fixture (Calibrated to CGWB Published Regional Yearbooks)",
       "officialDocsUrl": "https://indiawris.gov.in/wris/#/groundWater",
       "accessUrl": "https://indiawris.gov.in/wris/#/groundWaterLevelReports",
+      "accessDate": "2026-11-02",
       "license": "Government of India Open Data License (GODL-India) / Demonstration Benchmark",
       "citation": "Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.",
       "format": "Demonstration Benchmark CSV (Local Fixture)",
@@ -2358,7 +2366,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "8c097dad7116b92b41241d1da50636e1485edb603d00c105fe334c2860cbedc4",
-      "lastIngested": "2026-11-02T10:41:34.391Z"
+      "lastIngested": "2026-11-02T10:53:10.189Z"
     },
     "records": [
       {
