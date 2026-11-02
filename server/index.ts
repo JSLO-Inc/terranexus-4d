@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { locationRouter } from './routes/locationRoutes';
 import { generateScientificExplanation } from './aiService';
+import { getHeatmapLayerData, calculateAreaStatistics } from './services/heatmapRasterService';
+import { getLabelsForViewport, NATIONWIDE_HIERARCHICAL_LABELS } from './services/spatialLabelService';
 import {
   getHydroLocationData,
   getHydroPipelineStatus,
@@ -15,6 +18,9 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Universal Location & Discovery API
+app.use('/api/location', locationRouter);
 
 // Health & System Status Endpoint
 app.get('/api/health', (req, res) => {
@@ -38,6 +44,60 @@ app.get('/api/hydro/status', (req, res) => {
       success: true,
       data: status
     });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ==========================================
+// MULTI-LAYER SCIENTIFIC HEATMAP & AREA STATS API
+// ==========================================
+
+// Get raster cells for specific layer and timeStep
+app.get('/api/hydro/heatmap/grid', (req, res) => {
+  try {
+    const layerId = (req.query.layer as string) || 'layer-grace-twsa';
+    const timeStep = (req.query.timestep as string) || '2024-05';
+    const data = getHeatmapLayerData(layerId, timeStep);
+    res.json({ success: true, data });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Compute rigorous area statistics over valid cells within user circle
+app.post('/api/hydro/heatmap/area-stats', (req, res) => {
+  try {
+    const { layerId, timeStep, centerLat, centerLon, radiusKm } = req.body;
+    if (!layerId || typeof centerLat !== 'number' || typeof centerLon !== 'number' || typeof radiusKm !== 'number') {
+      return res.status(400).json({ success: false, error: 'Invalid parameters: layerId, centerLat, centerLon, radiusKm required' });
+    }
+
+    const stats = calculateAreaStatistics({
+      layerId,
+      timeStep,
+      centerLat,
+      centerLon,
+      radiusKm: Math.min(Math.max(radiusKm, 10), 1000)
+    });
+
+    res.json({ success: true, stats });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Hierarchical nationwide place labels for Cesium globe
+app.get('/api/geography/labels', (req, res) => {
+  try {
+    const minLon = parseFloat(req.query.minLon as string) || 67.0;
+    const minLat = parseFloat(req.query.minLat as string) || 6.0;
+    const maxLon = parseFloat(req.query.maxLon as string) || 98.0;
+    const maxLat = parseFloat(req.query.maxLat as string) || 38.0;
+    const altitude = parseFloat(req.query.altitude as string) || 1000000;
+
+    const labels = getLabelsForViewport(minLon, minLat, maxLon, maxLat, altitude);
+    res.json({ success: true, labels, totalAvailable: NATIONWIDE_HIERARCHICAL_LABELS.length });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

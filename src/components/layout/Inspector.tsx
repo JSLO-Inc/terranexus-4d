@@ -11,8 +11,10 @@ import {
   ShieldCheck,
   Download,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  MapPin
 } from 'lucide-react';
+import { LocationDataAvailability } from '../catalog/LocationDataAvailability';
 
 export const Inspector: React.FC = () => {
   const {
@@ -122,6 +124,45 @@ export const Inspector: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 text-xs">
         {activeTab === 'overview' && (
           <div className="flex flex-col gap-4">
+            {/* Administrative Location Context & Breadcrumb */}
+            <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-1.5">
+              <div className="flex items-center gap-1.5 text-cyan-400 font-mono text-[10px]">
+                <MapPin className="w-3 h-3 text-cyan-400" />
+                <span>ADMINISTRATIVE HIERARCHY</span>
+              </div>
+              <div className="text-[11px] text-slate-200 font-medium">
+                {(selectedLocation as any).administrativeHierarchy ? (
+                  <div className="flex flex-wrap items-center gap-1 text-slate-300">
+                    <span>India</span>
+                    {((selectedLocation as any).administrativeHierarchy.state) && (
+                      <>
+                        <span className="text-slate-600">›</span>
+                        <span className="text-slate-200">{(selectedLocation as any).administrativeHierarchy.state}</span>
+                      </>
+                    )}
+                    {((selectedLocation as any).administrativeHierarchy.district) && (
+                      <>
+                        <span className="text-slate-600">›</span>
+                        <span className="text-cyan-300 font-medium">{(selectedLocation as any).administrativeHierarchy.district}</span>
+                      </>
+                    )}
+                    {((selectedLocation as any).administrativeHierarchy.subDistrict || (selectedLocation as any).administrativeHierarchy.village) && (
+                      <>
+                        <span className="text-slate-600">›</span>
+                        <span className="text-slate-300">{(selectedLocation as any).administrativeHierarchy.subDistrict || (selectedLocation as any).administrativeHierarchy.village}</span>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <span>{selectedLocation.district}, {selectedLocation.state}, India</span>
+                )}
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">
+                <span>Elevation: {selectedLocation.elevationMeters}m ASL</span>
+                <span className="text-slate-500">{(selectedLocation as any).elevationSource || 'WGS84 Ellipsoid'}</span>
+              </div>
+            </div>
+
             {/* Module Status Telemetry Rows */}
             <div className="flex flex-col gap-2 bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/80">
               <div
@@ -360,6 +401,12 @@ export const Inspector: React.FC = () => {
                 <div className="text-slate-400">Depth: {selectedBorehole.totalDepthMeters}m | Water Strike: {selectedBorehole.waterTableDepthMeters} mbgl</div>
               </div>
             )}
+
+            {/* Nationwide Scientific Coverage & Evidence Audit */}
+            <LocationDataAvailability
+              coverage={(selectedLocation as any).coverage}
+              locationName={selectedLocation.name}
+            />
           </div>
         )}
 

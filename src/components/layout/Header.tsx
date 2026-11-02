@@ -3,6 +3,9 @@ import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { INDIA_LOCATIONS } from '../../data/locationsIndia';
 import { Compass, Calendar, ChevronDown, CheckCircle, Database } from 'lucide-react';
 
+import { LocationSearch } from '../location/LocationSearch';
+import { SelectedLocation } from '../../types/location';
+
 export const Header: React.FC = () => {
   const {
     selectedLocation,
@@ -29,9 +32,9 @@ export const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className="absolute top-4 left-4 right-4 h-14 z-30 flex items-center justify-between select-none pointer-events-none">
+    <header className="absolute top-4 left-4 right-4 h-14 z-30 flex items-center justify-between select-none pointer-events-none gap-3">
       {/* Top-Left: Brand & Subtitle */}
-      <div className="flex items-center gap-3 pointer-events-auto bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl px-3.5 py-2 shadow-2xl">
+      <div className="flex items-center gap-3 pointer-events-auto bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl px-3.5 py-2 shadow-2xl shrink-0">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 via-sky-500/30 to-blue-600/20 border border-cyan-400/50 flex items-center justify-center shadow-lg shadow-cyan-500/20">
           <Compass className="w-4 h-4 text-cyan-400 animate-pulse" />
         </div>
@@ -45,6 +48,14 @@ export const Header: React.FC = () => {
             Scientific Intelligence Platform
           </span>
         </div>
+      </div>
+
+      {/* Top-Center: Universal Location Search (India) */}
+      <div className="flex-1 max-w-md pointer-events-auto">
+        <LocationSearch
+          onLocationSelected={(loc: SelectedLocation) => setSelectedLocation(loc)}
+          className="w-full"
+        />
       </div>
 
       {/* Top-Right: Telemetry Status, Observation Interval & User Avatar */}

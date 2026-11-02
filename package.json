@@ -13,7 +13,8 @@
     "test:ingestion": "tsx test/test-ingestion.ts",
     "test:nasa": "tsx test/test-nasa-pipeline.ts",
     "test:phase4": "tsx test/test-phase4-suite.ts",
-    "test:all": "tsx test/test-system.ts && tsx test/test-ingestion.ts && tsx test/test-nasa-pipeline.ts && tsx test/test-api-routes.ts && tsx test/test-phase4-suite.ts",
+    "test:phase5": "tsx test/test-phase5-suite.ts",
+    "test:all": "tsx test/test-system.ts && tsx test/test-ingestion.ts && tsx test/test-nasa-pipeline.ts && tsx test/test-api-routes.ts && tsx test/test-phase4-suite.ts && tsx test/test-phase5-suite.ts",
     "check:env": "tsx scripts/check-config.ts",
     "preview": "vite preview"
   },
