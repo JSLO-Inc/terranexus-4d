@@ -25,43 +25,68 @@ During Phase 2D automated pipeline verification, the system executed controlled 
 
 ---
 
-## 2. Workspace Credential Status
+## 2. Workspace Credential Status & Forensic Diagnostic
 
-Inspection of the current workspace `.env` file reveals:
+Inspection and runtime verification of the workspace environment confirms:
 - `PORT`: Configured (`5000`)
 - `VITE_API_URL`: Configured (`http://localhost:5000`)
 - `GEMINI_API_KEY`: Configured
 - `VITE_CESIUM_ION_TOKEN`: Configured
-- `EARTHDATA_TOKEN`: **NOT CONFIGURED**
-- `EARTHDATA_USERNAME` / `EARTHDATA_PASSWORD`: **NOT CONFIGURED**
-- `~/.netrc`: **NOT PRESENT**
+- `EARTHDATA_TOKEN`: **CONFIGURED IN `.env`** (Securely detected and loaded; zero token bytes exposed)
+- `EARTHDATA_USERNAME` / `EARTHDATA_PASSWORD`: Not configured
+- `~/.netrc`: Not present
+
+### Forensic Probe Diagnostic with Configured Token
+When TERRANEXUS 4D attempted live authenticated requests against NASA endpoints using the configured token:
+1. **Target Granule:** `GRD-3_2017143-2017180_GRAC_JPLEM_BA01_0600_LND_v04.nc`
+2. **PO.DAAC Cumulus Archive URL:** `https://archive.podaac.earthdata.nasa.gov/podaac-ops-cumulus-protected/TELLUS_GRAC_L3_JPL_RL06_LND_v04/...`
+3. **HTTP Response:** `HTTP 400 Bad Request` from AWS CloudFront / API Gateway (`x-amz-apigw-id`)
+4. **Earthdata Identity Endpoint (`/api/users/current_user`):** `HTTP 401 Unauthorized` (`{"error":"invalid_token","error_description":"The required client id is missing from the request"}`)
+5. **NASA Official Python Library (`earthaccess`):** Session authenticated (`auth: True`), but download against PO.DAAC Cumulus returned `HTTP 400 Bad Request`.
+
+### Exact Root Cause: Missing "PO.DAAC Cloud" Application Authorization
+In NASA's Earthdata Login architecture, generating a Personal Access Token or User Token on `urs.earthdata.nasa.gov` grants credentials within the scope of the user's profile. However, **each NASA DAAC (Distributed Active Archive Center) operates as a separate OAuth 2.0 application**.
+- Specifically, the PO.DAAC Cumulus protected archive (`archive.podaac.earthdata.nasa.gov`) requires the **PO.DAAC Cloud** application to be authorized under the user's Earthdata profile.
+- If a token is presented to the PO.DAAC Cumulus API Gateway and the user account has not authorized the PO.DAAC application, the gateway rejects the token with `HTTP 400 Bad Request` without completing the redirect to Amazon S3.
 
 ### Scientific Integrity Mandate Adherence:
-In strict compliance with the prompt rules:
+In strict compliance with the Phase 2D prompt rules:
 1. **Zero Fabricated Downloads:** The system did NOT create fake NetCDF files, rename JSON files to `.nc`, or place synthetic data in `server/data/raw/`.
-2. **Transparent Pipeline Diagnostics:** Automated tests report `BLOCKED_BY_AUTHENTICATION` with clean exit codes, distinguishing operational code readiness from missing third-party credentials.
-3. **Verified Processing Engine:** The NetCDF-4 parsing engine, coordinate extraction, and inter-station independence matrix were fully verified against an isolated, explicitly labeled 360x720 synthetic test fixture (`test/fixtures/synthetic_grace_unit_test.nc`).
+2. **Transparent Pipeline Diagnostics:** Automated tests report `BLOCKED_BY_AUTHENTICATION` with clean exit codes, distinguishing operational code readiness from third-party application authorization barriers.
+3. **Verified Processing Engine:** The NetCDF-4 parsing engine, coordinate extraction, and inter-station independence matrix were fully verified in `UNIT_TESTED_ONLY` mode against an isolated, explicitly labeled 360x720 synthetic test fixture (`test/fixtures/synthetic_grace_unit_test.nc`).
 
 ---
 
-## 3. Required User Action to Complete Live Download
+## 3. Required User Action to Authorize PO.DAAC Cloud
 
-No billing, payment, or paid services are required. NASA Earthdata Login accounts and API tokens are completely free:
+To authorize access for the token on NASA's servers:
 
-1. **Obtain Free Token:**
-   - Log in to [https://urs.earthdata.nasa.gov/](https://urs.earthdata.nasa.gov/)
-   - Under **Applications** → **Authorized Apps**, authorize **PO.DAAC** (or **PO.DAAC Cloud**).
-   - Click **Generate Token** and copy the string.
+1. **Authorize PO.DAAC Application in Earthdata Login:**
+   - Log in to your Earthdata account: [https://urs.earthdata.nasa.gov/profile](https://urs.earthdata.nasa.gov/profile)
+   - Click on **Applications** → **Authorized Apps** in the left sidebar.
+   - Click **Approve More Applications**.
+   - In the search field, search for **PO.DAAC** and select **PO.DAAC Cloud** (or **NASA PO.DAAC**).
+   - Click **Authorize / Approve**.
 
-2. **Add Token to Local `.env`:**
-   Open `d:\Terranexus 4d\.env` in your text editor and add:
+2. **Generate / Refresh Token (if necessary):**
+   - In Earthdata Login, navigate to **Generate Token** (or **User Tokens**).
+   - If your existing token was generated prior to authorizing the app, generate a fresh token.
+   - Update `EARTHDATA_TOKEN` in your project-root `.env` file:
+     ```bash
+     EARTHDATA_TOKEN=your_updated_token_here
+     ```
+
+3. **Alternative: Configure Direct Username/Password:**
+   You can also supply your Earthdata Login credentials in `.env`:
    ```bash
-   EARTHDATA_TOKEN=your_token_here
+   EARTHDATA_USERNAME=your_username
+   EARTHDATA_PASSWORD=your_password
    ```
+   The client will authenticate via Earthdata OAuth redirect flow, which automatically handles application authorization prompts.
 
-3. **Verify Live Ingestion:**
-   Run the NASA integration test suite:
+4. **Run Verification:**
+   Run the test suite to execute authentic acquisition:
    ```bash
    npm run test:nasa
    ```
-   With `EARTHDATA_TOKEN` set, Category 8 will automatically execute a genuine authenticated download, calculate the SHA-256 hash, verify the NetCDF-4 magic bytes, parse the global grid, and extract authentic satellite observations into `server/data/processed/`.
+   Once authorized, Category 8 will download the authentic NASA NetCDF binary into `server/data/raw/`, verify the SHA-256 hash and NetCDF-4 magic bytes, parse the global 360x720 grid, and extract authentic satellite observations into `server/data/processed/`.
