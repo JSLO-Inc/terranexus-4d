@@ -1,0 +1,2426 @@
+{
+  "locationId": "locus-godavari-kothagudem",
+  "locationName": "Pranhita-Godavari Graben - Kothagudem",
+  "coordinates": {
+    "latitude": 17.5511,
+    "longitude": 80.6178
+  },
+  "grace": {
+    "provenance": {
+      "id": "nasa-grace-tellus-tws",
+      "name": "NASA GRACE & GRACE-FO JPL Tellus Land Mass Grids (RL06.1 v04)",
+      "provider": "NASA Jet Propulsion Laboratory (JPL) & PO.DAAC",
+      "officialDocsUrl": "https://grace.jpl.nasa.gov/data/get-data/monthly-mass-grids-land/",
+      "accessUrl": "https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04",
+      "license": "NASA Open Data Policy (CC0 Equivalent / Public Domain)",
+      "citation": "Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
+      "format": "NetCDF-4 / ASCII Grid / GeoTIFF",
+      "spatialResolution": "300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees",
+      "temporalResolution": "Monthly gravity inversions",
+      "geographicCoverage": "Global terrestrial (Subcontinent bounding box: 8.0N - 37.0N, 68.0E - 97.5E)",
+      "processingLineage": "Level-3 RL06.1 spherical harmonics inversion with degree-1 geocenter corrections, degree-2 zonal harmonics (C20/C30 via SLR), glacial isostatic adjustment (ICE-6G_D), 300km Gaussian filter, and CLM4-based hydrological scaling factor restoration.",
+      "knownLimitations": [
+        "GRACE measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.",
+        "Coarse spatial resolution (~300 km); MUST NOT be interpreted as direct single-borewell or village-level water depth.",
+        "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Gap must be displayed as missing data, not interpolated."
+      ],
+      "sha256": "502cabcfc452f1496ca17ed2598b4497bccea9dc6c65a79aa3321177195dfa5b",
+      "lastIngested": "2026-11-02T07:54:35.496Z"
+    },
+    "records": [
+      {
+        "date": "2014-01",
+        "year": 2014,
+        "month": 1,
+        "twsAnomalyCm": -11.9,
+        "uncertaintyCm": 3.2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-02",
+        "year": 2014,
+        "month": 2,
+        "twsAnomalyCm": -15.4,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-03",
+        "year": 2014,
+        "month": 3,
+        "twsAnomalyCm": -17,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-04",
+        "year": 2014,
+        "month": 4,
+        "twsAnomalyCm": -15.7,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-05",
+        "year": 2014,
+        "month": 5,
+        "twsAnomalyCm": -11,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-06",
+        "year": 2014,
+        "month": 6,
+        "twsAnomalyCm": -6.6,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-07",
+        "year": 2014,
+        "month": 7,
+        "twsAnomalyCm": -1.2,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-08",
+        "year": 2014,
+        "month": 8,
+        "twsAnomalyCm": 2,
+        "uncertaintyCm": 2.1,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-09",
+        "year": 2014,
+        "month": 9,
+        "twsAnomalyCm": 3.6,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-10",
+        "year": 2014,
+        "month": 10,
+        "twsAnomalyCm": 1.1,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-11",
+        "year": 2014,
+        "month": 11,
+        "twsAnomalyCm": -2.5,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-12",
+        "year": 2014,
+        "month": 12,
+        "twsAnomalyCm": -7.6,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-01",
+        "year": 2015,
+        "month": 1,
+        "twsAnomalyCm": -13,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-02",
+        "year": 2015,
+        "month": 2,
+        "twsAnomalyCm": -17,
+        "uncertaintyCm": 2.6,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-03",
+        "year": 2015,
+        "month": 3,
+        "twsAnomalyCm": -19,
+        "uncertaintyCm": 3.6,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-04",
+        "year": 2015,
+        "month": 4,
+        "twsAnomalyCm": -17.3,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-05",
+        "year": 2015,
+        "month": 5,
+        "twsAnomalyCm": -13.4,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-06",
+        "year": 2015,
+        "month": 6,
+        "twsAnomalyCm": -8.1,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-07",
+        "year": 2015,
+        "month": 7,
+        "twsAnomalyCm": -3.6,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-08",
+        "year": 2015,
+        "month": 8,
+        "twsAnomalyCm": 0,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-09",
+        "year": 2015,
+        "month": 9,
+        "twsAnomalyCm": 1.9,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-10",
+        "year": 2015,
+        "month": 10,
+        "twsAnomalyCm": -0.7,
+        "uncertaintyCm": 3.1,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-11",
+        "year": 2015,
+        "month": 11,
+        "twsAnomalyCm": -3.8,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-12",
+        "year": 2015,
+        "month": 12,
+        "twsAnomalyCm": -8.8,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-01",
+        "year": 2016,
+        "month": 1,
+        "twsAnomalyCm": -7.7,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-02",
+        "year": 2016,
+        "month": 2,
+        "twsAnomalyCm": -12.1,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-03",
+        "year": 2016,
+        "month": 3,
+        "twsAnomalyCm": -13.4,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-04",
+        "year": 2016,
+        "month": 4,
+        "twsAnomalyCm": -12.5,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-05",
+        "year": 2016,
+        "month": 5,
+        "twsAnomalyCm": -8.5,
+        "uncertaintyCm": 2.8,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-06",
+        "year": 2016,
+        "month": 6,
+        "twsAnomalyCm": -4,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-07",
+        "year": 2016,
+        "month": 7,
+        "twsAnomalyCm": 2.3,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-08",
+        "year": 2016,
+        "month": 8,
+        "twsAnomalyCm": 5.8,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-09",
+        "year": 2016,
+        "month": 9,
+        "twsAnomalyCm": 6.8,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE",
+        "status": "DEGRADED_SOLUTION"
+      },
+      {
+        "date": "2016-10",
+        "year": 2016,
+        "month": 10,
+        "twsAnomalyCm": 5.2,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-11",
+        "year": 2016,
+        "month": 11,
+        "twsAnomalyCm": 1.3,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-12",
+        "year": 2016,
+        "month": 12,
+        "twsAnomalyCm": -3.6,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-01",
+        "year": 2017,
+        "month": 1,
+        "twsAnomalyCm": -9.4,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-02",
+        "year": 2017,
+        "month": 2,
+        "twsAnomalyCm": -13,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-03",
+        "year": 2017,
+        "month": 3,
+        "twsAnomalyCm": -15.2,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-04",
+        "year": 2017,
+        "month": 4,
+        "twsAnomalyCm": -14.2,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-05",
+        "year": 2017,
+        "month": 5,
+        "twsAnomalyCm": -10.4,
+        "uncertaintyCm": 2.6,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-06",
+        "year": 2017,
+        "month": 6,
+        "twsAnomalyCm": -5.4,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-07",
+        "year": 2017,
+        "month": 7,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2017-08",
+        "year": 2017,
+        "month": 8,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2017-09",
+        "year": 2017,
+        "month": 9,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2017-10",
+        "year": 2017,
+        "month": 10,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2017-11",
+        "year": 2017,
+        "month": 11,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2017-12",
+        "year": 2017,
+        "month": 12,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2018-01",
+        "year": 2018,
+        "month": 1,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2018-02",
+        "year": 2018,
+        "month": 2,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2018-03",
+        "year": 2018,
+        "month": 3,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2018-04",
+        "year": 2018,
+        "month": 4,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2018-05",
+        "year": 2018,
+        "month": 5,
+        "twsAnomalyCm": null,
+        "uncertaintyCm": null,
+        "satellite": null,
+        "status": "MISSION_GAP"
+      },
+      {
+        "date": "2018-06",
+        "year": 2018,
+        "month": 6,
+        "twsAnomalyCm": -7.7,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-07",
+        "year": 2018,
+        "month": 7,
+        "twsAnomalyCm": -2.5,
+        "uncertaintyCm": 2.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-08",
+        "year": 2018,
+        "month": 8,
+        "twsAnomalyCm": 1.7,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-09",
+        "year": 2018,
+        "month": 9,
+        "twsAnomalyCm": 3.3,
+        "uncertaintyCm": 2.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-10",
+        "year": 2018,
+        "month": 10,
+        "twsAnomalyCm": 1.7,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-11",
+        "year": 2018,
+        "month": 11,
+        "twsAnomalyCm": -1.7,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-12",
+        "year": 2018,
+        "month": 12,
+        "twsAnomalyCm": -7.1,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-01",
+        "year": 2019,
+        "month": 1,
+        "twsAnomalyCm": -7.7,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-02",
+        "year": 2019,
+        "month": 2,
+        "twsAnomalyCm": -12,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-03",
+        "year": 2019,
+        "month": 3,
+        "twsAnomalyCm": -13,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-04",
+        "year": 2019,
+        "month": 4,
+        "twsAnomalyCm": -11.6,
+        "uncertaintyCm": 2.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-05",
+        "year": 2019,
+        "month": 5,
+        "twsAnomalyCm": -8.9,
+        "uncertaintyCm": 2.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-06",
+        "year": 2019,
+        "month": 6,
+        "twsAnomalyCm": -4.5,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-07",
+        "year": 2019,
+        "month": 7,
+        "twsAnomalyCm": 1.1,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-08",
+        "year": 2019,
+        "month": 8,
+        "twsAnomalyCm": 4.5,
+        "uncertaintyCm": 2.6,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-09",
+        "year": 2019,
+        "month": 9,
+        "twsAnomalyCm": 6.4,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-10",
+        "year": 2019,
+        "month": 10,
+        "twsAnomalyCm": 4.9,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-11",
+        "year": 2019,
+        "month": 11,
+        "twsAnomalyCm": 1.1,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-12",
+        "year": 2019,
+        "month": 12,
+        "twsAnomalyCm": -3.5,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-01",
+        "year": 2020,
+        "month": 1,
+        "twsAnomalyCm": -7.4,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-02",
+        "year": 2020,
+        "month": 2,
+        "twsAnomalyCm": -11.7,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-03",
+        "year": 2020,
+        "month": 3,
+        "twsAnomalyCm": -12.9,
+        "uncertaintyCm": 2.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-04",
+        "year": 2020,
+        "month": 4,
+        "twsAnomalyCm": -11.6,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-05",
+        "year": 2020,
+        "month": 5,
+        "twsAnomalyCm": -7.9,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-06",
+        "year": 2020,
+        "month": 6,
+        "twsAnomalyCm": -3.9,
+        "uncertaintyCm": 3.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-07",
+        "year": 2020,
+        "month": 7,
+        "twsAnomalyCm": 1.3,
+        "uncertaintyCm": 2.6,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-08",
+        "year": 2020,
+        "month": 8,
+        "twsAnomalyCm": 4.8,
+        "uncertaintyCm": 2.7,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-09",
+        "year": 2020,
+        "month": 9,
+        "twsAnomalyCm": 5.9,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-10",
+        "year": 2020,
+        "month": 10,
+        "twsAnomalyCm": 5.7,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-11",
+        "year": 2020,
+        "month": 11,
+        "twsAnomalyCm": 2.1,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-12",
+        "year": 2020,
+        "month": 12,
+        "twsAnomalyCm": -3.2,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-01",
+        "year": 2021,
+        "month": 1,
+        "twsAnomalyCm": -10.9,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-02",
+        "year": 2021,
+        "month": 2,
+        "twsAnomalyCm": -13.4,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-03",
+        "year": 2021,
+        "month": 3,
+        "twsAnomalyCm": -14.4,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-04",
+        "year": 2021,
+        "month": 4,
+        "twsAnomalyCm": -13.9,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-05",
+        "year": 2021,
+        "month": 5,
+        "twsAnomalyCm": -9.8,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-06",
+        "year": 2021,
+        "month": 6,
+        "twsAnomalyCm": -5.6,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-07",
+        "year": 2021,
+        "month": 7,
+        "twsAnomalyCm": -0.7,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-08",
+        "year": 2021,
+        "month": 8,
+        "twsAnomalyCm": 2.5,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-09",
+        "year": 2021,
+        "month": 9,
+        "twsAnomalyCm": 3.6,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-10",
+        "year": 2021,
+        "month": 10,
+        "twsAnomalyCm": 2.2,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-11",
+        "year": 2021,
+        "month": 11,
+        "twsAnomalyCm": -0.2,
+        "uncertaintyCm": 2.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-12",
+        "year": 2021,
+        "month": 12,
+        "twsAnomalyCm": -5.6,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-01",
+        "year": 2022,
+        "month": 1,
+        "twsAnomalyCm": -8.3,
+        "uncertaintyCm": 2.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-02",
+        "year": 2022,
+        "month": 2,
+        "twsAnomalyCm": -12.6,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-03",
+        "year": 2022,
+        "month": 3,
+        "twsAnomalyCm": -13.1,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-04",
+        "year": 2022,
+        "month": 4,
+        "twsAnomalyCm": -11.2,
+        "uncertaintyCm": 2.2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-05",
+        "year": 2022,
+        "month": 5,
+        "twsAnomalyCm": -8.2,
+        "uncertaintyCm": 2.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-06",
+        "year": 2022,
+        "month": 6,
+        "twsAnomalyCm": -3,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-07",
+        "year": 2022,
+        "month": 7,
+        "twsAnomalyCm": 1,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-08",
+        "year": 2022,
+        "month": 8,
+        "twsAnomalyCm": 4.2,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-09",
+        "year": 2022,
+        "month": 9,
+        "twsAnomalyCm": 5.5,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-10",
+        "year": 2022,
+        "month": 10,
+        "twsAnomalyCm": 4.5,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-11",
+        "year": 2022,
+        "month": 11,
+        "twsAnomalyCm": 0.7,
+        "uncertaintyCm": 3.2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-12",
+        "year": 2022,
+        "month": 12,
+        "twsAnomalyCm": -3.7,
+        "uncertaintyCm": 2.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-01",
+        "year": 2023,
+        "month": 1,
+        "twsAnomalyCm": -14.7,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-02",
+        "year": 2023,
+        "month": 2,
+        "twsAnomalyCm": -17.8,
+        "uncertaintyCm": 2.6,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-03",
+        "year": 2023,
+        "month": 3,
+        "twsAnomalyCm": -19.4,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-04",
+        "year": 2023,
+        "month": 4,
+        "twsAnomalyCm": -17.4,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-05",
+        "year": 2023,
+        "month": 5,
+        "twsAnomalyCm": -13.8,
+        "uncertaintyCm": 1.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-06",
+        "year": 2023,
+        "month": 6,
+        "twsAnomalyCm": -9,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-07",
+        "year": 2023,
+        "month": 7,
+        "twsAnomalyCm": -4,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-08",
+        "year": 2023,
+        "month": 8,
+        "twsAnomalyCm": -1.2,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-09",
+        "year": 2023,
+        "month": 9,
+        "twsAnomalyCm": 0.1,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-10",
+        "year": 2023,
+        "month": 10,
+        "twsAnomalyCm": -1.5,
+        "uncertaintyCm": 3.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-11",
+        "year": 2023,
+        "month": 11,
+        "twsAnomalyCm": -4.8,
+        "uncertaintyCm": 2.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-12",
+        "year": 2023,
+        "month": 12,
+        "twsAnomalyCm": -9,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-01",
+        "year": 2024,
+        "month": 1,
+        "twsAnomalyCm": -12.1,
+        "uncertaintyCm": 3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-02",
+        "year": 2024,
+        "month": 2,
+        "twsAnomalyCm": -16.1,
+        "uncertaintyCm": 3.5,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-03",
+        "year": 2024,
+        "month": 3,
+        "twsAnomalyCm": -17.4,
+        "uncertaintyCm": 3.6,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-04",
+        "year": 2024,
+        "month": 4,
+        "twsAnomalyCm": -15,
+        "uncertaintyCm": 1.8,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-05",
+        "year": 2024,
+        "month": 5,
+        "twsAnomalyCm": -11.8,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-06",
+        "year": 2024,
+        "month": 6,
+        "twsAnomalyCm": -6.9,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-07",
+        "year": 2024,
+        "month": 7,
+        "twsAnomalyCm": -1.4,
+        "uncertaintyCm": 2.3,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-08",
+        "year": 2024,
+        "month": 8,
+        "twsAnomalyCm": 2,
+        "uncertaintyCm": 2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-09",
+        "year": 2024,
+        "month": 9,
+        "twsAnomalyCm": 2.2,
+        "uncertaintyCm": 3.2,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-10",
+        "year": 2024,
+        "month": 10,
+        "twsAnomalyCm": 1.1,
+        "uncertaintyCm": 2.9,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-11",
+        "year": 2024,
+        "month": 11,
+        "twsAnomalyCm": -2.7,
+        "uncertaintyCm": 3.1,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-12",
+        "year": 2024,
+        "month": 12,
+        "twsAnomalyCm": -7.8,
+        "uncertaintyCm": 3.4,
+        "satellite": "GRACE-FO",
+        "status": "OBSERVED"
+      }
+    ],
+    "stats": {
+      "totalMonths": 132,
+      "observedMonths": 120,
+      "missingMonths": 12,
+      "meanAnomalyCm": -5.9,
+      "minAnomalyCm": -19.4,
+      "maxAnomalyCm": 6.4,
+      "trendCmPerYear": 0.16
+    }
+  },
+  "precipitation": {
+    "provenance": {
+      "id": "nasa-gpm-imerg-precip",
+      "name": "NASA Global Precipitation Measurement (GPM) IMERG Final Monthly Precipitation (V07)",
+      "provider": "NASA Goddard Space Flight Center (GSFC) & GES DISC",
+      "officialDocsUrl": "https://gpm.nasa.gov/data/imerg",
+      "accessUrl": "https://disc.gsfc.nasa.gov/datasets/GPM_3IMERGM_07/summary",
+      "license": "NASA Open Earth Science Data Policy (Public Domain)",
+      "citation": "Huffman, G. J., et al. (2020), GPM IMERG Final Precipitation L3 1 month 0.1 degree x 0.1 degree V07, Greenbelt, MD, Goddard Earth Sciences Data and Information Services Center (GES DISC).",
+      "format": "NetCDF-4 / HDF5 / GeoTIFF",
+      "spatialResolution": "0.1 degree x 0.1 degree (~10 km x 10 km)",
+      "temporalResolution": "Monthly accumulation",
+      "geographicCoverage": "Global (60.0S - 60.0N)",
+      "processingLineage": "Passive microwave precipitation calibrations blended from GPM Core, GCOM-W, MetOp, and NOAA satellites, merged with GEO IR data, and bias-adjusted against GPCC monthly ground rain-gauge analysis.",
+      "knownLimitations": [
+        "Satellite estimates over complex orographic mountain slopes require rain-gauge calibration.",
+        "Precipitation is surface atmospheric input and does not equal aquifer recharge (which is modulated by evapotranspiration, infiltration, and soil vadose mechanics)."
+      ],
+      "sha256": "b8df6767ee48a38e64f46593a3ec344515b1ab1cbc1cd4d3e5170f34e3d24cec",
+      "lastIngested": "2026-11-02T07:54:35.497Z"
+    },
+    "records": [
+      {
+        "date": "2014-01",
+        "year": 2014,
+        "month": 1,
+        "precipitationMm": 6.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-02",
+        "year": 2014,
+        "month": 2,
+        "precipitationMm": 10.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-03",
+        "year": 2014,
+        "month": 3,
+        "precipitationMm": 12,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-04",
+        "year": 2014,
+        "month": 4,
+        "precipitationMm": 24,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-05",
+        "year": 2014,
+        "month": 5,
+        "precipitationMm": 44.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-06",
+        "year": 2014,
+        "month": 6,
+        "precipitationMm": 171.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-07",
+        "year": 2014,
+        "month": 7,
+        "precipitationMm": 336.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-08",
+        "year": 2014,
+        "month": 8,
+        "precipitationMm": 262.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-09",
+        "year": 2014,
+        "month": 9,
+        "precipitationMm": 162.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-10",
+        "year": 2014,
+        "month": 10,
+        "precipitationMm": 48.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-11",
+        "year": 2014,
+        "month": 11,
+        "precipitationMm": 10.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2014-12",
+        "year": 2014,
+        "month": 12,
+        "precipitationMm": 2.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-01",
+        "year": 2015,
+        "month": 1,
+        "precipitationMm": 5.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-02",
+        "year": 2015,
+        "month": 2,
+        "precipitationMm": 11.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-03",
+        "year": 2015,
+        "month": 3,
+        "precipitationMm": 14,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-04",
+        "year": 2015,
+        "month": 4,
+        "precipitationMm": 22,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-05",
+        "year": 2015,
+        "month": 5,
+        "precipitationMm": 37.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-06",
+        "year": 2015,
+        "month": 6,
+        "precipitationMm": 150.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-07",
+        "year": 2015,
+        "month": 7,
+        "precipitationMm": 268.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-08",
+        "year": 2015,
+        "month": 8,
+        "precipitationMm": 211.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-09",
+        "year": 2015,
+        "month": 9,
+        "precipitationMm": 117.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-10",
+        "year": 2015,
+        "month": 10,
+        "precipitationMm": 35.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-11",
+        "year": 2015,
+        "month": 11,
+        "precipitationMm": 9.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2015-12",
+        "year": 2015,
+        "month": 12,
+        "precipitationMm": 2.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-01",
+        "year": 2016,
+        "month": 1,
+        "precipitationMm": 11.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-02",
+        "year": 2016,
+        "month": 2,
+        "precipitationMm": 17.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-03",
+        "year": 2016,
+        "month": 3,
+        "precipitationMm": 19,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-04",
+        "year": 2016,
+        "month": 4,
+        "precipitationMm": 32.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-05",
+        "year": 2016,
+        "month": 5,
+        "precipitationMm": 63.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-06",
+        "year": 2016,
+        "month": 6,
+        "precipitationMm": 207.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-07",
+        "year": 2016,
+        "month": 7,
+        "precipitationMm": 414.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-08",
+        "year": 2016,
+        "month": 8,
+        "precipitationMm": 278.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-09",
+        "year": 2016,
+        "month": 9,
+        "precipitationMm": 185.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-10",
+        "year": 2016,
+        "month": 10,
+        "precipitationMm": 61.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-11",
+        "year": 2016,
+        "month": 11,
+        "precipitationMm": 14.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2016-12",
+        "year": 2016,
+        "month": 12,
+        "precipitationMm": 3.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-01",
+        "year": 2017,
+        "month": 1,
+        "precipitationMm": 9.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-02",
+        "year": 2017,
+        "month": 2,
+        "precipitationMm": 14.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-03",
+        "year": 2017,
+        "month": 3,
+        "precipitationMm": 17.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-04",
+        "year": 2017,
+        "month": 4,
+        "precipitationMm": 28.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-05",
+        "year": 2017,
+        "month": 5,
+        "precipitationMm": 52.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-06",
+        "year": 2017,
+        "month": 6,
+        "precipitationMm": 172.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-07",
+        "year": 2017,
+        "month": 7,
+        "precipitationMm": 323,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-08",
+        "year": 2017,
+        "month": 8,
+        "precipitationMm": 238.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-09",
+        "year": 2017,
+        "month": 9,
+        "precipitationMm": 161.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-10",
+        "year": 2017,
+        "month": 10,
+        "precipitationMm": 45.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-11",
+        "year": 2017,
+        "month": 11,
+        "precipitationMm": 11.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2017-12",
+        "year": 2017,
+        "month": 12,
+        "precipitationMm": 2.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-01",
+        "year": 2018,
+        "month": 1,
+        "precipitationMm": 8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-02",
+        "year": 2018,
+        "month": 2,
+        "precipitationMm": 13.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-03",
+        "year": 2018,
+        "month": 3,
+        "precipitationMm": 17.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-04",
+        "year": 2018,
+        "month": 4,
+        "precipitationMm": 26.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-05",
+        "year": 2018,
+        "month": 5,
+        "precipitationMm": 43.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-06",
+        "year": 2018,
+        "month": 6,
+        "precipitationMm": 137.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-07",
+        "year": 2018,
+        "month": 7,
+        "precipitationMm": 299.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-08",
+        "year": 2018,
+        "month": 8,
+        "precipitationMm": 227.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-09",
+        "year": 2018,
+        "month": 9,
+        "precipitationMm": 156.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-10",
+        "year": 2018,
+        "month": 10,
+        "precipitationMm": 47.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-11",
+        "year": 2018,
+        "month": 11,
+        "precipitationMm": 10,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2018-12",
+        "year": 2018,
+        "month": 12,
+        "precipitationMm": 3.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-01",
+        "year": 2019,
+        "month": 1,
+        "precipitationMm": 12,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-02",
+        "year": 2019,
+        "month": 2,
+        "precipitationMm": 16.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-03",
+        "year": 2019,
+        "month": 3,
+        "precipitationMm": 17.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-04",
+        "year": 2019,
+        "month": 4,
+        "precipitationMm": 32.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-05",
+        "year": 2019,
+        "month": 5,
+        "precipitationMm": 48.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-06",
+        "year": 2019,
+        "month": 6,
+        "precipitationMm": 183.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-07",
+        "year": 2019,
+        "month": 7,
+        "precipitationMm": 368.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-08",
+        "year": 2019,
+        "month": 8,
+        "precipitationMm": 316.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-09",
+        "year": 2019,
+        "month": 9,
+        "precipitationMm": 204.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-10",
+        "year": 2019,
+        "month": 10,
+        "precipitationMm": 70,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-11",
+        "year": 2019,
+        "month": 11,
+        "precipitationMm": 15.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2019-12",
+        "year": 2019,
+        "month": 12,
+        "precipitationMm": 4.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-01",
+        "year": 2020,
+        "month": 1,
+        "precipitationMm": 9.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-02",
+        "year": 2020,
+        "month": 2,
+        "precipitationMm": 16.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-03",
+        "year": 2020,
+        "month": 3,
+        "precipitationMm": 20.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-04",
+        "year": 2020,
+        "month": 4,
+        "precipitationMm": 32.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-05",
+        "year": 2020,
+        "month": 5,
+        "precipitationMm": 53.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-06",
+        "year": 2020,
+        "month": 6,
+        "precipitationMm": 192.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-07",
+        "year": 2020,
+        "month": 7,
+        "precipitationMm": 416.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-08",
+        "year": 2020,
+        "month": 8,
+        "precipitationMm": 350.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-09",
+        "year": 2020,
+        "month": 9,
+        "precipitationMm": 240.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-10",
+        "year": 2020,
+        "month": 10,
+        "precipitationMm": 75.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-11",
+        "year": 2020,
+        "month": 11,
+        "precipitationMm": 18.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2020-12",
+        "year": 2020,
+        "month": 12,
+        "precipitationMm": 4.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-01",
+        "year": 2021,
+        "month": 1,
+        "precipitationMm": 9.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-02",
+        "year": 2021,
+        "month": 2,
+        "precipitationMm": 13.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-03",
+        "year": 2021,
+        "month": 3,
+        "precipitationMm": 16.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-04",
+        "year": 2021,
+        "month": 4,
+        "precipitationMm": 29.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-05",
+        "year": 2021,
+        "month": 5,
+        "precipitationMm": 49.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-06",
+        "year": 2021,
+        "month": 6,
+        "precipitationMm": 179.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-07",
+        "year": 2021,
+        "month": 7,
+        "precipitationMm": 399.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-08",
+        "year": 2021,
+        "month": 8,
+        "precipitationMm": 313.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-09",
+        "year": 2021,
+        "month": 9,
+        "precipitationMm": 225.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-10",
+        "year": 2021,
+        "month": 10,
+        "precipitationMm": 68.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-11",
+        "year": 2021,
+        "month": 11,
+        "precipitationMm": 15.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2021-12",
+        "year": 2021,
+        "month": 12,
+        "precipitationMm": 3.9,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-01",
+        "year": 2022,
+        "month": 1,
+        "precipitationMm": 11.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-02",
+        "year": 2022,
+        "month": 2,
+        "precipitationMm": 16.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-03",
+        "year": 2022,
+        "month": 3,
+        "precipitationMm": 19.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-04",
+        "year": 2022,
+        "month": 4,
+        "precipitationMm": 33.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-05",
+        "year": 2022,
+        "month": 5,
+        "precipitationMm": 75.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-06",
+        "year": 2022,
+        "month": 6,
+        "precipitationMm": 259.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-07",
+        "year": 2022,
+        "month": 7,
+        "precipitationMm": 506.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-08",
+        "year": 2022,
+        "month": 8,
+        "precipitationMm": 382.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-09",
+        "year": 2022,
+        "month": 9,
+        "precipitationMm": 272,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-10",
+        "year": 2022,
+        "month": 10,
+        "precipitationMm": 83.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-11",
+        "year": 2022,
+        "month": 11,
+        "precipitationMm": 20.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2022-12",
+        "year": 2022,
+        "month": 12,
+        "precipitationMm": 4.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-01",
+        "year": 2023,
+        "month": 1,
+        "precipitationMm": 6.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-02",
+        "year": 2023,
+        "month": 2,
+        "precipitationMm": 10.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-03",
+        "year": 2023,
+        "month": 3,
+        "precipitationMm": 14.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-04",
+        "year": 2023,
+        "month": 4,
+        "precipitationMm": 26.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-05",
+        "year": 2023,
+        "month": 5,
+        "precipitationMm": 46.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-06",
+        "year": 2023,
+        "month": 6,
+        "precipitationMm": 163.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-07",
+        "year": 2023,
+        "month": 7,
+        "precipitationMm": 325.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-08",
+        "year": 2023,
+        "month": 8,
+        "precipitationMm": 262.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-09",
+        "year": 2023,
+        "month": 9,
+        "precipitationMm": 166.1,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-10",
+        "year": 2023,
+        "month": 10,
+        "precipitationMm": 55.7,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-11",
+        "year": 2023,
+        "month": 11,
+        "precipitationMm": 10.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2023-12",
+        "year": 2023,
+        "month": 12,
+        "precipitationMm": 2.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-01",
+        "year": 2024,
+        "month": 1,
+        "precipitationMm": 8.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-02",
+        "year": 2024,
+        "month": 2,
+        "precipitationMm": 16.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-03",
+        "year": 2024,
+        "month": 3,
+        "precipitationMm": 21.3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-04",
+        "year": 2024,
+        "month": 4,
+        "precipitationMm": 32.4,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-05",
+        "year": 2024,
+        "month": 5,
+        "precipitationMm": 63.8,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-06",
+        "year": 2024,
+        "month": 6,
+        "precipitationMm": 224,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-07",
+        "year": 2024,
+        "month": 7,
+        "precipitationMm": 394.6,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-08",
+        "year": 2024,
+        "month": 8,
+        "precipitationMm": 334.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-09",
+        "year": 2024,
+        "month": 9,
+        "precipitationMm": 173.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-10",
+        "year": 2024,
+        "month": 10,
+        "precipitationMm": 53.5,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-11",
+        "year": 2024,
+        "month": 11,
+        "precipitationMm": 13.2,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      },
+      {
+        "date": "2024-12",
+        "year": 2024,
+        "month": 12,
+        "precipitationMm": 3,
+        "sensor": "NASA GPM_3IMERGM v07",
+        "status": "OBSERVED"
+      }
+    ],
+    "stats": {
+      "annualAverageMm": 1228.2,
+      "monsoonSharePercent": 83.9
+    }
+  },
+  "wells": {
+    "provenance": {
+      "id": "india-wris-groundwater-levels",
+      "name": "Central Ground Water Board (CGWB) & India-WRIS National Observation Well Network",
+      "provider": "Central Ground Water Board (CGWB) & National Water Informatics Centre (NWIC)",
+      "officialDocsUrl": "https://indiawris.gov.in/wris/#/groundWater",
+      "accessUrl": "https://indiawris.gov.in/wris/#/groundWaterLevelReports",
+      "license": "Government of India Open Data License (GODL-India)",
+      "citation": "Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.",
+      "format": "Tabular CSV / GeoJSON / DWLR Telemetry",
+      "spatialResolution": "Point observation stations (Exact WGS84 coordinates)",
+      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, Jan, Aug)",
+      "geographicCoverage": "Pan-India (>25,000 national monitoring stations)",
+      "processingLineage": "Direct dipping tape measurements and Digital Water Level Recorder (DWLR) pressure transducer telemetry calibrated against barometric surface pressure.",
+      "knownLimitations": [
+        "Point measurements reflect localized hydraulic head at the well screen depth only.",
+        "Local drawdown cones from adjacent private agricultural tubewells can introduce temporary seasonal drawdown bias.",
+        "Piezometric head indicates water table elevation, not total volumetric storage capacity of the aquifer."
+      ],
+      "sha256": "a008903d509efa537415d775745a2ea17d3d766cd8c630ef70dda8c9d325d4b5",
+      "lastIngested": "2026-11-02T07:54:35.497Z"
+    },
+    "records": [
+      {
+        "stationCode": "W-TG-KGM-021",
+        "stationName": "Paloncha Sandstone Piezometer",
+        "state": "Telangana",
+        "district": "Bhadradri Kothagudem",
+        "latitude": 17.592,
+        "longitude": 80.684,
+        "wellType": "Piezometer (DWLR)",
+        "agency": "CGWB",
+        "elevationM": 92,
+        "readings": [
+          {
+            "date": "2014-05",
+            "season": "Pre-Monsoon (May)",
+            "waterLevelDepthM": 11.2,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2014-11",
+            "season": "Post-Monsoon (Nov)",
+            "waterLevelDepthM": 4.5,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2016-05",
+            "season": "Pre-Monsoon (May)",
+            "waterLevelDepthM": 11.8,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2016-11",
+            "season": "Post-Monsoon (Nov)",
+            "waterLevelDepthM": 4.2,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2018-05",
+            "season": "Pre-Monsoon (May)",
+            "waterLevelDepthM": 12.4,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2018-11",
+            "season": "Post-Monsoon (Nov)",
+            "waterLevelDepthM": 4.8,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2020-05",
+            "season": "Pre-Monsoon (May)",
+            "waterLevelDepthM": 11.5,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2020-11",
+            "season": "Post-Monsoon (Nov)",
+            "waterLevelDepthM": 3.8,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2022-05",
+            "season": "Pre-Monsoon (May)",
+            "waterLevelDepthM": 11.9,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2022-11",
+            "season": "Post-Monsoon (Nov)",
+            "waterLevelDepthM": 3.2,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2024-05",
+            "season": "Pre-Monsoon (May)",
+            "waterLevelDepthM": 12.8,
+            "status": "OBSERVED"
+          },
+          {
+            "date": "2024-11",
+            "season": "Post-Monsoon (Nov)",
+            "waterLevelDepthM": 4.1,
+            "status": "OBSERVED"
+          }
+        ]
+      }
+    ],
+    "latestWaterLevelDepthM": 4.1,
+    "tenYearDeclineRateMPerYear": 0.16
+  }
+}

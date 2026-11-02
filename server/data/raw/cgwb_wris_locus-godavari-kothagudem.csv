@@ -1,0 +1,13 @@
+Station_Code,Station_Name,State,District,Latitude,Longitude,Well_Type,Agency,Elevation_m,Date,Season,Water_Level_Depth_mbgl,Status
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2014-05,"Pre-Monsoon (May)",11.2,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2014-11,"Post-Monsoon (Nov)",4.5,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2016-05,"Pre-Monsoon (May)",11.8,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2016-11,"Post-Monsoon (Nov)",4.2,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2018-05,"Pre-Monsoon (May)",12.4,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2018-11,"Post-Monsoon (Nov)",4.8,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2020-05,"Pre-Monsoon (May)",11.5,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2020-11,"Post-Monsoon (Nov)",3.8,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2022-05,"Pre-Monsoon (May)",11.9,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2022-11,"Post-Monsoon (Nov)",3.2,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2024-05,"Pre-Monsoon (May)",12.8,OBSERVED
+W-TG-KGM-021,"Paloncha Sandstone Piezometer",Telangana,Bhadradri Kothagudem,17.592,80.684,Piezometer (DWLR),CGWB,92,2024-11,"Post-Monsoon (Nov)",4.1,OBSERVED

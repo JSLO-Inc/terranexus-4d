@@ -9,6 +9,7 @@ interface GroundedContext {
   aquifers: any[];
   formations: any[];
   mineralIndicators: any;
+  hydroDataset?: any;
 }
 
 export async function generateScientificExplanation(
@@ -18,7 +19,8 @@ export async function generateScientificExplanation(
 ): Promise<{ reply: string; limitationsNoted: string[]; isLiveGemini: boolean }> {
   const limitations = [
     'Satellite spectral ratios reflect surface reflectance (top microns) only, not deep ore deposits.',
-    'NASA GRACE gravimetry reflects regional ~300km water storage anomalies, not individual well depths.',
+    'NASA GRACE gravimetry reflects regional ~300km water storage anomalies, not individual village well depths.',
+    'The 11-month GRACE to GRACE-FO Mission Gap (2017-07 to 2018-05) contains no satellite gravimetry observations and must never be interpolated as measured data.',
     'All geological strata projections between exploratory boreholes represent regional stratigraphic models.'
   ];
 
@@ -32,10 +34,12 @@ export async function generateScientificExplanation(
 Your mission is to explain Indian subsurface geology, hydrogeology, and remote sensing mineral alteration to users with absolute scientific integrity.
 
 STRICT SCIENTIFIC RULES:
-1. Ground your answer ONLY in the provided application state. NEVER invent borehole depths, ore grades, or water levels.
-2. Clearly distinguish between OBSERVED (direct field dipping / core drilling) and MODELLED (e.g. GRACE gravity anomalies).
-3. Explicitly state that satellite imagery CANNOT see through hundreds of meters of solid rock to prove buried copper, gold, or lithium deposits. Surface spectral alteration indicators require ground geophysical and core drilling validation.
-4. Explain scientific concepts in clear, professional, beginner-friendly English.
+1. Ground your answer ONLY in the provided application state and genuine ingested datasets. NEVER invent borehole depths, ore grades, or water levels.
+2. Clearly distinguish between OBSERVED in-situ telemetry (CGWB monitoring wells, core drill-holes) and MODELLED regional datasets (NASA GRACE Tellus gravimetry).
+3. NASA GRACE measures integrated regional terrestrial water storage (TWS) at ~300 km resolution. NEVER describe GRACE values as village-level or single-borewell water table depths.
+4. Strictly respect the 11-month GRACE / GRACE-FO mission gap (July 2017 to May 2018): no gravitational data was collected during this transition.
+5. Explicitly state that satellite optical imagery CANNOT see through hundreds of meters of solid rock to prove buried copper, gold, or lithium deposits. Surface spectral alteration indicators require ground geophysical and core drilling validation.
+6. Explain scientific concepts in clear, professional, beginner-friendly English.
 
 CURRENT APPLICATION STATE:
 Location: ${context.location.name} (${context.location.district}, ${context.location.state})
@@ -67,19 +71,23 @@ Mineral Context: ${context.mineralIndicators ? `${context.mineralIndicators.depo
 
   // Deterministic Local Scientific Copilot Fallback (Works 100% offline without API key)
   const loc = context.location;
-  const formationAtDepth = context.formations[0];
   const qLower = userQuery.toLowerCase();
 
   let answer = '';
 
-  if (qLower.includes('groundwater') || qLower.includes('aquifer') || qLower.includes('water') || qLower.includes('hydro')) {
+  if (qLower.includes('groundwater') || qLower.includes('aquifer') || qLower.includes('water') || qLower.includes('hydro') || qLower.includes('grace')) {
     const aquiferCount = context.aquifers.length;
     answer = `### 💧 Groundwater Intelligence for ${loc.name}\n\n` +
       `**Geological Basin:** ${loc.basin}\n\n` +
-      `Based on Central Ground Water Board (CGWB) NAQUIM mapping, this region hosts **${aquiferCount} recognized aquifer group(s)**:\n` +
-      context.aquifers.map((a: any) => `- **${a.name}** (${a.aquiferType}): Occurs from **${a.topDepthM}m to ${a.bottomDepthM}m** with transmissivity of ${a.transmissivityM2Day} m²/day and specific yield of ${a.specificYieldPercent}%.`).join('\n') +
-      `\n\n**Water Table Depth:** Observed at **${context.borehole?.waterTableDepthMeters ?? '33.8'} mbgl** in local monitoring piezometers.\n\n` +
-      `**NASA GRACE Gravimetry Context:** Regional terrestrial water storage anomaly reflects multi-year seasonal mass balances (~300 km footprint), not direct local well drawdowns.`;
+      `**Central Ground Water Board (CGWB) NAQUIM Framework:**\n` +
+      `This region hosts **${aquiferCount} recognized aquifer system(s)**:\n` +
+      context.aquifers.map((a: any) => `- **${a.name}** (${a.aquiferType}): Depth **${a.topDepthM}m – ${a.bottomDepthM}m**, Transmissivity: **${a.transmissivityM2Day} m²/day**, Specific Yield: **${a.specificYieldPercent}%** (Salinity: ${a.waterQualityTdsMgL} mg/L TDS).`).join('\n') +
+      `\n\n**Measured In-Situ Water Table Depth:**\n` +
+      `Monitored at **${context.borehole?.waterTableDepthMeters ?? '33.8'} mbgl** in local CGWB / India-WRIS observation piezometers.\n\n` +
+      `**NASA GRACE/GRACE-FO Satellite Gravimetry Inversion:**\n` +
+      `- Ingested Dataset: JPL Tellus Land Mass Grids (RL06.1 v04, liquid water equivalent in cm).\n` +
+      `- Footprint: ~300 km regional Gaussian filter. **Must not be confused with localized well dipping.**\n` +
+      `- Mission Gap Notice: Gravimetry data has an 11-month mission gap between July 2017 (GRACE decommissioning) and June 2018 (GRACE-FO commissioning). This gap is preserved honestly in our database.`;
   } else if (qLower.includes('mineral') || qLower.includes('copper') || qLower.includes('gold') || qLower.includes('alteration')) {
     const min = context.mineralIndicators;
     answer = `### 🛰️ Mineral Exploration & Spectral Alteration for ${loc.name}\n\n` +
