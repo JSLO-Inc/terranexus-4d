@@ -1,4 +1,10 @@
-export type ScientificStatus = 'OBSERVED' | 'MODELLED' | 'PREDICTED' | 'SIMULATED';
+export type ScientificStatus =
+  | 'OBSERVED'
+  | 'MODELLED'
+  | 'PREDICTED'
+  | 'SIMULATED'
+  | 'DEMONSTRATION'
+  | 'UNVERIFIED';
 
 export interface DatasetMetadata {
   id: string;

@@ -16,7 +16,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 1.8,
       densityGcm3: 2.65,
       hardnessMohs: 7.0,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     },
     {
       id: 'geo-ajabgarh-sch',
@@ -32,7 +32,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 2.4,
       densityGcm3: 2.82,
       hardnessMohs: 5.5,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     },
     {
       id: 'geo-khetri-basement',
@@ -48,7 +48,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 0.6,
       densityGcm3: 2.72,
       hardnessMohs: 6.5,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     }
   ],
   'locus-deccan-pune': [
@@ -66,7 +66,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 4.5,
       densityGcm3: 2.90,
       hardnessMohs: 6.0,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     },
     {
       id: 'geo-dt-pune-low',
@@ -82,7 +82,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 2.1,
       densityGcm3: 2.95,
       hardnessMohs: 6.5,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     },
     {
       id: 'geo-peninsular-basement',
@@ -98,7 +98,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 0.5,
       densityGcm3: 2.70,
       hardnessMohs: 6.5,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     }
   ],
   'locus-indogangetic-ludhiana': [
@@ -116,7 +116,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 28.0,
       densityGcm3: 1.95,
       hardnessMohs: 3.0,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     },
     {
       id: 'geo-ig-older',
@@ -132,7 +132,7 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 19.5,
       densityGcm3: 2.15,
       hardnessMohs: 3.5,
-      status: 'OBSERVED'
+      status: 'MODELLED'
     },
     {
       id: 'geo-siwalik-bed',
@@ -148,15 +148,152 @@ export const GEOLOGICAL_FORMATIONS: Record<string, GeologicalFormation[]> = {
       porosityAvg: 8.0,
       densityGcm3: 2.45,
       hardnessMohs: 5.0,
-      status: 'OBSERVED'
+      status: 'MODELLED'
+    }
+  ],
+  'locus-zawar-udaipur': [
+    {
+      id: 'geo-zaw-mochia',
+      code: 'ZAW-MOC',
+      name: 'Mochia Formation (Host Dolomite)',
+      supergroup: 'Aravalli Supergroup',
+      group: 'Zawar Group',
+      age: 'Paleoproterozoic (~2.0 Ga)',
+      primaryLithology: 'Massive dolomitic marble with sphalerite-galena lenses',
+      secondaryLithology: 'Carbonaceous and sericitic phyllite',
+      typicalThicknessMeters: 350,
+      colorHex: '#94a3b8',
+      porosityAvg: 2.0,
+      densityGcm3: 2.85,
+      hardnessMohs: 4.0,
+      status: 'MODELLED'
+    },
+    {
+      id: 'geo-zaw-phyllite',
+      code: 'ZAW-PHY',
+      name: 'Borai Formation (Graphitic Phyllite & Quartzite)',
+      supergroup: 'Aravalli Supergroup',
+      group: 'Zawar Group',
+      age: 'Paleoproterozoic (~2.1 Ga)',
+      primaryLithology: 'Graphite-bearing carbonaceous phyllite with sheared quartz veins',
+      secondaryLithology: 'Ferruginous quartzite beds',
+      typicalThicknessMeters: 550,
+      colorHex: '#475569',
+      porosityAvg: 3.2,
+      densityGcm3: 2.70,
+      hardnessMohs: 4.5,
+      status: 'MODELLED'
+    }
+  ],
+  'locus-dharwar-kolar': [
+    {
+      id: 'geo-kol-amphibolite',
+      code: 'KOL-AMP',
+      name: 'Kolar Schist Formation (Metabasalt / Amphibolite)',
+      supergroup: 'Dharwar Supergroup',
+      group: 'Kolar Greenstone Group',
+      age: 'Neoarchean (~2.7 Ga)',
+      primaryLithology: 'Foliated hornblende-plagioclase amphibolite with auriferous quartz veins',
+      secondaryLithology: 'Banded Iron Formation (BIF) marker bands',
+      typicalThicknessMeters: 1200,
+      colorHex: '#1e3a5f',
+      porosityAvg: 1.1,
+      densityGcm3: 3.05,
+      hardnessMohs: 6.5,
+      status: 'MODELLED'
+    },
+    {
+      id: 'geo-kol-champion',
+      code: 'KOL-CHA',
+      name: 'Champion Gneiss & Granitoid Basement',
+      supergroup: 'Dharwar Craton Basement',
+      group: 'Peninsular Gneissic Complex',
+      age: 'Mesoarchean (~3.2 Ga)',
+      primaryLithology: 'Granodioritic and tonalitic gneiss',
+      secondaryLithology: 'Pegmatite and microgranite dykes',
+      typicalThicknessMeters: 3000,
+      colorHex: '#0f172a',
+      porosityAvg: 0.6,
+      densityGcm3: 2.68,
+      hardnessMohs: 6.5,
+      status: 'MODELLED'
+    }
+  ],
+  'locus-singhbhum-jharkhand': [
+    {
+      id: 'geo-sin-chaibasa',
+      code: 'SIN-CHAI',
+      name: 'Chaibasa Formation (Mica Schist & Quartzite)',
+      supergroup: 'Singhbhum Group',
+      group: 'Singhbhum Mobile Belt',
+      age: 'Mesoproterozoic (~1.6 Ga)',
+      primaryLithology: 'Garnet-staurolite-mica schist and kyanite quartzite',
+      secondaryLithology: 'Apatite-magnetite mineralized veins',
+      typicalThicknessMeters: 800,
+      colorHex: '#7c2d12',
+      porosityAvg: 2.2,
+      densityGcm3: 2.78,
+      hardnessMohs: 6.0,
+      status: 'MODELLED'
+    },
+    {
+      id: 'geo-sin-granite',
+      code: 'SIN-GRN',
+      name: 'Singhbhum Granite Complex (Basement)',
+      supergroup: 'Singhbhum Craton',
+      group: 'Singhbhum Granite Phase III',
+      age: 'Paleoarchean (~3.3 Ga)',
+      primaryLithology: 'Biotite granodiorite and tonalite',
+      secondaryLithology: 'Mafic dyke swarms (Newer Dolerite)',
+      typicalThicknessMeters: 4000,
+      colorHex: '#451a03',
+      porosityAvg: 0.5,
+      densityGcm3: 2.65,
+      hardnessMohs: 6.5,
+      status: 'MODELLED'
+    }
+  ],
+  'locus-godavari-kothagudem': [
+    {
+      id: 'geo-god-kamthi',
+      code: 'GOD-KAM',
+      name: 'Kamthi Formation (Upper Gondwana Sandstone)',
+      supergroup: 'Gondwana Supergroup',
+      group: 'Kamthi Group',
+      age: 'Late Permian to Early Triassic (~250 Ma)',
+      primaryLithology: 'Coarse ferruginous sandstone with pebble horizons and siltstone',
+      secondaryLithology: 'Red clay and mudstone lenses',
+      typicalThicknessMeters: 400,
+      colorHex: '#b45309',
+      porosityAvg: 16.5,
+      densityGcm3: 2.28,
+      hardnessMohs: 4.5,
+      status: 'MODELLED'
+    },
+    {
+      id: 'geo-god-barakar',
+      code: 'GOD-BAR',
+      name: 'Barakar Formation (Coal Measures & Sandstone)',
+      supergroup: 'Gondwana Supergroup',
+      group: 'Damuda Group',
+      age: 'Early Permian (~280 Ma)',
+      primaryLithology: 'White to grey felspathic sandstone interbedded with workable coal seams',
+      secondaryLithology: 'Carbonaceous shale and fireclay',
+      typicalThicknessMeters: 650,
+      colorHex: '#78350f',
+      porosityAvg: 12.0,
+      densityGcm3: 2.35,
+      hardnessMohs: 4.0,
+      status: 'MODELLED'
     }
   ]
 };
 
-export const AUTHENTIC_BOREHOLES: BoreholeRecord[] = [
+// Representative composite litholog benchmark records (synthesized from published geological drill memoirs)
+export const REPRESENTATIVE_BOREHOLES: BoreholeRecord[] = [
   {
     id: 'bh-gsi-khe-014',
-    wellCode: 'GSI-KHE-DDH-14B',
+    wellCode: 'GSI-KHE-DDH-14B (Representative Composite)',
     locationId: 'locus-khetri-rajasthan',
     latitude: 28.0051,
     longitude: 75.7892,
@@ -164,18 +301,18 @@ export const AUTHENTIC_BOREHOLES: BoreholeRecord[] = [
     sourceAgency: 'GSI',
     drillingYear: 2018,
     waterTableDepthMeters: 48.5,
-    status: 'OBSERVED',
+    status: 'DEMONSTRATION',
     strataIntervals: [
       { fromDepth: 0, toDepth: 12, lithology: 'Colluvium / Alluvial Soil', description: 'Loose quartzose sand with angular quartzite gravels', color: '#fef08a', permeability: 'High' },
       { fromDepth: 12, toDepth: 55, lithology: 'Weathered Quartz-Mica Schist', description: 'Oxidized limonite-stained biotite schist with clayey foliation planes', color: '#d97706', permeability: 'Medium' },
       { fromDepth: 55, toDepth: 160, lithology: 'Massive Alwar Quartzite', description: 'Vitreous hard pinkish-white quartzite, cross-bedded with minor joints', color: '#b45309', permeability: 'Low' },
-      { fromDepth: 160, toDepth: 310, lithology: 'Garnet-Chlorite-Quartz Schist (Mineralized)', description: 'Foliated shear zone containing chalcopyrite dissemination and pyrrhotite veins (Cu assay: 0.82% - 1.45%)', color: '#92400e', permeability: 'Low' },
+      { fromDepth: 160, toDepth: 310, lithology: 'Garnet-Chlorite-Quartz Schist (Mineralized)', description: 'Foliated shear zone containing chalcopyrite dissemination and pyrrhotite veins (Representative Cu zone)', color: '#92400e', permeability: 'Low' },
       { fromDepth: 310, toDepth: 450, lithology: 'Massive Amphibolite & Granitic Gneiss', description: 'Dense dark greenish-black hornblende-plagioclase amphibolite with quartz veins', color: '#451a03', permeability: 'Impermeable' }
     ]
   },
   {
     id: 'bh-cgwb-lud-003',
-    wellCode: 'CGWB-PB-LUD-EW-03',
+    wellCode: 'CGWB-PB-LUD-EW-03 (Representative Composite)',
     locationId: 'locus-indogangetic-ludhiana',
     latitude: 30.9042,
     longitude: 75.8598,
@@ -183,7 +320,7 @@ export const AUTHENTIC_BOREHOLES: BoreholeRecord[] = [
     sourceAgency: 'CGWB',
     drillingYear: 2021,
     waterTableDepthMeters: 33.8,
-    status: 'OBSERVED',
+    status: 'DEMONSTRATION',
     strataIntervals: [
       { fromDepth: 0, toDepth: 18, lithology: 'Surface Sandy Loam & Silt', description: 'Topsoil under active agrarian cultivation', color: '#fef3c7', permeability: 'High' },
       { fromDepth: 18, toDepth: 62, lithology: 'Fine to Medium Micaceous Sand (Aquifer I)', description: 'Pale yellowish-grey sand with muscovite and quartz grains', color: '#fde68a', permeability: 'High' },
@@ -195,7 +332,7 @@ export const AUTHENTIC_BOREHOLES: BoreholeRecord[] = [
   },
   {
     id: 'bh-gwb-pun-009',
-    wellCode: 'GSDA-MH-PUN-PZ-09',
+    wellCode: 'GSDA-MH-PUN-PZ-09 (Representative Composite)',
     locationId: 'locus-deccan-pune',
     latitude: 18.5230,
     longitude: 73.8591,
@@ -203,7 +340,7 @@ export const AUTHENTIC_BOREHOLES: BoreholeRecord[] = [
     sourceAgency: 'State Ground Water Department',
     drillingYear: 2020,
     waterTableDepthMeters: 8.2,
-    status: 'OBSERVED',
+    status: 'DEMONSTRATION',
     strataIntervals: [
       { fromDepth: 0, toDepth: 4, lithology: 'Black Cotton Soil (Regur)', description: 'Expansive smectite-rich clayey soil', color: '#334155', permeability: 'Low' },
       { fromDepth: 4, toDepth: 16, lithology: 'Weathered Vesicular Basalt (Murrum)', description: 'Decomposed friable basalt, main unconfined dugwell aquifer zone', color: '#64748b', permeability: 'Medium' },
@@ -214,3 +351,6 @@ export const AUTHENTIC_BOREHOLES: BoreholeRecord[] = [
     ]
   }
 ];
+
+// Backward-compatible alias for existing imports
+export const AUTHENTIC_BOREHOLES = REPRESENTATIVE_BOREHOLES;

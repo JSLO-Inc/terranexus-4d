@@ -1,4 +1,5 @@
 import { SpectralIndexIndicator } from '../types';
+import { ScientificStatus } from '../types/datasets';
 
 export interface MineralProspectivitySummary {
   locationId: string;
@@ -9,7 +10,7 @@ export interface MineralProspectivitySummary {
   spectralIndices: SpectralIndexIndicator[];
   regionalProspectivityScore: 'Low' | 'Moderate' | 'High' | 'Prospective Belt';
   fieldValidationRequirement: string;
-  status: 'OBSERVED' | 'MODELLED';
+  status: ScientificStatus;
 }
 
 export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
@@ -21,7 +22,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
     surfaceAlterationFeatures: 'Prominent surface gossan caps, intense ferruginous staining (goethite/hematite), and sericitic/chloritic alteration haloes on exposed ridge crests.',
     regionalProspectivityScore: 'Prospective Belt',
     fieldValidationRequirement: 'MANDATORY: Surface spectral anomalies reflect surficial weathering and alteration only. Core drilling, ground electromagnetic/IP geophysics, and laboratory geochemical assays are essential to confirm subsurface mineralization.',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     spectralIndices: [
       {
         id: 'spec-fe-khe',
@@ -32,8 +33,8 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Hematite, Goethite, Limonite, Ferrihydrite',
         indexValue: 1.84,
         alterationStrength: 'Intense',
-        status: 'OBSERVED',
-        scientificDisclaimer: 'High B4/B2 reflectance ratio indicates selective absorption in blue and high reflectance in red, diagnostic of oxidized iron minerals on exposed rock surfaces. DOES NOT indicate underground ore depth or tonnage.'
+        status: 'MODELLED',
+        scientificDisclaimer: 'Curated regional benchmark ratio (B4/B2) diagnostic of oxidized iron minerals on exposed rock surfaces. DOES NOT indicate underground ore depth or tonnage.'
       },
       {
         id: 'spec-oh-khe',
@@ -44,7 +45,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Al-OH clay minerals (Kaolinite, Illite, Sericite, Muscovite)',
         indexValue: 1.62,
         alterationStrength: 'Moderate',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Indicates characteristic Al-OH vibrational absorption at 2.2 microns typical of phyllic/argillic alteration zones associated with hydrothermal fluid circulation.'
       },
       {
@@ -56,7 +57,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Fe-Mg silicates (Chlorite, Epidote, Actinolite)',
         indexValue: 1.35,
         alterationStrength: 'Moderate',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Corresponds to propylitic alteration margins surrounding inner hydrothermal cores.'
       }
     ]
@@ -69,7 +70,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
     surfaceAlterationFeatures: 'Silicification, ferruginous carbonate alteration, and surface oxidation crusts on dolomitic ridges.',
     regionalProspectivityScore: 'Prospective Belt',
     fieldValidationRequirement: 'MANDATORY: Remote sensing spectral anomalies highlight outcropping dolomites and gossanous horizons. Underground mine development requires 3D electrical resistivity and exploratory diamond drilling.',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     spectralIndices: [
       {
         id: 'spec-fe-zaw',
@@ -80,7 +81,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Ferruginous Carbonate & Gossan',
         indexValue: 1.48,
         alterationStrength: 'Moderate',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Reflects weathering of iron-bearing carbonates and oxidized sphalerite/galena gossans.'
       },
       {
@@ -92,7 +93,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Dolomite, Calcite, Talc, Sericite',
         indexValue: 1.71,
         alterationStrength: 'Intense',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Distinct 2.3-micron vibrational overtone of Mg-CO3 in dolomite.'
       }
     ]
@@ -105,7 +106,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
     surfaceAlterationFeatures: 'Silica enrichment, tourmalinization, and quartz-carbonate veins within sheared amphibolites.',
     regionalProspectivityScore: 'High',
     fieldValidationRequirement: 'MANDATORY: Surface vegetation and soil cover partially obscure outcrop. Magnetic/gravity survey validation required.',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     spectralIndices: [
       {
         id: 'spec-fe-kol',
@@ -116,7 +117,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Magnetite, Hematite, Quartzite',
         indexValue: 1.55,
         alterationStrength: 'Moderate',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Elevated iron absorption from outcropping ferruginous quartzites.'
       },
       {
@@ -128,7 +129,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Muscovite / Illite Alteration',
         indexValue: 1.28,
         alterationStrength: 'Weak',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Muted by tropical soil weathering; indicates localized hydrothermally sheared metavolcanics.'
       }
     ]
@@ -141,7 +142,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
     surfaceAlterationFeatures: 'Thick vegetative crops and cultivated soils. No hydrothermal alteration signatures.',
     regionalProspectivityScore: 'Low',
     fieldValidationRequirement: 'No hard-rock mineral prospectivity. Basin comprises hundreds of meters of soft fluvial sediments.',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     spectralIndices: [
       {
         id: 'spec-fe-lud',
@@ -152,7 +153,7 @@ export const MINERAL_INDICATORS: Record<string, MineralProspectivitySummary> = {
         targetMineralGroup: 'Soil Organic Matter & Humus',
         indexValue: 1.05,
         alterationStrength: 'Negligible',
-        status: 'OBSERVED',
+        status: 'MODELLED',
         scientificDisclaimer: 'Dominated by agricultural crop chlorophyll signatures (high NIR) rather than mineralized rock.'
       }
     ]

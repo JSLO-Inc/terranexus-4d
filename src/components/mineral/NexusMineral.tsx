@@ -18,7 +18,7 @@ export const NexusMineral: React.FC = () => {
               <Sparkles className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">NEXUS MINERAL — Remote Sensing & Alteration</h2>
-            <StatusBadge status="OBSERVED" size="md" />
+            <StatusBadge status="MODELLED" size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1">
             Copernicus Sentinel-2 & ASTER multi-spectral band ratioing for surface gossan, iron oxide, and hydrothermal clay detection.

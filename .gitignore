@@ -35,5 +35,6 @@ dist-ssr
 .cache
 .turbo
 .temp
+.temp-chrome/
 *.tsbuildinfo
 tmp/

@@ -236,10 +236,10 @@ export const Subsurface3D: React.FC = () => {
             <Box className="w-4 h-4" />
             <span>3D STRATIGRAPHIC CUTAWAY</span>
           </div>
-          <StatusBadge status="OBSERVED" size="sm" />
+          <StatusBadge status="SIMULATED" size="sm" />
         </div>
         <p className="text-[11px] text-slate-400 leading-tight">
-          Volumetric block diagram derived from published GSI 1:50,000 geological mapping & deep exploratory drill-holes.
+          Conceptual 3D block diagram derived from regional GSI 1:50,000 stratigraphy and discrete 1D exploratory drill-holes.
         </p>
         <div className="mt-2 flex items-center gap-3 text-[10px] font-mono text-slate-400 border-t border-slate-800/80 pt-1.5">
           <span className="flex items-center gap-1 text-cyan-400">

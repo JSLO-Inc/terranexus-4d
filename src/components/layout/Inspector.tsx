@@ -111,7 +111,7 @@ export const Inspector: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-amber-400" />
-                <h4 className="font-semibold text-xs text-slate-200">Borehole Litholog Record</h4>
+                <h4 className="font-semibold text-xs text-slate-200">Representative Composite Litholog</h4>
               </div>
               <StatusBadge status={selectedBorehole.status} size="sm" />
             </div>

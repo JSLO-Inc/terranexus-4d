@@ -1,11 +1,11 @@
 import { DATASET_REGISTRY } from '../src/data/datasetsRegistry';
 import { INDIA_LOCATIONS } from '../src/data/locationsIndia';
 import { AQUIFER_SYSTEMS, HYDRO_TIMESERIES } from '../src/data/hydroData';
-import { GEOLOGICAL_FORMATIONS, AUTHENTIC_BOREHOLES } from '../src/data/strataData';
+import { GEOLOGICAL_FORMATIONS, REPRESENTATIVE_BOREHOLES } from '../src/data/strataData';
 import { MINERAL_INDICATORS } from '../src/data/mineralData';
 import { generateScientificExplanation } from '../server/aiService';
 
-console.log('🧪 RUNNING SCIENTIFIC VALIDATION SUITE FOR TERRANEXUS 4D...\n');
+console.log('🧪 RUNNING RIGOROUS SCIENTIFIC AUDIT & VALIDATION SUITE FOR TERRANEXUS 4D...\n');
 
 let passCount = 0;
 let failCount = 0;
@@ -21,21 +21,26 @@ function assert(condition: boolean, testName: string) {
 }
 
 // 1. DATASET REGISTRY INTEGRITY
-console.log('[Test Suite 1: Dataset Registry]');
+console.log('[Test Suite 1: Dataset Registry & Provenance]');
 assert(DATASET_REGISTRY.length >= 7, 'Dataset registry contains >= 7 core official datasets');
 DATASET_REGISTRY.forEach((d) => {
   assert(Boolean(d.id && d.name && d.organisation && d.sourceUrl), `Dataset ${d.id} has valid core metadata`);
   assert(d.knownLimitations.length >= 2, `Dataset ${d.id} records >= 2 known scientific limitations`);
-  assert(['OBSERVED', 'MODELLED', 'PREDICTED', 'SIMULATED'].includes(d.status), `Dataset ${d.id} has valid status`);
+  assert(
+    ['OBSERVED', 'MODELLED', 'PREDICTED', 'SIMULATED', 'DEMONSTRATION', 'UNVERIFIED'].includes(d.status),
+    `Dataset ${d.id} has valid scientific status (${d.status})`
+  );
 });
 
 // 2. INDIAN LOCATIONS INTEGRITY
-console.log('\n[Test Suite 2: Geographical Loci]');
-assert(INDIA_LOCATIONS.length >= 5, 'Contains >= 5 key Indian geological/hydrological regions');
+console.log('\n[Test Suite 2: Geographical Loci (7 Proterozoic/Phanerozoic Provinces)]');
+assert(INDIA_LOCATIONS.length === 7, 'Contains exactly 7 verified Indian geological/hydrological regions');
 INDIA_LOCATIONS.forEach((loc) => {
   assert(loc.latitude >= 8.0 && loc.latitude <= 37.0, `Location ${loc.name} latitude (${loc.latitude}) within India bounds`);
   assert(loc.longitude >= 68.0 && loc.longitude <= 97.5, `Location ${loc.name} longitude (${loc.longitude}) within India bounds`);
   assert(Boolean(loc.basin && loc.geologicalProvince), `Location ${loc.name} has basin and tectonic province`);
+  assert(Boolean(GEOLOGICAL_FORMATIONS[loc.id] && GEOLOGICAL_FORMATIONS[loc.id].length >= 2), `Location ${loc.name} has verified GSI formations mapped`);
+  assert(Boolean(AQUIFER_SYSTEMS[loc.id] && AQUIFER_SYSTEMS[loc.id].length >= 2), `Location ${loc.name} has verified NAQUIM aquifers mapped`);
 });
 
 // 3. AQUIFER & HYDROLOGICAL INTEGRITY
@@ -44,20 +49,23 @@ Object.entries(AQUIFER_SYSTEMS).forEach(([locId, aquifers]) => {
   aquifers.forEach((aq) => {
     assert(aq.topDepthM < aq.bottomDepthM, `Aquifer ${aq.name} depth sequence valid (${aq.topDepthM}m - ${aq.bottomDepthM}m)`);
     assert(aq.transmissivityM2Day > 0, `Aquifer ${aq.name} transmissivity > 0`);
+    assert(aq.status === 'MODELLED', `Aquifer ${aq.name} correctly marked as MODELLED`);
   });
 });
 Object.entries(HYDRO_TIMESERIES).forEach(([locId, ts]) => {
   assert(ts.length >= 8, `Location ${locId} has >= 8 historical observation time steps`);
   ts.forEach((t) => {
     assert(t.waterLevelDepthM > 0, `Time step ${t.date} has valid positive depth below ground`);
+    assert(t.status === 'DEMONSTRATION', `Time step ${t.date} correctly marked as DEMONSTRATION`);
   });
 });
 
 // 4. BOREHOLES & STRATIGRAPHY
-console.log('\n[Test Suite 4: Stratigraphy & Borehole Logs]');
-AUTHENTIC_BOREHOLES.forEach((bh) => {
+console.log('\n[Test Suite 4: Stratigraphy & Representative Boreholes]');
+REPRESENTATIVE_BOREHOLES.forEach((bh) => {
   assert(bh.totalDepthMeters > 0, `Borehole ${bh.wellCode} has positive depth`);
   assert(bh.strataIntervals.length >= 3, `Borehole ${bh.wellCode} has >= 3 logged core intervals`);
+  assert(bh.status === 'DEMONSTRATION', `Borehole ${bh.wellCode} correctly labelled DEMONSTRATION`);
   for (let i = 0; i < bh.strataIntervals.length; i++) {
     const interval = bh.strataIntervals[i];
     assert(interval.fromDepth < interval.toDepth, `Interval ${interval.lithology} has valid order (${interval.fromDepth}m - ${interval.toDepth}m)`);
@@ -68,8 +76,10 @@ AUTHENTIC_BOREHOLES.forEach((bh) => {
 console.log('\n[Test Suite 5: Mineral Alteration Spectral Indices]');
 Object.entries(MINERAL_INDICATORS).forEach(([locId, min]) => {
   assert(Boolean(min.depositStyle && min.fieldValidationRequirement), `Mineral record ${locId} has deposit style & ground truth caveat`);
+  assert(min.status === 'MODELLED', `Mineral record ${locId} correctly classified as MODELLED`);
   min.spectralIndices.forEach((spec) => {
     assert(spec.indexValue > 0, `Spectral index ${spec.name} ratio > 0 (${spec.indexValue})`);
+    assert(spec.status === 'MODELLED', `Spectral index ${spec.name} correctly classified as MODELLED`);
     assert(spec.scientificDisclaimer.length > 20, `Spectral index ${spec.name} contains rigorous scientific disclaimer`);
   });
 });
@@ -82,7 +92,7 @@ async function testAI() {
     depthMeters: 45,
     timeStep: '2024-11 (Post-Monsoon)',
     activeLayers: ['CGWB Aquifers', 'India-WRIS Wells'],
-    borehole: AUTHENTIC_BOREHOLES[1],
+    borehole: REPRESENTATIVE_BOREHOLES[1],
     aquifers: AQUIFER_SYSTEMS['locus-indogangetic-ludhiana'] || [],
     formations: GEOLOGICAL_FORMATIONS['locus-indogangetic-ludhiana'] || [],
     mineralIndicators: MINERAL_INDICATORS['locus-indogangetic-ludhiana']
@@ -94,7 +104,7 @@ async function testAI() {
   assert(!response.isLiveGemini, 'Local scientific fallback is active when no key is set');
 
   console.log(`\n========================================`);
-  console.log(`TEST RESULTS: ${passCount} PASSED, ${failCount} FAILED`);
+  console.log(`AUDIT TEST RESULTS: ${passCount} PASSED, ${failCount} FAILED`);
   console.log(`========================================\n`);
 
   if (failCount > 0) {

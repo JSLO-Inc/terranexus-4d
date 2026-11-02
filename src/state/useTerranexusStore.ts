@@ -13,18 +13,18 @@ export const INITIAL_LAYERS: LayerDefinition[] = [
     name: 'CGWB NAQUIM Aquifer Boundaries',
     category: 'hydro',
     datasetId: 'cgwb-naquim-aquifer',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     description: '1:50,000 scale aquifer systems mapped by Central Ground Water Board.',
     enabled: true,
     opacity: 0.85
   },
   {
     id: 'layer-wris-wells',
-    name: 'India-WRIS Monitoring Piezometers',
+    name: 'India-WRIS Monitoring Piezometers (Benchmark Network)',
     category: 'hydro',
     datasetId: 'india-wris-groundwater-levels',
-    status: 'OBSERVED',
-    description: 'National groundwater level telemetry and observation stations.',
+    status: 'DEMONSTRATION',
+    description: 'Curated national groundwater level observation stations.',
     enabled: true,
     opacity: 0.95
   },
@@ -43,18 +43,18 @@ export const INITIAL_LAYERS: LayerDefinition[] = [
     name: 'GSI 1:50k / 1:2M Geological Bedrock Map',
     category: 'strata',
     datasetId: 'gsi-bhukosh-geology',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     description: 'Geological Survey of India lithostratigraphic bedrock units.',
     enabled: true,
     opacity: 0.80
   },
   {
     id: 'layer-gsi-lithologs',
-    name: 'National Exploratory Boreholes',
+    name: 'Exploratory Borehole Core Logs (Representative)',
     category: 'strata',
     datasetId: 'gsi-national-lithologs',
-    status: 'OBSERVED',
-    description: 'Standard 1D borehole lithological columns with depth intervals.',
+    status: 'DEMONSTRATION',
+    description: 'Representative 1D composite borehole lithological columns with depth intervals.',
     enabled: true,
     opacity: 1.0
   },
@@ -63,7 +63,7 @@ export const INITIAL_LAYERS: LayerDefinition[] = [
     name: 'Sentinel-2 Iron Oxide / Gossan Index',
     category: 'mineral',
     datasetId: 'copernicus-sentinel2-alteration',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     description: 'Surface spectral band reflectance ratio (B4/B2) for ferruginous alteration.',
     enabled: true,
     opacity: 0.75
@@ -73,7 +73,7 @@ export const INITIAL_LAYERS: LayerDefinition[] = [
     name: 'Sentinel-2 Hydroxyl / Clay Alteration',
     category: 'mineral',
     datasetId: 'copernicus-sentinel2-alteration',
-    status: 'OBSERVED',
+    status: 'MODELLED',
     description: 'Shortwave infrared ratio (B11/B12) identifying argillic/phyllic minerals.',
     enabled: false,
     opacity: 0.75

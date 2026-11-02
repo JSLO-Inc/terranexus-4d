@@ -122,7 +122,7 @@ export const NexusAI: React.FC = () => {
               <StatusBadge status="MODELLED" size="sm" />
             </div>
             <p className="text-[11px] text-slate-400">
-              Grounded exclusively in active CGWB, GSI, NASA GRACE, and Sentinel-2 data. Zero hallucination policy.
+              Grounded in curated CGWB, GSI, NASA, and Copernicus datasets with strict scientific limitation guardrails.
             </p>
           </div>
         </div>

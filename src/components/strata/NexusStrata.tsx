@@ -24,10 +24,10 @@ export const NexusStrata: React.FC = () => {
               <Mountain className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">NEXUS STRATA — Geological Intelligence</h2>
-            <StatusBadge status="OBSERVED" size="md" />
+            <StatusBadge status="MODELLED" size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            GSI Bhukosh 1:50,000 lithostratigraphic mapping, rock properties, and exploratory borehole lithologs.
+            GSI Bhukosh 1:50,000 lithostratigraphic mapping, rock properties, and representative exploratory borehole lithologs.
           </p>
         </div>
       </div>

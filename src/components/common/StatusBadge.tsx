@@ -40,8 +40,31 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm', s
       text: 'text-fuchsia-300',
       dot: 'bg-fuchsia-400',
       description: 'Hypothetical or illustrative geological scenario.'
+    },
+    DEMONSTRATION: {
+      label: 'DEMONSTRATION',
+      bg: 'bg-indigo-950/80',
+      border: 'border-indigo-500/50',
+      text: 'text-indigo-300',
+      dot: 'bg-indigo-400',
+      description: 'Curated benchmark values representing published literature; not live telemetry.'
+    },
+    UNVERIFIED: {
+      label: 'UNVERIFIED',
+      bg: 'bg-rose-950/80',
+      border: 'border-rose-500/50',
+      text: 'text-rose-300',
+      dot: 'bg-rose-400',
+      description: 'Data coverage unconfirmed or pending ground-truth verification.'
     }
-  }[status];
+  }[status] || {
+    label: status,
+    bg: 'bg-slate-900',
+    border: 'border-slate-700',
+    text: 'text-slate-300',
+    dot: 'bg-slate-400',
+    description: 'Status indicator'
+  };
 
   const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs';
 

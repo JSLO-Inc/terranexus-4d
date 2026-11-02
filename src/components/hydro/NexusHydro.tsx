@@ -58,7 +58,7 @@ export const NexusHydro: React.FC = () => {
               <Droplet className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">NEXUS HYDRO — Groundwater Intelligence</h2>
-            <StatusBadge status="OBSERVED" size="md" />
+            <StatusBadge status="MODELLED" size="md" />
           </div>
           <p className="text-xs text-slate-400 mt-1">
             Groundwater dynamics, NAQUIM multi-tier aquifers, India-WRIS piezometer hydrographs & NASA GRACE-FO gravimetry.
@@ -81,8 +81,8 @@ export const NexusHydro: React.FC = () => {
         {/* Measured Water Table Depth */}
         <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
           <div className="flex items-center justify-between text-xs text-slate-400">
-            <span>Water Table Depth</span>
-            <StatusBadge status="OBSERVED" size="sm" />
+            <span>Water Table Depth (Benchmark Well)</span>
+            <StatusBadge status={currentMetric?.status || "DEMONSTRATION"} size="sm" />
           </div>
           <div className="my-2">
             <span className="text-3xl font-extrabold font-mono text-sky-400">
