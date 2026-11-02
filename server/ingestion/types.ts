@@ -9,6 +9,33 @@
 
 export type IngestionStatus = 'IDLE' | 'INGESTING' | 'SUCCESS' | 'CACHED' | 'ERROR';
 
+export type DataSourceTier = 
+  | 'DEMONSTRATION'
+  | 'CMR_METADATA_DISCOVERED'
+  | 'RAW_FILE_DOWNLOADED'
+  | 'RAW_FILE_VALIDATED'
+  | 'GENUINE_NASA_PROCESSED';
+
+export interface GenuineNasaGranuleMetadata {
+  granuleId: string;
+  collectionConceptId: string;
+  productShortName: string;
+  productVersion: string;
+  sourceUrl: string;
+  fileSizeBytes: number;
+  originalSha256: string;
+  downloadTimestamp: string;
+  format: string;
+  extractionMethod: 'NEAREST_CENTROID_HAVERSINE';
+  cellCentroidLat: number;
+  cellCentroidLon: number;
+  distanceToCentroidKm: number;
+  smoothingFootprintKm: number;
+  missingDataHandling: string;
+  citation: string;
+  processingTimestamp: string;
+}
+
 export interface DatasetProvenance {
   id: string;
   name: string;
@@ -34,7 +61,7 @@ export interface GraceRecord {
   twsAnomalyCm: number | null; // Null if mission gap or missing
   uncertaintyCm: number | null; // Formal error estimate (+/- cm)
   satellite: 'GRACE' | 'GRACE-FO' | null;
-  status: 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION';
+  status: 'OBSERVED' | 'MODELLED' | 'MISSION_GAP' | 'DEGRADED_SOLUTION';
 }
 
 export interface PrecipitationRecord {
@@ -69,12 +96,14 @@ export interface ObservationWellRecord {
 export interface HydroLocationDataset {
   locationId: string;
   locationName: string;
+  dataSourceTier: DataSourceTier;
   coordinates: {
     latitude: number;
     longitude: number;
   };
   grace: {
     provenance: DatasetProvenance;
+    genuineNasaGranule?: GenuineNasaGranuleMetadata;
     records: GraceRecord[];
     stats: {
       totalMonths: number;

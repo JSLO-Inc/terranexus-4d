@@ -1,12 +1,16 @@
+import fs from 'fs';
+import path from 'path';
 import {
   HydroLocationDataset,
   HydroPipelineStatus,
-  IngestionStatus
+  IngestionStatus,
+  DataSourceTier,
+  GenuineNasaGranuleMetadata
 } from './types';
 import { extractGraceTimeseries, computeGraceStats } from './gracePipeline';
 import { extractRainfallTimeseries, computeRainfallStats } from './rainfallPipeline';
 import { extractWellObservations, computeWellStats } from './wrisImportPipeline';
-import { saveToCache, loadFromCache, hasValidCache } from './cacheManager';
+import { saveToCache, loadFromCache, hasValidCache, PROCESSED_DIR } from './cacheManager';
 
 const INDIAN_LOCATIONS_META: Record<string, { name: string; latitude: number; longitude: number }> = {
   'locus-indogangetic-ludhiana': { name: 'Ludhiana - Central Punjab Plain', latitude: 30.9010, longitude: 75.8573 },
@@ -38,8 +42,40 @@ export function ingestLocationHydro(locationId: string, force: boolean = false):
     longitude: 78.9629
   };
 
-  // 1. Ingest NASA GRACE/GRACE-FO
+  // 1. Ingest NASA GRACE/GRACE-FO (checks for genuine processed extractions first)
   const { records: graceRecords, provenance: graceProv } = extractGraceTimeseries(locationId);
+  
+  // Check if genuine processed data exists for this location in PROCESSED_DIR
+  let dataSourceTier: DataSourceTier = 'DEMONSTRATION';
+  let genuineGranuleMeta: GenuineNasaGranuleMetadata | undefined = undefined;
+
+  const processedPath = path.join(PROCESSED_DIR, `grace_extracted_${locationId}.json`);
+  if (fs.existsSync(processedPath)) {
+    try {
+      const rawProcessed = fs.readFileSync(processedPath, 'utf-8');
+      const processedJson = JSON.parse(rawProcessed);
+      if (processedJson.success && processedJson.extractions?.[locationId]) {
+        dataSourceTier = 'GENUINE_NASA_PROCESSED';
+        genuineGranuleMeta = processedJson.granuleMetadata;
+        
+        // Merge genuine observation into time series
+        const obsDate = processedJson.observationDate; // e.g. "2017-05"
+        const ext = processedJson.extractions[locationId];
+        const matchIdx = graceRecords.findIndex(r => r.date === obsDate);
+        if (matchIdx !== -1 && ext.twsAnomalyCm !== null) {
+          graceRecords[matchIdx] = {
+            ...graceRecords[matchIdx],
+            twsAnomalyCm: ext.twsAnomalyCm,
+            uncertaintyCm: ext.uncertaintyCm,
+            status: 'OBSERVED'
+          };
+        }
+      }
+    } catch (err) {
+      console.warn(`Failed to read processed NASA data for ${locationId}:`, err);
+    }
+  }
+
   const graceStats = computeGraceStats(graceRecords);
 
   // 2. Ingest NASA GPM IMERG Rainfall
@@ -53,12 +89,14 @@ export function ingestLocationHydro(locationId: string, force: boolean = false):
   const dataset: HydroLocationDataset = {
     locationId,
     locationName: meta.name,
+    dataSourceTier,
     coordinates: {
       latitude: meta.latitude,
       longitude: meta.longitude
     },
     grace: {
       provenance: graceProv,
+      genuineNasaGranule: genuineGranuleMeta,
       records: graceRecords,
       stats: graceStats
     },

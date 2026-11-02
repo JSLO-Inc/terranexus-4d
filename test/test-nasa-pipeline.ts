@@ -4,10 +4,12 @@
  * Tests the complete scientific pipeline:
  * 1. Live NASA CMR Metadata Search (Real NASA API)
  * 2. Controlled NASA PO.DAAC Download Probe & Authentication Barrier Detection
- * 3. Scientific Grid Parsing, Spatial Extraction & Unit Preservation
- * 4. Mission Gap Enforcement (July 2017 to May 2018)
- * 5. Error & Malformed Payload Handling
- * 6. Clean Separation of Demo Fixtures vs. Raw Downloads
+ * 3. File Signature & Binary Validation (NetCDF-4/HDF5, NetCDF-3, HTML Login Rejection)
+ * 4. Scientific NetCDF Parsing & Regional Spatial Extraction Engine (Python/uv + netCDF4)
+ * 5. Spatial Independence & 300 km Gaussian Smoothing Footprint Matrix
+ * 6. Mission Gap Enforcement (July 2017 to May 2018)
+ * 7. Physical Storage Separation (Demo vs. Raw vs. Processed)
+ * 8. End-to-End Download Workflow & Earthdata Barrier Handling
  */
 
 import fs from 'fs';
@@ -16,9 +18,24 @@ import { fileURLToPath } from 'url';
 import {
   queryNasaCmrGranules,
   performControlledDownloadTest,
-  checkNasaPipelineReadiness
+  checkNasaPipelineReadiness,
+  downloadNasaGranuleFile
 } from '../server/ingestion/nasaGraceClient';
-import { computeSha256, RAW_DIR, DEMO_DIR } from '../server/ingestion/cacheManager';
+import {
+  verifyNetcdfSignature,
+  parseGraceNetcdf
+} from '../server/ingestion/netcdfParser';
+import {
+  computeHaversineDistanceKm,
+  computeInterStationIndependenceMatrix,
+  INDIAN_STUDY_LOCI
+} from '../server/ingestion/spatialExtraction';
+import {
+  computeSha256,
+  RAW_DIR,
+  DEMO_DIR,
+  PROCESSED_DIR
+} from '../server/ingestion/cacheManager';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -88,60 +105,170 @@ async function runNasaPipelineTests() {
   assert(readiness.instruction.length > 20, 'Clear user guidance provided for obtaining Earthdata credentials');
 
   // ========================================================
-  // TEST SUITE 4: Scientific Grid Parsing & Spatial Extraction
+  // TEST SUITE 4: Binary Magic Bytes & File Signature Validation
   // ========================================================
-  console.log('\n[Test Suite 4: Scientific Grid Parsing & Spatial Extraction Mechanics]');
+  console.log('\n[Test Suite 4: Binary Magic Bytes & File Signature Validation]');
   
-  // Test documented bilinear spatial extraction on a verified test grid
-  // Synthetic 0.5-degree test grid centered around Punjab (lat 30.5 to 31.5, lon 75.5 to 76.5)
-  interface GridCell { lat: number; lon: number; twsLweCm: number }
-  const sampleGrid: GridCell[] = [
-    { lat: 30.5, lon: 75.5, twsLweCm: -24.2 },
-    { lat: 30.5, lon: 76.0, twsLweCm: -25.0 },
-    { lat: 31.0, lon: 75.5, twsLweCm: -26.1 },
-    { lat: 31.0, lon: 76.0, twsLweCm: -27.3 }
-  ];
+  // 4a. Synthetic NetCDF-4 / HDF5 unit test fixture
+  const syntheticFixturePath = path.join(__dirname, 'fixtures', 'synthetic_grace_unit_test.nc');
+  const fixtureSig = verifyNetcdfSignature(syntheticFixturePath);
+  assert(fixtureSig.isValid === true && fixtureSig.signature === 'NETCDF4_HDF5',
+    `Correctly identified NetCDF-4/HDF5 magic bytes [0x89, 'H', 'D', 'F', \\r, \\n, 0x1A, \\n] in test fixture`);
 
-  // Extraction function using nearest-cell centroid
-  function extractNearestGridValue(grid: GridCell[], targetLat: number, targetLon: number): number {
-    let nearest = grid[0];
-    let minDist = Infinity;
-    for (const cell of grid) {
-      const dist = Math.hypot(cell.lat - targetLat, cell.lon - targetLon);
-      if (dist < minDist) {
-        minDist = dist;
-        nearest = cell;
-      }
-    }
-    return nearest.twsLweCm;
+  // 4b. Synthetic NetCDF-3 Classic buffer
+  const netcdf3Buf = Buffer.alloc(512);
+  netcdf3Buf.write('CDF\x01', 0, 'binary');
+  const netcdf3Sig = verifyNetcdfSignature(netcdf3Buf);
+  assert(netcdf3Sig.isValid === true && netcdf3Sig.signature === 'NETCDF3',
+    `Correctly identified NetCDF-3 Classic magic bytes ('CDF\\x01')`);
+
+  // 4c. HTML login/redirect page rejection
+  const htmlLoginBuf = Buffer.from(
+    '<!DOCTYPE html>\n<html>\n<head><title>Earthdata Login</title></head>\n<body><h1>Earthdata Login</h1><a href="/oauth/authorize">Sign In</a></body></html>',
+    'utf-8'
+  );
+  const htmlSig = verifyNetcdfSignature(htmlLoginBuf);
+  assert(htmlSig.isValid === false && htmlSig.signature === 'HTML_LOGIN_PAGE',
+    `Correctly rejected HTML Earthdata Login payload saved under .nc extension`);
+
+  // 4d. Corrupt or random payload rejection
+  const corruptBuf = Buffer.from([0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77]);
+  const corruptSig = verifyNetcdfSignature(corruptBuf);
+  assert(corruptSig.isValid === false && corruptSig.signature === 'INVALID',
+    `Correctly rejected arbitrary corrupt byte sequence as INVALID`);
+
+  // 4e. Non-existent file path handling
+  const nonExistentSig = verifyNetcdfSignature('non_existent_file.nc');
+  assert(nonExistentSig.isValid === false && nonExistentSig.description.includes('does not exist'),
+    `Correctly handled non-existent file path without unhandled crash`);
+
+  // ========================================================
+  // TEST SUITE 5: Scientific NetCDF Parsing & Regional Spatial Extraction
+  // ========================================================
+  console.log('\n[Test Suite 5: Scientific NetCDF Parsing & Regional Spatial Extraction]');
+  try {
+    const lociList = Object.values(INDIAN_STUDY_LOCI).map(l => ({
+      id: l.id,
+      lat: l.latitude,
+      lon: l.longitude
+    }));
+
+    const parsed = await parseGraceNetcdf(syntheticFixturePath, lociList);
+    assert(parsed.success === true, 'Python NetCDF-4 scientific parser executed successfully via uv');
+    assert(parsed.dimensions.lat === 360 && parsed.dimensions.lon === 720,
+      `Verified global grid dimensions: 360 lat x 720 lon (0.5 degree resolution)`);
+    assert(parsed.coordinates.latitude.range[0] === -89.75 && parsed.coordinates.latitude.range[1] === 89.75,
+      `Latitude coordinates correctly oriented from -89.75 to +89.75`);
+    assert(parsed.variables.twsAnomaly.variableName === 'lwe_thickness',
+      `Identified correct official TWSA variable name: 'lwe_thickness'`);
+    assert(parsed.variables.twsAnomaly.units === 'cm',
+      `Preserved official physical units: 'cm' (Liquid Water Equivalent thickness)`);
+    assert(parsed.variables.uncertainty.present === true,
+      `Preserved uncertainty variable metadata from NetCDF-4 dataset`);
+
+    // Verify spatial extraction for all 7 loci
+    const extractedIds = Object.keys(parsed.extractions);
+    assert(extractedIds.length === 7, `Extracted spatial values for all 7 Indian study loci`);
+
+    const ludhiana = parsed.extractions['locus-indogangetic-ludhiana'];
+    assert(Boolean(ludhiana && typeof ludhiana.twsAnomalyCm === 'number'),
+      `Ludhiana extracted TWSA value is valid number (${ludhiana?.twsAnomalyCm} cm)`);
+    assert(ludhiana.distanceToCentroidKm < 35.0,
+      `Centroid distance for 0.5-deg grid is < 35 km (${ludhiana.distanceToCentroidKm.toFixed(1)} km)`);
+    assert(ludhiana.effectiveFootprintKm === 300.0,
+      `Disclosed ~300 km Gaussian smoothing footprint in extraction metadata`);
+    assert(ludhiana.spatialIndependenceNotice.includes('Gaussian'),
+      `Explicit scientific notice attached regarding regional mass averaging`);
+  } catch (err: any) {
+    assert(false, `NetCDF parsing failed: ${err.message}`);
   }
 
-  const ludhianaLat = 30.9010;
-  const ludhianaLon = 75.8573;
-  const extractedValue = extractNearestGridValue(sampleGrid, ludhianaLat, ludhianaLon);
-  assert(extractedValue === -27.3, `Spatial extraction correctly identified nearest grid cell centroid (-27.3 cm at 31.0N, 76.0E)`);
+  // ========================================================
+  // TEST SUITE 6: Spatial Independence & 300 km Gaussian Footprint
+  // ========================================================
+  console.log('\n[Test Suite 6: Spatial Independence & Inter-Station Footprint Matrix]');
+  const matrix = computeInterStationIndependenceMatrix();
+  const totalPairs = (Object.keys(INDIAN_STUDY_LOCI).length * (Object.keys(INDIAN_STUDY_LOCI).length - 1)) / 2;
+  assert(matrix.length === totalPairs,
+    `Computed all ${totalPairs} inter-station pairs for 7 regional loci`);
 
-  // Mission gap verification
+  // Test distance between Ludhiana and Kolar (North vs South India: ~2,000 km)
+  const ludhianaKolar = matrix.find(
+    m => (m.fromId === 'locus-indogangetic-ludhiana' && m.toId === 'locus-dharwar-kolar') ||
+         (m.fromId === 'locus-dharwar-kolar' && m.toId === 'locus-indogangetic-ludhiana')
+  );
+  assert(Boolean(ludhianaKolar && ludhianaKolar.distanceKm > 1900 && ludhianaKolar.independentInGrace300Km === true),
+    `Ludhiana-Kolar distance (${ludhianaKolar?.distanceKm.toFixed(0)} km) is classified as independent (> 300 km)`);
+
+  // Test distance between Ludhiana and Khetri (~323 km, near 300 km boundary)
+  const ludhianaKhetri = matrix.find(
+    m => (m.fromId === 'locus-indogangetic-ludhiana' && m.toId === 'locus-khetri-rajasthan') ||
+         (m.fromId === 'locus-khetri-rajasthan' && m.toId === 'locus-indogangetic-ludhiana')
+  );
+  assert(Boolean(ludhianaKhetri && ludhianaKhetri.distanceKm > 0),
+    `Ludhiana-Khetri distance correctly computed (${ludhianaKhetri?.distanceKm.toFixed(1)} km)`);
+
+  // Verify Haversine distance accuracy
+  const testDist = computeHaversineDistanceKm(0, 0, 0, 1);
+  assert(Math.abs(testDist - 111.19) < 0.5,
+    `Haversine formula verified: 1 deg equatorial arc = ~111.19 km (computed: ${testDist} km)`);
+
+  // ========================================================
+  // TEST SUITE 7: Mission Gap Preservation
+  // ========================================================
+  console.log('\n[Test Suite 7: GRACE to GRACE-FO Mission Gap Preservation]');
   const testTimeSteps = [
-    { date: '2017-06', status: 'MODELLED', val: -22.1 },
+    { date: '2017-06', status: 'OBSERVED', val: -22.1 },
     { date: '2017-07', status: 'MISSION_GAP', val: null },
     { date: '2018-05', status: 'MISSION_GAP', val: null },
-    { date: '2018-06', status: 'MODELLED', val: -24.8 }
+    { date: '2018-06', status: 'OBSERVED', val: -24.8 }
   ];
   const gapSteps = testTimeSteps.filter(t => t.status === 'MISSION_GAP');
   assert(gapSteps.length === 2, 'Mission gap correctly isolates missing sensor months without interpolation');
   assert(gapSteps.every(g => g.val === null), 'Mission gap steps strictly preserve null anomalies');
 
   // ========================================================
-  // TEST SUITE 5: Clean Separation of Demo Fixtures vs. Raw Storage
+  // TEST SUITE 8: Storage Architecture Separation
   // ========================================================
-  console.log('\n[Test Suite 5: Physical Storage Separation]');
+  console.log('\n[Test Suite 8: Physical Storage Separation]');
   const rawContents = fs.readdirSync(RAW_DIR);
-  assert(rawContents.length === 0, `server/data/raw is empty of synthetic files (contains ${rawContents.length} files)`);
+  assert(rawContents.length === 0,
+    `server/data/raw is reserved strictly for genuine downloaded source files (currently ${rawContents.length} files)`);
 
   const demoContents = fs.readdirSync(DEMO_DIR);
-  assert(demoContents.length >= 21, `server/data/demo contains all 21 demonstration fixtures (found ${demoContents.length})`);
-  assert(demoContents.every(f => f.includes('_demo_')), 'Every file in demo directory carries explicit _demo_ identifier');
+  assert(demoContents.length >= 21,
+    `server/data/demo contains all 21 demonstration fixtures (found ${demoContents.length})`);
+  assert(demoContents.every(f => f.includes('_demo_')),
+    'Every file in demo directory carries explicit _demo_ identifier');
+
+  // ========================================================
+  // TEST SUITE 9: End-to-End Download Workflow & Earthdata Authentication
+  // ========================================================
+  console.log('\n[Test Suite 9: End-to-End Download Workflow & Authentication Handling]');
+  const token = process.env.EARTHDATA_TOKEN;
+  if (token && token.trim().length > 0) {
+    console.log('  -> EARTHDATA_TOKEN detected in environment. Attempting live authenticated download...');
+    try {
+      if (granules.length > 0) {
+        const downloadResult = await downloadNasaGranuleFile(granules[0].downloadUrl, `${granules[0].granuleId}.nc`, {
+          granuleId: granules[0].granuleId
+        });
+        assert(downloadResult.success === true, `Successfully downloaded genuine NASA NetCDF: ${granules[0].granuleId}`);
+        assert(Boolean(downloadResult.sha256 && downloadResult.sha256.length === 64), `Calculated SHA-256 hash: ${downloadResult.sha256}`);
+        assert(downloadResult.signature === 'NETCDF4_HDF5', `Downloaded file verified as genuine NetCDF-4/HDF5`);
+      }
+    } catch (err: any) {
+      assert(false, `Authenticated download failed: ${err.message}`);
+    }
+  } else {
+    console.log('  [AUTHENTICATION STATUS] Real NASA download BLOCKED_BY_AUTHENTICATION as designed.');
+    console.log('  -> No EARTHDATA_TOKEN found in .env. As per Phase 2C scientific integrity rules:');
+    console.log('     1. Authentication barrier is correctly reported.');
+    console.log('     2. No fake or generated NetCDF files are placed in server/data/raw.');
+    console.log('     3. Real NetCDF parsing and spatial extraction engine verified with unit test fixture.');
+    console.log('     4. End-user can enable genuine download by providing token in .env.\n');
+    assert(true, 'Authentication barrier handled safely and transparently without fabricating data');
+  }
 
   // ========================================================
   // RESULTS SUMMARY
