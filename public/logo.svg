@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <circle cx="50" cy="50" r="46" stroke="#00e5ff" stroke-width="2.5" stroke-dasharray="4 2"/>
+  <ellipse cx="50" cy="50" rx="46" ry="18" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.6"/>
+  <ellipse cx="50" cy="50" rx="18" ry="46" stroke="#f59e0b" stroke-width="1.5" stroke-opacity="0.6"/>
+  <!-- Subsurface Strata Layers -->
+  <path d="M15 50 Q50 68 85 50" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M22 62 Q50 78 78 62" stroke="#a855f7" stroke-width="2.5"/>
+  <path d="M30 74 Q50 86 70 74" stroke="#00e5ff" stroke-width="2.5"/>
+  <!-- Central core point -->
+  <circle cx="50" cy="50" r="4" fill="#00e5ff"/>
+</svg>
