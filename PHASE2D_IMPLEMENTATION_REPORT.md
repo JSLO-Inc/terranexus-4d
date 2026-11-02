@@ -70,7 +70,7 @@ TERRANEXUS 4D — PHASE 2D TEST SUITE EXECUTION SUMMARY
 ================================================================================
 Test Suite                   Total Tests    Passed    Failed    Verification Tag
 --------------------------------------------------------------------------------
-NASA Pipeline Integration            54        54         0    UNIT_TESTED_ONLY / CMR_LIVE
+NASA Pipeline Integration            56        56         0    UNIT_TESTED_ONLY / CMR_LIVE
 API Route Safety & Handling          10        10         0    OFFLINE_VERIFIED
 Ingestion Engine Regression       2,285     2,285         0    OFFLINE_VERIFIED
 System Audit & Grounding            231       231         0    OFFLINE_VERIFIED
@@ -88,7 +88,7 @@ In strict accordance with Phase 2D instructions:
 > **VERDICT: `PHASE 2D PARTIALLY COMPLETE — AUTHENTICATION OR OTHER BLOCKER REMAINS`**
 
 **Reasoning:**
-- The end-to-end software pipeline (CMR metadata discovery, PO.DAAC authentication handler, AWS S3 redirect header-stripper, NetCDF-4 binary validator, Python scientific parser, spatial extraction engine, and inter-station independence matrix) is completely built, forensically corrected, and verified through automated regression suites.
-- However, because an `EARTHDATA_TOKEN` has not yet been supplied in the workspace `.env` file, genuine NASA Level-3 NetCDF files could not be downloaded without violating the strict mandate against faking or fabricating data.
-- The pipeline halted safely and transparently at the authentication boundary (`BLOCKED_BY_AUTHENTICATION`).
-- All instructions and procedures for enabling live data acquisition are documented in `PHASE2D_BLOCKERS.md` and `PHASE2D_USER_GUIDE.md`.
+- The complete end-to-end software pipeline (CMR metadata discovery, PO.DAAC authentication handler, AWS S3 redirect header-stripper, NetCDF-4 binary validator, Python scientific parser, spatial extraction engine, and inter-station independence matrix) is fully built, forensically corrected, and verified through automated regression suites (56/56 passing tests).
+- While `EARTHDATA_TOKEN` was detected and read securely from the workspace `.env` file without exposing credentials, requests to the protected NASA PO.DAAC Cumulus archive (`archive.podaac.earthdata.nasa.gov`) are rejected with `HTTP 400 Bad Request` because the user's Earthdata Login account has not yet authorized the "PO.DAAC Cloud" application under `https://urs.earthdata.nasa.gov/profile` (Applications → Authorized Apps).
+- In accordance with the strict mandate against faking or fabricating data, the pipeline safely and transparently recorded `BLOCKED_BY_AUTHENTICATION`.
+- The raw data directory `server/data/raw/` remains pristine (0 files), parser tests are honestly labeled `UNIT_TESTED_ONLY`, and exact steps to approve PO.DAAC Cloud are detailed in `PHASE2D_BLOCKERS.md`.

@@ -12,8 +12,11 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 import { computeSha256, RAW_DIR, PROCESSED_DIR } from './cacheManager';
 import { verifyNetcdfSignature } from './netcdfParser';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -320,16 +323,17 @@ export async function downloadNasaGranuleFile(
 
     // Detect authentication barriers
     if (httpStatus === 400 || httpStatus === 401 || httpStatus === 403) {
-      const isAuthBarrier = !creds.hasCredentials || httpStatus === 401 || httpStatus === 403;
+      const errorMsg = creds.hasCredentials
+        ? `NASA PO.DAAC rejected Earthdata Login credentials (HTTP ${httpStatus} ${statusText}). The configured credentials or EARTHDATA_TOKEN may be expired or missing 'PO.DAAC Cloud' Application Authorization in NASA Earthdata Login (https://urs.earthdata.nasa.gov/).`
+        : `NASA PO.DAAC requires NASA Earthdata Login authentication (HTTP ${httpStatus} ${statusText}). Access to '${targetUrl}' was rejected. Please configure EARTHDATA_TOKEN in .env.`;
+
       return {
         url: targetUrl,
         httpStatus,
         statusText,
         downloadStatus: creds.hasCredentials ? 'INVALID_CREDENTIALS' : 'AUTHENTICATION_REQUIRED',
         requiresEarthdataAuth: true,
-        error: isAuthBarrier
-          ? `NASA PO.DAAC requires NASA Earthdata Login authentication (HTTP ${httpStatus} ${statusText}). Access to '${targetUrl}' was rejected.`
-          : `HTTP ${httpStatus} Bad Request from server gateway.`
+        error: errorMsg
       };
     }
 
