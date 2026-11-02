@@ -99,7 +99,7 @@ export const INDIAN_STUDY_LOCI: Record<string, StudyLocus> = {
  * Computes great-circle distance between two geographic coordinates in kilometers.
  */
 export function computeHaversineDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const r = 6371.0088; // Earth mean radius in km
+  const r = 6371.0088; // Earth mean radius in km (IUGG standard)
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -110,16 +110,129 @@ export function computeHaversineDistanceKm(lat1: number, lon1: number, lat2: num
   return Math.round(r * c * 100) / 100;
 }
 
+export interface GridCentroidExtraction {
+  targetLat: number;
+  targetLon: number;
+  centroidLat: number;
+  centroidLon: number;
+  distanceKm: number;
+}
+
+/**
+ * Computes the exact nearest 0.5-degree grid cell centroid for the JPL Tellus Land Mass Grid.
+ * 
+ * Grid geometry:
+ * - Latitude: -89.75 to +89.75 (step 0.5 deg, 360 cells)
+ * - Longitude: 0.25 to 359.75 (step 0.5 deg, 720 cells)
+ * - Maximum theoretical centroid offset for a 0.5 deg grid is sqrt(0.25^2 + 0.25^2) * 111.32 km = ~39.36 km.
+ */
+export function computeNearestTellusGridCentroid(lat: number, lon: number): GridCentroidExtraction {
+  if (lat < -90 || lat > 90) {
+    throw new Error(`Invalid latitude ${lat}: must be within [-90, +90]`);
+  }
+  if (lon < -180 || lon > 360) {
+    throw new Error(`Invalid longitude ${lon}: must be within [-180, +360]`);
+  }
+
+  // Nearest latitude in [-89.75 to +89.75, step 0.5]
+  const latIdx = Math.round((lat - (-89.75)) / 0.5);
+  const clampedLatIdx = Math.max(0, Math.min(359, latIdx));
+  const centroidLat = Math.round((-89.75 + clampedLatIdx * 0.5) * 10000) / 10000;
+
+  // Transform longitude into [0, 360) convention
+  const lonIn360 = lon < 0 ? lon + 360.0 : lon;
+  const lonIdx = Math.round((lonIn360 - 0.25) / 0.5);
+  const wrappedLonIdx = ((lonIdx % 720) + 720) % 720;
+  const rawCentroidLon = 0.25 + wrappedLonIdx * 0.5;
+
+  // Wrap back to [-180, 180] for standard geographic reporting
+  const centroidLon = Math.round((rawCentroidLon > 180.0 ? rawCentroidLon - 360.0 : rawCentroidLon) * 10000) / 10000;
+
+  const distanceKm = computeHaversineDistanceKm(lat, lon, centroidLat, centroidLon);
+
+  // Geospatial sanity check: distance cannot exceed 40 km for a 0.5-degree grid
+  if (distanceKm > 40.0) {
+    throw new Error(
+      `Spatial extraction anomaly: distance to centroid (${distanceKm} km) exceeds the theoretical 0.5-deg grid maximum of 39.4 km. Check coordinate order and projection.`
+    );
+  }
+
+  return {
+    targetLat: lat,
+    targetLon: lon,
+    centroidLat,
+    centroidLon,
+    distanceKm
+  };
+}
+
+/**
+ * Precalculated and forensically validated grid centroids for all 7 regional Indian loci.
+ * Validates that Singhbhum's centroid is (22.75N, 86.25E) and NOT 73.50E.
+ */
+export const VALIDATED_INDIAN_LOCI_CENTROIDS: Record<string, GridCentroidExtraction> = {
+  'locus-indogangetic-ludhiana': {
+    targetLat: 30.9010,
+    targetLon: 75.8573,
+    centroidLat: 30.7500,
+    centroidLon: 75.7500,
+    distanceKm: 19.67
+  },
+  'locus-khetri-rajasthan': {
+    targetLat: 28.0039,
+    targetLon: 75.7878,
+    centroidLat: 28.2500,
+    centroidLon: 75.7500,
+    distanceKm: 27.62
+  },
+  'locus-deccan-pune': {
+    targetLat: 18.5204,
+    targetLon: 73.8567,
+    centroidLat: 18.7500,
+    centroidLon: 73.7500,
+    distanceKm: 27.90
+  },
+  'locus-zawar-udaipur': {
+    targetLat: 24.3564,
+    targetLon: 73.7161,
+    centroidLat: 24.2500,
+    centroidLon: 73.7500,
+    distanceKm: 12.32
+  },
+  'locus-dharwar-kolar': {
+    targetLat: 12.9602,
+    targetLon: 78.2712,
+    centroidLat: 12.7500,
+    centroidLon: 78.2500,
+    distanceKm: 23.49
+  },
+  'locus-singhbhum-jharkhand': {
+    targetLat: 22.5804,
+    targetLon: 86.4800,
+    centroidLat: 22.7500,
+    centroidLon: 86.2500,
+    distanceKm: 30.21
+  },
+  'locus-godavari-kothagudem': {
+    targetLat: 17.5511,
+    targetLon: 80.6178,
+    centroidLat: 17.7500,
+    centroidLon: 80.7500,
+    distanceKm: 26.18
+  }
+};
+
 export interface InterStationDistance {
   fromId: string;
   toId: string;
   distanceKm: number;
   independentInGrace300Km: boolean;
+  classification: 'CORRELATED' | 'MARGINAL_TRANSITIONAL' | 'INDEPENDENT';
   notes: string;
 }
 
 /**
- * Computes the complete inter-station distance matrix and evaluates spatial independence
+ * Computes the complete 21-pair inter-station distance matrix and evaluates spatial independence
  * under the ~300 km Gaussian smoothing footprint of NASA GRACE/GRACE-FO.
  */
 export function computeInterStationIndependenceMatrix(): InterStationDistance[] {
@@ -132,14 +245,20 @@ export function computeInterStationIndependenceMatrix(): InterStationDistance[] 
       const b = loci[j];
       const distKm = computeHaversineDistanceKm(a.latitude, a.longitude, b.latitude, b.longitude);
 
-      // GRACE ~300 km Gaussian filter means full independence requires separation > 300 km
+      // Evaluate spatial independence under ~300 km Gaussian filter
       const independentInGrace300Km = distKm >= 300.0;
+      let classification: 'CORRELATED' | 'MARGINAL_TRANSITIONAL' | 'INDEPENDENT';
       let notes = '';
 
       if (distKm < 300.0) {
+        classification = 'CORRELATED';
         notes = `Separation (${distKm.toFixed(1)} km) is within the ~300 km GRACE smoothing footprint. Observations share significant regional mass covariance and cannot be treated as isolated independent point measurements.`;
+      } else if (distKm < 350.0) {
+        classification = 'MARGINAL_TRANSITIONAL';
+        notes = `Separation (${distKm.toFixed(1)} km) is within the marginal transition buffer (300-350 km) of the Gaussian smoothing filter. Partial covariance may occur during extensive subcontinental monsoon anomalies.`;
       } else {
-        notes = `Separation (${distKm.toFixed(1)} km) exceeds the ~300 km GRACE smoothing footprint. Regional mass signals are largely independent.`;
+        classification = 'INDEPENDENT';
+        notes = `Separation (${distKm.toFixed(1)} km) well exceeds the ~300 km GRACE smoothing footprint. Regional mass balance signals are physically independent.`;
       }
 
       results.push({
@@ -147,6 +266,7 @@ export function computeInterStationIndependenceMatrix(): InterStationDistance[] 
         toId: b.id,
         distanceKm: distKm,
         independentInGrace300Km,
+        classification,
         notes
       });
     }

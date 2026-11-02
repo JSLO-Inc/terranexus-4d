@@ -1,6 +1,7 @@
 {
   "locationId": "locus-khetri-rajasthan",
   "locationName": "Khetri Copper Belt - Jhunjhunu",
+  "dataSourceTier": "DEMONSTRATION",
   "coordinates": {
     "latitude": 28.0039,
     "longitude": 75.7878
@@ -26,7 +27,7 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "68b1652faa8b85c15ba8d7b4c8257ad80c9661afe82636f10f96d50d1037c1c4",
-      "lastIngested": "2026-11-02T08:35:04.424Z"
+      "lastIngested": "2026-11-02T09:43:17.271Z"
     },
     "records": [
       {
@@ -1248,7 +1249,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "f81af9e66df93e9b5260dc582fea83a38b7c0960d6bef2261be18b555c208014",
-      "lastIngested": "2026-11-02T08:35:04.425Z"
+      "lastIngested": "2026-11-02T09:43:17.272Z"
     },
     "records": [
       {
@@ -2334,7 +2335,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "91570aeb69db3e2822b483d64392b8d7d6e898a03cfdeb3725da00de27b998f4",
-      "lastIngested": "2026-11-02T08:35:04.425Z"
+      "lastIngested": "2026-11-02T09:43:17.273Z"
     },
     "records": [
       {

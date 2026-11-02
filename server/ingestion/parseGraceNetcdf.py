@@ -162,9 +162,10 @@ def parse_netcdf_file(filepath: str, coords_list: list = None) -> dict:
                 elif not uses_360_convention and tgt_lon > 180.0:
                     grid_lookup_lon = tgt_lon - 360.0
 
-                # Nearest grid cell centroid
+                # Nearest grid cell centroid with circular longitude handling
                 lat_diffs = np.abs(lat_arr - tgt_lat)
-                lon_diffs = np.abs(lon_arr - grid_lookup_lon)
+                raw_lon_diffs = np.abs(lon_arr - grid_lookup_lon)
+                lon_diffs = np.minimum(raw_lon_diffs, 360.0 - raw_lon_diffs) if uses_360_convention else raw_lon_diffs
 
                 lat_idx = int(np.argmin(lat_diffs))
                 lon_idx = int(np.argmin(lon_diffs))
@@ -173,9 +174,14 @@ def parse_netcdf_file(filepath: str, coords_list: list = None) -> dict:
                 cell_lon = float(lon_arr[lon_idx])
 
                 # Normalise cell_lon back to standard [-180, 180] for reporting
-                reported_cell_lon = cell_lon - 360.0 if cell_lon > 180.0 else cell_lon
+                reported_cell_lon = cell_lon - 360.0 if (uses_360_convention and cell_lon > 180.0) else cell_lon
 
                 dist_km = haversine_distance_km(tgt_lat, tgt_lon, cell_lat, reported_cell_lon)
+
+                if dist_km > 40.0:
+                    sys.stderr.write(
+                        f"WARNING: Extraction for {loc_id} ({tgt_lat}, {tgt_lon}) produced excessive centroid distance: {dist_km} km. Centroid: ({cell_lat}, {reported_cell_lon})\n"
+                    )
 
                 # Extract TWS anomaly value
                 raw_val = tws_data[time_idx, lat_idx, lon_idx] if has_time_dim else tws_data[lat_idx, lon_idx]
