@@ -1,7 +1,7 @@
 {
   "locationId": "locus-dharwar-kolar",
   "locationName": "Kolar Schist Belt - Robertsonpet",
-  "dataSourceTier": "DEMONSTRATION",
+  "dataSourceTier": "GENUINE_NASA_PROCESSED",
   "coordinates": {
     "latitude": 12.9602,
     "longitude": 78.2712
@@ -27,7 +27,30 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "6d0d0d2d2b9452bbd55a231753c689859484f68decf2b13e919f2d3b98e2a441",
-      "lastIngested": "2026-11-02T09:43:17.365Z"
+      "lastIngested": "2026-11-02T10:41:34.434Z"
+    },
+    "genuineNasaGranule": {
+      "granuleId": "GRD-3_2017143-2017180_GRAC_JPLEM_BA01_0600_LND_v04",
+      "collectionConceptId": "C2077042612-POCLOUD",
+      "productShortName": "TELLUS_GRAC_L3_JPL_RL06_LND_v04",
+      "productVersion": "RL06v04",
+      "sourceUrl": "https://archive.podaac.earthdata.nasa.gov/podaac-ops-cumulus-protected/TELLUS_GRAC_L3_JPL_RL06_LND_v04/GRD-3_2017143-2017180_GRAC_JPLEM_BA01_0600_LND_v04.nc",
+      "fileSizeBytes": 1098859,
+      "originalSha256": "52564817031e20e0956ba678f8c560756d44f7009970391106a8ce62be0c71e9",
+      "downloadTimestamp": "2026-11-02T10:39:34.742Z",
+      "format": "NETCDF4_CLASSIC",
+      "extractionMethod": "NEAREST_CENTROID_HAVERSINE",
+      "cellCentroidLat": 12.5,
+      "cellCentroidLon": 78.5,
+      "distanceToCentroidKm": 56.87,
+      "smoothingFootprintKm": 300,
+      "sourceUnits": "m",
+      "twsaRawValue": -0.154,
+      "twsaValueCm": -15.4,
+      "uncertaintyCm": 2.8,
+      "missingDataHandling": "Preserved as null / NaN; zero interpolation during mission gaps",
+      "citation": "Landerer, F. W. and S. C. Swenson (2012), Accuracy of scaled GRACE terrestrial water storage estimates. Water Resources Research, 48(4), W04531.",
+      "processingTimestamp": "2026-11-02T10:41:34.377Z"
     },
     "records": [
       {
@@ -403,10 +426,10 @@
         "date": "2017-06",
         "year": 2017,
         "month": 6,
-        "twsAnomalyCm": -14.3,
-        "uncertaintyCm": 2.5,
+        "twsAnomalyCm": -15.4,
+        "uncertaintyCm": 2.8,
         "satellite": "GRACE",
-        "status": "MODELLED"
+        "status": "OBSERVED"
       },
       {
         "date": "2017-07",
@@ -1226,7 +1249,7 @@
       "meanAnomalyCm": -7.5,
       "minAnomalyCm": -16.5,
       "maxAnomalyCm": 1.6,
-      "trendCmPerYear": -0.14
+      "trendCmPerYear": -0.13
     }
   },
   "precipitation": {
@@ -1249,7 +1272,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "cae8438013cd78e831865240385b2a24694816d48684f98f7330bd321a641dfa",
-      "lastIngested": "2026-11-02T09:43:17.366Z"
+      "lastIngested": "2026-11-02T10:41:34.434Z"
     },
     "records": [
       {
@@ -2335,7 +2358,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "abecb4f98891ec86b3ca181db1622e88f62d023daf54099d46561ccce273d650",
-      "lastIngested": "2026-11-02T09:43:17.366Z"
+      "lastIngested": "2026-11-02T10:41:34.435Z"
     },
     "records": [
       {

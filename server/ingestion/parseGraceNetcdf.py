@@ -178,9 +178,12 @@ def parse_netcdf_file(filepath: str, coords_list: list = None) -> dict:
 
                 dist_km = haversine_distance_km(tgt_lat, tgt_lon, cell_lat, reported_cell_lon)
 
-                if dist_km > 40.0:
+                lat_res = abs(float(lat_arr[1] - lat_arr[0])) if len(lat_arr) > 1 else 0.5
+                max_expected_dist = float(np.sqrt((lat_res / 2.0)**2 + (lat_res / 2.0)**2) * 111.32) + 2.0
+
+                if dist_km > max_expected_dist:
                     sys.stderr.write(
-                        f"WARNING: Extraction for {loc_id} ({tgt_lat}, {tgt_lon}) produced excessive centroid distance: {dist_km} km. Centroid: ({cell_lat}, {reported_cell_lon})\n"
+                        f"WARNING: Extraction for {loc_id} ({tgt_lat}, {tgt_lon}) produced excessive centroid distance: {dist_km:.2f} km (resolution: {lat_res} deg, threshold: {max_expected_dist:.1f} km). Centroid: ({cell_lat}, {reported_cell_lon})\n"
                     )
 
                 # Extract TWS anomaly value
