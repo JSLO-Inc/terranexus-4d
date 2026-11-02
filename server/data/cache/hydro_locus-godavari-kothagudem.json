@@ -1,6 +1,7 @@
 {
   "locationId": "locus-godavari-kothagudem",
   "locationName": "Pranhita-Godavari Graben - Kothagudem",
+  "dataSourceTier": "DEMONSTRATION",
   "coordinates": {
     "latitude": 17.5511,
     "longitude": 80.6178
@@ -26,7 +27,7 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "7df7ea2b039b6ff89ca825c3d04de13f2b01e14ba8141eebcf39e0495afa1b08",
-      "lastIngested": "2026-11-02T08:35:04.531Z"
+      "lastIngested": "2026-11-02T09:43:17.434Z"
     },
     "records": [
       {
@@ -1248,7 +1249,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "f0644a124964ea3672b221fe1b10efc8157a7e5c1f2a6f920e21ebc52ce42ea3",
-      "lastIngested": "2026-11-02T08:35:04.532Z"
+      "lastIngested": "2026-11-02T09:43:17.435Z"
     },
     "records": [
       {
@@ -2334,7 +2335,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "9fa38b21d9c325b549902ce5cadd33f3b8f5488b0ca1d606799681a18fb6faaa",
-      "lastIngested": "2026-11-02T08:35:04.533Z"
+      "lastIngested": "2026-11-02T09:43:17.436Z"
     },
     "records": [
       {

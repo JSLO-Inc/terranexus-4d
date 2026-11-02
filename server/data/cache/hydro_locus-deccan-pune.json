@@ -1,6 +1,7 @@
 {
   "locationId": "locus-deccan-pune",
   "locationName": "Upper Bhima Basin - Pune Deccan Traps",
+  "dataSourceTier": "DEMONSTRATION",
   "coordinates": {
     "latitude": 18.5204,
     "longitude": 73.8567
@@ -26,7 +27,7 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "f76d31d65a01b39116783492340beaafd5a3355ae20e6fe7e1cf9b53b068a0c4",
-      "lastIngested": "2026-11-02T08:35:04.439Z"
+      "lastIngested": "2026-11-02T09:43:17.302Z"
     },
     "records": [
       {
@@ -1248,7 +1249,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "226592557bc7cdd447b80dffafeb9dd148d511b9fa92e1e42f0271b04bc66b29",
-      "lastIngested": "2026-11-02T08:35:04.441Z"
+      "lastIngested": "2026-11-02T09:43:17.303Z"
     },
     "records": [
       {
@@ -2334,7 +2335,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "6a1f998e1c43ac88411f8424e3bc548015adde6ffec0268a3d98c571bdea89bc",
-      "lastIngested": "2026-11-02T08:35:04.442Z"
+      "lastIngested": "2026-11-02T09:43:17.303Z"
     },
     "records": [
       {

@@ -1,6 +1,7 @@
 {
   "locationId": "locus-zawar-udaipur",
   "locationName": "Zawar Mineral Belt - Udaipur",
+  "dataSourceTier": "DEMONSTRATION",
   "coordinates": {
     "latitude": 24.3564,
     "longitude": 73.7161
@@ -26,7 +27,7 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "ccc319a9f0e6bb2de267917219d73b3d09e2bc26ed7ae6b282b90c581593dcd0",
-      "lastIngested": "2026-11-02T08:35:04.462Z"
+      "lastIngested": "2026-11-02T09:43:17.332Z"
     },
     "records": [
       {
@@ -1248,7 +1249,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "ffe70c596b671aafc7ebb43921ed52a5ce302c3876303ead3d2014fdf2097bc8",
-      "lastIngested": "2026-11-02T08:35:04.462Z"
+      "lastIngested": "2026-11-02T09:43:17.335Z"
     },
     "records": [
       {
@@ -2334,7 +2335,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "c319cbcfb62e329a2c9d129b572c426fe9ded1248bb68f655bb89de5e02366e3",
-      "lastIngested": "2026-11-02T08:35:04.462Z"
+      "lastIngested": "2026-11-02T09:43:17.335Z"
     },
     "records": [
       {

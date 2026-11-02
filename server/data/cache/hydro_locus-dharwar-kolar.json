@@ -1,6 +1,7 @@
 {
   "locationId": "locus-dharwar-kolar",
   "locationName": "Kolar Schist Belt - Robertsonpet",
+  "dataSourceTier": "DEMONSTRATION",
   "coordinates": {
     "latitude": 12.9602,
     "longitude": 78.2712
@@ -26,7 +27,7 @@
         "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
       ],
       "sha256": "6d0d0d2d2b9452bbd55a231753c689859484f68decf2b13e919f2d3b98e2a441",
-      "lastIngested": "2026-11-02T08:35:04.488Z"
+      "lastIngested": "2026-11-02T09:43:17.365Z"
     },
     "records": [
       {
@@ -1248,7 +1249,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "cae8438013cd78e831865240385b2a24694816d48684f98f7330bd321a641dfa",
-      "lastIngested": "2026-11-02T08:35:04.489Z"
+      "lastIngested": "2026-11-02T09:43:17.366Z"
     },
     "records": [
       {
@@ -2334,7 +2335,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "abecb4f98891ec86b3ca181db1622e88f62d023daf54099d46561ccce273d650",
-      "lastIngested": "2026-11-02T08:35:04.490Z"
+      "lastIngested": "2026-11-02T09:43:17.366Z"
     },
     "records": [
       {
