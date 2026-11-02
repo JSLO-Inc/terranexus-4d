@@ -244,7 +244,7 @@ export const CesiumGlobe: React.FC = () => {
     // Add Scientific ~300 km Gaussian Smoothing Footprint Ellipse Entity
     const footprint = viewer.entities.add({
       id: 'spatial-footprint-300km',
-      name: `NASA GRACE ~300 km Gaussian Smoothing Footprint (${selectedLocation.name})`,
+      name: `Illustrative ~300 km Spatial Smoothing Footprint (${selectedLocation.name})`,
       position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude),
       ellipse: {
         semiMajorAxis: 300000.0, // 300 km radius in meters
@@ -256,7 +256,7 @@ export const CesiumGlobe: React.FC = () => {
         outlineWidth: 2
       },
       label: {
-        text: `~300 km GRACE Footprint\nArea: ~282,743 km²`,
+        text: `Illustrative ~300 km Footprint\nNominal Envelope ~282,743 km²\n(Non-Discrete Radial Response)`,
         font: '10px "JetBrains Mono", monospace',
         style: Cesium.LabelStyle.FILL_AND_OUTLINE,
         fillColor: Cesium.Color.fromCssColorString('#00e5ff'),
@@ -528,7 +528,9 @@ export const CesiumGlobe: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-cyan-400" />
               Base Imagery:
             </span>
-            <span className="font-mono text-cyan-300 text-[10px] uppercase">{imageryMode} (No API Token Req.)</span>
+            <span className="font-mono text-cyan-300 text-[10px]">
+              {imageryMode === 'satellite' ? 'Esri World Imagery (ArcGIS Terms)' : 'OpenStreetMap (ODbL)'}
+            </span>
           </div>
 
           <div className="flex items-center justify-between">
@@ -546,7 +548,15 @@ export const CesiumGlobe: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-purple-400" />
               GRACE Footprint:
             </span>
-            <span className="font-mono text-purple-300 text-[10px]">~300 km Gaussian</span>
+            <span className="font-mono text-purple-300 text-[10px]">~300 km Illustrative Envelope</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <span className="text-slate-300 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-slate-500" />
+              Terrain Surface:
+            </span>
+            <span className="font-mono text-slate-400 text-[10px]">WGS84 Ellipsoid (Flat)</span>
           </div>
         </div>
 
@@ -559,7 +569,7 @@ export const CesiumGlobe: React.FC = () => {
                 ? 'bg-cyan-950/80 border-cyan-500/60 text-cyan-200'
                 : 'bg-slate-900 border-slate-700 text-slate-400'
             }`}
-            title="Toggle NASA GRACE ~300 km Gaussian smoothing footprint disc"
+            title="Toggle illustrative ~300 km Gaussian smoothing footprint disc"
           >
             <Activity className="w-3 h-3" />
             Footprint Disc
@@ -572,7 +582,7 @@ export const CesiumGlobe: React.FC = () => {
                 ? 'bg-cyan-950/80 border-cyan-500/60 text-cyan-200'
                 : 'bg-slate-900 border-slate-700 text-slate-400'
             }`}
-            title="Toggle Geological Basin GeoJSON boundaries"
+            title="Toggle Geological Basin GeoJSON boundaries (Demonstration/Approximations)"
           >
             <Layers className="w-3 h-3" />
             Basin Outlines
@@ -589,18 +599,18 @@ export const CesiumGlobe: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom-Left: Real-Time Coordinate HUD */}
-      <div className="absolute bottom-4 left-4 bg-slate-950/85 border border-slate-800 rounded-lg px-3 py-1.5 font-mono text-xs text-slate-300 backdrop-blur z-10 flex items-center gap-3 shadow-xl">
+      {/* Real-Time Coordinate HUD (Positioned cleanly above bottom timeline deck) */}
+      <div className="absolute bottom-16 left-20 bg-slate-950/85 border border-slate-800 rounded-lg px-3 py-1 font-mono text-xs text-slate-300 backdrop-blur z-10 flex items-center gap-2.5 shadow-xl pointer-events-none">
         <div className="flex items-center gap-1.5 text-cyan-400">
           <Crosshair className="w-3.5 h-3.5" />
           <span className="text-[10px] uppercase tracking-wider text-slate-400">COORDINATES:</span>
         </div>
         {mouseCoords ? (
-          <span className="text-cyan-300 font-semibold">
+          <span className="text-cyan-300 font-semibold text-[11px]">
             {mouseCoords.lat.toFixed(4)}°N, {mouseCoords.lon.toFixed(4)}°E ({mouseCoords.height}m ASL)
           </span>
         ) : (
-          <span className="text-slate-500">Hover cursor over globe</span>
+          <span className="text-slate-500 text-[11px]">Hover cursor over globe</span>
         )}
       </div>
 

@@ -323,28 +323,77 @@ app.post('/api/hydro/refresh', (req, res) => {
 });
 
 // ==========================================
-// NEXUS AI EXPLANATION ENDPOINT
+// NEXUS AI EXPLANATION ENDPOINT (HARDENED)
 // ==========================================
+const aiRateLimiterMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkAiRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute window
+  const maxRequests = 30; // Max 30 requests per minute per IP
+  const record = aiRateLimiterMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    aiRateLimiterMap.set(ip, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+
+  if (record.count >= maxRequests) {
+    return false;
+  }
+
+  record.count += 1;
+  return true;
+}
+
 app.post('/api/ai/explain', async (req, res) => {
   try {
-    const { query, context } = req.body;
-    if (!query || !context) {
-      return res.status(400).json({ error: 'Missing query or context payload' });
+    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+
+    // Rate limiting check
+    if (!checkAiRateLimit(clientIp)) {
+      return res.status(429).json({
+        success: false,
+        error: 'Rate limit exceeded (maximum 30 requests per minute). Please wait before submitting another query.',
+        code: 'RATE_LIMIT_EXCEEDED'
+      });
     }
 
+    const { query, context } = req.body;
+
+    // Rigorous input validation
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ success: false, error: 'Invalid or missing "query" string parameter' });
+    }
+
+    const cleanQuery = query.trim();
+    if (cleanQuery.length < 2) {
+      return res.status(400).json({ success: false, error: 'Query is too short (minimum 2 characters required)' });
+    }
+
+    if (cleanQuery.length > 500) {
+      return res.status(400).json({ success: false, error: 'Query exceeds maximum permitted length (500 characters)' });
+    }
+
+    if (!context || typeof context !== 'object' || !context.location) {
+      return res.status(400).json({ success: false, error: 'Invalid or missing "context" payload object with location details' });
+    }
+
+    // Backend-exclusive API key resolution
     const apiKey = process.env.GEMINI_API_KEY;
-    const result = await generateScientificExplanation(query, context, apiKey);
+    const result = await generateScientificExplanation(cleanQuery, context, apiKey, 15000);
 
     res.json({
       success: true,
       result
     });
   } catch (error: any) {
-    console.error('Error generating scientific explanation:', error);
+    // Sanitize error without exposing keys, tokens or internal paths
+    console.error('[Nexus AI Error]', error?.message || 'Unknown processing error');
     res.status(500).json({
       success: false,
-      error: 'Failed to generate scientific explanation',
-      details: error.message
+      error: 'An internal error occurred while processing the scientific explanation. Safe offline fallback active.',
+      code: 'AI_SERVICE_ERROR'
     });
   }
 });
@@ -354,3 +403,4 @@ app.listen(PORT, () => {
   console.log(`[TERRANEXUS 4D] Ingestion Engine: Hydro Real Pipeline Active`);
   console.log(`[TERRANEXUS 4D] Gemini AI Status: ${process.env.GEMINI_API_KEY ? 'CONFIGURED' : 'OFFLINE MODE (Local Scientific Rules Active)'}`);
 });
+

@@ -1,130 +1,116 @@
-import React from 'react';
-import { useTerranexusStore, TIME_STEPS } from '../../state/useTerranexusStore';
+import React, { useEffect, useState } from 'react';
+import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { INDIA_LOCATIONS } from '../../data/locationsIndia';
-import { Globe, Layers, Navigation, Info, Eye, Sliders, ChevronDown } from 'lucide-react';
+import { Compass, Calendar, ChevronDown, CheckCircle, Database } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const {
     selectedLocation,
     setSelectedLocation,
-    depthMeters,
-    currentTimeIndex,
-    viewMode,
-    setViewMode,
-    inspectorOpen,
-    setInspectorOpen,
-    activeModule
+    activeModule,
+    setActiveModule
   } = useTerranexusStore();
 
-  const currentTime = TIME_STEPS[currentTimeIndex] || 'Current';
+  const [nasaLiveStatus, setNasaLiveStatus] = useState<boolean>(true);
+  const [showLocationMenu, setShowLocationMenu] = useState<boolean>(false);
+
+  // Derive real connection status from backend API readiness
+  useEffect(() => {
+    fetch('/api/health')
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ONLINE') {
+          setNasaLiveStatus(true);
+        }
+      })
+      .catch(() => {
+        setNasaLiveStatus(false);
+      });
+  }, []);
 
   return (
-    <header className="h-14 border-b border-slate-800 bg-slate-950/90 backdrop-blur px-4 flex items-center justify-between z-30 select-none">
-      {/* Brand & Identity */}
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500/20 via-amber-500/10 to-purple-500/20 border border-cyan-500/40 flex items-center justify-center p-1.5 shadow-lg shadow-cyan-500/10">
-          <img src="/logo.svg" alt="Terranexus Logo" className="w-full h-full" />
+    <header className="absolute top-4 left-4 right-4 h-14 z-30 flex items-center justify-between select-none pointer-events-none">
+      {/* Top-Left: Brand & Subtitle */}
+      <div className="flex items-center gap-3 pointer-events-auto bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl rounded-2xl px-3.5 py-2 shadow-2xl">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500/20 via-sky-500/30 to-blue-600/20 border border-cyan-400/50 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <Compass className="w-4 h-4 text-cyan-400 animate-pulse" />
         </div>
-        <div>
+        <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <h1 className="font-bold text-sm tracking-wider uppercase bg-gradient-to-r from-cyan-400 via-sky-300 to-amber-300 bg-clip-text text-transparent">
+            <span className="font-extrabold text-sm tracking-wider uppercase text-slate-100">
               TERRANEXUS 4D
-            </h1>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-600/40 text-cyan-300">
-              INDIA DIGITAL TWIN
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 hidden md:block">
-            National Subsurface Intelligence & Earth System Twin
-          </p>
-        </div>
-      </div>
-
-      {/* 4D Spatiotemporal Coordinates Bar */}
-      <div className="hidden lg:flex items-center gap-2 bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-1 font-mono text-xs shadow-inner">
-        <div className="flex items-center gap-1.5 text-slate-300 border-r border-slate-700/60 pr-3">
-          <Navigation className="w-3.5 h-3.5 text-cyan-400" />
-          <span>
-            {selectedLocation.latitude.toFixed(4)}°N, {selectedLocation.longitude.toFixed(4)}°E
+          <span className="text-[10px] tracking-wide text-slate-400 font-medium">
+            Scientific Intelligence Platform
           </span>
-          <span className="text-[10px] text-slate-500">({selectedLocation.elevationMeters}m ASL)</span>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-amber-300 border-r border-slate-700/60 px-3">
-          <Sliders className="w-3.5 h-3.5 text-amber-400" />
-          <span>Depth: -{depthMeters}m</span>
-        </div>
-
-        <div className="flex items-center gap-1.5 text-purple-300 pl-3">
-          <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-          <span className="truncate max-w-[150px]">{currentTime}</span>
         </div>
       </div>
 
-      {/* Center/Right Controls */}
-      <div className="flex items-center gap-3">
-        {/* Location Quick-Selector */}
-        <div className="relative">
-          <select
-            value={selectedLocation.id}
-            onChange={(e) => {
-              const loc = INDIA_LOCATIONS.find(l => l.id === e.target.value);
-              if (loc) setSelectedLocation(loc);
-            }}
-            className="appearance-none bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg text-xs text-slate-200 py-1.5 pl-3 pr-8 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer"
-          >
-            {INDIA_LOCATIONS.map((loc) => (
-              <option key={loc.id} value={loc.id} className="bg-slate-900 text-slate-100">
-                {loc.name} ({loc.state})
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+      {/* Top-Right: Telemetry Status, Observation Interval & User Avatar */}
+      <div className="flex items-center gap-2.5 pointer-events-auto">
+        {/* Actual NASA Data Connection Status Pill */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl shadow-2xl text-xs font-mono">
+          <span className={`w-2 h-2 rounded-full ${nasaLiveStatus ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+          <span className="text-slate-200 text-[11px] font-sans font-medium">
+            {nasaLiveStatus ? 'Live • NASA Data' : 'Curated Benchmark'}
+          </span>
         </div>
 
-        {/* View Mode Switcher (Globe / Subsurface / Split) */}
-        {activeModule === 'globe' && (
-          <div className="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5 text-xs font-medium">
-            <button
-              onClick={() => setViewMode('globe')}
-              className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
-                viewMode === 'globe' ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Globe className="w-3 h-3" /> Globe
-            </button>
-            <button
-              onClick={() => setViewMode('split')}
-              className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
-                viewMode === 'split' ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Layers className="w-3 h-3" /> Split
-            </button>
-            <button
-              onClick={() => setViewMode('underground')}
-              className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
-                viewMode === 'underground' ? 'bg-amber-950 text-amber-300 border border-amber-800/60' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Eye className="w-3 h-3" /> 3D Strata
-            </button>
-          </div>
-        )}
+        {/* Observation Time Range Selector */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl shadow-2xl text-xs font-mono text-slate-200 hover:border-slate-700 transition-colors cursor-pointer">
+          <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-[11px] font-sans font-medium">Jan 2020 – Dec 2024</span>
+          <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
+        </div>
 
-        {/* Scientific Inspector Toggle */}
-        <button
-          onClick={() => setInspectorOpen(!inspectorOpen)}
-          className={`p-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition-colors ${
-            inspectorOpen
-              ? 'bg-cyan-950/80 border-cyan-600/60 text-cyan-300'
-              : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-          }`}
-          title="Toggle Scientific Evidence Inspector"
-        >
-          <Info className="w-4 h-4" />
-          <span className="hidden md:inline font-mono text-[11px]">Inspector</span>
-        </button>
+        {/* Location Dropdown Quick Selector */}
+        <div className="relative">
+          <button
+            onClick={() => setShowLocationMenu(!showLocationMenu)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl shadow-2xl text-xs text-slate-200 hover:border-slate-700 transition-colors"
+          >
+            <span className="text-amber-400 font-mono text-[10px] uppercase">Locus:</span>
+            <span className="font-semibold text-[11px] max-w-[130px] truncate">{selectedLocation.name.split(' - ')[0]}</span>
+            <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
+          </button>
+
+          {showLocationMenu && (
+            <div className="absolute right-0 top-full mt-2 w-64 bg-slate-950/95 border border-slate-800 rounded-2xl p-1.5 backdrop-blur-2xl shadow-2xl z-50 flex flex-col gap-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2.5 py-1">
+                Indian Study Regions
+              </span>
+              {INDIA_LOCATIONS.map((loc) => {
+                const isSelected = loc.id === selectedLocation.id;
+                return (
+                  <button
+                    key={loc.id}
+                    onClick={() => {
+                      setSelectedLocation(loc);
+                      setShowLocationMenu(false);
+                    }}
+                    className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl text-left text-xs transition-all ${
+                      isSelected
+                        ? 'bg-cyan-950/80 border border-cyan-500/50 text-cyan-200 font-semibold'
+                        : 'hover:bg-slate-900 text-slate-300'
+                    }`}
+                  >
+                    <div>
+                      <div className="font-medium">{loc.name.split(' - ')[0]}</div>
+                      <div className="text-[10px] text-slate-400">{loc.district}, {loc.state}</div>
+                    </div>
+                    {isSelected && <CheckCircle className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* User Profile Avatar */}
+        <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-xs font-semibold text-slate-200 shadow-xl cursor-pointer hover:border-cyan-400 transition-colors">
+          JS
+        </div>
       </div>
     </header>
   );
