@@ -3,6 +3,7 @@ import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { Interactive2DMap } from './Interactive2DMap';
 import { StatusBadge } from '../common/StatusBadge';
 import { LocationSearch } from '../location/LocationSearch';
+import { ExportReportModal } from './ExportReportModal';
 import {
   MapPin,
   Droplets,
@@ -25,7 +26,8 @@ import {
   Info,
   Ban,
   Tag,
-  AlertCircle
+  AlertCircle,
+  Download
 } from 'lucide-react';
 import { DossierResponse, NormalizedObservation, DataCategory } from '../../types/dossier';
 
@@ -42,6 +44,7 @@ export const LocationDossierView: React.FC = () => {
   } = useTerranexusStore();
 
   const [evidenceFilter, setEvidenceFilter] = useState<string>('all');
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
 
   const d = currentDossier;
   const isSourcesTab = dossierActiveTab === 'sources' || dossierActiveTab === 'evidence';
@@ -60,6 +63,15 @@ export const LocationDossierView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+              title="Export Full Scientific Intelligence Report (Markdown / PDF)"
+            >
+              <Download className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden sm:inline">Export Report</span>
+            </button>
+
             <button
               onClick={() => setShowProviderHealthModal(true)}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
@@ -858,6 +870,13 @@ export const LocationDossierView: React.FC = () => {
       <div className="w-full h-[400px] sm:h-[460px] lg:h-full lg:flex-1 min-w-0 min-h-0 relative overflow-hidden">
         <Interactive2DMap />
       </div>
+
+      {/* Export Scientific Intelligence Report Modal */}
+      <ExportReportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        dossier={d}
+      />
     </div>
   );
 };

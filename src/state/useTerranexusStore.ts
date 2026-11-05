@@ -718,6 +718,7 @@ export function useTerranexusStore(): TerranexusState {
       notify();
     },
     setTerrainElevationGrid: (terrainElevationGrid) => {
+      if (globalState.terrainElevationGrid === terrainElevationGrid) return;
       globalState = { ...globalState, terrainElevationGrid };
       notify();
     },

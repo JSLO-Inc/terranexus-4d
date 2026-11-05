@@ -16,6 +16,11 @@ import {
   generateLithologyPbrTextures,
   buildDippingStratumGeometry,
   buildCornerCutInternalCappingWalls,
+  buildCornerCutStratumGeometry,
+  buildCornerCutTerrainGeometry,
+  buildVolumetricStratumGeometry,
+  buildGeologicalDatumPlinthGeometry,
+  buildStratigraphicContactSeamGeometry,
   TerraneStructuralAttitude
 } from './geologicalMaterials';
 import {
@@ -623,6 +628,10 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
   const origEmissiveRef = useRef<THREE.Color | null>(null);
   const origIntensityRef = useRef<number>(0);
 
+  // Persistent camera viewpoint refs across re-renders
+  const savedCamPosRef = useRef<THREE.Vector3 | null>(null);
+  const savedCtrlTargetRef = useRef<THREE.Vector3 | null>(null);
+
   const {
     selectedLocation,
     currentDossier,
@@ -675,12 +684,19 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
   const [hoveredEntity, setHoveredEntity] = useState<any>(null);
   const [selectedEntity, setSelectedEntity] = useState<any>(null);
 
-  // Fetch authentic Copernicus GLO-90 DEM grid on coordinate or extent change
+  // Cached coordinate key to prevent redundant DEM fetches and infinite re-render loops
+  const lastFetchedCoordRef = useRef<string>('');
   useEffect(() => {
+    const lat = Number(selectedLocation.latitude);
+    const lon = Number(selectedLocation.longitude);
+    const coordKey = `${lat.toFixed(4)},${lon.toFixed(4)},${explorationExtentKm}`;
+    if (lastFetchedCoordRef.current === coordKey) return;
+    lastFetchedCoordRef.current = coordKey;
+
     let isMounted = true;
     const fetchGrid = async () => {
       try {
-        const url = `/api/providers/elevation/grid?lat=${selectedLocation.latitude}&lon=${selectedLocation.longitude}&extentKm=${explorationExtentKm}&resolution=25`;
+        const url = `/api/providers/elevation/grid?lat=${lat}&lon=${lon}&extentKm=${explorationExtentKm}&resolution=25`;
         const res = await fetch(url);
         if (res.ok) {
           const json = await res.json();
@@ -694,7 +710,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     };
     fetchGrid();
     return () => { isMounted = false; };
-  }, [selectedLocation.latitude, selectedLocation.longitude, explorationExtentKm, setTerrainElevationGrid]);
+  }, [selectedLocation.latitude, selectedLocation.longitude, explorationExtentKm]);
 
   // Scientific data queries for current location
   const formations = deriveDynamicFormations(selectedLocation, currentDossier);
@@ -730,7 +746,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         : 32.4; // Scientific baseline benchmark
 
   // Reset Camera View helper
-  const applyCameraPreset = useCallback((preset: 'isometric' | 'front' | 'side' | 'top' | 'corner' | 'reset') => {
+  const applyCameraPreset = useCallback((preset: 'isometric' | 'front' | 'side' | 'top' | 'corner' | 'closeup' | 'reset') => {
     if (!cameraRef.current || !controlsRef.current) return;
     const camera = cameraRef.current;
     const controls = controlsRef.current;
@@ -752,6 +768,10 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         camera.position.set(48, 25, 48);
         controls.target.set(0, -14, 0);
         break;
+      case 'closeup':
+        camera.position.set(22, 2, 22);
+        controls.target.set(0, -6, 4);
+        break;
       case 'isometric':
       case 'reset':
       default:
@@ -761,6 +781,8 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     }
     camera.lookAt(controls.target);
     controls.update();
+    savedCamPosRef.current = camera.position.clone();
+    savedCtrlTargetRef.current = controls.target.clone();
   }, []);
 
   const handleResetCamera = () => applyCameraPreset('isometric');
@@ -816,7 +838,10 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
 
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.5, 1000);
     cameraRef.current = camera;
-    if (cutawayBlockStyle === 'corner') {
+    if (savedCamPosRef.current && savedCtrlTargetRef.current) {
+      camera.position.copy(savedCamPosRef.current);
+      camera.lookAt(savedCtrlTargetRef.current);
+    } else if (cutawayBlockStyle === 'corner') {
       camera.position.set(48, 25, 48);
       camera.lookAt(0, -14, 0);
     } else {
@@ -846,10 +871,19 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     if (typeof window !== 'undefined') {
       (window as any).__subsurfaceCamera = camera;
       (window as any).__subsurfaceControls = controls;
+      (window as any).__applyCameraPreset = applyCameraPreset;
     }
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.target.set(0, -14, 0);
+    if (savedCtrlTargetRef.current) {
+      controls.target.copy(savedCtrlTargetRef.current);
+    } else {
+      controls.target.set(0, -14, 0);
+    }
+    controls.addEventListener('end', () => {
+      savedCamPosRef.current = camera.position.clone();
+      savedCtrlTargetRef.current = controls.target.clone();
+    });
     controls.minDistance = 18;
     controls.maxDistance = 140;
     controls.maxPolarAngle = Math.PI / 2 + 0.05;
@@ -883,11 +917,22 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     bounceLight.position.set(20, -35, 25);
     scene.add(bounceLight);
 
-    // Geotechnical Datum Platform & Coordinate Grid (SwissTopo / CAD Workstation Standard)
-    const gridHelper = new THREE.GridHelper(blockWidth * 1.35, 18, 0x0ea5e9, 0x1e293b);
-    gridHelper.position.set(0, baseDatumY, 0);
+    // Geotechnical Datum Plinth & Coordinate Grid (Museum / CAD Standard)
+    const isCornerMode = cutawayBlockStyle === 'corner';
+    const plinthGeo = buildGeologicalDatumPlinthGeometry(blockWidth, blockLength, baseDatumY, isCornerMode, 2.5, 1.2);
+    const plinthMat = new THREE.MeshStandardMaterial({
+      color: 0x090d16, // Precision museum-grade dark slate
+      roughness: 0.85,
+      metalness: 0.3
+    });
+    const plinthMesh = new THREE.Mesh(plinthGeo, plinthMat);
+    plinthMesh.receiveShadow = true;
+    scene.add(plinthMesh);
+
+    const gridHelper = new THREE.GridHelper(blockWidth * 1.25, 16, 0x0ea5e9, 0x1e293b);
+    gridHelper.position.set(0, baseDatumY + 0.02, 0);
     (gridHelper.material as THREE.Material).transparent = true;
-    (gridHelper.material as THREE.Material).opacity = 0.35;
+    (gridHelper.material as THREE.Material).opacity = 0.28;
     scene.add(gridHelper);
 
     // 4. Main Stratigraphic Group & Clipping Planes
@@ -895,21 +940,16 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     strataGroupRef.current = strataGroup;
     scene.add(strataGroup);
 
-    // Depth Clipping Plane (horizontal slice)
+    // Depth Clipping Plane (horizontal slice for interactive layer elevation cuts)
     const depthClipPlane = new THREE.Plane(
       new THREE.Vector3(0, -1, 0),
       depthMeters > 0 ? -depthMeters * verticalScale : 99999
     );
     depthClipPlaneRef.current = depthClipPlane;
 
-    // Corner Cut Clipping Planes (excises front quadrant x > 0 && z > 0)
-    const cornerPlaneX = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
-    const cornerPlaneZ = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
-
-    const activeClippingPlanes: THREE.Plane[] =
-      cutawayBlockStyle === 'corner'
-        ? [cornerPlaneX, cornerPlaneZ]
-        : [depthClipPlane];
+    // In Corner Cut mode, we use monolithic L-shaped geometry natively!
+    // No GPU fragment-clipping planes needed for corner excision, avoiding all edge artifacts!
+    const activeClippingPlanes: THREE.Plane[] = depthMeters > 0 ? [depthClipPlane] : [];
 
     const interactiveObjects: THREE.Object3D[] = [];
     strataMeshesRef.current = [];
@@ -927,18 +967,18 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       const dRiver = Math.abs(z - zRiver);
 
       // Fluvial incision channel & natural levee ridges
-      const riverIncision = -2.2 * Math.exp(-(dRiver * dRiver) / (2 * 3.4 * 3.4));
-      const leveeRidge = 0.60 * Math.exp(-((dRiver - 4.6) * (dRiver - 4.6)) / (2 * 1.6 * 1.6));
+      const riverIncision = -2.8 * Math.exp(-(dRiver * dRiver) / (2 * 3.6 * 3.6));
+      const leveeRidge = 0.85 * Math.exp(-((dRiver - 4.8) * (dRiver - 4.8)) / (2 * 1.8 * 1.8));
       const fluvialComponent = (riverIncision + leveeRidge) * cutawayExaggeration;
 
-      // 2. Copernicus GLO-90 DEM Grid Elevation
+      // 2. Copernicus GLO-90 DEM Grid Elevation with Smooth Hermite Spline Interpolation
       if (terrainElevationGrid && terrainElevationGrid.elevations?.length > 0) {
         const grid = terrainElevationGrid;
         const rows = grid.elevations.length;
         const cols = grid.elevations[0].length;
         const meanEle = grid.meanElevationM || 0;
-        const reliefRange = Math.max(grid.maxElevationM - grid.minElevationM, 6.0);
-        const demScale = Math.min(Math.max(4.5 / reliefRange, 0.08), 0.35) * cutawayExaggeration;
+        const reliefRange = Math.max(grid.maxElevationM - grid.minElevationM, 10.0);
+        const demScale = Math.min(Math.max(5.5 / reliefRange, 0.12), 0.42) * cutawayExaggeration;
 
         const u = Math.max(0, Math.min(1, (x + blockWidth / 2) / blockWidth));
         const v = Math.max(0, Math.min(1, (z + blockLength / 2) / blockLength));
@@ -952,13 +992,24 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         const fr = rFloat - r0;
         const fc = cFloat - c0;
 
+        // Cubic Hermite smoothstep weights prevent polygonal facet artifacts
+        const sFr = fr * fr * (3 - 2 * fr);
+        const sFc = fc * fc * (3 - 2 * fc);
+
         const e00 = grid.elevations[r0][c0];
         const e10 = grid.elevations[r0][c1];
         const e01 = grid.elevations[r1][c0];
         const e11 = grid.elevations[r1][c1];
 
-        const ele = (1 - fc) * ((1 - fr) * e00 + fr * e01) + fc * ((1 - fr) * e10 + fr * e11);
-        return (ele - meanEle) * demScale + fluvialComponent * 0.45;
+        const ele = (1 - sFc) * ((1 - sFr) * e00 + sFr * e01) + sFc * ((1 - sFr) * e10 + sFr * e11);
+
+        // Geomorphic micro-relief overlay derived from continuous multi-frequency noise
+        const microRelief = (
+          Math.sin(x * 0.22 + 1.2) * Math.cos(z * 0.18 + 0.8) * 0.45 +
+          Math.sin((x + z) * 0.35) * 0.25
+        ) * cutawayExaggeration;
+
+        return (ele - meanEle) * demScale + fluvialComponent * 0.55 + microRelief;
       }
 
       // 3. Multi-Octave Continuous Terrain Geomorphology
@@ -970,38 +1021,36 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         // Strike-parallel hogback quartzite ridges and eroded shale valleys
         const strikeRad = (structuralAttitude.strikeDeg * Math.PI) / 180;
         const normalCoord = x * Math.cos(strikeRad) + z * Math.sin(strikeRad);
-        return (
-          Math.sin(normalCoord * 0.22) * 4.2 +
-          Math.cos(normalCoord * 0.45) * 1.4 +
-          Math.sin(z * 0.15) * 0.8
-        ) * cutawayExaggeration;
+        const ridgeHarmonic = Math.sin(normalCoord * 0.24) * 4.6 + Math.cos(normalCoord * 0.50) * 1.6;
+        const talusSlope = Math.sin(z * 0.18) * 0.9;
+        return (ridgeHarmonic + talusSlope) * cutawayExaggeration;
       }
 
       if (isDeccan) {
         // Step-terraced basalt trap mesa scarps and flow plateaus
-        const rawRelief = Math.sin(x * 0.10) * 3.2 + Math.cos(z * 0.12) * 2.8;
-        const terraceStep = Math.floor(rawRelief / 1.6) * 1.2 + (rawRelief % 1.6) * 0.35;
+        const rawRelief = Math.sin(x * 0.12) * 3.6 + Math.cos(z * 0.14) * 3.0;
+        const terraceStep = Math.floor(rawRelief / 1.5) * 1.35 + (rawRelief % 1.5) * 0.40;
         return terraceStep * cutawayExaggeration;
       }
 
       if (isCraton) {
         // Archean shield: undulating granite-gneiss domes and lateritic mesas
         return (
-          Math.sin(x * 0.12 + 0.5) * Math.cos(z * 0.10 - 0.4) * 3.5 +
-          Math.sin((x + z) * 0.20) * 1.2 +
-          fluvialComponent * 0.5
+          Math.sin(x * 0.14 + 0.5) * Math.cos(z * 0.12 - 0.4) * 3.8 +
+          Math.sin((x + z) * 0.22) * 1.4 +
+          fluvialComponent * 0.55
         ) * cutawayExaggeration;
       }
 
       // Default Alluvial Plain (Ludhiana / Indo-Gangetic Foreland):
-      // Rolling agricultural terraces, gentle swales, and incised river channel
+      // Natural agricultural terraces, gentle swales, and incised river channel
       const rollingTerraces = (
-        Math.sin(x * 0.08 + 0.4) * Math.cos(z * 0.07 - 0.3) * 2.2 +
-        Math.sin((x + z) * 0.14) * 0.9 +
-        Math.cos((x - z) * 0.16) * 0.6 +
-        Math.sin(x * 0.30 + z * 0.24) * 0.35
+        Math.sin(x * 0.09 + 0.4) * Math.cos(z * 0.08 - 0.3) * 2.6 +
+        Math.sin((x + z) * 0.15) * 1.1 +
+        Math.cos((x - z) * 0.18) * 0.75 +
+        Math.sin(x * 0.32 + z * 0.26) * 0.40
       );
-      const regionalSlope = -0.035 * x + 0.025 * z;
+      const regionalSlope = -0.038 * x + 0.028 * z;
 
       return (rollingTerraces + regionalSlope) * cutawayExaggeration + fluvialComponent;
     };
@@ -1009,18 +1058,24 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     // -------------------------------------------------------------
     // A. TOP TERRAIN DISPLACED RELIEF SURFACE MESH
     // -------------------------------------------------------------
-    const terrainCols = 96;
-    const terrainRows = 96;
-    const terrainGeo = new THREE.PlaneGeometry(blockWidth, blockLength, terrainCols - 1, terrainRows - 1);
-    terrainGeo.rotateX(-Math.PI / 2);
-    const terrainPosAttr = terrainGeo.attributes.position;
-
-    for (let i = 0; i < terrainPosAttr.count; i++) {
-      const vx = terrainPosAttr.getX(i);
-      const vz = terrainPosAttr.getZ(i);
-      terrainPosAttr.setY(i, getSurfaceElevation(vx, vz));
+    let terrainGeo: THREE.BufferGeometry;
+    if (cutawayBlockStyle === 'corner') {
+      // Native continuous L-shaped terrain surface covering the 3 intact quadrants
+      terrainGeo = buildCornerCutTerrainGeometry(getSurfaceElevation, blockWidth, blockLength, 48, 48);
+    } else {
+      // Full rectangular block terrain grid
+      const terrainCols = 96;
+      const terrainRows = 96;
+      terrainGeo = new THREE.PlaneGeometry(blockWidth, blockLength, terrainCols - 1, terrainRows - 1);
+      terrainGeo.rotateX(-Math.PI / 2);
+      const terrainPosAttr = terrainGeo.attributes.position;
+      for (let i = 0; i < terrainPosAttr.count; i++) {
+        const vx = terrainPosAttr.getX(i);
+        const vz = terrainPosAttr.getZ(i);
+        terrainPosAttr.setY(i, getSurfaceElevation(vx, vz));
+      }
+      terrainGeo.computeVertexNormals();
     }
-    terrainGeo.computeVertexNormals();
 
     const elevationSourceLabel = terrainElevationGrid?.sourceDataset || 'Copernicus Global 90m DEM (GLO-90)';
     const elevationDataTier = terrainElevationGrid?.status === 'OBSERVED' ? 'OBSERVED' : 'MODELLED';
@@ -1028,17 +1083,16 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     const terrainTexture = generateTerrainTexture(selectedLocation.id, mineralDisplayMode, selectedLocation as any);
     const terrainMat = new THREE.MeshStandardMaterial({
       map: terrainTexture,
-      roughness: 0.85,
-      metalness: 0.05,
+      roughness: 0.82,
+      metalness: 0.04,
       polygonOffset: true,
-      polygonOffsetFactor: -2,
-      polygonOffsetUnits: -2,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -1,
       clippingPlanes: activeClippingPlanes,
-      clipIntersection: cutawayBlockStyle === 'corner',
       side: THREE.DoubleSide
     });
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
-    terrainMesh.position.y = 0.05; // Clean separation above volumetric regolith prevents coplanar z-fighting
+    terrainMesh.position.y = 0.00; // Aligns seamlessly with the top of the volumetric regolith layer
     terrainMesh.receiveShadow = true;
     terrainMesh.castShadow = true;
     terrainMesh.userData = {
@@ -1093,7 +1147,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     const regolithTopFunc = (x: number, z: number) => getSurfaceElevation(x, z);
     const regolithBotFunc = (x: number, z: number) => getSurfaceElevation(x, z) - regolithThk(x, z);
 
-    const regolithGeo = buildDippingStratumGeometry(regolithTopFunc, regolithBotFunc, blockWidth, blockLength, 32, 32, 4.0);
+    const regolithGeo = buildVolumetricStratumGeometry(regolithTopFunc, regolithBotFunc, blockWidth, blockLength, isCornerMode, 32, 32, 4.0);
     const regolithPbr = generateLithologyPbrTextures('Q-SOIL-REG', 'Weathered Regolith, Saprolite, and Humus Loam', '#573919');
 
     const regolithMat = new THREE.MeshStandardMaterial({
@@ -1104,7 +1158,6 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       roughness: 0.95,
       metalness: 0.02,
       clippingPlanes: activeClippingPlanes,
-      clipIntersection: cutawayBlockStyle === 'corner',
       side: THREE.DoubleSide
     });
     const regolithMesh = new THREE.Mesh(regolithGeo, regolithMat);
@@ -1123,34 +1176,6 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     strataGroup.add(regolithMesh);
     interactiveObjects.push(regolithMesh);
     strataMeshesRef.current.push(regolithMesh);
-
-    if (cutawayBlockStyle === 'corner') {
-      const regolithCapGeo = buildCornerCutInternalCappingWalls(
-        regolithTopFunc,
-        regolithBotFunc,
-        blockWidth / 2,
-        blockLength / 2,
-        32,
-        32,
-        4.0
-      );
-      const regolithCapMat = new THREE.MeshStandardMaterial({
-        color: 0x573919,
-        map: regolithPbr.map,
-        bumpMap: regolithPbr.bumpMap,
-        bumpScale: 0.10,
-        roughness: 0.95,
-        metalness: 0.02,
-        side: THREE.DoubleSide
-      });
-      const regolithCapMesh = new THREE.Mesh(regolithCapGeo, regolithCapMat);
-      regolithCapMesh.receiveShadow = true;
-      regolithCapMesh.castShadow = true;
-      regolithCapMesh.userData = regolithMesh.userData;
-      strataGroup.add(regolithCapMesh);
-      interactiveObjects.push(regolithCapMesh);
-      strataMeshesRef.current.push(regolithCapMesh);
-    }
 
     // -------------------------------------------------------------
     // D. WATERTIGHT DIPPING & UNDULATING GEOLOGICAL STRATA STACK
@@ -1200,7 +1225,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
 
       // Procedural PBR materials with meter-anchored UV coordinates
       const pbr = generateLithologyPbrTextures(formation.code, formation.primaryLithology, formation.colorHex);
-      const slabGeo = buildDippingStratumGeometry(topFunc, botFunc, blockWidth, blockLength, 32, 32, 4.0);
+      const slabGeo = buildVolumetricStratumGeometry(topFunc, botFunc, blockWidth, blockLength, isCornerMode, 32, 32, 4.0);
 
       // In fence mode, strata blocks become transparent so fence panels shine through
       const isFenceActive = cutawayBlockStyle === 'fence';
@@ -1216,7 +1241,6 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         opacity: isFenceActive ? 0.22 : 0.96,
         depthWrite: !isFenceActive,
         clippingPlanes: activeClippingPlanes,
-        clipIntersection: cutawayBlockStyle === 'corner',
         side: THREE.DoubleSide
       });
 
@@ -1247,42 +1271,12 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       interactiveObjects.push(slabMesh);
       strataMeshesRef.current.push(slabMesh);
 
-      // Solid internal capping walls for 90° corner cut excavations
-      if (cutawayBlockStyle === 'corner') {
-        const capGeo = buildCornerCutInternalCappingWalls(
-          topFunc,
-          botFunc,
-          blockWidth / 2,
-          blockLength / 2,
-          32,
-          32,
-          4.0
-        );
-        const capMat = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(formation.colorHex),
-          map: pbr.map,
-          bumpMap: pbr.bumpMap,
-          bumpScale: 0.12,
-          roughnessMap: pbr.roughnessMap,
-          roughness: pbr.roughness,
-          metalness: pbr.metalness,
-          side: THREE.DoubleSide
-        });
-        const capMesh = new THREE.Mesh(capGeo, capMat);
-        capMesh.receiveShadow = true;
-        capMesh.castShadow = true;
-        capMesh.userData = slabMesh.userData;
-        strataGroup.add(capMesh);
-        interactiveObjects.push(capMesh);
-        strataMeshesRef.current.push(capMesh);
-      }
-
       // Boundary wireframe lines delineating contact surfaces
-      const wireGeo = new THREE.EdgesGeometry(slabGeo, 25);
+      const wireGeo = new THREE.EdgesGeometry(slabGeo, 28);
       const wireMat = new THREE.LineBasicMaterial({
-        color: 0x334155,
+        color: 0x1e293b,
         transparent: true,
-        opacity: isFenceActive ? 0.25 : 0.6,
+        opacity: isFenceActive ? 0.25 : 0.45,
         clippingPlanes: activeClippingPlanes
       });
       const wireframe = new THREE.LineSegments(wireGeo, wireMat);
@@ -1290,31 +1284,16 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     });
 
     // Distinct Geological Contact Seam Lines on Exposed Internal Cutaway Walls
-    if (cutawayBlockStyle === 'corner') {
+    if (isCornerMode) {
       const contactLineMat = new THREE.LineBasicMaterial({
-        color: 0x0f172a,
-        linewidth: 1.5,
+        color: 0x090d16,
+        linewidth: 2.0,
         transparent: true,
-        opacity: 0.65
+        opacity: 0.85
       });
       contactFuncs.forEach((cFunc) => {
-        // Wall 1 line (x = 0, z from 0 to halfL)
-        const wall1Pts: THREE.Vector3[] = [];
-        for (let s = 0; s <= 32; s++) {
-          const z = (s / 32) * (blockLength / 2);
-          wall1Pts.push(new THREE.Vector3(0.01, cFunc(0, z), z));
-        }
-        const wall1Geo = new THREE.BufferGeometry().setFromPoints(wall1Pts);
-        strataGroup.add(new THREE.Line(wall1Geo, contactLineMat));
-
-        // Wall 2 line (z = 0, x from 0 to halfW)
-        const wall2Pts: THREE.Vector3[] = [];
-        for (let s = 0; s <= 32; s++) {
-          const x = (s / 32) * (blockWidth / 2);
-          wall2Pts.push(new THREE.Vector3(x, cFunc(x, 0), 0.01));
-        }
-        const wall2Geo = new THREE.BufferGeometry().setFromPoints(wall2Pts);
-        strataGroup.add(new THREE.Line(wall2Geo, contactLineMat));
+        const seamGeo = buildStratigraphicContactSeamGeometry(cFunc, blockWidth / 2, blockLength / 2, 32);
+        strataGroup.add(new THREE.LineSegments(seamGeo, contactLineMat));
       });
     }
 
@@ -1330,7 +1309,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       const aqTopFunc = (x: number, z: number) => topY + getDipOffset(x, z) * 0.6;
       const aqBotFunc = (x: number, z: number) => botY + getDipOffset(x, z) * 0.6;
 
-      const aqGeo = buildDippingStratumGeometry(aqTopFunc, aqBotFunc, blockWidth * 1.002, blockLength * 1.002, 32, 32, 4.0);
+      const aqGeo = buildVolumetricStratumGeometry(aqTopFunc, aqBotFunc, blockWidth * 1.001, blockLength * 1.001, isCornerMode, 32, 32, 4.0);
       const aqMat = new THREE.MeshStandardMaterial({
         color: new THREE.Color(0x0ea5e9),
         emissive: new THREE.Color(0x0284c7),
@@ -1341,7 +1320,6 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         opacity: waterOpacity * 0.45,
         depthWrite: false,
         clippingPlanes: activeClippingPlanes,
-        clipIntersection: cutawayBlockStyle === 'corner',
         side: THREE.DoubleSide
       });
 
@@ -1384,12 +1362,8 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
 
       const wtPlaneY = -observedWaterTableDepth * verticalScale;
 
-      const wtPlaneGeo = new THREE.PlaneGeometry(blockWidth * 0.996, blockLength * 0.996, 64, 64);
-      wtPlaneGeo.rotateX(-Math.PI / 2);
-
-      const posAttr = wtPlaneGeo.attributes.position;
-      const bhX = borehole ? 8 : 0;
-      const bhZ = borehole ? 8 : 0;
+      const bhX = isCornerMode ? 0 : 6;
+      const bhZ = isCornerMode ? 7.5 : 6;
       // Physical pumping parameters: Q = 12.0 L/s = 1036.8 m3/day
       const q_m3_day = 1036.8;
       const t_m2_day = (aquifers.length > 0 && aquifers[0].transmissivityM2Day > 0) ? aquifers[0].transmissivityM2Day : 65.0;
@@ -1399,10 +1373,8 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       const thiemFactor = (q_m3_day / (2 * Math.PI * t_m2_day)) * 0.15 * verticalScale;
       const maxDrawdown = Math.min(thiemFactor * Math.log(radiusOfInfluence / rWell), 5.5 * verticalScale);
 
-      for (let i = 0; i < posAttr.count; i++) {
-        const vx = posAttr.getX(i);
-        const vz = posAttr.getZ(i);
-        // Water table subtly mirrors subdued surface terrain (phreatic replication), NOT deep bedrock tectonic dip
+      const wtElevationFunc = (vx: number, vz: number): number => {
+        // Water table subtly mirrors subdued surface terrain (phreatic replication)
         const regionalSlope = getSurfaceElevation(vx, vz) * 0.22;
         const distToWell = Math.sqrt((vx - bhX) ** 2 + (vz - bhZ) ** 2);
         let drawdown = 0;
@@ -1413,8 +1385,6 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
           const rawDrawdown = maxDrawdown * (Math.log(radiusOfInfluence / effectiveR) / Math.log(radiusOfInfluence / rWell));
 
           // Jacob (1944) unconfined-aquifer correction:
-          // s = H - sqrt(max(0, H^2 - 2 * H * s'))
-          // Applicable to unconfined aquifers under Dupuit late-time quasi-steady horizontal flow.
           const aquiferH = aquifers.length > 0 ? (aquifers[0].bottomDepthM - aquifers[0].topDepthM) * verticalScale : 0;
           if (aquifers[0]?.aquiferType === 'Unconfined' && aquiferH > 0 && 2 * rawDrawdown < aquiferH) {
             drawdown = aquiferH - Math.sqrt(Math.max(0, aquiferH * aquiferH - 2 * aquiferH * rawDrawdown));
@@ -1423,9 +1393,21 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
           }
         }
 
-        posAttr.setY(i, regionalSlope - drawdown);
+        return regionalSlope - drawdown;
+      };
+
+      let wtPlaneGeo: THREE.BufferGeometry;
+      if (isCornerMode) {
+        wtPlaneGeo = buildCornerCutTerrainGeometry(wtElevationFunc, blockWidth * 0.996, blockLength * 0.996, 36, 36);
+      } else {
+        wtPlaneGeo = new THREE.PlaneGeometry(blockWidth * 0.996, blockLength * 0.996, 64, 64);
+        wtPlaneGeo.rotateX(-Math.PI / 2);
+        const posAttr = wtPlaneGeo.attributes.position;
+        for (let i = 0; i < posAttr.count; i++) {
+          posAttr.setY(i, wtElevationFunc(posAttr.getX(i), posAttr.getZ(i)));
+        }
+        wtPlaneGeo.computeVertexNormals();
       }
-      wtPlaneGeo.computeVertexNormals();
 
       const wtPlaneMat = new THREE.MeshStandardMaterial({
         color: 0x0ea5e9,
@@ -1440,7 +1422,6 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         polygonOffsetFactor: -1,
         polygonOffsetUnits: -1,
         clippingPlanes: activeClippingPlanes,
-        clipIntersection: cutawayBlockStyle === 'corner',
         side: THREE.DoubleSide
       });
       const wtPlaneMesh = new THREE.Mesh(wtPlaneGeo, wtPlaneMat);
@@ -1527,8 +1508,10 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
     if (borehole) {
       const bhDepthScaled = borehole.totalDepthMeters * verticalScale;
       const bhGroup = new THREE.Group();
-      const wellHeadY = cutawayBlockStyle === 'corner' ? 0.2 : getSurfaceElevation(8, 8) + 0.2;
-      bhGroup.position.set(8, wellHeadY, 8);
+      const bhX = isCornerMode ? 0 : 6;
+      const bhZ = isCornerMode ? 7.5 : 6;
+      const wellHeadY = getSurfaceElevation(bhX, bhZ);
+      bhGroup.position.set(bhX, 0, bhZ);
 
       // Precision Surface Casing Monument (SwissTopo / Geotechnical Engineering Standard)
       const collarGeo = new THREE.CylinderGeometry(0.35, 0.40, 0.45, 16);
@@ -1538,7 +1521,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         roughness: 0.25
       });
       const collarMesh = new THREE.Mesh(collarGeo, collarMat);
-      collarMesh.position.y = 0.225;
+      collarMesh.position.y = wellHeadY + 0.225;
       collarMesh.userData = {
         type: 'WELLHEAD',
         name: `Surface Monitoring Wellhead (${borehole.wellCode})`,
@@ -1556,14 +1539,14 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
         roughness: 0.2
       });
       const capPlateMesh = new THREE.Mesh(capPlateGeo, capPlateMat);
-      capPlateMesh.position.y = 0.46;
+      capPlateMesh.position.y = wellHeadY + 0.46;
       bhGroup.add(capPlateMesh);
 
       // Multi-Segment Stratigraphic Drill Core Column
       if (borehole.strataIntervals && borehole.strataIntervals.length > 0) {
         borehole.strataIntervals.forEach((interval) => {
-          const fromY = -interval.fromDepth * verticalScale;
-          const toY = -interval.toDepth * verticalScale;
+          const fromY = wellHeadY - interval.fromDepth * verticalScale;
+          const toY = wellHeadY - interval.toDepth * verticalScale;
           const intervalHeight = Math.max(Math.abs(toY - fromY), 0.4);
           const midY = (fromY + toY) / 2;
 
@@ -1606,7 +1589,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
           roughness: 0.3
         });
         const pipeMesh = new THREE.Mesh(pipeGeo, pipeMat);
-        pipeMesh.position.y = -bhDepthScaled / 2;
+        pipeMesh.position.y = wellHeadY - bhDepthScaled / 2;
         pipeMesh.userData = {
           type: 'BOREHOLE',
           wellCode: borehole.wellCode,
@@ -1628,7 +1611,7 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       });
       const ringMesh = new THREE.Mesh(waterStrikeRingGeo, waterStrikeRingMat);
       ringMesh.rotation.x = Math.PI / 2;
-      ringMesh.position.y = -borehole.waterTableDepthMeters * verticalScale;
+      ringMesh.position.y = wellHeadY - borehole.waterTableDepthMeters * verticalScale;
       bhGroup.add(ringMesh);
 
       strataGroup.add(bhGroup);
@@ -1636,8 +1619,8 @@ export const Subsurface3D: React.FC<Subsurface3DProps> = ({ className = '', isCo
       // 3D Stratigraphic Fence Panels (Civil 3D Geotechnical Modeler Reference)
       // Generates orthogonal fence corridors connecting borehole across the model
       const fenceLines = [
-        { x0: 8, z0: 8, x1: -blockWidth * 0.42, z1: -blockLength * 0.42, name: "Section A – A'" },
-        { x0: 8, z0: 8, x1: -blockWidth * 0.42, z1: blockLength * 0.42, name: "Section B – B'" }
+        { x0: bhX, z0: bhZ, x1: -blockWidth * 0.42, z1: -blockLength * 0.42, name: "Section A – A'" },
+        { x0: bhX, z0: bhZ, x1: -blockWidth * 0.42, z1: blockLength * 0.42, name: "Section B – B'" }
       ];
 
       fenceLines.forEach((line) => {

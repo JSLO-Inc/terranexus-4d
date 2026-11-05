@@ -975,3 +975,573 @@ export function buildCornerCutInternalCappingWalls(
 
   return geometry;
 }
+
+/**
+ * Constructs a 100% watertight, monolithic L-shaped volumetric stratum geometry
+ * for Corner Cut excavations without relying on GPU clipping planes or separate capping meshes.
+ * 
+ * Solid domain covers the 3 visible quadrants:
+ * - Quadrant NW: x in [-halfW, 0], z in [-halfL, 0]
+ * - Quadrant SW: x in [-halfW, 0], z in [0, halfL]
+ * - Quadrant NE: x in [0, halfW], z in [-halfL, 0]
+ * 
+ * Internal Excavation Cross-Section Walls:
+ * - Face 1: x = 0, z in [0, halfL], normal pointing +X (into excavated void)
+ * - Face 2: z = 0, x in [0, halfW], normal pointing +Z (into excavated void)
+ * Meeting at x = 0, z = 0 with complete continuous stratigraphic contact!
+ */
+export function buildCornerCutStratumGeometry(
+  topYFunc: (x: number, z: number) => number,
+  botYFunc: (x: number, z: number) => number,
+  width: number,
+  length: number,
+  segsX: number = 32,
+  segsZ: number = 32,
+  meterScale: number = 4.0
+): THREE.BufferGeometry {
+  const positions: number[] = [];
+  const uvs: number[] = [];
+
+  const halfW = width / 2;
+  const halfL = length / 2;
+  const halfSegsX = Math.max(8, Math.floor(segsX / 2));
+  const halfSegsZ = Math.max(8, Math.floor(segsZ / 2));
+  const dxW = halfW / halfSegsX;
+  const dzL = halfL / halfSegsZ;
+
+  // Helper to add a quad on top surface (normal points +Y)
+  const addTopQuad = (x0: number, x1: number, z0: number, z1: number) => {
+    const y00 = topYFunc(x0, z0);
+    const y10 = topYFunc(x1, z0);
+    const y01 = topYFunc(x0, z1);
+    const y11 = topYFunc(x1, z1);
+
+    const u0 = (x0 + halfW) / meterScale;
+    const u1 = (x1 + halfW) / meterScale;
+    const v0 = (z0 + halfL) / meterScale;
+    const v1 = (z1 + halfL) / meterScale;
+
+    // Tri 1: (0,0) -> (0,1) -> (1,1)
+    positions.push(
+      x0, y00, z0,
+      x0, y01, z1,
+      x1, y11, z1
+    );
+    uvs.push(u0, v0, u0, v1, u1, v1);
+
+    // Tri 2: (0,0) -> (1,1) -> (1,0)
+    positions.push(
+      x0, y00, z0,
+      x1, y11, z1,
+      x1, y10, z0
+    );
+    uvs.push(u0, v0, u1, v1, u1, v0);
+  };
+
+  // Helper to add a quad on bottom surface (normal points -Y)
+  const addBotQuad = (x0: number, x1: number, z0: number, z1: number) => {
+    const y00 = botYFunc(x0, z0);
+    const y10 = botYFunc(x1, z0);
+    const y01 = botYFunc(x0, z1);
+    const y11 = botYFunc(x1, z1);
+
+    const u0 = (x0 + halfW) / meterScale;
+    const u1 = (x1 + halfW) / meterScale;
+    const v0 = (z0 + halfL) / meterScale;
+    const v1 = (z1 + halfL) / meterScale;
+
+    // Tri 1: (0,0) -> (1,0) -> (1,1)
+    positions.push(
+      x0, y00, z0,
+      x1, y10, z0,
+      x1, y11, z1
+    );
+    uvs.push(u0, v0, u1, v0, u1, v1);
+
+    // Tri 2: (0,0) -> (1,1) -> (0,1)
+    positions.push(
+      x0, y00, z0,
+      x1, y11, z1,
+      x0, y01, z1
+    );
+    uvs.push(u0, v0, u1, v1, u0, v1);
+  };
+
+  // 1. TOP & BOTTOM SURFACES ACROSS 3 QUADRANTS
+  // Quadrant NW: x in [-halfW, 0], z in [-halfL, 0]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = -halfL + iz * dzL;
+    const z1 = z0 + dzL;
+    for (let ix = 0; ix < halfSegsX; ix++) {
+      const x0 = -halfW + ix * dxW;
+      const x1 = x0 + dxW;
+      addTopQuad(x0, x1, z0, z1);
+      addBotQuad(x0, x1, z0, z1);
+    }
+  }
+
+  // Quadrant SW: x in [-halfW, 0], z in [0, halfL]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = iz * dzL;
+    const z1 = z0 + dzL;
+    for (let ix = 0; ix < halfSegsX; ix++) {
+      const x0 = -halfW + ix * dxW;
+      const x1 = x0 + dxW;
+      addTopQuad(x0, x1, z0, z1);
+      addBotQuad(x0, x1, z0, z1);
+    }
+  }
+
+  // Quadrant NE: x in [0, halfW], z in [-halfL, 0]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = -halfL + iz * dzL;
+    const z1 = z0 + dzL;
+    for (let ix = 0; ix < halfSegsX; ix++) {
+      const x0 = ix * dxW;
+      const x1 = x0 + dxW;
+      addTopQuad(x0, x1, z0, z1);
+      addBotQuad(x0, x1, z0, z1);
+    }
+  }
+
+  // 2. NORTH OUTER WALL (z = -halfL, facing -Z) across full width [-halfW, +halfW]
+  const totalSegsX = halfSegsX * 2;
+  for (let ix = 0; ix < totalSegsX; ix++) {
+    const x0 = -halfW + ix * dxW;
+    const x1 = x0 + dxW;
+    const z = -halfL;
+
+    const top0 = topYFunc(x0, z);
+    const top1 = topYFunc(x1, z);
+    const bot0 = botYFunc(x0, z);
+    const bot1 = botYFunc(x1, z);
+
+    const u0 = (x0 + halfW) / meterScale;
+    const u1 = (x1 + halfW) / meterScale;
+    const vTop0 = top0 / meterScale;
+    const vTop1 = top1 / meterScale;
+    const vBot0 = bot0 / meterScale;
+    const vBot1 = bot1 / meterScale;
+
+    positions.push(
+      x0, top0, z,
+      x1, top1, z,
+      x0, bot0, z
+    );
+    uvs.push(u0, vTop0, u1, vTop1, u0, vBot0);
+
+    positions.push(
+      x1, top1, z,
+      x1, bot1, z,
+      x0, bot0, z
+    );
+    uvs.push(u1, vTop1, u1, vBot1, u0, vBot0);
+  }
+
+  // 3. WEST OUTER WALL (x = -halfW, facing -X) across full length [-halfL, +halfL]
+  const totalSegsZ = halfSegsZ * 2;
+  for (let iz = 0; iz < totalSegsZ; iz++) {
+    const z0 = -halfL + iz * dzL;
+    const z1 = z0 + dzL;
+    const x = -halfW;
+
+    const top0 = topYFunc(x, z0);
+    const top1 = topYFunc(x, z1);
+    const bot0 = botYFunc(x, z0);
+    const bot1 = botYFunc(x, z1);
+
+    const u0 = (z0 + halfL) / meterScale;
+    const u1 = (z1 + halfL) / meterScale;
+    const vTop0 = top0 / meterScale;
+    const vTop1 = top1 / meterScale;
+    const vBot0 = bot0 / meterScale;
+    const vBot1 = bot1 / meterScale;
+
+    positions.push(
+      x, top0, z0,
+      x, bot0, z0,
+      x, top1, z1
+    );
+    uvs.push(u0, vTop0, u0, vBot0, u1, vTop1);
+
+    positions.push(
+      x, top1, z1,
+      x, bot0, z0,
+      x, bot1, z1
+    );
+    uvs.push(u1, vTop1, u0, vBot0, u1, vBot1);
+  }
+
+  // 4. SOUTH OUTER WALL (z = +halfL, facing +Z) across x in [-halfW, 0]
+  for (let ix = 0; ix < halfSegsX; ix++) {
+    const x0 = -halfW + ix * dxW;
+    const x1 = x0 + dxW;
+    const z = halfL;
+
+    const top0 = topYFunc(x0, z);
+    const top1 = topYFunc(x1, z);
+    const bot0 = botYFunc(x0, z);
+    const bot1 = botYFunc(x1, z);
+
+    const u0 = (x0 + halfW) / meterScale;
+    const u1 = (x1 + halfW) / meterScale;
+    const vTop0 = top0 / meterScale;
+    const vTop1 = top1 / meterScale;
+    const vBot0 = bot0 / meterScale;
+    const vBot1 = bot1 / meterScale;
+
+    positions.push(
+      x0, top0, z,
+      x0, bot0, z,
+      x1, top1, z
+    );
+    uvs.push(u0, vTop0, u0, vBot0, u1, vTop1);
+
+    positions.push(
+      x1, top1, z,
+      x0, bot0, z,
+      x1, bot1, z
+    );
+    uvs.push(u1, vTop1, u0, vBot0, u1, vBot1);
+  }
+
+  // 5. EAST OUTER WALL (x = +halfW, facing +X) across z in [-halfL, 0]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = -halfL + iz * dzL;
+    const z1 = z0 + dzL;
+    const x = halfW;
+
+    const top0 = topYFunc(x, z0);
+    const top1 = topYFunc(x, z1);
+    const bot0 = botYFunc(x, z0);
+    const bot1 = botYFunc(x, z1);
+
+    const u0 = (z0 + halfL) / meterScale;
+    const u1 = (z1 + halfL) / meterScale;
+    const vTop0 = top0 / meterScale;
+    const vTop1 = top1 / meterScale;
+    const vBot0 = bot0 / meterScale;
+    const vBot1 = bot1 / meterScale;
+
+    positions.push(
+      x, top0, z0,
+      x, top1, z1,
+      x, bot0, z0
+    );
+    uvs.push(u0, vTop0, u1, vTop1, u0, vBot0);
+
+    positions.push(
+      x, top1, z1,
+      x, bot1, z1,
+      x, bot0, z0
+    );
+    uvs.push(u1, vTop1, u1, vBot1, u0, vBot0);
+  }
+
+  // 6. INTERNAL EXCAVATION FACE 1 (x = 0, z in [0, halfL], facing +X into excavated cut)
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = iz * dzL;
+    const z1 = z0 + dzL;
+    const x = 0;
+
+    const top0 = topYFunc(x, z0);
+    const top1 = topYFunc(x, z1);
+    const bot0 = botYFunc(x, z0);
+    const bot1 = botYFunc(x, z1);
+
+    const u0 = z0 / meterScale;
+    const u1 = z1 / meterScale;
+    const vTop0 = top0 / meterScale;
+    const vTop1 = top1 / meterScale;
+    const vBot0 = bot0 / meterScale;
+    const vBot1 = bot1 / meterScale;
+
+    positions.push(
+      x, top0, z0,
+      x, top1, z1,
+      x, bot0, z0
+    );
+    uvs.push(u0, vTop0, u1, vTop1, u0, vBot0);
+
+    positions.push(
+      x, top1, z1,
+      x, bot1, z1,
+      x, bot0, z0
+    );
+    uvs.push(u1, vTop1, u1, vBot1, u0, vBot0);
+  }
+
+  // 7. INTERNAL EXCAVATION FACE 2 (z = 0, x in [0, halfW], facing +Z into excavated cut)
+  for (let ix = 0; ix < halfSegsX; ix++) {
+    const x0 = ix * dxW;
+    const x1 = x0 + dxW;
+    const z = 0;
+
+    const top0 = topYFunc(x0, z);
+    const top1 = topYFunc(x1, z);
+    const bot0 = botYFunc(x0, z);
+    const bot1 = botYFunc(x1, z);
+
+    const u0 = x0 / meterScale;
+    const u1 = x1 / meterScale;
+    const vTop0 = top0 / meterScale;
+    const vTop1 = top1 / meterScale;
+    const vBot0 = bot0 / meterScale;
+    const vBot1 = bot1 / meterScale;
+
+    positions.push(
+      x0, top0, z,
+      x0, bot0, z,
+      x1, top1, z
+    );
+    uvs.push(u0, vTop0, u0, vBot0, u1, vTop1);
+
+    positions.push(
+      x1, top1, z,
+      x0, bot0, z,
+      x1, bot1, z
+    );
+    uvs.push(u1, vTop1, u0, vBot0, u1, vBot1);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.computeVertexNormals();
+
+  return geometry;
+}
+
+/**
+ * Universal volumetric stratum builder that constructs a continuous, watertight 3D solid
+ * for either Corner Cut (L-shaped) or Full Block / Fence modes.
+ */
+export function buildVolumetricStratumGeometry(
+  topYFunc: (x: number, z: number) => number,
+  botYFunc: (x: number, z: number) => number,
+  width: number,
+  length: number,
+  isCornerCut: boolean,
+  segsX: number = 32,
+  segsZ: number = 32,
+  meterScale: number = 4.0
+): THREE.BufferGeometry {
+  if (isCornerCut) {
+    return buildCornerCutStratumGeometry(topYFunc, botYFunc, width, length, segsX, segsZ, meterScale);
+  }
+  return buildDippingStratumGeometry(topYFunc, botYFunc, width, length, segsX, segsZ, meterScale);
+}
+
+/**
+ * Constructs a continuous, high-resolution L-shaped displaced terrain surface mesh
+ * for the Corner Cut mode, mapped with normalized [0, 1] UVs that align seamlessly with
+ * the canvas terrain texture.
+ */
+export function buildCornerCutTerrainGeometry(
+  surfaceElevationFunc: (x: number, z: number) => number,
+  width: number,
+  length: number,
+  segsX: number = 48,
+  segsZ: number = 48
+): THREE.BufferGeometry {
+  const positions: number[] = [];
+  const uvs: number[] = [];
+
+  const halfW = width / 2;
+  const halfL = length / 2;
+  const halfSegsX = Math.max(12, Math.floor(segsX / 2));
+  const halfSegsZ = Math.max(12, Math.floor(segsZ / 2));
+  const dxW = halfW / halfSegsX;
+  const dzL = halfL / halfSegsZ;
+
+  const addTerrainQuad = (x0: number, x1: number, z0: number, z1: number) => {
+    const y00 = surfaceElevationFunc(x0, z0);
+    const y10 = surfaceElevationFunc(x1, z0);
+    const y01 = surfaceElevationFunc(x0, z1);
+    const y11 = surfaceElevationFunc(x1, z1);
+
+    const u0 = (x0 + halfW) / width;
+    const u1 = (x1 + halfW) / width;
+    const v0 = (z0 + halfL) / length;
+    const v1 = (z1 + halfL) / length;
+
+    // Tri 1: (0,0) -> (0,1) -> (1,1) [upward normal]
+    positions.push(
+      x0, y00, z0,
+      x0, y01, z1,
+      x1, y11, z1
+    );
+    uvs.push(u0, v0, u0, v1, u1, v1);
+
+    // Tri 2: (0,0) -> (1,1) -> (1,0)
+    positions.push(
+      x0, y00, z0,
+      x1, y11, z1,
+      x1, y10, z0
+    );
+    uvs.push(u0, v0, u1, v1, u1, v0);
+  };
+
+  // Quadrant NW: x in [-halfW, 0], z in [-halfL, 0]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = -halfL + iz * dzL;
+    const z1 = z0 + dzL;
+    for (let ix = 0; ix < halfSegsX; ix++) {
+      const x0 = -halfW + ix * dxW;
+      const x1 = x0 + dxW;
+      addTerrainQuad(x0, x1, z0, z1);
+    }
+  }
+
+  // Quadrant SW: x in [-halfW, 0], z in [0, halfL]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = iz * dzL;
+    const z1 = z0 + dzL;
+    for (let ix = 0; ix < halfSegsX; ix++) {
+      const x0 = -halfW + ix * dxW;
+      const x1 = x0 + dxW;
+      addTerrainQuad(x0, x1, z0, z1);
+    }
+  }
+
+  // Quadrant NE: x in [0, halfW], z in [-halfL, 0]
+  for (let iz = 0; iz < halfSegsZ; iz++) {
+    const z0 = -halfL + iz * dzL;
+    const z1 = z0 + dzL;
+    for (let ix = 0; ix < halfSegsX; ix++) {
+      const x0 = ix * dxW;
+      const x1 = x0 + dxW;
+      addTerrainQuad(x0, x1, z0, z1);
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.computeVertexNormals();
+
+  return geometry;
+}
+
+/**
+ * Builds 3D line segment geometry marking the exact geological contacts along
+ * the exposed internal cutaway faces.
+ */
+export function buildStratigraphicContactSeamGeometry(
+  contactFunc: (x: number, z: number) => number,
+  halfW: number,
+  halfL: number,
+  segs: number = 32
+): THREE.BufferGeometry {
+  const points: number[] = [];
+
+  // Face 1: along x = 0, z from 0 to halfL
+  const dz = halfL / segs;
+  for (let iz = 0; iz < segs; iz++) {
+    const z0 = iz * dz;
+    const z1 = z0 + dz;
+    const y0 = contactFunc(0, z0);
+    const y1 = contactFunc(0, z1);
+    points.push(0.015, y0, z0, 0.015, y1, z1);
+  }
+
+  // Face 2: along z = 0, x from 0 to halfW
+  const dx = halfW / segs;
+  for (let ix = 0; ix < segs; ix++) {
+    const x0 = ix * dx;
+    const x1 = x0 + dx;
+    const y0 = contactFunc(x0, 0);
+    const y1 = contactFunc(x1, 0);
+    points.push(x0, y0, 0.015, x1, y1, 0.015);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+  return geometry;
+}
+
+/**
+ * Constructs a precision, museum-grade beveled geotechnical datum plinth
+ * that frames the bottom of the geological block diagram, eliminating the
+ * "Minecraft block floating in space" appearance and providing CAD/GIS standard framing.
+ */
+export function buildGeologicalDatumPlinthGeometry(
+  width: number,
+  length: number,
+  baseY: number,
+  isCornerCut: boolean = false,
+  plinthHeight: number = 2.5,
+  bevel: number = 1.0
+): THREE.BufferGeometry {
+  const positions: number[] = [];
+  const uvs: number[] = [];
+
+  const halfW = width / 2;
+  const halfL = length / 2;
+  const topY = baseY;
+  const botY = baseY - plinthHeight;
+
+  const addQuad = (
+    p1: [number, number, number],
+    p2: [number, number, number],
+    p3: [number, number, number],
+    p4: [number, number, number]
+  ) => {
+    positions.push(...p1, ...p2, ...p3);
+    positions.push(...p1, ...p3, ...p4);
+    uvs.push(0, 0, 1, 0, 1, 1);
+    uvs.push(0, 0, 1, 1, 0, 1);
+  };
+
+  if (!isCornerCut) {
+    const wTop = halfW;
+    const lTop = halfL;
+    const wBot = halfW + bevel;
+    const lBot = halfL + bevel;
+
+    // Bottom face
+    addQuad([-wBot, botY, -lBot], [wBot, botY, -lBot], [wBot, botY, lBot], [-wBot, botY, lBot]);
+
+    // 4 Beveled side faces
+    // North (z = -l)
+    addQuad([-wTop, topY, -lTop], [wTop, topY, -lTop], [wBot, botY, -lBot], [-wBot, botY, -lBot]);
+    // South (z = +l)
+    addQuad([wTop, topY, lTop], [-wTop, topY, lTop], [-wBot, botY, lBot], [wBot, botY, lBot]);
+    // West (x = -w)
+    addQuad([-wTop, topY, lTop], [-wTop, topY, -lTop], [-wBot, botY, -lBot], [-wBot, botY, lBot]);
+    // East (x = +w)
+    addQuad([wTop, topY, -lTop], [wTop, topY, lTop], [wBot, botY, lBot], [wBot, botY, -lBot]);
+  } else {
+    const wT = halfW;
+    const lT = halfL;
+    const wB = halfW + bevel;
+    const lB = halfL + bevel;
+
+    // Outer North face (z = -lT)
+    addQuad([-wT, topY, -lT], [wT, topY, -lT], [wB, botY, -lB], [-wB, botY, -lB]);
+    // Outer West face (x = -wT)
+    addQuad([-wT, topY, lT], [-wT, topY, -lT], [-wB, botY, -lB], [-wB, botY, lB]);
+    // Outer South face (z = +lT, x in [-wT, 0])
+    addQuad([0, topY, lT], [-wT, topY, lT], [-wB, botY, lB], [0, botY, lB]);
+    // Outer East face (x = +wT, z in [-lT, 0])
+    addQuad([wT, topY, -lT], [wT, topY, 0], [wB, botY, 0], [wB, botY, -lB]);
+
+    // Internal Excavation Step Plinth Walls
+    // Face 1: at x = 0, z in [0, lT]
+    addQuad([0, topY, 0], [0, topY, lT], [0, botY, lB], [0, botY, 0]);
+    // Face 2: at z = 0, x in [0, wT]
+    addQuad([wT, topY, 0], [0, topY, 0], [0, botY, 0], [wB, botY, 0]);
+
+    // Bottom L-shape
+    addQuad([-wB, botY, -lB], [wB, botY, -lB], [wB, botY, 0], [-wB, botY, 0]);
+    addQuad([-wB, botY, 0], [0, botY, 0], [0, botY, lB], [-wB, botY, lB]);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.computeVertexNormals();
+
+  return geometry;
+}
+

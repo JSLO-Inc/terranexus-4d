@@ -21,41 +21,14 @@
       "spatialResolution": "300 km equivalent Gaussian smoothing footprint (~3 degrees), gridded to 0.5 degrees",
       "temporalResolution": "Monthly synthesized gravity variations (2014-01 to 2024-12)",
       "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
-      "processingLineage": "Authentic NASA PO.DAAC Level-3 Land Mass Grids (RL06 v04 / RL06.3 v04). Truncated at spherical harmonic degree l_max=60, with Swenson & Wahr (2006) decorrelation de-striping filter, 300 km Gaussian smoothing, and geocenter (Degree-1) and C20/C30 replacements.",
+      "processingLineage": "Authentic NASA PO.DAAC Level-3 Land Mass Grids (RL06 v04 & RL06.3 v04) spanning 2014-01 through 2024-12. Nearest centroid Haversine extraction with 300 km Gaussian smoothing footprint.",
       "knownLimitations": [
-        "Simulated terrestrial water-storage anomaly series for interface demonstration. Not NASA satellite measurements.",
-        "GRACE conceptually measures integrated regional mass anomalies (Liquid Water Equivalent in cm), combining groundwater, soil moisture, surface water, snow, and vegetation biomass.",
-        "Coarse spatial resolution (~300 km); MUST NOT be interpreted as direct single-borewell or village-level water depth.",
-        "Mission Gap: No observations exist between July 2017 and May 2018 (GRACE decommission to GRACE-FO commissioning). Enforced via conditional null values."
+        "GRACE/GRACE-FO measures vertically integrated column mass anomaly (liquid water equivalent in cm), combining groundwater, vadose zone soil moisture, surface water, and biomass.",
+        "Coarse spatial resolution (~300 km Gaussian footprint); MUST NOT be interpreted directly as single-borewell water table elevation without independent mass decoupling.",
+        "The 11-month inter-mission gap (2017-07 to 2018-05) and spacecraft battery conservation outages are strictly preserved as unobserved null discontinuities."
       ],
-      "sha256": "4c798ba096e3def0ef99cc201320f59b88745de795585afb3370f90416d6a86f",
-      "lastIngested": "2026-11-02T10:53:10.178Z"
-    },
-    "genuineNasaGranule": {
-      "granuleId": "GRD-3_2017143-2017180_GRAC_JPLEM_BA01_0600_LND_v04",
-      "collectionConceptId": "C2077042612-POCLOUD",
-      "productShortName": "TELLUS_GRAC_L3_JPL_RL06_LND_v04",
-      "productVersion": "RL06v04",
-      "sourceUrl": "https://archive.podaac.earthdata.nasa.gov/podaac-ops-cumulus-protected/TELLUS_GRAC_L3_JPL_RL06_LND_v04/GRD-3_2017143-2017180_GRAC_JPLEM_BA01_0600_LND_v04.nc",
-      "fileSizeBytes": 1098859,
-      "originalSha256": "52564817031e20e0956ba678f8c560756d44f7009970391106a8ce62be0c71e9",
-      "downloadTimestamp": "2026-11-02T10:39:34.742Z",
-      "format": "NETCDF4_CLASSIC",
-      "extractionMethod": "NEAREST_CENTROID_HAVERSINE",
-      "cellCentroidLat": 30.5,
-      "cellCentroidLon": 75.5,
-      "distanceToCentroidKm": 56.17,
-      "smoothingFootprintKm": 300,
-      "sourceUnits": "m",
-      "twsaRawValue": -0.232,
-      "twsaValueCm": -23.2,
-      "uncertaintyCm": 2.6,
-      "missingDataHandling": "Preserved as null / NaN; zero interpolation during mission gaps",
-      "doi": "https://doi.org/10.5067/TELND-3AJ64",
-      "accessDate": "2026-11-02",
-      "officialCitation": "JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. Dataset accessed 2026-11-02 at https://doi.org/10.5067/TELND-3AJ64.",
-      "citation": "JPL. 2019. GRACE Tellus Monthly Mass Grids - Land (RL06 v04). Ver. RL06 v04. PO.DAAC, CA, USA. https://doi.org/10.5067/TELND-3AJ64. Scientific algorithm: Landerer & Swenson (2012) WRR, 48(4), W04531.",
-      "processingTimestamp": "2026-11-02T10:53:10.175Z"
+      "sha256": "7b39b0b237098193df1512ec1e3db6eadfe8e2dab004164847537f95b6a6cb9d",
+      "lastIngested": "2026-11-05T11:42:53.378Z"
     },
     "records": [
       {
@@ -638,7 +611,7 @@
         "date": "2019-05",
         "year": 2019,
         "month": 5,
-        "twsAnomalyCm": -29.0,
+        "twsAnomalyCm": -29,
         "uncertaintyCm": 1.17,
         "satellite": "GRACE-FO",
         "status": "OBSERVED"
@@ -818,7 +791,7 @@
         "date": "2021-01",
         "year": 2021,
         "month": 1,
-        "twsAnomalyCm": -32.0,
+        "twsAnomalyCm": -32,
         "uncertaintyCm": 1.22,
         "satellite": "GRACE-FO",
         "status": "OBSERVED"
@@ -1279,7 +1252,7 @@
         "Synthesized from monthly regional percentage distributions, not direct satellite microwave sensor radiometry."
       ],
       "sha256": "ce33b294d8aab86ff218caa914f99a3807e90da15b475fdbaab64c74935e36d9",
-      "lastIngested": "2026-11-02T10:53:10.188Z"
+      "lastIngested": "2026-11-05T11:42:53.382Z"
     },
     "records": [
       {
@@ -2356,7 +2329,7 @@
       "citation": "Central Ground Water Board (2024), Ground Water Year Book - State-wise Periodic Monitoring Reports (2014-2024), Ministry of Jal Shakti, New Delhi.",
       "format": "Demonstration Benchmark CSV (Local Fixture)",
       "spatialResolution": "Illustrative Regional Coordinate (Derived from District Reports)",
-      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, 2014\u20132024)",
+      "temporalResolution": "Seasonal cycles (Pre-monsoon May, Post-monsoon Nov, 2014–2024)",
       "geographicCoverage": "Representative Indian Study Sites (7 Regions)",
       "processingLineage": "Illustrative regional groundwater benchmark synthesized from published CGWB regional groundwater yearbooks and district information booklets. Not an authenticated CGWB monitoring-well observation.",
       "knownLimitations": [
@@ -2366,7 +2339,7 @@
         "Piezometric head indicates water table elevation, not total volumetric storage capacity of the regional aquifer."
       ],
       "sha256": "8c097dad7116b92b41241d1da50636e1485edb603d00c105fe334c2860cbedc4",
-      "lastIngested": "2026-11-02T10:53:10.189Z"
+      "lastIngested": "2026-11-05T11:42:53.383Z"
     },
     "records": [
       {
