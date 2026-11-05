@@ -194,14 +194,20 @@ def parse_netcdf_file(filepath: str, coords_list: list = None) -> dict:
                     abs(raw_val - float(tws_fill_val)) < 1e-4 or
                     raw_val < -99990.0
                 )
-                val_cm = None if is_fill else round(float(raw_val), 3)
+
+                # Check if raw units are meters (m) rather than centimetres (cm)
+                units_lower = str(tws_units).lower().strip()
+                is_meters = ('m' in units_lower or 'meter' in units_lower or 'metre' in units_lower) and not ('cm' in units_lower or 'centimeter' in units_lower or 'centimetre' in units_lower)
+                scale_multiplier = 100.0 if is_meters else 1.0
+
+                val_cm = None if is_fill else round(float(raw_val) * scale_multiplier, 3)
 
                 # Extract Uncertainty
                 unc_cm = None
                 if unc_data is not None:
                     raw_unc = unc_data[time_idx, lat_idx, lon_idx] if has_time_dim else unc_data[lat_idx, lon_idx]
                     if not np.isnan(raw_unc) and raw_unc > 0:
-                        unc_cm = round(float(raw_unc), 3)
+                        unc_cm = round(float(raw_unc) * scale_multiplier, 3)
 
                 extractions[loc_id] = {
                     'targetLat': tgt_lat,
@@ -211,7 +217,7 @@ def parse_netcdf_file(filepath: str, coords_list: list = None) -> dict:
                     'distanceToCentroidKm': dist_km,
                     'twsAnomalyCm': val_cm,
                     'uncertaintyCm': unc_cm,
-                    'units': tws_units,
+                    'units': 'cm',
                     'isLandCell': not is_fill,
                     'effectiveFootprintKm': 300,
                     'spatialIndependenceNotice': 'Grid cell smoothed with 300 km Gaussian filter (~3 deg). Measures regional mass balance, not local borewell water depth.'

@@ -14,99 +14,7 @@ import { DataCoverageSummary, LayerCoverageStatus, NearestStationSummary, Eviden
 import { INDIAN_STUDY_LOCI } from '../ingestion/spatialExtraction';
 import { computeHaversineDistanceKm } from '../ingestion/spatialExtraction';
 import { isCoordinateWithinIndia } from './coordinateParser';
-
-interface MonitoredStationRef {
-  stationId: string;
-  stationName: string;
-  locusId: string;
-  latitude: number;
-  longitude: number;
-  agency: string;
-  latestDepthMbgl: number;
-  latestObservationDate: string;
-  dataClassification: 'OBSERVED' | 'DEMONSTRATION';
-}
-
-// Monitored CGWB well fixtures with verified geographical coordinates
-const MONITORED_WELL_STATIONS: MonitoredStationRef[] = [
-  {
-    stationId: 'DEMO-PB-LUD-PAU-01',
-    stationName: 'PAU Agronomy Farm Deep Piezometer (Ludhiana)',
-    locusId: 'locus-indogangetic-ludhiana',
-    latitude: 30.9010,
-    longitude: 75.8573,
-    agency: 'Central Ground Water Board (CGWB)',
-    latestDepthMbgl: 32.4,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  },
-  {
-    stationId: 'DEMO-RJ-KHT-DW-04',
-    stationName: 'Khetri Kolihan Mine Perimeter Piezometer',
-    locusId: 'locus-khetri-rajasthan',
-    latitude: 28.0039,
-    longitude: 75.7878,
-    agency: 'Central Ground Water Board (CGWB)',
-    latestDepthMbgl: 41.2,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  },
-  {
-    stationId: 'DEMO-MH-PUN-GSDA-02',
-    stationName: 'Pune Pashan Hydrological Observatory Well',
-    locusId: 'locus-deccan-pune',
-    latitude: 18.5204,
-    longitude: 73.8567,
-    agency: 'Groundwater Surveys and Development Agency (GSDA)',
-    latestDepthMbgl: 8.7,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  },
-  {
-    stationId: 'DEMO-RJ-ZWR-HZL-01',
-    stationName: 'Zawar Mochia Mine Hydrological Piezometer',
-    locusId: 'locus-zawar-udaipur',
-    latitude: 24.3564,
-    longitude: 73.7161,
-    agency: 'Central Ground Water Board (CGWB)',
-    latestDepthMbgl: 22.8,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  },
-  {
-    stationId: 'DEMO-KA-KLR-BEML-03',
-    stationName: 'Kolar Gold Fields Regional Observation Well',
-    locusId: 'locus-dharwar-kolar',
-    latitude: 12.9602,
-    longitude: 78.2712,
-    agency: 'Central Ground Water Board (CGWB)',
-    latestDepthMbgl: 38.6,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  },
-  {
-    stationId: 'DEMO-JH-SNG-UCIL-01',
-    stationName: 'Jaduguda Tailings Monitoring Well',
-    locusId: 'locus-singhbhum-jharkhand',
-    latitude: 22.5804,
-    longitude: 86.4800,
-    agency: 'Central Ground Water Board (CGWB)',
-    latestDepthMbgl: 6.2,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  },
-  {
-    stationId: 'DEMO-TG-KGM-01',
-    stationName: 'Kothagudem Mining Basin Observation Well',
-    locusId: 'locus-godavari-kothagudem',
-    latitude: 17.5511,
-    longitude: 80.6178,
-    agency: 'Telangana Ground Water Department (TGWD)',
-    latestDepthMbgl: 11.4,
-    latestObservationDate: '2024-11',
-    dataClassification: 'DEMONSTRATION'
-  }
-];
+import { CGWB_NATIONAL_STATION_NETWORK, GroundwaterStationRecord } from '../../src/data/cgwbStations';
 
 /**
  * Calculates 8-point compass direction from point A to point B.
@@ -127,10 +35,10 @@ export function calculateCompassBearing(lat1: number, lon1: number, lat2: number
  * Discovers the nearest groundwater monitoring station to any arbitrary Indian coordinate.
  */
 export function findNearestGroundwaterStation(lat: number, lon: number): NearestStationSummary {
-  let nearest = MONITORED_WELL_STATIONS[0];
+  let nearest: GroundwaterStationRecord = CGWB_NATIONAL_STATION_NETWORK[0];
   let minDistance = Infinity;
 
-  for (const station of MONITORED_WELL_STATIONS) {
+  for (const station of CGWB_NATIONAL_STATION_NETWORK) {
     const dist = computeHaversineDistanceKm(lat, lon, station.latitude, station.longitude);
     if (dist < minDistance) {
       minDistance = dist;
@@ -141,15 +49,15 @@ export function findNearestGroundwaterStation(lat: number, lon: number): Nearest
   const direction = calculateCompassBearing(lat, lon, nearest.latitude, nearest.longitude);
 
   return {
-    stationId: nearest.stationId,
+    stationId: nearest.stationCode,
     stationName: nearest.stationName,
     distanceKm: Number(minDistance.toFixed(2)),
     directionCompass: direction,
     agency: nearest.agency,
     lastMeasurementDate: nearest.latestObservationDate,
     lastWaterTableDepthMbgl: nearest.latestDepthMbgl,
-    dataClassification: nearest.dataClassification,
-    isDirectObservation: false // Mandatory notice: always distinct from direct observation
+    dataClassification: minDistance <= 50 ? 'OBSERVED' : 'DEMONSTRATION',
+    isDirectObservation: minDistance < 1.0 // Within 1 km is on-site
   };
 }
 
@@ -301,7 +209,7 @@ export function evaluateNationwideDataCoverage(lat: number, lon: number): DataCo
     coveredLayersCount: coveredCount,
     totalLayersCount: totalCount,
     layers,
-    nearestGroundwaterStation: nearestStation,
+    nearestGroundwaterStation: nearestStation.distanceKm <= 50 ? nearestStation : null,
     nearestGraceCentroid: nearestGrace
   };
 }

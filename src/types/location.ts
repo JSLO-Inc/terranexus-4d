@@ -18,6 +18,7 @@ export interface AdministrativeHierarchy {
   city?: string;
   town?: string;
   village?: string;
+  locality?: string; // Suburb / Neighborhood
   pincode?: string;
   formattedAddress: string;
 }
@@ -36,8 +37,8 @@ export interface NearestStationSummary {
   agency: string;
   lastMeasurementDate: string;
   lastWaterTableDepthMbgl: number;
-  dataClassification: 'OBSERVED' | 'DEMONSTRATION';
-  isDirectObservation: false; // Mandatory reminder: nearby station is NEVER a direct observation at user coordinate
+  dataClassification: 'OBSERVED' | 'INTERPOLATED' | 'MODELLED' | 'ILLUSTRATIVE' | 'DEMONSTRATION' | 'UNAVAILABLE';
+  isDirectObservation: boolean; // True only if station is < 1 km from query coordinate
 }
 
 export interface LayerCoverageStatus {
@@ -46,7 +47,7 @@ export interface LayerCoverageStatus {
   category: 'HYDRO' | 'GEOLOGY' | 'MINERAL' | 'CLIMATE';
   isCovered: boolean;
   resolution: string;
-  dataTier: 'OBSERVED' | 'MODELLED' | 'DEMONSTRATION' | 'UNAVAILABLE';
+  dataTier: 'OBSERVED' | 'INTERPOLATED' | 'MODELLED' | 'ILLUSTRATIVE' | 'DEMONSTRATION' | 'UNAVAILABLE';
   sourceAgency: string;
   notes: string;
 }
@@ -94,6 +95,9 @@ export interface SelectedLocation {
     categorisation: 'SAFE' | 'SEMI_CRITICAL' | 'CRITICAL' | 'OVER_EXPLOITED' | 'SALINE';
     primaryAquiferSystem: string;
     assessmentYear: string;
+    spatialAggregationLevel?: string;
+    disclaimer?: string;
+    scaleDisclaimer?: string;
   };
   geologicalTerrane?: {
     terraneId: string;

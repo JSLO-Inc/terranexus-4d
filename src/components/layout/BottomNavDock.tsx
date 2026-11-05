@@ -40,7 +40,7 @@ export const BottomNavDock: React.FC = () => {
   ];
 
   return (
-    <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl shadow-2xl select-none">
+    <div className="glass-panel flex items-center gap-1.5 p-1.5 rounded-2xl shadow-2xl select-none">
       {dockItems.map((item) => {
         const isActive = activeModule === item.id;
         return (

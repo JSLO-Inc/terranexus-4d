@@ -7,13 +7,17 @@
 
 export type DataClassificationTier =
   | 'OBSERVED'
+  | 'INTERPOLATED'
   | 'MODELLED'
   | 'PREDICTED'
   | 'SIMULATED'
+  | 'ILLUSTRATIVE'
   | 'DEMONSTRATION'
+  | 'UNAVAILABLE'
   | 'UNVERIFIED';
 
-export type ProviderHealthStatus = 'ONLINE' | 'OFFLINE' | 'AUTHENTICATION_REQUIRED' | 'DEGRADED';
+export type ProviderHealthStatus = 'ONLINE' | 'OFFLINE' | 'AUTHENTICATION_REQUIRED' | 'DEGRADED' | 'OFFLINE_CACHED' | 'LOCAL_ARCHIVE_AVAILABLE' | 'ERROR';
+
 export type ConfigurationStatus = 'CONFIGURED' | 'UNCONFIGURED' | 'PARTIAL';
 export type ActualDataAvailability = 'GENUINE_LIVE' | 'GENUINE_LOCAL_ARCHIVE' | 'SYNTHETIC_SIMULATED' | 'DEMONSTRATION' | 'UNAVAILABLE';
 export type IntegrationStatus = 'OPERATIONAL' | 'DEGRADED' | 'STANDIN_SIMULATED' | 'OFFLINE';
@@ -87,18 +91,31 @@ export interface MajorRiverBasin {
   basinId: string;
   name: string;
   drainageAreaSqKm: number;
-  origin: string;
-  outflow: string;
+  origin?: string;
+  outflow?: string;
   majorStates: string[];
   centroid: [number, number];
   bounds: [number, number, number, number]; // [minLon, minLat, maxLon, maxLat]
-  polygon?: [number, number][]; // Authentic catchment boundary polygon vertices [lon, lat]
+  polygon?: [number, number][]; // Catchment boundary polygon vertices [lon, lat]
+  geometry?: any; // Official GeoJSON geometry (Polygon / MultiPolygon)
+  geometryProvenance?: string;
   isCatchmentPolygon?: boolean;
+  isAmbiguousBoundary?: boolean;
+  adjacentBasinIds?: string[];
+  boundaryResolutionNotice?: string;
+}
+
+export interface BasinResolutionResult {
+  basin: MajorRiverBasin | null;
+  isAmbiguousBoundary: boolean;
+  matchingBasins: MajorRiverBasin[];
+  tieBreakerRule?: string;
 }
 
 export interface IAdministrativeBoundaryProvider extends BaseDataProvider {
   getMajorRiverBasins(): MajorRiverBasin[];
   getBasinForCoordinate(lat: number, lon: number): MajorRiverBasin | null;
+  getBasinResolutionForCoordinate?(lat: number, lon: number): BasinResolutionResult;
   getStateBoundaries(): Array<{ stateCode: string; stateName: string; bounds: [number, number, number, number] }>;
 }
 
@@ -147,8 +164,9 @@ export interface IGroundwaterProvider extends BaseDataProvider {
     criticalStates: string[];
     safeStates: string[];
   };
-  getAquiferSystemForCoordinate(lat: number, lon: number): MajorAquiferSystem;
+  getAquiferSystemForCoordinate(lat: number, lon: number): MajorAquiferSystem | null;
 }
+
 
 // ==========================================
 // 3. RAINFALL & CLIMATOLOGY INTERFACES
@@ -163,6 +181,7 @@ export interface MonthlyRainfallRecord {
 export interface IRainfallProvider extends BaseDataProvider {
   getMonthlyPrecipitation(lat: number, lon: number, yearMonth: string): Promise<number>;
   getClimatology(lat: number, lon: number): MonthlyRainfallRecord[];
+  discoverGpmGranules?(yearMonth: string): Promise<any>;
 }
 
 // ==========================================
@@ -220,10 +239,11 @@ export interface GeologicalTerrane {
 }
 
 export interface IGeologyProvider extends BaseDataProvider {
-  getGeologicalTerraneForCoordinate(lat: number, lon: number): GeologicalTerrane;
+  getGeologicalTerraneForCoordinate(lat: number, lon: number): GeologicalTerrane | null;
   getAllTerranes(): GeologicalTerrane[];
   getTerraneById(terraneId: string): GeologicalTerrane | null;
 }
+
 
 // ==========================================
 // 5. MINERAL & ALTERATION INTERFACES
@@ -239,6 +259,10 @@ export interface SpectralAlterationSignature {
   status: DataClassificationTier;
   confidencePercent: number;
   spatialResolutionMeters: number;
+  indexValue?: number;
+  alterationStrength?: string;
+  targetMineralGroup?: string;
+  scientificDisclaimer?: string;
 }
 
 export interface MetallogenicBelt {
@@ -257,4 +281,31 @@ export interface IMineralDataProvider extends BaseDataProvider {
   getMetallogenicBeltForCoordinate(lat: number, lon: number): MetallogenicBelt;
   getAllMetallogenicBelts(): MetallogenicBelt[];
   getBeltById(beltId: string): MetallogenicBelt | null;
+  discoverSentinel2Scenes?(lat: number, lon: number, maxCloudPercent?: number): Promise<any>;
+}
+
+// ==========================================
+// 6. ELEVATION & DIGITAL ELEVATION MODEL INTERFACES
+// ==========================================
+
+export interface ElevationGridResult {
+  centerLat: number;
+  centerLon: number;
+  extentKm: number;
+  gridResolution: number; // e.g. 17 (17x17 grid)
+  elevations: number[][]; // 2D array of elevations in meters ASL [row][col]
+  minElevationM: number;
+  maxElevationM: number;
+  meanElevationM: number;
+  sourceDataset: string;
+  horizontalCrs: string; // 'EPSG:4326 (WGS84)'
+  verticalDatum: string; // 'EGM96 / Mean Sea Level (MSL)'
+  status: DataClassificationTier; // 'OBSERVED' (from DEM raster) | 'MODELLED' | 'DEMONSTRATION'
+  provenance: string;
+  bounds: [number, number, number, number]; // [minLon, minLat, maxLon, maxLat]
+}
+
+export interface IElevationProvider extends BaseDataProvider {
+  getElevationForCoordinate(lat: number, lon: number): Promise<{ elevationM: number; status: DataClassificationTier; source: string }>;
+  getElevationGrid(lat: number, lon: number, extentKm?: number, resolution?: number): Promise<ElevationGridResult>;
 }

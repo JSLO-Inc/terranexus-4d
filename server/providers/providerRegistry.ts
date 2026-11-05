@@ -24,6 +24,8 @@ import { NasaGraceProvider } from './implementations/NasaGraceProvider';
 import { NasaGpmRainfallProvider } from './implementations/NasaGpmRainfallProvider';
 import { GsiGeologyProvider } from './implementations/GsiGeologyProvider';
 import { GsiMineralProvider } from './implementations/GsiMineralProvider';
+import { ElevationProvider, elevationProvider } from './implementations/ElevationProvider';
+import { IElevationProvider } from './interfaces';
 
 export class ProviderRegistry {
   private static instance: ProviderRegistry;
@@ -37,6 +39,7 @@ export class ProviderRegistry {
   private rainfallProvider: IRainfallProvider;
   private geologyProvider: IGeologyProvider;
   private mineralProvider: IMineralDataProvider;
+  private elevationProvider: IElevationProvider;
 
   private constructor() {
     // Instantiate providers
@@ -47,6 +50,7 @@ export class ProviderRegistry {
     this.rainfallProvider = new NasaGpmRainfallProvider();
     this.geologyProvider = new GsiGeologyProvider();
     this.mineralProvider = new GsiMineralProvider();
+    this.elevationProvider = elevationProvider;
 
     // Register all
     this.register(this.geocodingProvider);
@@ -56,6 +60,7 @@ export class ProviderRegistry {
     this.register(this.rainfallProvider);
     this.register(this.geologyProvider);
     this.register(this.mineralProvider);
+    this.register(this.elevationProvider);
   }
 
   public static getInstance(): ProviderRegistry {
@@ -99,6 +104,10 @@ export class ProviderRegistry {
 
   public getMineral(): IMineralDataProvider {
     return this.mineralProvider;
+  }
+
+  public getElevation(): IElevationProvider {
+    return this.elevationProvider;
   }
 
   public async getHealthReport(): Promise<Array<{

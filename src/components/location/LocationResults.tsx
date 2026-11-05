@@ -10,6 +10,7 @@ interface LocationResultsProps {
   suggestions: GeocodingSuggestion[];
   isLoading: boolean;
   error?: string | null;
+  selectedIndex?: number;
   onSelectSuggestion: (suggestion: GeocodingSuggestion) => void;
   onClose: () => void;
 }
@@ -18,6 +19,7 @@ export const LocationResults: React.FC<LocationResultsProps> = ({
   suggestions,
   isLoading,
   error,
+  selectedIndex = -1,
   onSelectSuggestion,
   onClose
 }) => {
@@ -47,48 +49,64 @@ export const LocationResults: React.FC<LocationResultsProps> = ({
   }
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 max-h-80 overflow-y-auto bg-slate-950/95 backdrop-blur-md border border-slate-700/80 rounded-xl shadow-2xl z-50 divide-y divide-slate-800/80 scrollbar-thin scrollbar-thumb-slate-700">
-      <div className="px-3 py-1.5 bg-slate-900/70 text-[10px] uppercase font-mono tracking-wider text-slate-400 flex items-center justify-between">
-        <span>Suggested Indian Locations</span>
-        <span>{suggestions.length} Found</span>
+    <div
+      role="listbox"
+      aria-label="Suggested Locations"
+      className="absolute top-full left-0 right-0 sm:min-w-[420px] max-w-[560px] mt-2 max-h-80 overflow-y-auto bg-slate-950/98 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-50 divide-y divide-slate-800/80 scrollbar-thin scrollbar-thumb-slate-700"
+    >
+      <div className="px-3 py-2 bg-slate-900/90 text-[10px] uppercase font-mono tracking-wider text-slate-300 flex items-center justify-between border-b border-slate-800">
+        <span className="font-semibold text-cyan-400">Locations & Coordinates Found</span>
+        <span className="text-slate-400 font-mono">{suggestions.length} Results</span>
       </div>
 
-      {suggestions.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => {
-            onSelectSuggestion(item);
-            onClose();
-          }}
-          className="w-full px-3 py-2.5 text-left hover:bg-slate-800/70 transition-colors flex items-center space-x-3 group"
-        >
-          <div className="w-7 h-7 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0 group-hover:border-cyan-400 group-hover:scale-105 transition-all">
-            {item.type === 'CITY' || item.type === 'TOWN' ? (
-              <Building className="w-3.5 h-3.5" />
-            ) : (
-              <MapPin className="w-3.5 h-3.5" />
-            )}
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-medium text-slate-100 truncate group-hover:text-cyan-300 transition-colors">
-                {item.name}
-              </span>
-              {item.state && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
-                  {item.state}
-                </span>
+      {suggestions.map((item, idx) => {
+        const isHighlighted = idx === selectedIndex;
+        return (
+          <button
+            key={item.id}
+            role="option"
+            aria-selected={isHighlighted}
+            tabIndex={0}
+            onClick={() => {
+              onSelectSuggestion(item);
+              onClose();
+            }}
+            className={`w-full px-3 py-2.5 text-left transition-colors flex items-center space-x-3 group cursor-pointer ${
+              isHighlighted ? 'bg-cyan-950/80 text-cyan-100' : 'hover:bg-slate-900/90'
+            }`}
+          >
+            <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
+              isHighlighted
+                ? 'bg-cyan-900/80 border-cyan-400 text-cyan-300 scale-105'
+                : 'bg-cyan-950/70 border-cyan-500/40 text-cyan-400 group-hover:border-cyan-400 group-hover:scale-105'
+            }`}>
+              {item.type === 'CITY' || item.type === 'TOWN' ? (
+                <Building className="w-4 h-4" />
+              ) : (
+                <MapPin className="w-4 h-4" />
               )}
             </div>
-            <p className="text-[10px] text-slate-400 truncate mt-0.5">
-              {item.displayName}
-            </p>
-          </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">
+                  {item.name}
+                </span>
+                {item.state && (
+                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-200 border border-slate-700 shrink-0">
+                    {item.state}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-300 truncate mt-0.5">
+                {item.displayName}
+              </p>
+            </div>
 
           <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 shrink-0" />
         </button>
-      ))}
+      );
+    })}
     </div>
   );
 };

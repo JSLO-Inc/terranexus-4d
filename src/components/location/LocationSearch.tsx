@@ -19,6 +19,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<GeocodingSuggestion[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -145,26 +146,52 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
           onChange={(e) => {
             setQuery(e.target.value);
             setErrorMessage(null);
+            setSelectedIndex(-1);
+          }}
+          onKeyDown={(e) => {
+            if (isOpen && suggestions.length > 0) {
+              if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedIndex((prev) => (prev + 1) % suggestions.length);
+              } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedIndex((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+              } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                e.preventDefault();
+                handleSelectSuggestion(suggestions[selectedIndex]);
+              } else if (e.key === 'Escape') {
+                setIsOpen(false);
+              }
+            }
           }}
           onFocus={() => {
             if (suggestions.length > 0 || errorMessage) setIsOpen(true);
           }}
-          placeholder="Search India: City, Village, Coordinates, or Maps Link..."
-          className="w-full pl-9 pr-8 py-1.5 bg-slate-900/80 hover:bg-slate-900/95 focus:bg-slate-950 border border-slate-700/70 focus:border-cyan-500/80 rounded-xl text-xs text-slate-100 placeholder-slate-400 shadow-inner backdrop-blur-md outline-none transition-all duration-200"
+          aria-label="Search places by name, district, coordinates, or Google Maps URL"
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-autocomplete="list"
+          aria-haspopup="listbox"
+          placeholder="Search place, coordinates, or Maps URL..."
+          className="w-full pl-9 pr-9 py-2 bg-slate-900/95 hover:bg-slate-900 focus:bg-slate-950 border-2 border-slate-700/80 focus:border-cyan-400 rounded-xl text-xs sm:text-sm font-medium text-white placeholder-slate-400 caret-cyan-400 shadow-lg outline-none transition-all duration-200"
         />
 
         {query && (
           <button
             type="button"
+            aria-label="Clear search input"
+            title="Clear search input"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => {
               setQuery('');
               setSuggestions([]);
               setErrorMessage(null);
+              setSelectedIndex(-1);
               setIsOpen(false);
             }}
-            className="absolute right-2.5 text-slate-400 hover:text-slate-200 p-0.5 rounded transition-colors"
+            className="absolute right-2.5 text-slate-400 hover:text-slate-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400 p-0.5 rounded transition-colors cursor-pointer z-10"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3.5 h-3.5" />
           </button>
         )}
       </form>
@@ -174,6 +201,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
           suggestions={suggestions}
           isLoading={isLoading}
           error={errorMessage}
+          selectedIndex={selectedIndex}
           onSelectSuggestion={handleSelectSuggestion}
           onClose={() => setIsOpen(false)}
         />

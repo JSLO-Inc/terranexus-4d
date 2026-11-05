@@ -1,5 +1,5 @@
 # NASA JPL Tellus Land Mass Grids (RL06.1 v04)
-# Location: Upper Bhima Basin - Pune Deccan Traps (ID: locus-deccan-pune)
+# Location: Upper Bhima Basin - Pune Deccan Traps (Resolved ID: locus-deccan-pune, Query: osm-249714132)
 # Latitude: 18.5204 N, Longitude: 73.8567 E
 # Spatial Resolution: 300km Gaussian Filter (~3 deg), 0.5 deg grid
 # Unit: Liquid Water Equivalent (LWE) thickness in cm

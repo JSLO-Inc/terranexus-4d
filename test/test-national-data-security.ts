@@ -154,9 +154,10 @@ async function runNationalDataAndSecurityTests() {
   // Test 3.1: Provider registry singleton initializes
   assert(Boolean(providerRegistry), 'ProviderRegistry singleton instantiates cleanly');
 
-  // Test 3.2: Health report returns 7 registered scientific providers
+  // Test 3.2: Health report returns 8 registered scientific providers
   const healthReport = await providerRegistry.getHealthReport();
-  assert(healthReport.length === 7, `Health report contains all 7 registered providers (found: ${healthReport.length})`);
+  assert(healthReport.length === 8, `Health report contains all 8 registered providers (found: ${healthReport.length})`);
+  assert(healthReport.some(p => p.category === 'ELEVATION'), 'Registered providers include Copernicus/SRTM Elevation provider');
 
   // Test 3.3: All providers declare required provenance and classification
   const classifications = healthReport.map(p => p.dataClassification);
@@ -264,10 +265,10 @@ async function runNationalDataAndSecurityTests() {
   const allSimulatedBoreholes = allTerranes.every(t => t.borehole.status === 'SIMULATED' && t.borehole.isEducationalCrossSection === true);
   assert(allSimulatedBoreholes, 'Every GSI terrane borehole is classified strictly as SIMULATED educational cross-section');
 
-  // Test 5.7 (Phase 5D): Uncontained coordinate returns unclassified regional interpretation, not Dharwar
+  // Test 5.7 (Phase 5E): Uncontained coordinate returns null (UNAVAILABLE)
   const uncontainedPoint = geologyProvider.getGeologicalTerraneForCoordinate(35.0, 74.0); // Extreme north
-  assert(uncontainedPoint.terraneId.includes('INDO-GANGETIC') || uncontainedPoint.terraneId.includes('REGIONAL'),
-    'Uncontained coordinates do not silently default to Dharwar Craton');
+  assert(uncontainedPoint === null, 'Uncontained coordinates return null (UNAVAILABLE) without guessing');
+
 
   // ==========================================
   // SECTION 6: CWC MAJOR RIVER BASINS OF INDIA

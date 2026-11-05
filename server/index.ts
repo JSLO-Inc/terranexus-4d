@@ -2,7 +2,10 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { locationRouter } from './routes/locationRoutes';
 import { providerRouter } from './routes/providerRoutes';
-import { generateScientificExplanation } from './aiService';
+import { generateScientificExplanation, generateScientificExplanationStream } from './aiService';
+import { apiRegistryService } from './apiRegistry/apiRegistryService';
+import { managementRouter } from './apiRegistry/managementRouter';
+import { generateOperationsCenterHtml } from './apiRegistry/dashboardHtml';
 import { getHeatmapLayerData, calculateAreaStatistics } from './services/heatmapRasterService';
 import { getLabelsForViewport, NATIONWIDE_HIERARCHICAL_LABELS } from './services/spatialLabelService';
 import {
@@ -15,6 +18,8 @@ import { hardenedCors } from './security/originGuard';
 import { generalApiLimiter, locationSearchLimiter, ingestionLimiter } from './security/rateLimiter';
 import { validateOutboundUrl } from './security/urlValidator';
 import { validateAndSanitizeFilename } from './security/pathGuard';
+
+import { dossierRouter } from './routes/dossierRoutes';
 
 dotenv.config();
 
@@ -33,11 +38,78 @@ app.use(express.json({ limit: '1mb' }));
 // 4. Global sliding-window rate limiting
 app.use(generalApiLimiter);
 
+// 4b. Operations Centre Real-Time Request Logging Middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const p = req.originalUrl || req.path;
+    if (!p.startsWith('/@') && !p.endsWith('.js') && !p.endsWith('.css') && !p.endsWith('.ico')) {
+      apiRegistryService.logRequest({
+        method: req.method,
+        path: p,
+        statusCode: res.statusCode,
+        durationMs: Date.now() - start,
+        clientIp: req.ip || req.socket.remoteAddress || '127.0.0.1'
+      });
+    }
+  });
+  next();
+});
+
+// 4c. Operations Centre & API Registry Management Gateway
+app.use('/api/management', managementRouter);
+
 // 5. Scientific Data Providers API (CGWB, GSI, CWC, NASA, Copernicus)
 app.use('/api/providers', providerRouter);
 
 // 6. Universal Location & Discovery API (with dedicated rate limiting)
 app.use('/api/location', locationSearchLimiter, locationRouter);
+
+// 7. Location Evidence Engine & Dossier API (Direct & /api paths)
+app.use('/api', dossierRouter);
+app.use('/', dossierRouter);
+
+// Root & API Dashboard Landing Handlers (Resolves "Cannot GET /" and "Cannot GET /api")
+function renderApiDashboard(req: express.Request, res: express.Response) {
+  const isHtml = req.accepts('html');
+  const host = req.get('host') || `localhost:${PORT}`;
+  const protocol = req.protocol || 'http';
+  const baseUrl = `${protocol}://${host}`;
+
+  const apiEndpoints = [
+    { method: 'GET', path: '/api/health', desc: 'System health & AI configuration check', sample: `${baseUrl}/api/health` },
+    { method: 'GET', path: '/api/location-dossier?lat=18.5204&lon=73.8567', desc: 'Comprehensive Location Evidence Dossier (Pune benchmark)', sample: `${baseUrl}/api/location-dossier?lat=18.5204&lon=73.8567` },
+    { method: 'GET', path: '/api/location/search?q=Pune', desc: 'Place name & coordinate search resolver', sample: `${baseUrl}/api/location/search?q=Pune` },
+    { method: 'GET', path: '/api/hydro/status', desc: 'Hydro Ingestion Engine pipeline status & manifest', sample: `${baseUrl}/api/hydro/status` },
+    { method: 'GET', path: '/api/hydro/location/loc-18.5204-73.8567', desc: 'Historical GRACE & CGWB hydrogeological dataset', sample: `${baseUrl}/api/hydro/location/loc-18.5204-73.8567` },
+    { method: 'GET', path: '/api/hydro/heatmap/grid?layer=layer-grace-twsa&timestep=2024-05', desc: 'Gridded scientific heatmaps (0.5° GRACE mascons)', sample: `${baseUrl}/api/hydro/heatmap/grid?layer=layer-grace-twsa&timestep=2024-05` },
+    { method: 'GET', path: '/api/providers/catalog', desc: '14-tier scientific datasets registry & pedigree', sample: `${baseUrl}/api/providers/catalog` },
+    { method: 'GET', path: '/api/providers/health-dossier', desc: 'Data provider circuit breakers & telemetry gates', sample: `${baseUrl}/api/providers/health-dossier` },
+    { method: 'POST', path: '/api/ai/explain', desc: 'Gemini AI grounded geological synthesis', sample: null },
+    { method: 'POST', path: '/api/models/groundwater/validate', desc: 'Leave-One-Well-Out scientific backtesting gate', sample: null }
+  ];
+
+  if (isHtml) {
+    return res.type('html').send(generateOperationsCenterHtml(PORT));
+  }
+
+  // Programmatic JSON response for API consumers
+  res.json({
+    platform: 'TERRANEXUS 4D Backend API',
+    status: 'ONLINE',
+    port: PORT,
+    clientUrl: 'http://localhost:3000',
+    timestamp: new Date().toISOString(),
+    geminiConfigured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 5),
+    endpoints: apiEndpoints
+  });
+}
+
+// Root & Operations Centre Dashboard Landing Handlers
+app.get('/', renderApiDashboard);
+app.get('/dashboard', renderApiDashboard);
+app.get('/api', renderApiDashboard);
+app.get('/health', (req, res) => res.redirect('/api/health'));
 
 // Health & System Status Endpoint
 app.get('/api/health', (req, res) => {
@@ -214,6 +286,28 @@ app.get('/api/hydro/nasa/raw-files', async (req, res) => {
     res.json({ success: true, count: rawFiles.length, files: rawFiles });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Official CWC / India-WRIS 25 Major River Basins GeoJSON (GEO-03 / PERF-03)
+app.get('/api/basins/geojson', async (req, res) => {
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+    const zlib = await import('zlib');
+    const basinFile = path.resolve(process.cwd(), 'server/data/cwcBasins.json');
+    if (fs.existsSync(basinFile)) {
+      res.setHeader('Content-Type', 'application/json');
+      const acceptEncoding = (req.headers['accept-encoding'] as string) || '';
+      if (acceptEncoding.includes('gzip')) {
+        res.setHeader('Content-Encoding', 'gzip');
+        return fs.createReadStream(basinFile).pipe(zlib.createGzip()).pipe(res);
+      }
+      return fs.createReadStream(basinFile).pipe(res);
+    }
+    res.status(404).json({ success: false, error: 'CWC Basins GeoJSON not found on server' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
@@ -494,7 +588,8 @@ app.post('/api/ai/explain', async (req, res) => {
 
     res.json({
       success: true,
-      result
+      result,
+      data: result
     });
   } catch (error: any) {
     // Sanitize error without exposing keys, tokens or internal paths
@@ -505,6 +600,128 @@ app.post('/api/ai/explain', async (req, res) => {
       code: 'AI_SERVICE_ERROR'
     });
   }
+});
+
+// ==========================================
+// NEXUS AI STREAMING ENDPOINT (SSE)
+// ==========================================
+app.post('/api/ai/stream', async (req, res) => {
+  try {
+    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+
+    if (!checkAiRateLimit(clientIp)) {
+      return res.status(429).json({
+        success: false,
+        error: 'Rate limit exceeded (maximum 30 requests per minute). Please wait.',
+        code: 'RATE_LIMIT_EXCEEDED'
+      });
+    }
+
+    const { query, context } = req.body;
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ success: false, error: 'Invalid or missing "query" parameter' });
+    }
+
+    const cleanQuery = query.trim();
+    if (cleanQuery.length < 2 || cleanQuery.length > 500) {
+      return res.status(400).json({ success: false, error: 'Query length must be between 2 and 500 characters' });
+    }
+
+    if (!context || typeof context !== 'object' || !context.location) {
+      return res.status(400).json({ success: false, error: 'Invalid or missing context payload' });
+    }
+
+    // Configure Server-Sent Events headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (typeof (res as any).flushHeaders === 'function') {
+      (res as any).flushHeaders();
+    }
+
+    let isClientClosed = false;
+    req.on('close', () => {
+      isClientClosed = true;
+    });
+
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    const explanation = await generateScientificExplanationStream(
+      cleanQuery,
+      context,
+      apiKey,
+      (chunk: string) => {
+        if (!isClientClosed) {
+          res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`);
+        }
+      },
+      () => isClientClosed
+    );
+
+    if (!isClientClosed) {
+      res.write(`data: ${JSON.stringify({
+        type: 'done',
+        result: explanation
+      })}\n\n`);
+      res.end();
+    }
+  } catch (error: any) {
+    console.error('[Nexus AI Stream Error]', error?.message || 'Unknown streaming error');
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: 'Streaming error occurred. Safe offline fallback active.',
+        code: 'AI_STREAM_ERROR'
+      });
+    } else {
+      res.write(`data: ${JSON.stringify({ type: 'error', error: 'Internal streaming error' })}\n\n`);
+      res.end();
+    }
+  }
+});
+
+// 404 Fallback Handler (Replaces raw Express "Cannot GET <path>")
+app.use('*', (req, res) => {
+  const isHtml = req.accepts('html');
+  if (isHtml) {
+    return res.status(404).send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TERRANEXUS 4D — Endpoint Not Found</title>
+  <style>
+    body { background: #030712; color: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 1rem; }
+    .box { background: #0b1120; border: 1px solid #1e293b; border-radius: 1rem; padding: 2.5rem; max-width: 520px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+    h1 { font-size: 1.5rem; color: #38bdf8; margin-bottom: 0.5rem; font-family: monospace; font-weight: 800; }
+    p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.6; }
+    code { background: #1e293b; color: #22d3ee; padding: 0.2rem 0.5rem; border-radius: 0.35rem; font-family: monospace; }
+    .links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+    a { display: inline-flex; align-items: center; gap: 0.4rem; background: #0284c7; color: white; padding: 0.65rem 1.25rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
+    a:hover { background: #0ea5e9; }
+    a.secondary { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+    a.secondary:hover { background: #334155; color: white; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>404 • Endpoint Not Found</h1>
+    <p>The requested route <code>${req.method} ${req.originalUrl}</code> does not exist on the TERRANEXUS 4D Backend API.</p>
+    <div class="links">
+      <a href="/">📋 View API Directory (/)</a>
+      <a href="http://localhost:3000" class="secondary" target="_blank">🚀 Open Web App (localhost:3000)</a>
+    </div>
+  </div>
+</body>
+</html>`);
+  }
+  res.status(404).json({
+    success: false,
+    error: `Endpoint not found: ${req.method} ${req.originalUrl}`,
+    apiDashboard: 'http://localhost:3001/',
+    clientApp: 'http://localhost:3000'
+  });
 });
 
 app.listen(PORT, () => {

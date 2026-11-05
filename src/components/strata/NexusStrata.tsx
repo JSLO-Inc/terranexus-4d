@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { GEOLOGICAL_FORMATIONS, AUTHENTIC_BOREHOLES } from '../../data/strataData';
 import { INDIA_LOCATIONS } from '../../data/locationsIndia';
+import { Subsurface3D } from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
-import { Mountain, FileText, Layers, GitCompare, ShieldAlert, ArrowDown } from 'lucide-react';
+import { GeologicalFormation } from '../../types';
+import { Mountain, FileText, Layers, GitCompare, ShieldAlert, ArrowDown, Box, Sparkles } from 'lucide-react';
 
 export const NexusStrata: React.FC = () => {
-  const { selectedLocation, depthMeters, setDepthMeters } = useTerranexusStore();
+  const { selectedLocation, depthMeters, setDepthMeters, strataMode, setStrataMode, currentDossier } = useTerranexusStore();
   const [compareLocationId, setCompareLocationId] = useState<string>('locus-deccan-pune');
   const [dynamicTerrane, setDynamicTerrane] = useState<any>(null);
 
   useEffect(() => {
-    if (selectedLocation && !GEOLOGICAL_FORMATIONS[selectedLocation.id]) {
+    if (selectedLocation && !GEOLOGICAL_FORMATIONS[selectedLocation.id] && !currentDossier?.geology?.formations?.length) {
       fetch(`/api/providers/geology/terrane?lat=${selectedLocation.latitude}&lon=${selectedLocation.longitude}`)
         .then(res => res.json())
         .then(json => {
@@ -23,15 +25,46 @@ export const NexusStrata: React.FC = () => {
     } else {
       setDynamicTerrane(null);
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, currentDossier]);
 
-  const formations = GEOLOGICAL_FORMATIONS[selectedLocation.id] || dynamicTerrane?.formations || GEOLOGICAL_FORMATIONS['locus-deccan-pune'] || [];
-  const borehole = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id) || dynamicTerrane?.borehole || AUTHENTIC_BOREHOLES[0];
+  const formations: GeologicalFormation[] = (currentDossier?.geology?.formations && currentDossier.geology.formations.length > 0)
+    ? (currentDossier.geology.formations.map((f: any, idx: number) => ({
+        id: `form-dos-${idx}`,
+        code: f.name.slice(0, 4).toUpperCase(),
+        name: f.name,
+        supergroup: 'Local Successional Unit',
+        group: f.name,
+        age: f.age || 'Precambrian to Phanerozoic',
+        primaryLithology: f.lithology,
+        secondaryLithology: 'Interbedded horizon',
+        typicalThicknessMeters: f.thicknessM || 100,
+        colorHex: idx === 0 ? '#d97706' : idx === 1 ? '#0284c7' : '#10b981',
+        porosityAvg: 5.0,
+        densityGcm3: f.densityGcm3 || 2.65,
+        hardnessMohs: 6.0,
+        status: 'MODELLED'
+      })) as GeologicalFormation[])
+    : (GEOLOGICAL_FORMATIONS[selectedLocation.id] || dynamicTerrane?.formations || GEOLOGICAL_FORMATIONS['locus-deccan-pune'] || []);
+  const borehole = (currentDossier?.geology?.boreholeLog)
+    ? (currentDossier.geology.boreholeLog as any)
+    : (AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id) || dynamicTerrane?.borehole || null);
   const compareFormations = GEOLOGICAL_FORMATIONS[compareLocationId] || [];
   const compareLocation = INDIA_LOCATIONS.find(l => l.id === compareLocationId) || INDIA_LOCATIONS[1];
 
+  const handleKeyDownTab = (e: React.KeyboardEvent, currentMode: 'both' | 'cutaway' | 'litholog') => {
+    const modes: Array<'both' | 'cutaway' | 'litholog'> = ['both', 'cutaway', 'litholog'];
+    const idx = modes.indexOf(currentMode);
+    if (e.key === 'ArrowRight') {
+      const next = modes[(idx + 1) % modes.length];
+      setStrataMode(next);
+    } else if (e.key === 'ArrowLeft') {
+      const prev = modes[(idx - 1 + modes.length) % modes.length];
+      setStrataMode(prev);
+    }
+  };
+
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#080c14] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -46,12 +79,75 @@ export const NexusStrata: React.FC = () => {
             GSI Bhukosh 1:50,000 lithostratigraphic mapping, rock properties, and representative exploratory borehole lithologs.
           </p>
         </div>
+
+        {/* View Mode Toggle: 3D Cutaway / 1D Column / Combined */}
+        <div
+          role="tablist"
+          aria-label="Stratigraphy display mode"
+          className="glass-pill flex items-center gap-1 p-1 text-xs font-mono shadow-md"
+        >
+          <button
+            role="tab"
+            aria-selected={strataMode === 'both'}
+            tabIndex={strataMode === 'both' ? 0 : -1}
+            onClick={() => setStrataMode('both')}
+            onKeyDown={(e) => handleKeyDownTab(e, 'both')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 cursor-pointer ${
+              strataMode === 'both'
+                ? 'bg-amber-500/20 border border-amber-400/80 text-amber-300 font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Combined Twin</span>
+          </button>
+
+          <button
+            role="tab"
+            aria-selected={strataMode === 'cutaway'}
+            tabIndex={strataMode === 'cutaway' ? 0 : -1}
+            onClick={() => setStrataMode('cutaway')}
+            onKeyDown={(e) => handleKeyDownTab(e, 'cutaway')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 cursor-pointer ${
+              strataMode === 'cutaway'
+                ? 'bg-amber-500/20 border border-amber-400/80 text-amber-300 font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5 text-amber-400" />
+            <span>3D Cutaway</span>
+          </button>
+
+          <button
+            role="tab"
+            aria-selected={strataMode === 'litholog'}
+            tabIndex={strataMode === 'litholog' ? 0 : -1}
+            onClick={() => setStrataMode('litholog')}
+            onKeyDown={(e) => handleKeyDownTab(e, 'litholog')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 cursor-pointer ${
+              strataMode === 'litholog'
+                ? 'bg-amber-500/20 border border-amber-400/80 text-amber-300 font-semibold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 border border-transparent'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
+            <span>1D Column</span>
+          </button>
+        </div>
       </div>
 
+      {/* Interactive 3D Subsurface Land Chunk Cutaway */}
+      {(strataMode === 'both' || strataMode === 'cutaway') && (
+        <div className="h-[440px] rounded-2xl border border-slate-800/80 shadow-2xl overflow-hidden relative bg-[#060911]">
+          <Subsurface3D />
+        </div>
+      )}
+
       {/* Main Grid: Stratigraphic Column & Rock Properties */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {(strataMode === 'both' || strataMode === 'litholog') && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Stratigraphic Column Visualizer */}
-        <div className="rounded-xl bg-slate-950/90 border border-slate-800 p-4 flex flex-col gap-3">
+        <div className="glass-panel rounded-2xl p-4 flex flex-col gap-3 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
               <Layers className="w-4 h-4 text-amber-400" />
@@ -96,7 +192,7 @@ export const NexusStrata: React.FC = () => {
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* Detailed Borehole Record */}
           {borehole ? (
-            <div className="rounded-xl bg-slate-950/90 border border-slate-800 p-4 flex flex-col gap-3">
+            <div className="glass-panel rounded-2xl p-5 flex flex-col gap-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-amber-400" />
@@ -108,7 +204,7 @@ export const NexusStrata: React.FC = () => {
               </div>
 
               {/* Scientific Honesty Notice (Phase 5D) */}
-              <div className="text-[11px] bg-amber-950/30 border border-amber-800/40 text-amber-300/90 rounded-lg p-2.5 flex items-start gap-2">
+              <div className="text-[11px] bg-amber-950/20 border border-amber-500/40 text-amber-200/90 rounded-xl p-3 flex items-start gap-2 shadow-sm">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
                 <span>
                   <strong>Educational Stratigraphic Section:</strong> Synthesized from published GSI geological memoirs and regional lithological models. NOT an authentic drilled exploratory borehole core at this exact coordinate.
@@ -211,6 +307,7 @@ export const NexusStrata: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Cross-Location Comparative Geology */}
       <div className="rounded-xl bg-slate-950/90 border border-slate-800 p-4 flex flex-col gap-4">

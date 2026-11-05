@@ -1,5 +1,6 @@
 import { ObservationWellRecord, DatasetProvenance } from './types';
 import { saveDemoFile } from './cacheManager';
+import { resolveNearestGraceLocationId } from './gracePipeline';
 
 export const WRIS_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'lastIngested'> = {
   id: 'cgwb-groundwater-benchmark',
@@ -238,7 +239,8 @@ export function extractWellObservations(locationId: string): {
   provenance: DatasetProvenance;
   demoCsv: string;
 } {
-  const well = DEMO_BENCHMARK_WELL_RECORDS[locationId] || DEMO_BENCHMARK_WELL_RECORDS['locus-indogangetic-ludhiana'];
+  const resolvedId = resolveNearestGraceLocationId(locationId);
+  const well = DEMO_BENCHMARK_WELL_RECORDS[resolvedId] || DEMO_BENCHMARK_WELL_RECORDS['locus-deccan-pune'];
   
   let demoCsv = `# TERRANEXUS 4D Groundwater Benchmark Fixture
 # NOTICE: Illustrative regional groundwater benchmark. Not an authenticated CGWB monitoring-well observation.
