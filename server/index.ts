@@ -109,6 +109,8 @@ function renderApiDashboard(req: express.Request, res: express.Response) {
 app.get('/', renderApiDashboard);
 app.get('/dashboard', renderApiDashboard);
 app.get('/api', renderApiDashboard);
+app.get('/operations-centre', renderApiDashboard);
+app.get('/operations-center', renderApiDashboard);
 app.get('/health', (req, res) => res.redirect('/api/health'));
 
 // Health & System Status Endpoint
