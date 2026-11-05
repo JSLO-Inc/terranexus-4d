@@ -45,12 +45,12 @@ NASA GRACE and GRACE-FO Level-3 Land Mass grids (JPL Tellus RL06 / RL06.3) are g
 
 ---
 
-## 3. Hydrological Basins & Geometry (CWC 14 Major Basins)
+## 3. Hydrological Basins & Geometry (CWC & India-WRIS 25 Official Basins)
 
 ### 3.1 Point-in-Polygon (PIP) Resolution
-- River basin identification is executed via deterministic ray-casting point-in-polygon containment against authentic CWC/NRSC catchment polygons.
-- **Scientific Limitation:** The current dataset models the 14 major river basins covering $76.3\%$ of India's landmass. 
-- **Null Containment:** Locations falling outside these 14 basins (such as West Flowing coastal streams in Kerala/Goa, East Flowing streams in coastal Tamil Nadu, the Luni endorheic basin in Rajasthan, and the Andaman/Lakshadweep islands) strictly return `null` (`UNKNOWN`) rather than guessing a nearest basin centroid.
+- River basin identification is executed via deterministic ray-casting point-in-polygon containment against authentic CWC & India-WRIS catchment polygons (`wris_basins_cwc_official.json`).
+- **Complete National Coverage:** Covers all 25 official Indian hydrological basins, including mainland major rivers (Ganga, Indus, Brahmaputra, Godavari, Krishna, Cauvery, Narmada, Tapi, Mahanadi, Pennar, Mahi, Sabarmati, Subarnarekha, Brahmani-Baitarani), coastal river groupings (Tapi to Tadri, Tadri to Kanyakumari, Pennar to Kanyakumari, Mahanadi to Pennar, Subarnarekha to Rushikulya), endorheic inland drainage (Kutch, Saurashtra & Luni, Ladakh High-Altitude Basins), and island marine catchments (Andaman and Nicobar Islands, Lakshadweep Islands).
+- **Null Containment:** Locations strictly falling outside all 25 official polygons (e.g. international territory, maritime EEZ outside island catchments) strictly return `null` (`UNKNOWN`) rather than guessing a nearest basin centroid or bounding box.
 
 ---
 
@@ -59,10 +59,11 @@ NASA GRACE and GRACE-FO Level-3 Land Mass grids (JPL Tellus RL06 / RL06.3) are g
 ### 4.1 Fundamental Law of Remote Sensing (Sentinel-2 MSI Mineral Indices)
 - Optical and shortwave infrared (SWIR) sensors on satellites detect reflected solar radiation strictly from the **outermost sub-millimetre surface layer** of the crust (the top few micrometres of exposed rock, gossan, or soil).
 - **Scientific Limitation:** Satellites cannot penetrate solid rock, dense agricultural crops, transported alluvium, or sand dunes. Surface alteration indices (e.g. ferric iron $B4/B2$, hydroxyl $B11/B12$) are classified as `MODELLED` analytical ratios. They **do not prove the presence of concealed commercial-grade copper, gold, or lithium deposits**.
+- **Copernicus CDSE Ingestion Status & Keycloak Barrier:** While scene metadata discovery is operational via CDSE OData (`discoverSentinel2Scenes`), programmatic download of full `.SAFE` L2A products or raw GeoTIFF bands requires an authorized Copernicus Data Space Ecosystem (CDSE) Keycloak OAuth token. Without this token, download attempts return HTTP 401 Unauthorized.
 
-### 4.2 NASA GPM IMERG Ingestion Status
-- Standby monthly precipitation is calculated via a localized seasonal curve and classified as **`SIMULATED` / `DEMONSTRATION`**.
-- Live ingestion of authentic $0.1^\circ \times 0.1^\circ$ NetCDF-4/HDF5 granules requires NASA GES DISC OAuth2 authentication (`EARTHDATA_TOKEN`), which is supported via the implemented CMR discovery query pipeline (`discoverGpmGranules`).
+### 4.2 NASA GPM IMERG Ingestion Status & GES DISC OAuth Barrier
+- Standby monthly precipitation is calculated via a localized seasonal curve and classified as **`SIMULATED` / `DEMONSTRATION`** (`STANDIN_SIMULATED`).
+- While metadata discovery for monthly V07 granules is operational via NASA CMR (`discoverGpmGranules`), direct binary download of HDF5 granules from `data.gesdisc.earthdata.nasa.gov` requires an active Earthdata Login Bearer Token with approved GES DISC OAuth application permissions on the user's Earthdata profile. Unauthenticated direct download requests return HTTP 401 Unauthorized.
 
 ---
 

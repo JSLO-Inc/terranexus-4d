@@ -20,7 +20,11 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       detectionTarget: 'Goethite, Hematite, Jarosite surface cappings',
       status: 'MODELLED',
       confidencePercent: 88,
-      spatialResolutionMeters: 10
+      spatialResolutionMeters: 10,
+      indexValue: 1.84,
+      alterationStrength: 'Intense',
+      targetMineralGroup: 'Goethite, Hematite, Jarosite surface cappings',
+      scientificDisclaimer: 'Ferric iron (Fe3+) absorption in blue with high reflectance in red; delineates oxidized hematite/goethite gossans.'
     },
     {
       id: 'spec-al-oh',
@@ -31,7 +35,11 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       detectionTarget: 'Illite, Sericite, Kaolinite, Muscovite',
       status: 'MODELLED',
       confidencePercent: 84,
-      spatialResolutionMeters: 20
+      spatialResolutionMeters: 20,
+      indexValue: 1.62,
+      alterationStrength: 'Moderate',
+      targetMineralGroup: 'Illite, Sericite, Kaolinite, Muscovite',
+      scientificDisclaimer: 'Diagnostic 2.20 µm absorption feature of Al-OH bond in phyllic/argillic alteration minerals.'
     },
     {
       id: 'spec-ferrous',
@@ -42,7 +50,11 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       detectionTarget: 'Chlorite, Epidote, Ferrous Silicates',
       status: 'MODELLED',
       confidencePercent: 79,
-      spatialResolutionMeters: 20
+      spatialResolutionMeters: 20,
+      indexValue: 1.35,
+      alterationStrength: 'Moderate',
+      targetMineralGroup: 'Chlorite, Epidote, Ferrous Silicates',
+      scientificDisclaimer: 'Elevated reflectance in SWIR-2 relative to NIR identifies ferrous iron in chlorite and epidote (propylitic halo).'
     }
   ],
   'lead_zinc_sedex': [
@@ -55,7 +67,11 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       detectionTarget: 'Dolomitic Marble, Ankerite, Siderite',
       status: 'MODELLED',
       confidencePercent: 82,
-      spatialResolutionMeters: 20
+      spatialResolutionMeters: 20,
+      indexValue: 0.24,
+      alterationStrength: 'Moderate',
+      targetMineralGroup: 'Dolomitic Marble, Ankerite, Siderite',
+      scientificDisclaimer: 'Carbonate CO3 absorption at 2.33 µm separates dolomitic host rocks from siliceous wall rocks.'
     },
     {
       id: 'spec-fe-ox-sedex',
@@ -66,7 +82,43 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       detectionTarget: 'Limonite / Jarosite capping over massive sulfides',
       status: 'MODELLED',
       confidencePercent: 86,
-      spatialResolutionMeters: 10
+      spatialResolutionMeters: 10,
+      indexValue: 1.72,
+      alterationStrength: 'Intense',
+      targetMineralGroup: 'Limonite / Jarosite capping over massive sulfides',
+      scientificDisclaimer: 'Supergene oxidation of sphalerite-galena-pyrite ore creating limonitic staining.'
+    }
+  ],
+  'ultramafic_chromite': [
+    {
+      id: 'spec-chromite-cr',
+      sensor: 'Copernicus Sentinel-2 MSI',
+      name: 'Chromite & Serpentinite Index',
+      formula: 'B12 / B8A (SWIR-2 / Narrow NIR)',
+      geologicalRationale: 'Diagnostic SWIR reflectance of serpentine and talc within hydrated ultramafic complexes containing chromitite pods.',
+      detectionTarget: 'Chromite Seams, Serpentinized Dunite, Talc-Carbonate',
+      status: 'MODELLED',
+      confidencePercent: 87,
+      spatialResolutionMeters: 20,
+      indexValue: 1.54,
+      alterationStrength: 'Intense',
+      targetMineralGroup: 'Chromite Seams, Serpentinized Dunite, Talc-Carbonate',
+      scientificDisclaimer: 'Highlights boundary of ultramafic intrusive complexes hosting podiform chromite.'
+    },
+    {
+      id: 'spec-ni-laterite',
+      sensor: 'Copernicus Sentinel-2 MSI',
+      name: 'Lateritic Overburden / Nickeliferous Gossan',
+      formula: 'B4 / B2 (Red / Blue)',
+      geologicalRationale: 'Deep tropical weathering of serpentinites generates limonite-rich nickeliferous lateritic capping.',
+      detectionTarget: 'Nickeliferous Limonite / Goethite Capping',
+      status: 'MODELLED',
+      confidencePercent: 91,
+      spatialResolutionMeters: 10,
+      indexValue: 1.88,
+      alterationStrength: 'High Confidence',
+      targetMineralGroup: 'Nickeliferous Limonite / Goethite Capping',
+      scientificDisclaimer: 'Delineates high-grade lateritic capping overlying deep unweathered chromitite.'
     }
   ],
   'iron_bif': [
@@ -79,7 +131,11 @@ export const SENTINEL2_SPECTRAL_SIGNATURES: Record<string, SpectralAlterationSig
       detectionTarget: 'High-Grade Banded Hematite Ore (BHO / BHQ)',
       status: 'MODELLED',
       confidencePercent: 92,
-      spatialResolutionMeters: 10
+      spatialResolutionMeters: 10,
+      indexValue: 2.15,
+      alterationStrength: 'High Confidence',
+      targetMineralGroup: 'High-Grade Banded Hematite Ore (BHO / BHQ)',
+      scientificDisclaimer: 'Distinguishes high-grade hematite from surrounding shale and quartzite.'
     }
   ]
 };
@@ -139,5 +195,27 @@ export const MAJOR_METALLOGENIC_BELTS: MetallogenicBelt[] = [
     keyMinesOrOccurrences: ['Bailadila Deposit 5/14', 'Noamundi', 'Joda East', 'Barsua'],
     bounds: [81.1, 18.5, 85.8, 22.2],
     spectralIndices: SENTINEL2_SPECTRAL_SIGNATURES['iron_bif']
+  },
+  {
+    beltId: 'GSI-BELT-MALANJKHAND',
+    name: 'Malanjkhand Paleoproterozoic Porphyry Copper Belt',
+    depositStyle: 'Paleoproterozoic Calc-Alkaline Granitoid-Hosted Porphyry Copper-Molybdenum',
+    geologicalHostRock: 'Malanjkhand Calc-Alkaline Biotite Granite, Quartz Reefs, Metabasic Dykes',
+    targetCommodities: ['Copper (Cu)', 'Molybdenum (Mo)', 'Gold (Au)', 'Silver (Ag)'],
+    regionalProspectivityScore: 'Prospective Belt',
+    keyMinesOrOccurrences: ['Malanjkhand Open Cast Copper Mine (HCL)', 'Padritola', 'Mohgaon'],
+    bounds: [80.65, 21.95, 80.85, 22.10],
+    spectralIndices: SENTINEL2_SPECTRAL_SIGNATURES['copper_gold_porphyry']
+  },
+  {
+    beltId: 'GSI-BELT-SUKINDA',
+    name: 'Sukinda Ultramafic Chromite-PGE Belt',
+    depositStyle: 'Layered Ultramafic Intrusive Stratiform / Podiform Chromite Complex',
+    geologicalHostRock: 'Serpentinized Dunite, Peridotite, Orthopyroxenite, Lateritic Nickeliferous Cap',
+    targetCommodities: ['Chromite (Cr2O3 > 48%)', 'Nickel (Ni)', 'Cobalt (Co)', 'Platinum Group Elements (PGE)'],
+    regionalProspectivityScore: 'Prospective Belt',
+    keyMinesOrOccurrences: ['Sukinda Chromite Mine (Tata Steel)', 'South Kaliapani (OMC)', 'Ostapal', 'Mahagiri'],
+    bounds: [85.70, 20.90, 85.95, 21.15],
+    spectralIndices: SENTINEL2_SPECTRAL_SIGNATURES['ultramafic_chromite']
   }
 ];

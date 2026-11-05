@@ -10,7 +10,8 @@ export interface AquiferLayer {
   bottomDepthM: number;
   principalRock: string;
   transmissivityM2Day: number;
-  specificYieldPercent: number;
+  specificYieldPercent?: number; // S_y (%) for unconfined / semi-confined
+  storativity?: number; // Dimensionless elastic storage coefficient (S) for confined
   waterQualityTdsMgL: number;
   ecMicrosiemens: number;
   status: ScientificStatus;
@@ -55,7 +56,8 @@ export const AQUIFER_SYSTEMS: Record<string, AquiferLayer[]> = {
       bottomDepthM: 340,
       principalRock: 'Coarse sand and pebble horizon beneath regional clay cap',
       transmissivityM2Day: 3200,
-      specificYieldPercent: 3.5,
+      storativity: 0.00045,
+      specificYieldPercent: 0.045, // Equivalent elastic release percentage (S * 100)
       waterQualityTdsMgL: 680,
       ecMicrosiemens: 940,
       status: 'MODELLED'
@@ -235,7 +237,8 @@ export const AQUIFER_SYSTEMS: Record<string, AquiferLayer[]> = {
       bottomDepthM: 380,
       principalRock: 'Felspathic sandstone confined between coal/shale beds',
       transmissivityM2Day: 1600,
-      specificYieldPercent: 6.8,
+      storativity: 0.00038,
+      specificYieldPercent: 0.038, // Equivalent elastic release percentage (S * 100)
       waterQualityTdsMgL: 520,
       ecMicrosiemens: 740,
       status: 'MODELLED'

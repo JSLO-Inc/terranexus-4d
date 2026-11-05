@@ -44,11 +44,31 @@ raw-private-data/
 # 4. NASA Satellite Raw Data & Processed Binary Storage
 # Preserves pristine directory isolation and prevents binary satellite files from entering Git
 server/data/raw/*
+!server/data/raw/.gitkeep
 server/data/processed/*
-server/data/cache/hydro_click-*
-server/data/cache/hydro_loc-*
+!server/data/processed/.gitkeep
+server/data/cache/*
+!server/data/cache/hydro_locus-*.json
+!server/data/cache/.gitkeep
 server/data/demo/cgwb_wris_demo_click-*
 server/data/demo/cgwb_wris_demo_loc-*
+server/data/demo/cgwb_wris_demo_custom-pin-*
+server/data/demo/cgwb_wris_demo_geo-*
+server/data/demo/cgwb_wris_demo_osm-*
+server/data/gis/*.geojsonl*
+server/data/gis/*.7z
+server/data/gis/*.zip
+
+# 4b. Local Backups & Scratch Files
+.backup*
+backup*/
+backups/
+*.backup
+*.bak
+scratch/
+scratch_*
+temp_*
+coverage/
 
 
 # 5. Build Artifacts & Dependencies
@@ -82,3 +102,54 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# 8. Antigravity Agent & Assistant Scratch
+.gemini/
+TODAY_CHECKPOINT.md
+
+# 9. Local Diagnostic Screenshot Runs (Kept on Local PC, Excluded from GitHub Repository)
+docs/deep-inspection-screenshots/
+docs/final-audit-screenshots/
+docs/screenshots-acceptance/
+docs/screenshots-after/
+docs/screenshots-before/
+docs/screenshots-chrome-inspection/
+docs/screenshots-live-*/
+docs/screenshots-live-qa/
+docs/visual-regression/
+docs/whole-project-audit-screenshots/
+docs/*.json
+
+# 10. Local Reference Assets & Design Mockups (Kept on Local PC, Excluded from Git)
+design-references/
+
+# 11. Local Forensic Audit Scratch & Working Notes (Kept on Local PC, Excluded from Git)
+PHASE5E_*
+
+# 12. Uncurated Docs Root Images (Preserve only curated docs/screenshots/*.png)
+docs/*.png
+!docs/screenshots/*.png
+
+# 13. Ad-hoc GIS Data Ingestion & Geometry Scripts (Kept on Local PC, Excluded from Git)
+server/data/gis/*.py
+server/data/gis/test_*.ts
+
+# 14. Local Diagnostic & Benchmark Scratch Scripts (Kept on Local PC, Excluded from Git)
+scripts/capture-*
+scripts/inspect-*
+scripts/diagnose-*
+scripts/live-*
+scripts/reconcile-*
+scripts/benchmark-*
+scripts/profile-*
+scripts/summarize-*
+scripts/chrome-inspection.ts
+scripts/deep-browser-inspection.ts
+scripts/get-exact-suite-counts.ts
+scripts/verify-*
+scripts/test-boundary-*
+scripts/test-gpm-live.ts
+scripts/test-provider-health.ts
+scripts/test-security-readiness.ts
+scripts/test-sentinel2-live.ts
+scripts/diagnostic-*

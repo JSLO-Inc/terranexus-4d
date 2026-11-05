@@ -366,5 +366,64 @@ export const GSI_LITHOTECTONIC_TERRANES: GeologicalTerrane[] = [
         { depthFromM: 128, depthToM: 320, lithology: 'Compacted Barakar Sandstone & Talchir Tillite Bedrock', color: '#334155', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Basal Gondwana glacial marine tillite acting as regional aquiclude' }
       ]
     }
+  },
+  {
+    terraneId: 'TERRANE-EASTERN-GHATS-COASTAL',
+    name: 'Eastern Ghats Mobile Belt & Godavari-Krishna Coastal Basin',
+    cratonicAffiliation: 'Circum-East Indian Proterozoic Mobile Belt & Quaternary Deltaic Complex',
+    ageEpoch: 'Paleoproterozoic Granulite Basement (~1.6 - 1.0 Ga) to Holocene Deltaic Fill',
+    primaryLithology: 'Quaternary Fluvio-Marine Alluvium, Tertiary Rajahmundry Sandstone, Charnockite & Khondalite Basement',
+    crustalThicknessKm: 38,
+    structuralFabric: 'NE-SW granulite shear fabric overlain by passive continental margin extensional deltaic basins',
+    dominantAquiferType: 'Multi-tiered Coastal Alluvial Sand Aquifer & Semi-Confined Rajahmundry Sandstone',
+    mineralPotential: ['Beach Placer Heavy Minerals (Ilmenite, Rutile, Monazite, Zircon)', 'Silica Sand', 'Hydrocarbons (KG Basin)'],
+    bounds: [79.5, 14.0, 84.5, 19.5],
+    formations: [
+      {
+        id: 'fmt-egc-01',
+        code: 'Q-GK-ALV',
+        name: 'Godavari-Krishna Deltaic Alluvium (Coastal Plain)',
+        age: 'Holocene to Late Pleistocene',
+        primaryLithology: 'Fine to medium micaceous quartz sand, silt, and deltaic clay lenses',
+        colorHex: '#ca8a04',
+        typicalThicknessMeters: 45,
+        hydrogeologicalSignificance: 'Prolific shallow unconfined aquifer; seasonal recharge from Godavari distributary canals.'
+      },
+      {
+        id: 'fmt-egc-02',
+        code: 'T-RJ-SST',
+        name: 'Rajahmundry Sandstone Formation',
+        age: 'Tertiary (Miocene to Pliocene)',
+        primaryLithology: 'Ferruginous medium to coarse sandstone with clay-stone interbeds',
+        colorHex: '#b45309',
+        typicalThicknessMeters: 220,
+        hydrogeologicalSignificance: 'High-transmissivity regional semi-confined to confined aquifer with excellent freshwater yields.'
+      },
+      {
+        id: 'fmt-egc-03',
+        code: 'PR-EG-GRN',
+        name: 'Eastern Ghats Granulite Basement (Charnockite & Khondalite)',
+        age: 'Paleoproterozoic to Mesoproterozoic (~1.6 Ga)',
+        primaryLithology: 'Hypersthene-bearing charnockite, garnet-sillimanite khondalite gneiss',
+        colorHex: '#334155',
+        typicalThicknessMeters: 1800,
+        hydrogeologicalSignificance: 'Dense metamorphic basement; localized secondary water storage limited to deep structural fracture planes.'
+      }
+    ],
+    borehole: {
+      wellCode: 'EDU-SYNTH-EGC-SEC-01',
+      sourceAgency: 'Educational Stratigraphic Synthesis (GSI Southern Region & CGWB Godavari Delta Memoirs)',
+      totalDepthM: 280,
+      status: 'SIMULATED',
+      isEducationalCrossSection: true,
+      disclaimer: 'Educational composite stratigraphic section synthesized from published GSI/CGWB memoirs. NOT an authentic drilled exploratory borehole at this coordinate.',
+      layers: [
+        { depthFromM: 0, depthToM: 8, lithology: 'Silty Loam & Active Deltaic Floodplain Silt', color: '#a16207', fractureIntensity: 'None', hydrogeologicalCharacter: 'Surficial high-infiltration deltaic soil with dense canal irrigation link' },
+        { depthFromM: 8, depthToM: 38, lithology: 'Fine to Coarse Micaceous Sand (Deltaic Unconfined Aquifer)', color: '#ca8a04', fractureIntensity: 'None', hydrogeologicalCharacter: 'Primary shallow tube-well horizon for paddy cultivation' },
+        { depthFromM: 38, depthToM: 58, lithology: 'Dark Bluish-Grey Marine Clay (Aquitard Horizon)', color: '#475569', fractureIntensity: 'None', hydrogeologicalCharacter: 'Impermeable deltaic backswamp clay confining underlying sandstone' },
+        { depthFromM: 58, depthToM: 165, lithology: 'Coarse Ferruginous Rajahmundry Sandstone (Confined Aquifer)', color: '#b45309', fractureIntensity: 'Low', hydrogeologicalCharacter: 'High transmissivity semi-confined artesian to sub-artesian aquifer' },
+        { depthFromM: 165, depthToM: 280, lithology: 'Massive Charnockitic Granulite Crystalline Bedrock', color: '#1e293b', fractureIntensity: 'Low', hydrogeologicalCharacter: 'Impermeable Proterozoic Eastern Ghats crystalline metamorphic basement' }
+      ]
+    }
   }
 ];

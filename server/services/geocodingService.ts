@@ -20,6 +20,7 @@ export interface LocalGeoPlace {
   type: 'STATE' | 'UNION_TERRITORY' | 'DISTRICT' | 'CITY' | 'TOWN' | 'GEOLOGICAL_PROVINCE' | 'WATERSHED';
   state: string;
   district?: string;
+  subDistrict?: string;
   latitude: number;
   longitude: number;
   elevationMeters: number;
@@ -36,28 +37,29 @@ export const LOCAL_INDIAN_GEOGRAPHIC_INDEX: LocalGeoPlace[] = [
   // --- States & Major Capitals ---
   { id: 'geo-in-dl', name: 'Delhi', type: 'UNION_TERRITORY', state: 'Delhi', district: 'New Delhi', latitude: 28.6139, longitude: 77.2090, elevationMeters: 216, aliases: ['new delhi', 'ncr', 'capital'] },
   { id: 'geo-in-pb-chd', name: 'Chandigarh', type: 'UNION_TERRITORY', state: 'Chandigarh', latitude: 30.7333, longitude: 76.7794, elevationMeters: 321, aliases: ['chd'] },
-  { id: 'geo-in-pb-lud', name: 'Ludhiana', type: 'CITY', state: 'Punjab', district: 'Ludhiana', latitude: 30.9010, longitude: 75.8573, elevationMeters: 247, basin: 'Indo-Gangetic Basin', geologicalProvince: 'Indo-Gangetic Foredeep Alluvium', aliases: ['central punjab', 'sutlej plain'] },
+  { id: 'locus-indogangetic-ludhiana', name: 'Ludhiana', type: 'CITY', state: 'Punjab', district: 'Ludhiana', latitude: 30.9010, longitude: 75.8573, elevationMeters: 244, basin: 'Indo-Gangetic Alluvial Basin (Indus-Sutlej Sub-basin)', geologicalProvince: 'Quaternary Indo-Gangetic Foreland Alluvium', aliases: ['central punjab', 'sutlej plain', 'ludhiana - central punjab plain', 'geo-in-pb-lud'] },
   { id: 'geo-in-pb-asr', name: 'Amritsar', type: 'CITY', state: 'Punjab', district: 'Amritsar', latitude: 31.6340, longitude: 74.8723, elevationMeters: 234, aliases: ['golden temple city'] },
   { id: 'geo-in-hr-ggn', name: 'Gurugram', type: 'CITY', state: 'Haryana', district: 'Gurugram', latitude: 28.4595, longitude: 77.0266, elevationMeters: 217, aliases: ['gurgaon'] },
   { id: 'geo-in-hr-karnal', name: 'Karnal', type: 'CITY', state: 'Haryana', district: 'Karnal', latitude: 29.6857, longitude: 76.9905, elevationMeters: 228, aliases: ['rice bowl'] },
   { id: 'geo-in-rj-jpr', name: 'Jaipur', type: 'CITY', state: 'Rajasthan', district: 'Jaipur', latitude: 26.9124, longitude: 75.7873, elevationMeters: 431, aliases: ['pink city'] },
-  { id: 'geo-in-rj-kht', name: 'Khetri', type: 'TOWN', state: 'Rajasthan', district: 'Jhunjhunu', latitude: 28.0039, longitude: 75.7878, elevationMeters: 484, basin: 'Shekhawati Basin', geologicalProvince: 'North Delhi Fold Belt', aliases: ['khetri copper belt', 'jhunjhunu'] },
-  { id: 'geo-in-rj-zwr', name: 'Zawar', type: 'TOWN', state: 'Rajasthan', district: 'Udaipur', latitude: 24.3564, longitude: 73.7161, elevationMeters: 395, basin: 'Aravalli Basin', geologicalProvince: 'Aravalli Supergroup', aliases: ['zawar mines', 'udaipur'] },
+  { id: 'locus-khetri-rajasthan', name: 'Khetri', type: 'TOWN', state: 'Rajasthan', district: 'Jhunjhunu', latitude: 28.0039, longitude: 75.7878, elevationMeters: 380, basin: 'Shekhawati Inland Arid Basin', geologicalProvince: 'North Delhi Fold Belt (Proterozoic Metasediments)', aliases: ['khetri copper belt', 'jhunjhunu', 'khetri copper belt - jhunjhunu', 'geo-in-rj-kht'] },
+  { id: 'locus-zawar-udaipur', name: 'Zawar', type: 'TOWN', state: 'Rajasthan', district: 'Udaipur', latitude: 24.3564, longitude: 73.7161, elevationMeters: 395, basin: 'Sabarmati Upper Catchment', geologicalProvince: 'Aravalli Supergroup (Early Proterozoic Carbonates & Phyllites)', aliases: ['zawar mines', 'udaipur', 'zawar mineral belt - udaipur', 'geo-in-rj-zwr'] },
   { id: 'geo-in-rj-jod', name: 'Jodhpur', type: 'CITY', state: 'Rajasthan', district: 'Jodhpur', latitude: 26.2389, longitude: 73.0243, elevationMeters: 231, aliases: ['blue city', 'marwar'] },
-  { id: 'geo-in-mh-pun', name: 'Pune', type: 'CITY', state: 'Maharashtra', district: 'Pune', latitude: 18.5204, longitude: 73.8567, elevationMeters: 560, basin: 'Upper Bhima Basin', geologicalProvince: 'Deccan Volcanic Province', aliases: ['poona', 'deccan plateau'] },
+  { id: 'locus-deccan-pune', name: 'Pune', type: 'CITY', state: 'Maharashtra', district: 'Pune', latitude: 18.5204, longitude: 73.8567, elevationMeters: 560, basin: 'Krishna River Basin (Bhima Sub-basin)', geologicalProvince: 'Deccan Volcanic Province (Upper Cretaceous-Paleocene Basalt Flows)', aliases: ['poona', 'deccan plateau', 'upper bhima basin - pune deccan traps', 'geo-in-mh-pun'] },
   { id: 'geo-in-mh-mum', name: 'Mumbai', type: 'CITY', state: 'Maharashtra', district: 'Mumbai City', latitude: 19.0760, longitude: 72.8777, elevationMeters: 14, aliases: ['bombay', 'konkan'] },
   { id: 'geo-in-mh-nag', name: 'Nagpur', type: 'CITY', state: 'Maharashtra', district: 'Nagpur', latitude: 21.1458, longitude: 79.0882, elevationMeters: 310, aliases: ['orange city', 'vidarbha'] },
   { id: 'geo-in-ka-blr', name: 'Bengaluru', type: 'CITY', state: 'Karnataka', district: 'Bengaluru Urban', latitude: 12.9716, longitude: 77.5946, elevationMeters: 920, aliases: ['bangalore'] },
-  { id: 'geo-in-ka-klr', name: 'Kolar', type: 'TOWN', state: 'Karnataka', district: 'Kolar', latitude: 12.9602, longitude: 78.2712, elevationMeters: 822, basin: 'Palar River Basin', geologicalProvince: 'Dharwar Craton / Kolar Schist Belt', aliases: ['kolar gold fields', 'kgf'] },
+  { id: 'locus-dharwar-kolar', name: 'Kolar', type: 'TOWN', state: 'Karnataka', district: 'Kolar', latitude: 12.9602, longitude: 78.2712, elevationMeters: 840, basin: 'Palar River Basin', geologicalProvince: 'Eastern Dharwar Craton (Archean Greenstone Belt)', aliases: ['kolar gold fields', 'kgf', 'kolar schist belt - robertsonpet', 'geo-in-ka-klr'] },
   { id: 'geo-in-ka-mys', name: 'Mysuru', type: 'CITY', state: 'Karnataka', district: 'Mysuru', latitude: 12.2958, longitude: 76.6394, elevationMeters: 763, aliases: ['mysore'] },
-  { id: 'geo-in-jh-sng', name: 'Singhbhum', type: 'DISTRICT', state: 'Jharkhand', district: 'East Singhbhum', latitude: 22.5804, longitude: 86.4800, elevationMeters: 190, basin: 'Subarnarekha Basin', geologicalProvince: 'Singhbhum Craton / Thrust Zone', aliases: ['jamshedpur', 'jaduguda', 'ghatsila'] },
+  { id: 'locus-singhbhum-jharkhand', name: 'Singhbhum', type: 'DISTRICT', state: 'Jharkhand', district: 'East Singhbhum', latitude: 22.5804, longitude: 86.4800, elevationMeters: 105, basin: 'Subarnarekha River Basin', geologicalProvince: 'Singhbhum Mobile Belt (Proterozoic Copper-Uranium Thrust Belt)', aliases: ['jamshedpur', 'jaduguda', 'ghatsila', 'singhbhum shear zone - ghatsila', 'geo-in-jh-sng'] },
   { id: 'geo-in-jh-rnc', name: 'Ranchi', type: 'CITY', state: 'Jharkhand', district: 'Ranchi', latitude: 23.3441, longitude: 85.3096, elevationMeters: 651, aliases: ['chota nagpur'] },
   { id: 'geo-in-jh-dnb', name: 'Dhanbad', type: 'CITY', state: 'Jharkhand', district: 'Dhanbad', latitude: 23.7957, longitude: 86.4304, elevationMeters: 227, aliases: ['coal capital', 'jharia'] },
   { id: 'geo-in-tg-hyd', name: 'Hyderabad', type: 'CITY', state: 'Telangana', district: 'Hyderabad', latitude: 17.3850, longitude: 78.4867, elevationMeters: 542, aliases: ['secunderabad'] },
-  { id: 'geo-in-tg-kgm', name: 'Kothagudem', type: 'TOWN', state: 'Telangana', district: 'Bhadradri Kothagudem', latitude: 17.5511, longitude: 80.6178, elevationMeters: 98, basin: 'Pranhita-Godavari Basin', geologicalProvince: 'Gondwana Graben', aliases: ['bhadradri', 'singareni collieries'] },
+  { id: 'locus-godavari-kothagudem', name: 'Kothagudem', type: 'TOWN', state: 'Telangana', district: 'Bhadradri Kothagudem', latitude: 17.5511, longitude: 80.6178, elevationMeters: 89, basin: 'Godavari Lower Sub-basin', geologicalProvince: 'Gondwana Sedimentary Graben (Permian-Triassic Sandstones & Shales)', aliases: ['bhadradri', 'singareni collieries', 'pranhita-godavari graben - kothagudem', 'geo-in-tg-kgm'] },
   { id: 'geo-in-tg-wgl', name: 'Warangal', type: 'CITY', state: 'Telangana', district: 'Hanamkonda', latitude: 17.9689, longitude: 79.5941, elevationMeters: 266, aliases: ['kazipet'] },
   { id: 'geo-in-ap-vja', name: 'Vijayawada', type: 'CITY', state: 'Andhra Pradesh', district: 'NTR District', latitude: 16.5062, longitude: 80.6480, elevationMeters: 23, aliases: ['bezawada', 'krishna river'] },
   { id: 'geo-in-ap-vsk', name: 'Visakhapatnam', type: 'CITY', state: 'Andhra Pradesh', district: 'Visakhapatnam', latitude: 17.6868, longitude: 83.2185, elevationMeters: 45, aliases: ['vizag'] },
+  { id: 'locus-bhimavaram-andhra', name: 'Bhimavaram', type: 'TOWN', state: 'Andhra Pradesh', district: 'West Godavari', subDistrict: 'Bhimavaram Mandal', latitude: 16.5449, longitude: 81.5212, elevationMeters: 7, basin: 'East Flowing Rivers between Mahanadi and Pennar', geologicalProvince: 'Godavari-Krishna Coastal Deltaic Belt', aliases: ['bhimavaram', 'west godavari', 'narasa agraharam', 'geo-in-ap-bhv'] },
   { id: 'geo-in-tn-che', name: 'Chennai', type: 'CITY', state: 'Tamil Nadu', district: 'Chennai', latitude: 13.0827, longitude: 80.2707, elevationMeters: 6, aliases: ['madras'] },
   { id: 'geo-in-tn-cbe', name: 'Coimbatore', type: 'CITY', state: 'Tamil Nadu', district: 'Coimbatore', latitude: 11.0168, longitude: 76.9558, elevationMeters: 411, aliases: ['kovai'] },
   { id: 'geo-in-kl-tvm', name: 'Thiruvananthapuram', type: 'CITY', state: 'Kerala', district: 'Thiruvananthapuram', latitude: 8.5241, longitude: 76.9366, elevationMeters: 10, aliases: ['trivandrum'] },
@@ -138,6 +140,7 @@ export function searchLocalGeographicIndex(query: string, maxResults: number = 8
         type: place.type,
         state: place.state,
         district: place.district,
+        subDistrict: place.subDistrict,
         relevanceScore: score
       });
     }
@@ -146,6 +149,80 @@ export function searchLocalGeographicIndex(query: string, maxResults: number = 8
   // Sort by score descending
   results.sort((a, b) => b.relevanceScore - a.relevanceScore);
   return results.slice(0, maxResults);
+}
+
+/**
+ * Normalizes administrative hierarchy components from OpenStreetMap Nominatim data
+ * in strict compliance with the Indian Administrative Structure:
+ * Level 1: Country (India)
+ * Level 2: State / Union Territory (e.g. Andhra Pradesh)
+ * Level 3: District (e.g. West Godavari)
+ * Level 4: Sub-District / Mandal / Tehsil / Taluk (e.g. Bhimavaram Mandal)
+ * Level 5: City / Town (e.g. Bhimavaram)
+ * Level 6: Village / Suburb / Locality (e.g. Narasa Agraharam)
+ */
+export function parseIndianAdministrativeAddress(addr: any, displayName?: string, fallbackName?: string): AdministrativeHierarchy {
+  const country = addr.country || 'India';
+  const state = addr.state || addr.province || '';
+
+  // 1. Resolve true revenue district
+  // In OSM India, 'state_district' is almost always the actual revenue district (e.g. "West Godavari District", "Palnadu District")
+  // 'district' is also used. 'county' is frequently used by OSM for Mandals / Tehsils (e.g. "Bhimavaram Mandal").
+  let district = '';
+  if (addr.state_district) {
+    district = addr.state_district.replace(/\s+District$/i, '').trim();
+  } else if (addr.district && !/mandal|tehsil|taluk/i.test(addr.district)) {
+    district = addr.district.replace(/\s+District$/i, '').trim();
+  } else if (addr.county && !/mandal|tehsil|taluk/i.test(addr.county)) {
+    district = addr.county.replace(/\s+District$/i, '').trim();
+  } else if (addr.city && !/mandal|tehsil|taluk/i.test(addr.city)) {
+    district = addr.city;
+  }
+
+  // 2. Resolve sub-district / mandal / tehsil / taluk
+  let subDistrict: string | undefined = undefined;
+  if (addr.subdistrict) {
+    subDistrict = addr.subdistrict;
+  } else if (addr.tehsil) {
+    subDistrict = addr.tehsil;
+  } else if (addr.taluk) {
+    subDistrict = addr.taluk;
+  } else if (addr.county && /mandal|tehsil|taluk/i.test(addr.county)) {
+    subDistrict = addr.county;
+  } else if (addr.district && /mandal|tehsil|taluk/i.test(addr.district)) {
+    subDistrict = addr.district;
+  }
+
+  // If district is still empty, and subDistrict has something, fallback
+  if (!district && subDistrict) {
+    district = subDistrict;
+  }
+
+  // 3. Resolve city / town / urban locus
+  const city = addr.city || (addr.town ? undefined : addr.municipality);
+  const town = addr.town || (!city && !addr.village ? fallbackName : undefined);
+  const village = addr.village || addr.hamlet;
+
+  // 4. Locality / suburb
+  const suburb = addr.suburb || addr.neighbourhood;
+
+  // Ensure district is never a local suburb
+  if (district === suburb && addr.state_district) {
+    district = addr.state_district.replace(/\s+District$/i, '').trim();
+  }
+
+  return {
+    country,
+    state,
+    district: district || state || 'Regional Sector',
+    subDistrict: subDistrict || (suburb && suburb !== town ? suburb : undefined),
+    city,
+    town,
+    village,
+    locality: suburb,
+    pincode: addr.postcode,
+    formattedAddress: displayName || [town || city || village, subDistrict, district, state, country].filter(Boolean).join(', ')
+  };
 }
 
 /**
@@ -171,13 +248,15 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
   // 2. Query Nominatim with safe rate limiting and User-Agent
   try {
     await throttleNominatim();
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&countrycodes=in&addressdetails=1&limit=6`;
+    // Support global searches across India and internationally
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&addressdetails=1&limit=8`;
     
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Terranexus4D/0.5.0 (contact: info@terranexus.internal; research earth twin)',
         'Accept-Language': 'en'
-      }
+      },
+      signal: AbortSignal.timeout(2500)
     });
 
     if (response.ok) {
@@ -186,11 +265,8 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
         .map((item, idx) => {
           const lat = parseFloat(item.lat);
           const lon = parseFloat(item.lon);
-          const addr = item.address || {};
-          const state = addr.state || addr.province || addr.state_district;
-          const district = addr.county || addr.district || addr.state_district;
-          const subDistrict = addr.suburb || addr.town || addr.tehsil || addr.taluk;
-          const name = item.name || item.display_name.split(',')[0];
+          const parsed = parseIndianAdministrativeAddress(item.address || {}, item.display_name, item.name);
+          const name = item.name || parsed.town || parsed.city || item.display_name.split(',')[0];
 
           return {
             id: `osm-${item.place_id || idx}`,
@@ -199,15 +275,15 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
             latitude: lat,
             longitude: lon,
             type: item.type || item.class || 'PLACE',
-            state,
-            district,
-            subDistrict,
+            state: parsed.state || parsed.country,
+            district: parsed.district,
+            subDistrict: parsed.subDistrict,
             relevanceScore: Math.round((1 - (idx * 0.1)) * 90)
           };
         })
-        .filter(r => isCoordinateWithinIndia(r.latitude, r.longitude));
+        .filter(r => !isNaN(r.latitude) && !isNaN(r.longitude));
 
-      // Combine with local results (avoiding duplicates)
+      // Combine with local Indian index matches (avoiding coordinate duplicates)
       const combined = [...nominatimResults];
       for (const loc of localResults) {
         if (!combined.some(c => Math.abs(c.latitude - loc.latitude) < 0.05 && Math.abs(c.longitude - loc.longitude) < 0.05)) {
@@ -248,23 +324,13 @@ export async function reverseGeocodeCoordinate(lat: number, lon: number): Promis
       headers: {
         'User-Agent': 'Terranexus4D/0.5.0 (contact: info@terranexus.internal; research earth twin)',
         'Accept-Language': 'en'
-      }
+      },
+      signal: AbortSignal.timeout(2000)
     });
 
     if (response.ok) {
       const data: any = await response.json();
-      const addr = data.address || {};
-      const hierarchy: AdministrativeHierarchy = {
-        country: addr.country || 'India',
-        state: addr.state || addr.province || addr.state_district,
-        district: addr.county || addr.district || addr.state_district,
-        subDistrict: addr.suburb || addr.town || addr.tehsil || addr.taluk,
-        city: addr.city,
-        town: addr.town,
-        village: addr.village || addr.hamlet,
-        pincode: addr.postcode,
-        formattedAddress: data.display_name || `${roundedLat}°N, ${roundedLon}°E`
-      };
+      const hierarchy = parseIndianAdministrativeAddress(data.address || {}, data.display_name, data.name);
 
       reverseCache.set(cacheKey, hierarchy);
       return hierarchy;
@@ -273,7 +339,19 @@ export async function reverseGeocodeCoordinate(lat: number, lon: number): Promis
     console.warn('[GeocodingService] Reverse geocode failed, using nearest local place fallback:', (err as any)?.message);
   }
 
-  // 2. Offline Fallback: Find nearest place from local index
+  // 2. Offline Fallback: Check if coordinate is in India vs International
+  if (!isCoordinateWithinIndia(lat, lon)) {
+    const internationalFallback: AdministrativeHierarchy = {
+      country: 'International',
+      state: `${Math.abs(roundedLat).toFixed(2)}°${roundedLat >= 0 ? 'N' : 'S'}`,
+      district: `${Math.abs(roundedLon).toFixed(2)}°${roundedLon >= 0 ? 'E' : 'W'}`,
+      formattedAddress: `${roundedLat.toFixed(4)}°, ${roundedLon.toFixed(4)}° (Global Coordinate Locus)`
+    };
+    reverseCache.set(cacheKey, internationalFallback);
+    return internationalFallback;
+  }
+
+  // 2b. Indian Coordinate: Find nearest place from local Indian index
   let nearestPlace: LocalGeoPlace = LOCAL_INDIAN_GEOGRAPHIC_INDEX[0];
   let minDistance = Infinity;
 

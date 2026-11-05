@@ -1,5 +1,6 @@
 import { PrecipitationRecord, DatasetProvenance } from './types';
 import { saveDemoFile } from './cacheManager';
+import { resolveNearestGraceLocationId } from './gracePipeline';
 
 export const RAINFALL_PROVENANCE_TEMPLATE: Omit<DatasetProvenance, 'sha256' | 'lastIngested'> = {
   id: 'nasa-gpm-imerg-demo-precip',
@@ -126,7 +127,8 @@ export function extractRainfallTimeseries(locationId: string): {
   provenance: DatasetProvenance;
   rawCsv: string;
 } {
-  const profile = RAINFALL_PROFILES[locationId] || RAINFALL_PROFILES['locus-indogangetic-ludhiana'];
+  const resolvedId = resolveNearestGraceLocationId(locationId);
+  const profile = RAINFALL_PROFILES[resolvedId] || RAINFALL_PROFILES['locus-deccan-pune'];
   const records: PrecipitationRecord[] = [];
 
   const startYear = 2014;

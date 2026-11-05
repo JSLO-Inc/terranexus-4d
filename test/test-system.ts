@@ -27,7 +27,7 @@ DATASET_REGISTRY.forEach((d) => {
   assert(Boolean(d.id && d.name && d.organisation && d.sourceUrl), `Dataset ${d.id} has valid core metadata`);
   assert(d.knownLimitations.length >= 2, `Dataset ${d.id} records >= 2 known scientific limitations`);
   assert(
-    ['OBSERVED', 'MODELLED', 'PREDICTED', 'SIMULATED', 'DEMONSTRATION', 'UNVERIFIED'].includes(d.status),
+    ['OBSERVED', 'MEASURED', 'INTERPOLATED', 'REMOTE', 'SATELLITE', 'DERIVED', 'MODELLED', 'ILLUSTRATIVE', 'PREDICTED', 'SIMULATED', 'DEMONSTRATION', 'UNVERIFIED'].includes(d.status),
     `Dataset ${d.id} has valid scientific status (${d.status})`
   );
 });

@@ -4,76 +4,259 @@ import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import { Inspector } from './components/layout/Inspector';
 import { TimeControl } from './components/layout/TimeControl';
-import { BottomNavDock } from './components/layout/BottomNavDock';
+import { DepthControl } from './components/layout/DepthControl';
 import { CesiumGlobe } from './components/globe/CesiumGlobe';
+import { Subsurface3D } from './components/subsurface/Subsurface3D';
 import { NexusHydro } from './components/hydro/NexusHydro';
 import { NexusStrata } from './components/strata/NexusStrata';
 import { NexusMineral } from './components/mineral/NexusMineral';
 import { NexusAI } from './components/ai/NexusAI';
 import { DataCatalog } from './components/catalog/DataCatalog';
-import { ArrowLeft } from 'lucide-react';
+import { LocationDossierView } from './components/dossier/LocationDossierView';
+import { ProviderHealthModal } from './components/dossier/ProviderHealthModal';
+import { InitialSearchGateway } from './components/location/InitialSearchGateway';
+import { NexusTime } from './components/time/NexusTime';
+import { ModuleErrorBoundary } from './components/common/ModuleErrorBoundary';
+import { BottomNavDock } from './components/layout/BottomNavDock';
+import { ArrowLeft, Layers, Sliders, Compass } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const { activeModule, setActiveModule } = useTerranexusStore();
+  const {
+    activeModule,
+    setActiveModule,
+    viewMode,
+    setViewMode,
+    mainView,
+    setMainView,
+    isInitialSearch,
+    setIsInitialSearch,
+    inspectorOpen,
+    setInspectorOpen,
+    depthMeters,
+    activeGroundwaterDepthMbgl,
+    isGlobeFullscreen,
+    setIsGlobeFullscreen
+  } = useTerranexusStore();
+
+  const [showDepthPanel, setShowDepthPanel] = React.useState<boolean>(false);
+
+  // Global keyboard accessibility listener (Escape closes open drawers/dialogs/fullscreen)
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showDepthPanel) setShowDepthPanel(false);
+        if (isGlobeFullscreen) setIsGlobeFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showDepthPanel, isGlobeFullscreen, setIsGlobeFullscreen]);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#030712] text-slate-100 font-sans select-none">
-      {/* Persistently Mounted 3D Cesium Digital Twin (Zero WebGL Re-initialization) */}
-      <div className="absolute inset-0 w-full h-full z-0">
-        <CesiumGlobe />
+    <div className="h-screen w-screen overflow-hidden bg-[#030712] text-slate-100 font-sans flex flex-col">
+      {/* Row 1: Fixed Desktop Header (Hidden in Fullscreen) */}
+      {!isGlobeFullscreen && <Header />}
+
+      {/* Row 2: Central Application Flex Workspace */}
+      <div className="flex-1 flex overflow-hidden min-h-0 w-full relative">
+        {/* Left Navigation Rail (Hidden in Fullscreen) */}
+        {!isGlobeFullscreen && <Navigation />}
+
+        {/* Center Main Workspace */}
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
+          {activeModule === 'globe' ? (
+            isInitialSearch ? (
+              /* Centered Initial Search Experience & Geotectonic Gateway */
+              <InitialSearchGateway onSelectLocus={() => setIsInitialSearch(false)} />
+            ) : mainView === 'dossier2d' ? (
+              /* Default View: 2D Geospatial Map Canvas + Location Evidence Dossier */
+              <ModuleErrorBoundary moduleName="Location Evidence Dossier">
+                <LocationDossierView />
+              </ModuleErrorBoundary>
+            ) : (
+              /* Optional Mode: Full 3D Digital Twin & Subsurface 3D Cutaway */
+              <>
+                <div className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-[#050811]">
+                  {/* Cesium 3D Globe - Protected against zero-width allocation */}
+                  <div
+                    className={`absolute inset-0 h-full transition-opacity duration-300 ${
+                      viewMode === 'split'
+                        ? 'w-1/2 left-0 opacity-100 pointer-events-auto z-10'
+                        : viewMode === 'cutaway' || viewMode === 'underground'
+                        ? 'w-full left-0 opacity-0 pointer-events-none -z-10'
+                        : 'w-full left-0 opacity-100 pointer-events-auto z-10'
+                    }`}
+                  >
+                    <ModuleErrorBoundary moduleName="Cesium 3D Globe">
+                      <CesiumGlobe />
+                    </ModuleErrorBoundary>
+                  </div>
+
+                  {/* Subsurface 3D Cutaway Land Block */}
+                  {(viewMode === 'split' || viewMode === 'cutaway' || viewMode === 'underground') && (
+                    <div
+                      className={`absolute inset-0 h-full z-20 ${
+                        viewMode === 'split'
+                          ? 'left-1/2 w-1/2 border-l border-slate-800/80 shadow-2xl'
+                          : 'left-0 w-full'
+                      }`}
+                    >
+                      <ModuleErrorBoundary moduleName="Subsurface 3D Cutaway">
+                        <Subsurface3D className="w-full h-full" />
+                      </ModuleErrorBoundary>
+                    </div>
+                  )}
+                </div>
+
+                {/* Docked In-Flow Bottom Visualization Toolbar */}
+                <footer className="h-12 shrink-0 border-t border-slate-800/80 bg-slate-950/95 px-4 flex items-center justify-between gap-4 z-20 select-none">
+                  {/* Left: Observation Timeline & 2D Return Button */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setMainView('dossier2d')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm"
+                      title="Return to 2D Location Evidence Dossier"
+                    >
+                      <Compass className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>2D Dossier</span>
+                    </button>
+
+                    <TimeControl />
+
+                    {/* Depth & Aquifer Controls Drawer Toggle */}
+                    <button
+                      onClick={() => setShowDepthPanel(!showDepthPanel)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
+                        showDepthPanel
+                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold shadow-sm'
+                          : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-amber-300 hover:border-slate-700'
+                      }`}
+                      title="Toggle Subsurface Depth & Water Controls"
+                    >
+                      <Sliders className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="hidden sm:inline">Depth & Aquifer Deck</span>
+                      <span className="text-amber-400 font-bold">(-{depthMeters}m)</span>
+                    </button>
+                  </div>
+
+                  {/* Center: Real Piezometric Level Status */}
+                  <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-slate-400">
+                    <span className="text-cyan-400">Water Table: {activeGroundwaterDepthMbgl !== null ? `-${activeGroundwaterDepthMbgl.toFixed(1)} mbgl` : 'No Local Well (<50km)'}</span>
+                    <span className="text-slate-600">•</span>
+                    <span className="text-amber-400">Slice: -{depthMeters}m</span>
+                  </div>
+
+                  {/* Right: Quick Inspector Locus Toggle if collapsed */}
+                  <div className="flex items-center gap-2">
+                    {!inspectorOpen && (
+                      <button
+                        onClick={() => setInspectorOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-all shadow-sm"
+                        title="Open Location & Evidence Inspector"
+                      >
+                        <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Inspect Locus</span>
+                      </button>
+                    )}
+                  </div>
+                </footer>
+
+                {/* Depth & Aquifer Floating Popover */}
+                {showDepthPanel && (
+                  <div className="absolute bottom-14 left-4 z-30 pointer-events-auto animate-fadeIn shadow-2xl">
+                    <div className="relative">
+                      <DepthControl />
+                      <button
+                        onClick={() => setShowDepthPanel(false)}
+                        className="absolute top-3 right-3 p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs"
+                        title="Close Depth Deck"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )
+          ) : (
+            /* Dedicated Scientific Workstations (Hydro, Strata, Mineral, AI, Catalog) */
+            <div className="flex-1 overflow-hidden flex flex-col bg-[#080c14]">
+              {/* Module Header Bar */}
+              <div className="h-10 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 bg-slate-950/90">
+                <button
+                  onClick={() => setActiveModule('globe')}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Return to 3D Digital Twin</span>
+                </button>
+                <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+                  Module: {activeModule}
+                </span>
+              </div>
+
+              {/* Module Content */}
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                {activeModule === 'hydro' && (
+                  <ModuleErrorBoundary moduleName="Nexus Hydro Analytics">
+                    <NexusHydro />
+                  </ModuleErrorBoundary>
+                )}
+                {activeModule === 'strata' && (
+                  <ModuleErrorBoundary moduleName="Nexus Strata & Boreholes">
+                    <NexusStrata />
+                  </ModuleErrorBoundary>
+                )}
+                {activeModule === 'mineral' && (
+                  <ModuleErrorBoundary moduleName="Nexus Mineral Alteration">
+                    <NexusMineral />
+                  </ModuleErrorBoundary>
+                )}
+                {activeModule === 'time' && (
+                  <ModuleErrorBoundary moduleName="Observation Timeline & Cycles">
+                    <NexusTime />
+                  </ModuleErrorBoundary>
+                )}
+                {activeModule === 'ai' && (
+                  <ModuleErrorBoundary moduleName="Nexus AI Copilot">
+                    <NexusAI />
+                  </ModuleErrorBoundary>
+                )}
+                {activeModule === 'catalog' && (
+                  <ModuleErrorBoundary moduleName="Scientific Data Catalog">
+                    <DataCatalog />
+                  </ModuleErrorBoundary>
+                )}
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* Right Collapsible Data & Provenance Inspector (Hidden in Fullscreen) */}
+        {!isGlobeFullscreen && <Inspector />}
+
+        {/* Floating Exit Fullscreen Control */}
+        {isGlobeFullscreen && (
+          <button
+            onClick={() => setIsGlobeFullscreen(false)}
+            className="absolute top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border border-amber-500/60 text-amber-300 font-mono text-xs shadow-2xl backdrop-blur-md hover:bg-slate-900 transition-all cursor-pointer"
+            title="Exit Immersive Fullscreen Mode (Esc)"
+          >
+            <span>Exit Fullscreen</span>
+            <span className="text-[10px] text-amber-400/80 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-700/60">
+              ESC
+            </span>
+          </button>
+        )}
       </div>
 
-      {/* Floating Header */}
-      <Header />
+      {/* Provider Resilience & Circuit Breaker Health Modal */}
+      <ProviderHealthModal />
 
-      {/* Floating Left Navigation Rail */}
-      <Navigation />
-
-      {/* Explore Mode: Floating Digital Twin Controls & Right Location Inspector */}
-      {activeModule === 'globe' && (
-        <>
-          {/* Floating Right Inspector Panel */}
-          <Inspector />
-
-          {/* Floating Bottom Timeline Deck (Bottom-Left) */}
-          <div className="absolute bottom-4 left-20 z-20 pointer-events-auto">
-            <TimeControl />
-          </div>
-
-          {/* Floating Bottom Navigation Dock (Bottom-Center) */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
-            <BottomNavDock />
-          </div>
-        </>
-      )}
-
-      {/* Deep Scientific Module Overlays */}
-      {activeModule !== 'globe' && (
-        <div className="absolute inset-0 z-40 bg-[#080c14]/95 backdrop-blur-2xl flex flex-col pt-16 overflow-hidden">
-          {/* Top Bar for Module Navigation */}
-          <div className="h-10 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 bg-slate-950/80">
-            <button
-              onClick={() => setActiveModule('globe')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Return to 3D Globe</span>
-            </button>
-
-            {/* Bottom Dock in Header for Instant Switching */}
-            <div className="scale-90 origin-right">
-              <BottomNavDock />
-            </div>
-          </div>
-
-          {/* Active Module Workstation */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            {activeModule === 'hydro' && <NexusHydro />}
-            {activeModule === 'strata' && <NexusStrata />}
-            {activeModule === 'mineral' && <NexusMineral />}
-            {activeModule === 'ai' && <NexusAI />}
-            {activeModule === 'catalog' && <DataCatalog />}
-          </div>
+      {/* Mobile Responsive Floating Bottom Dock */}
+      {!isGlobeFullscreen && !isInitialSearch && (
+        <div className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40">
+          <BottomNavDock />
         </div>
       )}
     </div>

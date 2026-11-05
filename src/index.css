@@ -9,7 +9,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #080c14;
+  background-color: #030712;
   color: #f1f5f9;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow: hidden;
@@ -19,42 +19,110 @@ body {
 
 /* Custom modern scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(3, 7, 18, 0.7);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
-  border-radius: 3px;
+  background: rgba(51, 65, 85, 0.7);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 1);
+  background: rgba(14, 165, 233, 0.6);
 }
 
 /* Cesium globe container adjustments */
 .cesium-viewer {
-  font-family: 'Inter', sans-serif !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
 }
 
 .cesium-widget-credits {
-  font-size: 10px !important;
-  opacity: 0.7;
+  font-size: 9px !important;
+  opacity: 0.55;
+  color: #94a3b8 !important;
+  background: rgba(3, 7, 18, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  padding: 2px 6px !important;
+  border-top-left-radius: 6px !important;
 }
 
-/* Glow effects for scientific status */
+.cesium-widget-credits a {
+  color: #38bdf8 !important;
+}
+
+/* Glassmorphism panel styling */
+.glass-panel {
+  background: rgba(7, 13, 27, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+}
+
+.glass-panel-elevated {
+  background: rgba(5, 10, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(14, 165, 233, 0.15);
+}
+
+.glass-pill {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+/* Precision scientific grid backgrounds */
+.bg-scientific-grid {
+  background-image: 
+    linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-radial-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 70%);
+}
+
+/* Refined glow effects for scientific status */
 .glow-hydro {
-  box-shadow: 0 0 15px -3px rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 16px -2px rgba(0, 229, 255, 0.35);
 }
 
 .glow-strata {
-  box-shadow: 0 0 15px -3px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 16px -2px rgba(245, 158, 11, 0.35);
 }
 
 .glow-mineral {
-  box-shadow: 0 0 15px -3px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 16px -2px rgba(168, 85, 247, 0.35);
 }
+
+.glow-cyan-sm {
+  box-shadow: 0 0 10px -2px rgba(56, 189, 248, 0.4);
+}
+
+/* Smooth keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.05); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulseGlow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+

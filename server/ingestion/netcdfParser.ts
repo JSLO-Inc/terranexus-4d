@@ -155,8 +155,13 @@ export function verifyNetcdfSignature(filepathOrBuffer: string | Buffer): {
 
 function getUvPath(): string {
   if (process.env.UV_PATH && fs.existsSync(process.env.UV_PATH)) return process.env.UV_PATH;
-  const localBin = path.join(process.env.USERPROFILE || 'C:\\Users\\Default', '.local', 'bin', 'uv.exe');
-  if (fs.existsSync(localBin)) return localBin;
+  const userHome = process.env.USERPROFILE || process.env.HOME;
+  if (userHome) {
+    const localBin = path.join(userHome, '.local', 'bin', process.platform === 'win32' ? 'uv.exe' : 'uv');
+    if (fs.existsSync(localBin)) return localBin;
+    const cargoBin = path.join(userHome, '.cargo', 'bin', process.platform === 'win32' ? 'uv.exe' : 'uv');
+    if (fs.existsSync(cargoBin)) return cargoBin;
+  }
   return 'uv';
 }
 

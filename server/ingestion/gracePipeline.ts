@@ -145,6 +145,48 @@ const LOCATIONS_CONFIG: Record<string, LocationGraceConfig> = {
 };
 
 /**
+ * Resolves an arbitrary location query or ID to the nearest geographic benchmark locus
+ * instead of arbitrarily defaulting to Ludhiana.
+ */
+export function resolveNearestGraceLocationId(locationId: string): string {
+  if (LOCATIONS_CONFIG[locationId]) return locationId;
+  
+  // Coordinate regex extraction
+  const coordMatch = locationId.match(/([-+]?\d{1,2}\.?\d*)[,_/|-]([-+]?\d{1,3}\.?\d*)/);
+  let targetLat: number | null = null;
+  let targetLon: number | null = null;
+  if (coordMatch) {
+    targetLat = parseFloat(coordMatch[1]);
+    targetLon = parseFloat(coordMatch[2]);
+  }
+
+  // Name keyword heuristics
+  const lower = locationId.toLowerCase();
+  if (lower.includes('pune') || lower.includes('mumbai') || lower.includes('maharashtra') || lower.includes('deccan') || lower.includes('nagpur')) return 'locus-deccan-pune';
+  if (lower.includes('kolar') || lower.includes('bengaluru') || lower.includes('bangalore') || lower.includes('karnataka') || lower.includes('tamil') || lower.includes('kerala') || lower.includes('chennai')) return 'locus-dharwar-kolar';
+  if (lower.includes('kothagudem') || lower.includes('hyderabad') || lower.includes('telangana') || lower.includes('andhra') || lower.includes('godavari')) return 'locus-godavari-kothagudem';
+  if (lower.includes('singhbhum') || lower.includes('jharkhand') || lower.includes('ranchi') || lower.includes('bengal') || lower.includes('kolkata') || lower.includes('odisha') || lower.includes('bihar')) return 'locus-singhbhum-jharkhand';
+  if (lower.includes('zawar') || lower.includes('udaipur') || lower.includes('gujarat') || lower.includes('ahmedabad')) return 'locus-zawar-udaipur';
+  if (lower.includes('khetri') || lower.includes('rajasthan') || lower.includes('jaipur')) return 'locus-khetri-rajasthan';
+  if (lower.includes('ludhiana') || lower.includes('punjab') || lower.includes('haryana') || lower.includes('delhi') || lower.includes('amritsar')) return 'locus-indogangetic-ludhiana';
+
+  if (targetLat !== null && targetLon !== null) {
+    let bestId = 'locus-deccan-pune';
+    let bestDist = Infinity;
+    for (const [id, c] of Object.entries(LOCATIONS_CONFIG)) {
+      const d = Math.hypot(c.latitude - targetLat, c.longitude - targetLon);
+      if (d < bestDist) {
+        bestDist = d;
+        bestId = id;
+      }
+    }
+    return bestId;
+  }
+
+  return 'locus-deccan-pune';
+}
+
+/**
  * Generates and extracts authentic GRACE/GRACE-FO JPL Tellus monthly time series (2014-01 to 2024-12)
  * for a designated Indian locus, strictly adhering to the 11-month mission gap (July 2017 to May 2018).
  */
@@ -153,14 +195,15 @@ export function extractGraceTimeseries(locationId: string): {
   provenance: DatasetProvenance;
   rawAscii: string;
 } {
-  const cfg = LOCATIONS_CONFIG[locationId] || LOCATIONS_CONFIG['locus-indogangetic-ludhiana'];
+  const resolvedId = resolveNearestGraceLocationId(locationId);
+  const cfg = LOCATIONS_CONFIG[resolvedId] || LOCATIONS_CONFIG['locus-deccan-pune'];
   const records: GraceRecord[] = [];
 
   const startYear = 2014;
   const endYear = 2024;
 
   let rawAscii = `# NASA JPL Tellus Land Mass Grids (RL06.1 v04)
-# Location: ${cfg.name} (ID: ${cfg.locationId})
+# Location: ${cfg.name} (Resolved ID: ${cfg.locationId}, Query: ${locationId})
 # Latitude: ${cfg.latitude.toFixed(4)} N, Longitude: ${cfg.longitude.toFixed(4)} E
 # Spatial Resolution: 300km Gaussian Filter (~3 deg), 0.5 deg grid
 # Unit: Liquid Water Equivalent (LWE) thickness in cm

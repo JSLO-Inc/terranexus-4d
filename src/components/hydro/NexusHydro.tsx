@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTerranexusStore, TIME_STEPS } from '../../state/useTerranexusStore';
 import { AQUIFER_SYSTEMS, HYDRO_TIMESERIES } from '../../data/hydroData';
 import { StatusBadge } from '../common/StatusBadge';
@@ -34,8 +34,10 @@ import {
   Globe,
   Lock,
   Check,
-  Target
+  Target,
+  Box
 } from 'lucide-react';
+import { Subsurface3D } from '../subsurface/Subsurface3D';
 import { HeatmapLayerSelector, AVAILABLE_HYDRO_HEATMAP_LAYERS } from './HeatmapLayerSelector';
 import { HeatmapLegend } from './HeatmapLegend';
 import { AreaAnalysisTool } from './AreaAnalysisTool';
@@ -150,12 +152,15 @@ export const NexusHydro: React.FC = () => {
     heatmapConfig,
     setHeatmapConfig,
     isAreaAnalysisOpen,
-    setIsAreaAnalysisOpen
+    setIsAreaAnalysisOpen,
+    setProviderDataStatus
   } = useTerranexusStore();
   const [activeTab, setActiveTab] = useState<'monthly' | 'seasonal' | 'aquifers' | 'heatmaps'>('monthly');
   const [liveData, setLiveData] = useState<IngestedHydroDataset | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [retryCountdownSec, setRetryCountdownSec] = useState<number>(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [ingestionStatus, setIngestionStatus] = useState<'LIVE_CACHED' | 'OFFLINE_BENCHMARK'>('LIVE_CACHED');
   const [lastRefreshedTime, setLastRefreshedTime] = useState<string>('');
   const [showRollingMean, setShowRollingMean] = useState<boolean>(false);
@@ -167,32 +172,83 @@ export const NexusHydro: React.FC = () => {
   const [showProvenanceModal, setShowProvenanceModal] = useState<boolean>(false);
   const [nasaReadiness, setNasaReadiness] = useState<any>(null);
 
-  // Fetch live ingested dataset from backend REST API
-  const fetchHydroData = async () => {
+  // Countdown timer for rate limiting retry-after
+  useEffect(() => {
+    if (retryCountdownSec <= 0) return;
+    const interval = setInterval(() => {
+      setRetryCountdownSec(s => Math.max(0, s - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [retryCountdownSec]);
+
+  // Clean abort controller on component unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Fetch live ingested dataset from backend REST API with rate-limit backoff and request deduplication
+  const fetchHydroData = async (retryCount = 0) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     try {
       const [resLoc, resReadiness] = await Promise.all([
-        fetch(`http://localhost:3001/api/hydro/location/${selectedLocation.id}`),
-        fetch('http://localhost:3001/api/hydro/nasa/readiness').catch(() => null)
+        fetch(`/api/hydro/location/${selectedLocation.id}`, { signal: controller.signal }),
+        fetch('/api/hydro/nasa/readiness', { signal: controller.signal }).catch(() => null)
       ]);
+
+      if (resLoc.status === 429) {
+        const retryHeader = resLoc.headers.get('Retry-After');
+        const retrySec = retryHeader ? parseInt(retryHeader, 10) : 5;
+        setRetryCountdownSec(retrySec);
+        setProviderDataStatus('RATE_LIMITED');
+        console.warn(`[NexusHydro] Rate limited (429). Retrying in ${retrySec}s...`);
+
+        if (retryCount < 2) {
+          setTimeout(() => {
+            fetchHydroData(retryCount + 1);
+          }, (retrySec + 0.5) * 1000);
+        } else {
+          setIngestionStatus('OFFLINE_BENCHMARK');
+          setProviderDataStatus('BENCHMARK');
+        }
+        return;
+      }
 
       if (!resLoc.ok) throw new Error(`HTTP error ${resLoc.status}`);
       const json = await resLoc.json();
       if (json.success && json.data) {
         setLiveData(json.data);
         setIngestionStatus('LIVE_CACHED');
+        setProviderDataStatus('CACHED');
         setLastRefreshedTime(new Date().toLocaleTimeString());
+        setRetryCountdownSec(0);
       } else {
         throw new Error('Invalid backend response');
       }
 
       if (resReadiness && resReadiness.ok) {
         const rJson = await resReadiness.json();
-        if (rJson.success) setNasaReadiness(rJson.data);
+        if (rJson.success) {
+          setNasaReadiness(rJson.data);
+          if (rJson.data.status === 'READY_FOR_INGESTION') {
+            setProviderDataStatus('LIVE');
+          }
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.warn('Backend live data unreachable; falling back to bundled benchmark:', err);
       setIngestionStatus('OFFLINE_BENCHMARK');
+      setProviderDataStatus('BENCHMARK');
     } finally {
       setIsLoading(false);
     }
@@ -203,10 +259,18 @@ export const NexusHydro: React.FC = () => {
   }, [selectedLocation.id]);
 
   const handleManualRefresh = async () => {
+    if (isRefreshing || retryCountdownSec > 0) return;
     setIsRefreshing(true);
     try {
-      await fetch('http://localhost:3001/api/hydro/refresh', { method: 'POST' });
-      await fetchHydroData();
+      const res = await fetch('/api/hydro/refresh', { method: 'POST' });
+      if (res.status === 429) {
+        const retryHeader = res.headers.get('Retry-After');
+        const retrySec = retryHeader ? parseInt(retryHeader, 10) : 5;
+        setRetryCountdownSec(retrySec);
+        setProviderDataStatus('RATE_LIMITED');
+      } else {
+        await fetchHydroData();
+      }
     } catch (err) {
       console.error('Refresh error:', err);
     } finally {
@@ -339,7 +403,7 @@ export const NexusHydro: React.FC = () => {
   const isGenuineTier = isHistoricalTier || isProcessedTier;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#080c14] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Top Banner / Ingestion Pipeline Status */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -402,12 +466,12 @@ export const NexusHydro: React.FC = () => {
           </button>
           <button
             onClick={handleManualRefresh}
-            disabled={isRefreshing}
+            disabled={isRefreshing || retryCountdownSec > 0}
             className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-sky-500/50 text-slate-300 text-xs font-mono flex items-center gap-1.5 transition-all shadow-md disabled:opacity-50"
-            title="Force refresh ingestion pipeline"
+            title={retryCountdownSec > 0 ? `API rate-limit backoff active. Please wait ${retryCountdownSec}s.` : 'Force refresh ingestion pipeline'}
           >
             <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {retryCountdownSec > 0 ? `Wait ${retryCountdownSec}s` : 'Refresh'}
           </button>
           <button
             onClick={handleExportIngestedCsv}
@@ -420,7 +484,7 @@ export const NexusHydro: React.FC = () => {
       </div>
 
       {/* Mandatory Groundwater Decoupling Warning Banner */}
-      <div className="rounded-xl bg-amber-950/30 border border-amber-600/50 p-4 flex flex-col gap-2.5 text-xs text-amber-200/90 shadow-lg">
+      <div className="rounded-xl bg-amber-950/20 border border-amber-500/40 p-4 flex flex-col gap-2.5 text-xs text-amber-200/90 shadow-lg backdrop-blur-md">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
           <span className="font-bold text-amber-300 text-sm tracking-wide">
@@ -445,7 +509,7 @@ export const NexusHydro: React.FC = () => {
       </div>
 
       {/* Hydrological Analytical Indicators Panel */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800 text-xs">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 glass-panel p-3.5 rounded-xl text-xs shadow-md">
         <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800/80">
           <span className="text-slate-400 block text-[10px] uppercase tracking-wider">Data Completeness</span>
           <span className="font-mono text-base font-bold text-sky-300">
@@ -487,7 +551,7 @@ export const NexusHydro: React.FC = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Measured Water Table Depth */}
-        <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
+        <div className="glass-panel rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all shadow-md">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Water Table Depth (Benchmark Well)</span>
             <span className="font-mono text-[10px] text-amber-300">
@@ -515,7 +579,7 @@ export const NexusHydro: React.FC = () => {
         </div>
 
         {/* NASA GRACE Gravimetry TWS Anomaly */}
-        <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
+        <div className="glass-panel rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all shadow-md">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>NASA GRACE TWS Anomaly</span>
             {activeGraceRecord?.status === 'MISSION_GAP' ? (
@@ -564,7 +628,7 @@ export const NexusHydro: React.FC = () => {
         </div>
 
         {/* Monthly Precipitation */}
-        <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
+        <div className="glass-panel rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all shadow-md">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>Precipitation (GPM IMERG)</span>
             <StatusBadge status="DEMONSTRATION" size="sm" />
@@ -590,7 +654,7 @@ export const NexusHydro: React.FC = () => {
         </div>
 
         {/* CGWB Resource Stress Assessment */}
-        <div className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col justify-between">
+        <div className="glass-panel rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/80 transition-all shadow-md">
           <div className="flex items-center justify-between text-xs text-slate-400">
             <span>IN-GRES Dynamic Stress</span>
             <StatusBadge status="DEMONSTRATION" size="sm" />
@@ -617,7 +681,7 @@ export const NexusHydro: React.FC = () => {
       </div>
 
       {/* Mandatory Scientific Integrity Callout */}
-      <div className="rounded-xl bg-slate-950 border border-sky-900/40 p-4 flex items-start gap-3 text-xs text-slate-300 leading-relaxed shadow-lg">
+      <div className="glass-panel rounded-xl p-4 flex items-start gap-3 text-xs text-slate-300 leading-relaxed shadow-lg">
         <ShieldCheck className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <span className="font-semibold text-sky-300 block">
@@ -776,12 +840,14 @@ export const NexusHydro: React.FC = () => {
                             </span>
                           </p>
                           {isGap ? (
-                            <p className="text-red-400 font-semibold text-[11px]">
-                              ⚠ MISSION TRANSITION GAP (July 2017 – May 2018: Zero satellites operating globally)
+                            <p className="text-red-400 font-semibold text-[11px] flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
+                              <span>MISSION TRANSITION GAP (July 2017 – May 2018: Zero satellites operating globally)</span>
                             </p>
                           ) : isMissing ? (
-                            <p className="text-amber-400 font-semibold text-[11px]">
-                              ⚠ OFFICIALLY MISSING (Spacecraft battery conservation shutoff or calibration outage)
+                            <p className="text-amber-400 font-semibold text-[11px] flex items-center gap-1">
+                              <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
+                              <span>OFFICIALLY MISSING (Spacecraft battery conservation shutoff or calibration outage)</span>
                             </p>
                           ) : (
                             <>
@@ -940,9 +1006,28 @@ export const NexusHydro: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 3: NAQUIM Aquifer Geometry */}
+      {/* Tab 3: NAQUIM Aquifer Geometry & 3D Groundwater Cutaway */}
       {activeTab === 'aquifers' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-4">
+          {/* Interactive 3D Subsurface Land Chunk Cutaway */}
+          <div className="rounded-2xl border border-slate-800 bg-[#060911] overflow-hidden shadow-2xl flex flex-col">
+            <div className="px-4 py-2.5 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Box className="w-4 h-4 text-cyan-400" />
+                <h3 className="text-xs font-bold font-mono text-cyan-300">
+                  3D HYDROGEOLOGICAL LAND CUTAWAY & SATURATION HORIZON
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono text-slate-400">
+                Volumetric multi-layer aquifers with dynamic recharge reactivity
+              </span>
+            </div>
+            <div className="h-[400px] w-full relative">
+              <Subsurface3D />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {aquifers.map((aq) => (
             <div key={aq.id} className="rounded-xl bg-slate-950/90 border border-slate-800 p-4 flex flex-col justify-between gap-3 shadow-lg">
               <div>
@@ -979,6 +1064,7 @@ export const NexusHydro: React.FC = () => {
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
 

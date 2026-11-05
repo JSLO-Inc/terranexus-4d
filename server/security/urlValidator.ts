@@ -28,7 +28,9 @@ const APPROVED_HOST_PATTERNS: RegExp[] = [
   /^([a-z0-9-]+\.)*bhuvan\.nrsc\.gov\.in$/i,
   /^([a-z0-9-]+\.)*indiawris\.gov\.in$/i,
   /^cgwb\.gov\.in$/i,
-  /^gsi\.gov\.in$/i
+  /^gsi\.gov\.in$/i,
+  /^([a-z0-9-]+\.)*open-meteo\.com$/i,
+  /^api\.open-elevation\.com$/i
 ];
 
 /**
@@ -265,6 +267,7 @@ export interface SafeFetchOptions {
   maxResponseSizeBytes?: number;
   headers?: Record<string, string>;
   method?: string;
+  body?: string;
   allowHttpForLocalDev?: boolean;
 }
 
@@ -299,9 +302,11 @@ export async function safeOutboundFetch(
       const response = await fetch(currentUrl, {
         method: options.method || 'GET',
         headers: options.headers,
+        body: options.body,
         redirect: 'manual',
         signal: controller.signal
       });
+
       clearTimeout(timer);
 
       // Check for HTTP redirect status (301, 302, 303, 307, 308)

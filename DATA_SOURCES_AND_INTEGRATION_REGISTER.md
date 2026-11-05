@@ -85,19 +85,19 @@
 
 ### 2.4 Geographical, Administrative & River Basins
 
-| Parameter | OpenStreetMap & Nominatim | Survey of India / Natural Earth Administrative Boundaries | CWC Major River Basins of India |
+| Parameter | OpenStreetMap & Nominatim | Survey of India / Natural Earth Administrative Boundaries | CWC India-WRIS Major River Basins of India |
 | :--- | :--- | :--- | :--- |
-| **Provider** | OpenStreetMap Foundation & Global Contributors | Survey of India / Natural Earth Open Data | Central Water Commission (CWC) / India-WRIS |
-| **Dataset** | OpenStreetMap Planet Dump & Nominatim API | 1:10m State & National Boundaries of India | CWC Major River Basins Atlas (14 Major Basins) |
+| **Provider** | OpenStreetMap Foundation & Global Contributors | Survey of India / Natural Earth Open Data | Central Water Commission (CWC) & India-WRIS |
+| **Dataset** | OpenStreetMap Planet Dump & Nominatim API | 1:10m State & National Boundaries of India | India-WRIS Official 25 River Basins Atlas (`wris_basins_cwc_official.json`) |
 | **Documentation** | https://nominatim.org/release-docs/latest/ | https://surveyofindia.gov.in/ / https://naturalearthdata.com | https://indiawris.gov.in/wris/#/riverBasins |
-| **Access Method** | HTTPS REST API (Rate limited: 1 req/sec) + Local Index | GeoJSON Vector Boundaries / Centroids | Multi-vertex Catchment Polygons with Ray-Casting PIP |
+| **Access Method** | HTTPS REST API (Rate limited: 1 req/sec) + Local Index | GeoJSON Vector Boundaries / Centroids | 25 Multi-vertex Catchment Polygons with Ray-Casting PIP |
 | **Auth Requirements** | None (Requires compliant User-Agent and attribution) | Public Open Access | Public Open Access (GODL-India) |
-| **Licence** | Open Database License (ODbL) 1.0 | Public Domain / CC0 / GODL-India | Government Open Data License - India (GODL) |
-| **Spatial Coverage** | All settlements, cities, districts, roads in India | 36 States & Union Territories of India | All 14 major river basins across the Indian subcontinent |
-| **Data Classification** | `OBSERVED` | `OBSERVED` | `OBSERVED` (Catchment Polygon Geometry) |
-| **Acquisition Status** | `PROCESSED` (Local offline index of 36 States + 70+ districts) | `PROCESSED` & `VALIDATED` | `PROCESSED` & `VALIDATED` (14 authentic catchment polygons) |
+| **Licence** | Open Database License (ODbL) 1.0 | Public Domain / CC0 / GODL-India | Government Open Data License - India (GODL) / CC0 1.0 |
+| **Spatial Coverage** | All settlements, cities, districts, roads in India | 36 States & Union Territories of India | Complete national coverage across all 25 official Indian hydrological basins |
+| **Data Classification** | `OBSERVED` | `OBSERVED` | `OBSERVED` (Authentic India-WRIS Polygon/MultiPolygon Geometry) |
+| **Acquisition Status** | `PROCESSED` (Local offline index of 36 States + 70+ districts) | `PROCESSED` & `VALIDATED` | `PROCESSED` & `VALIDATED` (25 official basins with 800m topology preservation) |
 | **Integration Status** | **`INTEGRATED`** (Universal Search Bar & Reverse Geocoding) | **`INTEGRATED`** (Top Bar Breadcrumbs, Inspector Hierarchy) | **`INTEGRATED`** (Inspector Basin Card & Provider Router; null for uncontained) |
-| **Known Limitations** | Nominatim demo server requires strict 1 req/sec rate limit. Mitigated via local offline index. | High-altitude border definitions follow official Survey of India cartographic standards. | Coordinates outside the 14 major polygons resolve to `null`/`UNKNOWN` (representing coastal or desert streams). |
+| **Known Limitations** | Nominatim demo server requires strict 1 req/sec rate limit. Mitigated via local offline index. | High-altitude border definitions follow official Survey of India cartographic standards. | Coordinates outside all 25 official polygons resolve strictly to `null`/`UNKNOWN` without bounding box or centroid guessing. |
 
 ---
 

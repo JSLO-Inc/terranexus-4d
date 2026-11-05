@@ -1,6 +1,12 @@
 export type ScientificStatus =
   | 'OBSERVED'
+  | 'MEASURED'
+  | 'INTERPOLATED'
+  | 'REMOTE'
+  | 'SATELLITE'
+  | 'DERIVED'
   | 'MODELLED'
+  | 'ILLUSTRATIVE'
   | 'PREDICTED'
   | 'SIMULATED'
   | 'DEMONSTRATION'

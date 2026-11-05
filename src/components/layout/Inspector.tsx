@@ -12,7 +12,9 @@ import {
   Download,
   Info,
   CheckCircle2,
-  MapPin
+  MapPin,
+  Box,
+  Maximize2
 } from 'lucide-react';
 import { LocationDataAvailability } from '../catalog/LocationDataAvailability';
 
@@ -25,7 +27,13 @@ export const Inspector: React.FC = () => {
     selectedBorehole,
     inspectorOpen,
     setInspectorOpen,
-    setActiveModule
+    setActiveModule,
+    viewMode,
+    setViewMode,
+    depthMeters,
+    activeGroundwaterDepthMbgl,
+    terrainElevationGrid,
+    explorationExtentKm
   } = useTerranexusStore();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'layers' | 'data' | 'provenance'>('overview');
@@ -67,39 +75,73 @@ export const Inspector: React.FC = () => {
       });
   }, [selectedLocation]);
 
-  if (!inspectorOpen) return null;
-
   const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
+  const observedWaterDepth = activeGroundwaterDepthMbgl ?? (selectedBorehole ? selectedBorehole.waterTableDepthMeters : null);
 
   return (
-    <aside className="absolute top-20 right-6 z-20 w-80 md:w-96 rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-2xl shadow-2xl overflow-hidden select-none flex flex-col max-h-[calc(100vh-130px)]">
-      {/* Top Landscape Thumbnail Card */}
-      <div className="relative h-28 w-full overflow-hidden shrink-0">
-        <img
-          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
-          alt="Terrain Overview"
-          className="w-full h-full object-cover brightness-75"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-
-        {/* Location Title & Coordinates */}
-        <div className="absolute bottom-2.5 left-3.5 right-3.5 flex items-end justify-between">
-          <div>
-            <h2 className="text-base font-extrabold text-white tracking-tight leading-tight">
-              {selectedLocation.name.split(' - ')[0]}
-            </h2>
-            <p className="text-[11px] font-mono text-cyan-300 font-medium">
-              {selectedLocation.latitude.toFixed(4)}° N, {selectedLocation.longitude.toFixed(4)}° E
-            </p>
+    <aside
+      className={`h-full shrink-0 border-l border-slate-800/80 glass-panel-elevated flex flex-col overflow-hidden z-20 select-none transition-all duration-300 ease-in-out ${
+        inspectorOpen ? 'w-80 md:w-92 lg:w-96 opacity-100' : 'w-0 border-l-0 opacity-0 pointer-events-none'
+      }`}
+    >
+      <div className="w-80 md:w-92 lg:w-96 h-full flex flex-col overflow-hidden shrink-0">
+        {/* Top 3D Subsurface Land Chunk Preview Header */}
+        <div className="relative h-34 w-full overflow-hidden shrink-0 bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950/60 p-3 flex flex-col justify-between border-b border-slate-800/80">
+        <div className="flex items-center justify-between z-10">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-[10px]">
+            <Box className="w-3.5 h-3.5 text-amber-400" />
+            <span>3D SUBTERRANEAN CHUNK</span>
           </div>
 
-          <button
-            onClick={() => setInspectorOpen(false)}
-            className="p-1 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-300 transition-colors border border-slate-700/60"
-            title="Close Inspector"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setViewMode(viewMode === 'cutaway' ? 'globe' : 'cutaway')}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-950/90 border border-sky-500/50 hover:bg-sky-900 text-cyan-300 font-mono text-[10px] transition-colors shadow-sm"
+              title="Toggle Full 3D Underground Cutaway View"
+            >
+              <Maximize2 className="w-3 h-3" />
+              <span>{viewMode === 'cutaway' ? 'Globe View' : '3D Cutaway'}</span>
+            </button>
+
+            <button
+              onClick={() => setInspectorOpen(false)}
+              className="p-1 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-300 transition-colors border border-slate-700/60"
+              title="Close Inspector"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Geological Cutaway Stratigraphic Preview Graphic */}
+        <div className="my-1 flex flex-col gap-1 rounded-lg bg-slate-950/60 p-2 border border-slate-800/70">
+          <div className="flex items-center justify-between text-[10px] font-mono">
+            <span className="text-slate-400">Slice: <span className="text-amber-400 font-bold">-{depthMeters}m</span></span>
+            <span className="text-cyan-400 flex items-center gap-1">
+              <Droplet className="w-2.5 h-2.5" />
+              <span>WT: {observedWaterDepth !== null ? `-${observedWaterDepth.toFixed(1)}m` : 'None (<50km)'}</span>
+            </span>
+            <span className="text-slate-500">{explorationExtentKm}km block</span>
+          </div>
+          {/* Stratigraphic color stripes preview */}
+          <div className="h-2 w-full rounded-full overflow-hidden flex shadow-inner">
+            <div className="h-full bg-amber-600 flex-[2]" title="Upper Overburden" />
+            <div className="h-full bg-cyan-500 flex-[3]" title="Active Aquifer Horizon" />
+            <div className="h-full bg-slate-700 flex-[4]" title="Deep Lithological Bedrock" />
+            <div className="h-full bg-amber-800 flex-[2]" title="Basement Complex" />
+          </div>
+        </div>
+
+        {/* Location Title & Coordinates */}
+        <div className="flex items-end justify-between z-10 pt-0.5">
+          <div>
+            <h2 className="text-sm font-extrabold text-white tracking-tight leading-tight">
+              {selectedLocation.name.split(' - ')[0]}
+            </h2>
+            <p className="text-[10px] font-mono text-cyan-300 font-medium">
+              {selectedLocation.latitude.toFixed(4)}° N, {selectedLocation.longitude.toFixed(4)}° E • {selectedLocation.elevationMeters}m ASL
+            </p>
+          </div>
         </div>
       </div>
 
@@ -146,10 +188,22 @@ export const Inspector: React.FC = () => {
                         <span className="text-cyan-300 font-medium">{(selectedLocation as any).administrativeHierarchy.district}</span>
                       </>
                     )}
-                    {((selectedLocation as any).administrativeHierarchy.subDistrict || (selectedLocation as any).administrativeHierarchy.village) && (
+                    {((selectedLocation as any).administrativeHierarchy.subDistrict) && (
                       <>
                         <span className="text-slate-600">›</span>
-                        <span className="text-slate-300">{(selectedLocation as any).administrativeHierarchy.subDistrict || (selectedLocation as any).administrativeHierarchy.village}</span>
+                        <span className="text-slate-300">{(selectedLocation as any).administrativeHierarchy.subDistrict}</span>
+                      </>
+                    )}
+                    {((selectedLocation as any).administrativeHierarchy.town || (selectedLocation as any).administrativeHierarchy.city || (selectedLocation as any).administrativeHierarchy.village) &&
+                     ((selectedLocation as any).administrativeHierarchy.town !== (selectedLocation as any).administrativeHierarchy.district &&
+                      (selectedLocation as any).administrativeHierarchy.city !== (selectedLocation as any).administrativeHierarchy.district) && (
+                      <>
+                        <span className="text-slate-600">›</span>
+                        <span className="text-amber-300 font-semibold">
+                          {(selectedLocation as any).administrativeHierarchy.town ||
+                           (selectedLocation as any).administrativeHierarchy.city ||
+                           (selectedLocation as any).administrativeHierarchy.village}
+                        </span>
                       </>
                     )}
                   </div>
@@ -157,9 +211,17 @@ export const Inspector: React.FC = () => {
                   <span>{selectedLocation.district}, {selectedLocation.state}, India</span>
                 )}
               </div>
-              <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">
-                <span>Elevation: {selectedLocation.elevationMeters}m ASL</span>
-                <span className="text-slate-500">{(selectedLocation as any).elevationSource || 'WGS84 Ellipsoid'}</span>
+              <div className="flex flex-col gap-1 text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">
+                <div className="flex items-center justify-between">
+                  <span>Spot Elevation: {selectedLocation.elevationMeters}m ASL</span>
+                  <span className="text-slate-500 text-[9px]">{(selectedLocation as any).elevationSource || 'Copernicus GLO-90 DEM'}</span>
+                </div>
+                {terrainElevationGrid && (
+                  <div className="flex items-center justify-between text-cyan-400/90 text-[9px] bg-slate-950/40 px-1.5 py-0.5 rounded">
+                    <span>DEM: {terrainElevationGrid.minElevationM}m – {terrainElevationGrid.maxElevationM}m</span>
+                    <span>{terrainElevationGrid.gridResolution}×{terrainElevationGrid.gridResolution} ({explorationExtentKm}km)</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -184,15 +246,21 @@ export const Inspector: React.FC = () => {
                   </span>
                 </div>
 
+                {/* Explicit Macro State-Level Notice Banner */}
+                <div className="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-[9px] text-amber-300 font-mono flex items-center justify-between">
+                  <span>SCALE: STATE-WIDE AGGREGATION</span>
+                  <span className="text-slate-400">{(selectedLocation as any).cgwbAssessment.stateName} State Total</span>
+                </div>
+
                 <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-slate-950/60 p-2 rounded-lg border border-slate-800/60">
                   <div>
-                    <span className="text-slate-500 block text-[9px]">Stage of Extraction:</span>
+                    <span className="text-slate-500 block text-[9px]">State Extraction Stage:</span>
                     <span className="text-slate-100 font-bold font-mono">
                       {(selectedLocation as any).cgwbAssessment.stageOfExtractionPercent}%
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block text-[9px]">Annual Recharge:</span>
+                    <span className="text-slate-500 block text-[9px]">State Annual Recharge:</span>
                     <span className="text-cyan-300 font-mono">
                       {(selectedLocation as any).cgwbAssessment.annualRechargeBcm} BCM/yr
                     </span>
@@ -205,14 +273,37 @@ export const Inspector: React.FC = () => {
                   </div>
                 </div>
 
-                <span className="text-[9px] text-slate-500">
-                  Source: CGWB & Ministry of Jal Shakti (GEC-2015 Compilation)
-                </span>
+                <div className="text-[9px] text-slate-500 flex flex-col gap-0.5">
+                  <span>Source: CGWB & Ministry of Jal Shakti (GEC-2015 Compilation)</span>
+                  <span className="text-amber-400/80 italic">
+                    Notice: Macro state totals compiled under GEC-2015. No verified local block/well assessment at this site.
+                  </span>
+                </div>
               </div>
             )}
 
             {/* Module Status Telemetry Rows */}
             <div className="flex flex-col gap-2 bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/80">
+              <div
+                onClick={() => setViewMode(viewMode === 'cutaway' ? 'globe' : 'cutaway')}
+                className="flex items-center justify-between p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-600/30">
+                    <Box className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <div className="font-semibold text-amber-300 group-hover:text-amber-200 transition-colors">
+                      3D Subsurface Cutaway
+                    </div>
+                    <div className="text-[10px] text-slate-400">Volumetric Strata & Aquifers</div>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono font-medium text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60">
+                  {viewMode === 'cutaway' ? 'Active' : 'Open 3D'}
+                </span>
+              </div>
+
               <div
                 onClick={() => setActiveModule('hydro')}
                 className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
@@ -417,6 +508,48 @@ export const Inspector: React.FC = () => {
             <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
               Validated Telemetry & Hydrogeology
             </span>
+
+            {/* Authentic Topography / DEM Grid Card */}
+            <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-1.5 text-[10px]">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-slate-200">Topography & Elevation (DEM)</span>
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-cyan-950/80 border border-cyan-700/60 text-cyan-300">
+                  {terrainElevationGrid?.status || 'OBSERVED'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 text-slate-400 font-mono pt-1">
+                <div>Dataset: <span className="text-slate-200">{terrainElevationGrid?.sourceDataset || 'Copernicus GLO-90 / Survey of India'}</span></div>
+                <div>Datum: <span className="text-slate-200">{terrainElevationGrid?.verticalDatum || 'EGM2008 / WGS84'}</span></div>
+                <div>Relief: <span className="text-slate-200">{terrainElevationGrid ? `${terrainElevationGrid.minElevationM}m to ${terrainElevationGrid.maxElevationM}m (mean: ${Math.round(terrainElevationGrid.meanElevationM)}m)` : `${selectedLocation.elevationMeters}m ASL`}</span></div>
+                <div>Cutaway Extent: <span className="text-slate-200">{explorationExtentKm} km × {explorationExtentKm} km</span></div>
+              </div>
+            </div>
+
+            {/* In-situ Groundwater Table Point Observation */}
+            <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-1.5 text-[10px]">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-cyan-300 flex items-center gap-1">
+                  <Droplet className="w-3 h-3 text-cyan-400" />
+                  <span>Groundwater Piezometric Strike</span>
+                </span>
+                <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono border ${
+                  observedWaterDepth !== null
+                    ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
+                    : 'bg-amber-950/80 border-amber-500/50 text-amber-300'
+                }`}>
+                  {observedWaterDepth !== null ? 'OBSERVED' : 'MODELLED'}
+                </span>
+              </div>
+              <div className="text-slate-300 font-mono text-[11px]">
+                Water Table: {observedWaterDepth !== null ? `-${observedWaterDepth.toFixed(1)} mbgl` : 'No Local Monitoring Well (<50km)'}
+              </div>
+              <p className="text-slate-400 text-[9px] leading-tight">
+                {observedWaterDepth !== null
+                  ? 'Physical water table position is anchored strictly to this observed measurement in the 3D cutaway.'
+                  : 'No verified CGWB/State piezometer within 50 km. Subsurface displays regional hydrogeological estimate.'}
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-2 text-[11px] font-mono bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
               <div>
                 <span className="text-slate-500 block text-[9px]">Basin:</span>
@@ -473,6 +606,18 @@ export const Inspector: React.FC = () => {
                 GRACE-FO DOI: <a href="https://doi.org/10.5067/GFLND-3J634" target="_blank" rel="noreferrer" className="text-cyan-400 underline">10.5067/GFLND-3J634</a>
               </p>
             </div>
+            <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-1.5 text-[10px]">
+              <span className="font-semibold text-slate-200">Copernicus GLO-90 / SRTM 30m Global DEM</span>
+              <p className="text-slate-400 leading-relaxed">
+                European Space Agency (ESA) & Airbus Defence and Space. Elevation tiles referenced to WGS84 horizontal CRS and EGM2008 vertical geoid datum.
+              </p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-1.5 text-[10px]">
+              <span className="font-semibold text-slate-200">Central Ground Water Board (CGWB) & NAQUIM</span>
+              <p className="text-slate-400 leading-relaxed">
+                National Aquifer Mapping and Management Programme, Ministry of Jal Shakti, Government of India. In-situ piezometer hydrographs and GEC-2015 national assessments.
+              </p>
+            </div>
             <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-1 text-[10px]">
               <span className="font-semibold text-slate-200">Spatial Smoothing Limitation</span>
               <p className="text-slate-400 leading-relaxed">
@@ -481,6 +626,7 @@ export const Inspector: React.FC = () => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </aside>
   );

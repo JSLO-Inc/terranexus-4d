@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { MINERAL_INDICATORS } from '../../data/mineralData';
+import { Subsurface3D } from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
-import { Sparkles, AlertOctagon, Scan, Target, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Sparkles, AlertOctagon, Scan, Target, ShieldCheck, CheckCircle2, Box } from 'lucide-react';
 
 export const NexusMineral: React.FC = () => {
-  const { selectedLocation } = useTerranexusStore();
+  const { selectedLocation, currentDossier, mineralDisplayMode, setMineralDisplayMode } = useTerranexusStore();
   const [dynamicBelt, setDynamicBelt] = useState<any>(null);
 
   useEffect(() => {
-    if (selectedLocation && !MINERAL_INDICATORS[selectedLocation.id]) {
+    if (selectedLocation && !MINERAL_INDICATORS[selectedLocation.id] && !currentDossier?.geology?.mineralProspectivity) {
       fetch(`/api/providers/mineral/belt?lat=${selectedLocation.latitude}&lon=${selectedLocation.longitude}`)
         .then(res => res.json())
         .then(json => {
@@ -21,12 +22,15 @@ export const NexusMineral: React.FC = () => {
     } else {
       setDynamicBelt(null);
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, currentDossier]);
 
-  const mineralSummary = MINERAL_INDICATORS[selectedLocation.id] || dynamicBelt || MINERAL_INDICATORS['locus-khetri-rajasthan'];
+  const mineralSummary: any = currentDossier?.geology?.mineralProspectivity
+    || MINERAL_INDICATORS[selectedLocation.id]
+    || dynamicBelt
+    || MINERAL_INDICATORS['locus-khetri-rajasthan'];
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#080c14] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Module Title Banner */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -43,8 +47,44 @@ export const NexusMineral: React.FC = () => {
         </div>
       </div>
 
+      {/* 3D Subsurface Mineral Alteration & Ore Vein Cutaway */}
+      <div className="rounded-2xl border border-slate-800/80 bg-[#060911] overflow-hidden shadow-2xl flex flex-col">
+        <div className="px-4 py-2.5 bg-slate-950/80 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Box className="w-4 h-4 text-purple-400" />
+            <h3 className="text-xs font-bold font-mono text-purple-300">
+              3D SUBTERRANEAN MINERAL VEIN & SHEAR ZONE CUTAWAY
+            </h3>
+          </div>
+          {/* Mineral Display Mode Segmented Controls */}
+          <div className="flex items-center gap-1 bg-slate-900/90 border border-slate-800 p-0.5 rounded-lg text-[10px] font-mono">
+            {[
+              { id: 'surface-spectral', label: 'Spectral' },
+              { id: 'geological-context', label: 'Host Rock' },
+              { id: 'modelled-prospectivity', label: 'Prospectivity' },
+              { id: 'demonstration-veins', label: 'Veins' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setMineralDisplayMode(tab.id as any)}
+                className={`px-2 py-1 rounded transition-colors ${
+                  mineralDisplayMode === tab.id
+                    ? 'bg-purple-900/80 border border-purple-500/60 text-purple-200 font-bold'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="h-[380px] w-full relative">
+          <Subsurface3D />
+        </div>
+      </div>
+
       {/* Mandatory Scientific Law Warning */}
-      <div className="rounded-xl bg-purple-950/30 border border-purple-800/60 p-4 flex items-start gap-3 shadow-xl">
+      <div className="rounded-xl bg-purple-950/20 border border-purple-500/40 p-4 flex items-start gap-3 shadow-xl backdrop-blur-md">
         <AlertOctagon className="w-6 h-6 text-purple-400 shrink-0 mt-0.5" />
         <div className="text-xs text-slate-200 leading-relaxed">
           <span className="font-bold text-purple-300 block mb-1 uppercase tracking-wide">
@@ -56,7 +96,7 @@ export const NexusMineral: React.FC = () => {
 
       {/* Prospectivity & Deposit Context */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between shadow-md">
           <span className="text-xs text-slate-400">Deposit Model Analogue</span>
           <h4 className="text-sm font-bold text-slate-100 mt-1">{mineralSummary.depositStyle}</h4>
           <span className="text-[10px] font-mono text-cyan-400 mt-2 block">
@@ -64,10 +104,10 @@ export const NexusMineral: React.FC = () => {
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between shadow-md">
           <span className="text-xs text-slate-400">Target Commodities</span>
           <div className="flex flex-wrap gap-1.5 mt-2">
-            {mineralSummary.targetCommodities.map((c, i) => (
+            {mineralSummary.targetCommodities?.map((c: string, i: number) => (
               <span key={i} className="px-2 py-0.5 rounded-md bg-purple-950/60 border border-purple-700/60 text-purple-300 text-xs font-mono font-medium">
                 {c}
               </span>
@@ -76,7 +116,7 @@ export const NexusMineral: React.FC = () => {
           <span className="text-[10px] text-slate-500 mt-2">Derived from regional geological synthesis</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col justify-between">
+        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between shadow-md">
           <span className="text-xs text-slate-400">Regional Prospectivity Category</span>
           <div className="my-1">
             <span className={`text-base font-bold font-mono px-2.5 py-1 rounded-lg border ${
@@ -94,7 +134,7 @@ export const NexusMineral: React.FC = () => {
       </div>
 
       {/* Validated Spectral Alteration Band Ratios */}
-      <div className="rounded-xl bg-slate-950/90 border border-slate-800 p-5 flex flex-col gap-4">
+      <div className="glass-panel rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Scan className="w-5 h-5 text-purple-400" />
@@ -106,45 +146,74 @@ export const NexusMineral: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mineralSummary.spectralIndices.map((idx) => (
-            <div key={idx.id} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between gap-3 shadow-md">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[10px] text-purple-300">{idx.sensor}</span>
-                  <StatusBadge status={idx.status} size="sm" />
-                </div>
-                <h4 className="font-bold text-xs text-slate-100">{idx.name}</h4>
-                <div className="font-mono text-xs text-amber-400 mt-0.5">{idx.formula}</div>
-              </div>
+          {(mineralSummary?.spectralIndices && mineralSummary.spectralIndices.length > 0) ? (
+            mineralSummary.spectralIndices.map((idx: any) => {
+              const displayVal = typeof idx.indexValue === 'number'
+                ? idx.indexValue.toFixed(2)
+                : typeof idx.confidencePercent === 'number'
+                ? `${idx.confidencePercent}% (Modelled)`
+                : 'N/A';
 
-              {/* Index Value & Strength Bar */}
-              <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                <div className="flex justify-between items-center text-xs font-mono mb-1.5">
-                  <span className="text-slate-400">Reflectance Ratio:</span>
-                  <span className="font-bold text-purple-300 text-base">{idx.indexValue.toFixed(2)}</span>
-                </div>
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-purple-500 to-amber-400 h-full rounded-full"
-                    style={{ width: `${Math.min((idx.indexValue / 2.5) * 100, 100)}%` }}
-                  />
-                </div>
-                <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
-                  <span>Alteration:</span>
-                  <span className="text-slate-300 font-semibold">{idx.alterationStrength}</span>
-                </div>
-              </div>
+              const barPercent = typeof idx.indexValue === 'number'
+                ? Math.min((idx.indexValue / 2.5) * 100, 100)
+                : typeof idx.confidencePercent === 'number'
+                ? idx.confidencePercent
+                : 50;
 
-              <div>
-                <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Target Mineral Group:</span>
-                <p className="text-[11px] text-slate-300 font-medium">{idx.targetMineralGroup}</p>
-              </div>
+              const alterationText = idx.alterationStrength ||
+                (typeof idx.confidencePercent === 'number' && idx.confidencePercent >= 80 ? 'High Confidence' : 'Modelled');
 
-              <p className="text-[10px] text-slate-400 leading-tight italic border-t border-slate-800/80 pt-2">
-                {idx.scientificDisclaimer}
+              const targetGroup = idx.targetMineralGroup || idx.detectionTarget || 'Alteration Assemblage';
+              const disclaimerText = idx.scientificDisclaimer || idx.geologicalRationale ||
+                'Surface spectral reflectance ratio indicates surficial regolith and weathering only. Does NOT indicate subterranean ore bodies or depth.';
+
+              return (
+                <div key={idx.id || idx.name} className="glass-panel p-4 rounded-xl flex flex-col justify-between gap-3 shadow-md hover:border-purple-500/50 transition-all">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono text-[10px] text-purple-300">{idx.sensor || 'Copernicus Sentinel-2 MSI'}</span>
+                      <StatusBadge status={idx.status || 'MODELLED'} size="sm" />
+                    </div>
+                    <h4 className="font-bold text-xs text-slate-100">{idx.name}</h4>
+                    <div className="font-mono text-xs text-amber-400 mt-0.5">{idx.formula}</div>
+                  </div>
+
+                  {/* Index Value & Strength Bar */}
+                  <div className="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <div className="flex justify-between items-center text-xs font-mono mb-1.5">
+                      <span className="text-slate-400">Reflectance / Confidence:</span>
+                      <span className="font-bold text-purple-300 text-base">{displayVal}</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-purple-500 to-amber-400 h-full rounded-full"
+                        style={{ width: `${barPercent}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
+                      <span>Alteration:</span>
+                      <span className="text-slate-300 font-semibold">{alterationText}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-slate-500 block mb-0.5">Target Mineral Group:</span>
+                    <p className="text-[11px] text-slate-300 font-medium">{targetGroup}</p>
+                  </div>
+
+                  <p className="text-[10px] text-slate-400 leading-tight italic border-t border-slate-800/80 pt-2">
+                    {disclaimerText}
+                  </p>
+                </div>
+              );
+            })
+          ) : (
+            <div className="col-span-full p-6 rounded-xl bg-slate-900/50 border border-slate-800 text-center">
+              <p className="text-xs text-slate-400">
+                No anomalous multi-spectral alteration indices detected in this regional terrane. Surface reflectance conforms to background country rock.
               </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 

@@ -30,7 +30,7 @@ export const DataCatalog: React.FC = () => {
   });
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#080c14] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -55,40 +55,43 @@ export const DataCatalog: React.FC = () => {
               placeholder="Search datasets, agency, format..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 w-56"
+              className="bg-slate-900/90 border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 w-56 shadow-sm"
             />
           </div>
 
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+            className="bg-slate-900/90 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 shadow-sm"
           >
-            <option value="ALL">All Statuses</option>
-            <option value="OBSERVED">OBSERVED Only</option>
-            <option value="MODELLED">MODELLED Only</option>
-            <option value="PREDICTED">PREDICTED Only</option>
-            <option value="SIMULATED">SIMULATED Only</option>
+            <option value="ALL">All Statuses ({DATASET_REGISTRY.length})</option>
+            <option value="MEASURED">MEASURED (In-Situ Telemetry)</option>
+            <option value="OBSERVED">OBSERVED (Direct Observations)</option>
+            <option value="INTERPOLATED">INTERPOLATED (Spatial Grids)</option>
+            <option value="DERIVED">DERIVED (Derived Products)</option>
+            <option value="MODELLED">MODELLED (Numerical Models)</option>
+            <option value="REMOTE">REMOTE (Satellite Observations)</option>
+            <option value="SIMULATED">SIMULATED (Physics Engines)</option>
           </select>
         </div>
       </div>
 
       {/* Operational Provider Health Grid */}
       {providers.length > 0 && (
-        <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col gap-3">
+        <div className="p-5 rounded-2xl glass-panel flex flex-col gap-3 shadow-xl">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
               <Activity className="w-4 h-4 text-emerald-400" />
               <span>LIVE SCIENTIFIC DATA PROVIDERS ({providers.length} ACTIVE ENGINES)</span>
             </div>
-            <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-950/60 border border-emerald-600/30 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-950/60 border border-emerald-600/30 px-2.5 py-0.5 rounded-full">
               PROVIDER-INDEPENDENT ARCHITECTURE
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {providers.map((p) => (
-              <div key={p.id} className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex flex-col justify-between gap-2">
+              <div key={p.id} className="p-3.5 rounded-xl glass-panel flex flex-col justify-between gap-2 shadow-sm hover:border-slate-700/80 transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-mono text-cyan-400 font-medium">{p.category}</span>
@@ -121,7 +124,7 @@ export const DataCatalog: React.FC = () => {
         {filtered.map((dataset) => (
           <div
             key={dataset.id}
-            className="p-5 rounded-2xl bg-slate-950/90 border border-slate-800 flex flex-col justify-between gap-4 shadow-xl hover:border-slate-700 transition-colors"
+            className="p-5 rounded-2xl glass-panel flex flex-col justify-between gap-4 shadow-xl hover:border-slate-700/80 transition-all"
           >
             <div>
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -229,7 +232,7 @@ export const DataCatalog: React.FC = () => {
       </div>
 
       {/* Official Legal Compliance, Non-Endorsement & Attribution Charter */}
-      <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-3">
+      <div className="p-5 rounded-2xl glass-panel text-xs space-y-3 shadow-xl">
         <div className="flex items-center gap-2 text-slate-200 font-bold text-sm">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>Legal Compliance, Open Data Policies & Non-Endorsement Disclaimers</span>

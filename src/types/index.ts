@@ -74,6 +74,15 @@ export interface SpectralIndexIndicator {
   scientificDisclaimer: string;
 }
 
+export interface SourceInspectionMetrics {
+  cgwbStationCode: string;
+  gsiQuadrangleSheet: string;
+  nasaMasconGranuleId: string;
+  looCvUncertainty: string;
+  coverageTier: string;
+  confidenceScorePercent: number;
+}
+
 export interface AIMessage {
   id: string;
   sender: 'user' | 'assistant' | 'system';
@@ -82,4 +91,6 @@ export interface AIMessage {
   groundedLocation?: string;
   groundedDataIds?: string[];
   limitationsNoted?: string[];
+  sources?: SourceInspectionMetrics;
+  isStreaming?: boolean;
 }

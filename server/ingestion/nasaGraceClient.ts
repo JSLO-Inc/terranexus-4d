@@ -474,10 +474,19 @@ export async function performControlledDownloadTest(
   return downloadNasaGranuleFile(targetUrl, targetFilename);
 }
 
+let cachedReadiness: { data: NasaPipelineReadiness; timestamp: number } | null = null;
+const READINESS_CACHE_TTL_MS = 60 * 1000; // 60 seconds TTL
+
 /**
  * Checks overall NASA pipeline readiness and provides user instructions.
+ * Cached for 60 seconds to prevent unnecessary outbound CMR requests on UI updates.
  */
-export async function checkNasaPipelineReadiness(): Promise<NasaPipelineReadiness> {
+export async function checkNasaPipelineReadiness(forceFresh: boolean = false): Promise<NasaPipelineReadiness> {
+  const now = Date.now();
+  if (!forceFresh && cachedReadiness && now - cachedReadiness.timestamp < READINESS_CACHE_TTL_MS) {
+    return cachedReadiness.data;
+  }
+
   const creds = getEarthdataCredentials();
 
   try {
@@ -495,7 +504,7 @@ export async function checkNasaPipelineReadiness(): Promise<NasaPipelineReadines
       instruction = 'NASA PO.DAAC requires a free NASA Earthdata account. Create an account at https://urs.earthdata.nasa.gov/, authorize the "PO.DAAC" application, and generate a Bearer Token to place in your .env file as EARTHDATA_TOKEN.';
     }
 
-    return {
+    const data: NasaPipelineReadiness = {
       cmrApiAvailable,
       verifiedCollections: {
         graceRl06ConceptId: GRACE_CONCEPT_ID,
@@ -510,8 +519,11 @@ export async function checkNasaPipelineReadiness(): Promise<NasaPipelineReadines
       status,
       instruction
     };
+
+    cachedReadiness = { data, timestamp: now };
+    return data;
   } catch (error: any) {
-    return {
+    const fallback: NasaPipelineReadiness = {
       cmrApiAvailable: false,
       verifiedCollections: {
         graceRl06ConceptId: GRACE_CONCEPT_ID,
@@ -526,5 +538,7 @@ export async function checkNasaPipelineReadiness(): Promise<NasaPipelineReadines
       status: 'OFFLINE',
       instruction: `Failed to connect to NASA CMR API: ${error.message}`
     };
+    cachedReadiness = { data: fallback, timestamp: now };
+    return fallback;
   }
 }

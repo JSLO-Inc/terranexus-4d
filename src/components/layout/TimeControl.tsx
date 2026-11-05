@@ -19,12 +19,13 @@ export const TimeControl: React.FC = () => {
   const currentLabel = TIME_STEPS[currentTimeIndex] || '2024-05';
 
   return (
-    <div className="flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-slate-950/85 border border-slate-800/80 backdrop-blur-xl shadow-2xl select-none text-xs">
+    <div className="glass-panel flex items-center gap-2.5 px-3 py-1.5 rounded-xl select-none text-xs shadow-lg">
       {/* Play/Pause Button */}
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className="p-1.5 rounded-lg bg-sky-950/80 hover:bg-sky-900 border border-sky-600/50 text-cyan-300 transition-all shadow-md shrink-0"
+        className="p-1.5 rounded-lg bg-sky-950/80 hover:bg-sky-900 border border-sky-600/50 text-cyan-300 transition-all shadow-md shrink-0 cursor-pointer"
         title={isPlaying ? 'Pause Playback' : 'Play Observation Timeline'}
+        aria-label={isPlaying ? 'Pause Playback' : 'Play Observation Timeline'}
       >
         {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
       </button>
@@ -41,7 +42,12 @@ export const TimeControl: React.FC = () => {
             setIsPlaying(false);
             setCurrentTimeIndex(Number(e.target.value));
           }}
-          className="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
+          className="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          aria-label="Temporal Timeline Observation Step"
+          aria-valuemin={0}
+          aria-valuemax={TIME_STEPS.length - 1}
+          aria-valuenow={currentTimeIndex}
+          aria-valuetext={`Observation date ${currentLabel}`}
           title={`Observation: ${currentLabel}`}
         />
       </div>
@@ -59,8 +65,9 @@ export const TimeControl: React.FC = () => {
           setIsPlaying(false);
           setCurrentTimeIndex(0);
         }}
-        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+        className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
         title="Reset to initial observation date"
+        aria-label="Reset to initial observation date"
       >
         <RotateCcw className="w-3 h-3" />
       </button>

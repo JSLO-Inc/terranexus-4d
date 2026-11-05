@@ -108,18 +108,18 @@ export function createRateLimiter(config: RateLimitConfig) {
 // Preset rate limiters
 export const generalApiLimiter = createRateLimiter({
   windowMs: 60 * 1000,
-  maxRequests: 180, // 180 requests per minute
+  maxRequests: 360, // 360 requests per minute (smooth multi-layer dashboard interaction)
   tierName: 'General API'
 });
 
 export const locationSearchLimiter = createRateLimiter({
   windowMs: 60 * 1000,
-  maxRequests: 90, // 90 requests per minute
+  maxRequests: 180, // 180 requests per minute
   tierName: 'Location Search'
 });
 
 export const ingestionLimiter = createRateLimiter({
   windowMs: 60 * 1000,
-  maxRequests: 15, // 15 requests per minute
+  maxRequests: 20, // 20 requests per minute
   tierName: 'Ingestion & Granule Downloads'
 });

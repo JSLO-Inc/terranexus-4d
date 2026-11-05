@@ -1,0 +1,419 @@
+[
+  {
+    "id": "api-nominatim-osm",
+    "name": "Nominatim OpenStreetMap Geocoding",
+    "provider": "OpenStreetMap Foundation",
+    "category": "GEODETIC",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://nominatim.openstreetmap.org",
+    "documentationUrl": "https://nominatim.org/release-docs/latest/api/Overview/",
+    "description": "Forward search and reverse geocoding providing structured administrative hierarchy down to district and village across India.",
+    "health": "HEALTHY",
+    "lastPingMs": 340,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-search",
+        "name": "Forward Search",
+        "path": "/search",
+        "method": "GET",
+        "description": "Geocodes location name or address into WGS84 latitude/longitude bounding box.",
+        "sampleQueryParams": {
+          "q": "Bhimavaram, Andhra Pradesh",
+          "format": "jsonv2",
+          "limit": "5"
+        }
+      },
+      {
+        "id": "ep-reverse",
+        "name": "Reverse Geocoding",
+        "path": "/reverse",
+        "method": "GET",
+        "description": "Resolves coordinates into structured Indian administrative hierarchy.",
+        "sampleQueryParams": {
+          "lat": "16.5449",
+          "lon": "81.5212",
+          "format": "jsonv2"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-usgs-earthquakes",
+    "name": "USGS Earthquake Hazards Feed",
+    "provider": "U.S. Geological Survey",
+    "category": "GEOLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://earthquake.usgs.gov",
+    "documentationUrl": "https://earthquake.usgs.gov/fdsnws/event/1/",
+    "description": "Real-time and historic global seismic event catalog for tectonic province stability analysis.",
+    "health": "HEALTHY",
+    "lastPingMs": 280,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-fdsnws-query",
+        "name": "Seismic Event Query",
+        "path": "/fdsnws/event/1/query",
+        "method": "GET",
+        "description": "Queries seismic events by geographic bounding envelope and magnitude.",
+        "sampleQueryParams": {
+          "format": "geojson",
+          "minmagnitude": "4.5",
+          "limit": "20"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-open-meteo-weather",
+    "name": "Open-Meteo Weather API",
+    "provider": "Open-Meteo GmbH",
+    "category": "METEOROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://api.open-meteo.com",
+    "documentationUrl": "https://open-meteo.com/en/docs",
+    "description": "High-resolution open meteorological and monsoon rainfall forecasts without API keys.",
+    "health": "HEALTHY",
+    "lastPingMs": 195,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-forecast",
+        "name": "Weather Forecast",
+        "path": "/v1/forecast",
+        "method": "GET",
+        "description": "Retrieves temperature, relative humidity, precipitation, and soil moisture profiles.",
+        "sampleQueryParams": {
+          "latitude": "16.5449",
+          "longitude": "81.5212",
+          "daily": "precipitation_sum"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-open-meteo-elevation",
+    "name": "Open-Meteo Elevation API",
+    "provider": "Open-Meteo GmbH",
+    "category": "GEODETIC",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://api.open-meteo.com",
+    "documentationUrl": "https://open-meteo.com/en/docs/elevation-api",
+    "description": "Global 90m digital elevation query service based on Copernicus DEM.",
+    "health": "HEALTHY",
+    "lastPingMs": 160,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-elevation",
+        "name": "Point Elevation Query",
+        "path": "/v1/elevation",
+        "method": "GET",
+        "description": "Returns terrain surface elevation above sea level in meters.",
+        "sampleQueryParams": {
+          "latitude": "16.5449",
+          "longitude": "81.5212"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-nasa-power",
+    "name": "NASA POWER Agroclimatology API",
+    "provider": "NASA Langley Research Center",
+    "category": "METEOROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://power.larc.nasa.gov",
+    "documentationUrl": "https://power.larc.nasa.gov/docs/services/api/",
+    "description": "Solar radiation, surface meteorology, and precipitation climatology from NASA satellite observations.",
+    "health": "HEALTHY",
+    "lastPingMs": 420,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-power-point",
+        "name": "Agroclimatology Point Series",
+        "path": "/api/temporal/daily/point",
+        "method": "GET",
+        "description": "Retrieves surface solar irradiance, 2m temperature, and precipitation.",
+        "sampleQueryParams": {
+          "parameters": "PRECTOTCORR,ALLSKY_SFC_SW_DWN",
+          "community": "AG",
+          "longitude": "81.52",
+          "latitude": "16.54",
+          "start": "20240101",
+          "end": "20240110",
+          "format": "JSON"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-nasa-podaac-cmr",
+    "name": "NASA PO.DAAC / CMR Metadata API",
+    "provider": "NASA JPL / Earthdata",
+    "category": "HYDROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://cmr.earthdata.nasa.gov",
+    "documentationUrl": "https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html",
+    "description": "Common Metadata Repository for authentic NASA GRACE and GRACE-FO Level-3 Tellus land mass grids.",
+    "health": "HEALTHY",
+    "lastPingMs": 310,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-granules",
+        "name": "Granules Search",
+        "path": "/search/granules.json",
+        "method": "GET",
+        "description": "Discovers GRACE Tellus NetCDF/ASCII granules with spatiotemporal filters.",
+        "sampleQueryParams": {
+          "short_name": "TELLUS_GRAC_L3_JPL_RL06_LND_v04",
+          "page_size": "5"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-nasa-gesdisc-gpm",
+    "name": "NASA GES DISC GPM IMERG Precipitation",
+    "provider": "NASA Goddard Space Flight Center",
+    "category": "HYDROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://gpm.nasa.gov",
+    "documentationUrl": "https://gpm.nasa.gov/data/imerg",
+    "description": "Global Precipitation Measurement (GPM) Integrated Multi-satellitE Retrievals for GPM (IMERG) monthly telemetry.",
+    "health": "HEALTHY",
+    "lastPingMs": 360,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-gpm-status",
+        "name": "GPM Data Gateway",
+        "path": "/data",
+        "method": "GET",
+        "description": "Provides satellite constellation radar and microwave precipitation telemetry."
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-copernicus-stac",
+    "name": "Copernicus Sentinel-2 STAC API",
+    "provider": "European Space Agency (ESA)",
+    "category": "REMOTE_SENSING",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://earth-search.aws.element84.com",
+    "documentationUrl": "https://stacspec.org/",
+    "description": "SpatioTemporal Asset Catalog (STAC) search for Copernicus Sentinel-2 L2A multi-spectral surface reflectance.",
+    "health": "HEALTHY",
+    "lastPingMs": 240,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-stac-search",
+        "name": "STAC Item Search",
+        "path": "/v1/search",
+        "method": "POST",
+        "description": "Searches cloud-free Sentinel-2 granules matching Indian coordinates.",
+        "sampleQueryParams": {}
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-carto-basemaps",
+    "name": "CARTO Basemaps Tile Service",
+    "provider": "CARTO",
+    "category": "GEODETIC",
+    "authType": "API_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://cartodb-basemaps-a.global.ssl.fastly.net",
+    "documentationUrl": "https://carto.com/help/building-maps/basemap-list/",
+    "description": "High-performance vector and raster tile basemaps (Dark Matter, Voyager, Positron) for geospatial rendering.",
+    "health": "HEALTHY",
+    "lastPingMs": 95,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-dark-matter",
+        "name": "Dark Matter Tiles",
+        "path": "/rastertiles/dark_all/{z}/{x}/{y}.png",
+        "method": "GET",
+        "description": "Dark-themed cartographic raster tiles optimized for scientific data overlays."
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-cgwb-groundwater",
+    "name": "CGWB National Groundwater Telemetry",
+    "provider": "Central Ground Water Board (CGWB) / India-WRIS",
+    "category": "HYDROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://indiawris.gov.in",
+    "documentationUrl": "http://cgwb.gov.in/",
+    "description": "National observation well network (piezometers and DWLR telemetry) measuring depth to water level in mbgl.",
+    "health": "HEALTHY",
+    "lastPingMs": 480,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-cgwb-stations",
+        "name": "National Monitoring Stations",
+        "path": "/api/wells/stations",
+        "method": "GET",
+        "description": "Retrieves in-situ DWLR monitoring stations and water table records."
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-gsi-bhukosh",
+    "name": "GSI Bhukosh Geological Portal",
+    "provider": "Geological Survey of India (GSI)",
+    "category": "GEOLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://bhukosh.gsi.gov.in",
+    "documentationUrl": "https://bhukosh.gsi.gov.in/Bhukosh/MapViewer.aspx",
+    "description": "1:50,000 national geological mapping, metallogenic belts, and borehole stratigraphy database.",
+    "health": "HEALTHY",
+    "lastPingMs": 520,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-bhukosh-wms",
+        "name": "GSI Bhukosh WMS Layer",
+        "path": "/server/services/Bhukosh/MapServer/WMSServer",
+        "method": "GET",
+        "description": "Web Map Service serving 1:50,000 geological lithostratigraphic boundaries."
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-cwc-basins",
+    "name": "CWC / India-WRIS 25 Major River Basins",
+    "provider": "Central Water Commission (CWC) / Ministry of Jal Shakti",
+    "category": "HYDROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "http://localhost:3001",
+    "documentationUrl": "https://cwc.gov.in/",
+    "description": "Official spatial polygons and hydrological attributes for all 25 designated Indian river basins.",
+    "health": "HEALTHY",
+    "lastPingMs": 15,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-basins-geojson",
+        "name": "River Basins GeoJSON",
+        "path": "/api/basins/geojson",
+        "method": "GET",
+        "description": "High-fidelity WGS84 GeoJSON geometry for CWC river basins with gzip support."
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-openaq-airquality",
+    "name": "OpenAQ Ambient Air Quality API",
+    "provider": "OpenAQ Community",
+    "category": "ENVIRONMENT",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://api.openaq.org",
+    "documentationUrl": "https://docs.openaq.org/",
+    "description": "Public air quality monitoring network tracking PM2.5, PM10, NO2, and SO2 across Indian metropolitan stations.",
+    "health": "HEALTHY",
+    "lastPingMs": 310,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-openaq-latest",
+        "name": "Latest Sensor Measurements",
+        "path": "/v2/latest",
+        "method": "GET",
+        "description": "Returns latest ambient pollutant telemetry filtered by country code IN.",
+        "sampleQueryParams": {
+          "country": "IN",
+          "limit": "10"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  },
+  {
+    "id": "api-usgs-waterservices",
+    "name": "USGS Water Services API",
+    "provider": "U.S. Geological Survey",
+    "category": "HYDROLOGY",
+    "authType": "NO_KEY",
+    "status": "ACTIVE",
+    "baseUrl": "https://waterservices.usgs.gov",
+    "documentationUrl": "https://waterservices.usgs.gov/rest/",
+    "description": "Global hydrological streamflow benchmark and reference piezometric sensor telemetry.",
+    "health": "HEALTHY",
+    "lastPingMs": 290,
+    "lastCheckedAt": "2026-11-04T12:00:00.000Z",
+    "endpoints": [
+      {
+        "id": "ep-usgs-iv",
+        "name": "Instantaneous Values",
+        "path": "/nwis/iv/",
+        "method": "GET",
+        "description": "Real-time groundwater depth and discharge rates in standard JSON/WaterML format.",
+        "sampleQueryParams": {
+          "format": "json",
+          "sites": "01646500"
+        }
+      }
+    ],
+    "isAutonomous": false,
+    "createdAt": "2026-11-01T00:00:00.000Z",
+    "updatedAt": "2026-11-04T12:00:00.000Z"
+  }
+]
