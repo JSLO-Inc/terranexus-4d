@@ -1,5 +1,5 @@
 # NASA JPL Tellus Land Mass Grids (RL06.1 v04)
-# Location: Ludhiana - Central Punjab Plain (Resolved ID: locus-indogangetic-ludhiana, Query: locus-indogangetic-ludhiana)
+# Location: Ludhiana - Central Punjab Plain (ID: locus-indogangetic-ludhiana)
 # Latitude: 30.9010 N, Longitude: 75.8573 E
 # Spatial Resolution: 300km Gaussian Filter (~3 deg), 0.5 deg grid
 # Unit: Liquid Water Equivalent (LWE) thickness in cm

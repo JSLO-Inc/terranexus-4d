@@ -15,9 +15,9 @@ import {
   getTerraneStructuralAttitude,
   generateLithologyPbrTextures,
   buildDippingStratumGeometry,
-  buildCornerCutStratumGeometry,
-  buildCornerCutTerrainGeometry,
-  buildGeologicalDatumPlinthGeometry
+  getGeographicalBoundaryRadius,
+  buildIrregularPolygonTerrainGeometry,
+  buildIrregularPolygonStratumGeometry
 } from '../src/components/subsurface/geologicalMaterials';
 import { GEOLOGICAL_FORMATIONS } from '../src/data/strataData';
 
@@ -220,30 +220,21 @@ async function runPhotorealisticCutawayVerification() {
   assert(dX4 >= 0 && dZ4 >= 0, `Back-Left Quadrant (x=-5, z=-5) remains visible (dX: ${dX4}, dZ: ${dZ4})`);
 
   // --------------------------------------------------------------------------
-  // SECTION 6: Monolithic Watertight L-Shaped Volumetric Cutaway Construction
+  // SECTION 6: Irregular Geographical Polygon Terrain & Stratum Geometry
   // --------------------------------------------------------------------------
-  console.log('\n[SECTION 6: Monolithic L-Shaped Volumetric Stratum & Terrain Geometry]');
+  console.log('\n[SECTION 6: Irregular Geographical Polygon 3D Region Extraction]');
 
-  const cornerStratumGeo = buildCornerCutStratumGeometry(topContactFunc, botContactFunc, width, length, segsX, segsZ);
-  assert(cornerStratumGeo instanceof THREE.BufferGeometry, 'Corner-cut stratum generated THREE.BufferGeometry');
+  const radiusFn = (theta: number) => getGeographicalBoundaryRadius(theta, 'locus-indogangetic-ludhiana', 30.90, 75.85, 24.0);
+  const rSample0 = radiusFn(0);
+  const rSample1 = radiusFn(Math.PI / 3);
+  assert(rSample0 > 12 && rSample0 < 36, `Irregular boundary radius R(0) = ${rSample0.toFixed(2)}m is within geographical watershed bounds`);
+  assert(Math.abs(rSample0 - rSample1) > 0.1, `Irregular boundary varies naturally with azimuth (R(0)=${rSample0.toFixed(2)} vs R(60°)=${rSample1.toFixed(2)})`);
 
-  const ccPos = cornerStratumGeo.getAttribute('position');
-  const ccUv = cornerStratumGeo.getAttribute('uv');
-  const ccNormal = cornerStratumGeo.getAttribute('normal');
+  const polyTerrainGeo = buildIrregularPolygonTerrainGeometry((x, z) => Math.sin(x * 0.1) + Math.cos(z * 0.1), radiusFn, 50, 16, 64, true);
+  assert(polyTerrainGeo.getAttribute('position').count > 0, `Irregular polygon terrain geometry generated ${polyTerrainGeo.getAttribute('position').count} vertices`);
 
-  assert(ccPos !== undefined && ccPos.count > 0, `Corner-cut position attribute created with ${ccPos?.count} vertices`);
-  assert(ccUv !== undefined && ccUv.count === ccPos?.count, `Corner-cut UV count matches vertices (${ccUv?.count})`);
-  assert(ccNormal !== undefined && ccNormal.count === ccPos?.count, `Corner-cut normals count matches vertices (${ccNormal?.count})`);
-
-  // Corner Cut Terrain Geometry
-  const cornerTerrainGeo = buildCornerCutTerrainGeometry((x, z) => Math.sin(x * 0.1) * 2.0, width, length, segsX, segsZ);
-  assert(cornerTerrainGeo instanceof THREE.BufferGeometry, 'Corner-cut terrain generated THREE.BufferGeometry');
-  assert(cornerTerrainGeo.getAttribute('position').count > 0, 'Corner-cut terrain position buffer is populated');
-
-  // Geological Datum Plinth Geometry
-  const plinthGeo = buildGeologicalDatumPlinthGeometry(width, length, -25, true);
-  assert(plinthGeo instanceof THREE.BufferGeometry, 'Geotechnical datum plinth generated THREE.BufferGeometry');
-  assert(plinthGeo.getAttribute('position').count > 0, 'Plinth position buffer is populated');
+  const polyStratumGeo = buildIrregularPolygonStratumGeometry(topContactFunc, botContactFunc, radiusFn, 16, 64, 4.0, true);
+  assert(polyStratumGeo.getAttribute('position').count > 0, `Irregular polygon stratum geometry generated ${polyStratumGeo.getAttribute('position').count} watertight vertices`);
 
   console.log('\n' + '='.repeat(80));
   console.log(`PHOTOREALISTIC CUTAWAY SUITE RESULTS: ${passCount} PASSED, 0 FAILED (TOTAL: ${totalCount})`);

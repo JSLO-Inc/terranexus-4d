@@ -1,51 +1,77 @@
 import React from 'react';
 import { useTerranexusStore, ActiveModule } from '../../state/useTerranexusStore';
-import { Globe, Layers, BarChart3, Database, Sparkles, SlidersHorizontal, Clock, Droplets } from 'lucide-react';
+import {
+  Globe,
+  Layers,
+  Database,
+  Sparkles,
+  SlidersHorizontal,
+  Clock,
+  Droplets,
+  PanelLeftClose,
+  PanelLeftOpen
+} from 'lucide-react';
 
 interface RailItem {
   id: ActiveModule;
   label: string;
+  subtitle: string;
   icon: React.ReactNode;
 }
 
 export const Navigation: React.FC = () => {
-  const { activeModule, setActiveModule, setMainView, setInspectorOpen, isNavCollapsed, isGlobeFullscreen } = useTerranexusStore();
+  const {
+    activeModule,
+    setActiveModule,
+    setMainView,
+    setInspectorOpen,
+    isNavCollapsed,
+    setIsNavCollapsed,
+    isGlobeFullscreen
+  } = useTerranexusStore();
 
   const railItems: RailItem[] = [
     {
       id: 'globe',
       label: '4D Digital Twin',
-      icon: <Globe className="w-5 h-5" />
+      subtitle: 'Globe & 3D Cutout',
+      icon: <Globe className="w-5 h-5 shrink-0" />
     },
     {
       id: 'hydro',
       label: 'Nexus Hydro',
-      icon: <Droplets className="w-5 h-5" />
+      subtitle: 'Aquifers & GRACE',
+      icon: <Droplets className="w-5 h-5 shrink-0" />
     },
     {
       id: 'strata',
       label: 'Nexus Strata',
-      icon: <Layers className="w-5 h-5" />
+      subtitle: 'GSI Lithology Logs',
+      icon: <Layers className="w-5 h-5 shrink-0" />
     },
     {
       id: 'mineral',
       label: 'Nexus Mineral',
-      icon: <SlidersHorizontal className="w-5 h-5" />
+      subtitle: 'Spectral & Belts',
+      icon: <SlidersHorizontal className="w-5 h-5 shrink-0" />
     },
     {
       id: 'time',
       label: 'Timeline & Cycles',
-      icon: <Clock className="w-5 h-5" />
+      subtitle: '2014–2024 Epochs',
+      icon: <Clock className="w-5 h-5 shrink-0" />
     },
     {
       id: 'ai',
       label: 'Nexus AI Copilot',
-      icon: <Sparkles className="w-5 h-5" />
+      subtitle: 'Grounded Reasoning',
+      icon: <Sparkles className="w-5 h-5 shrink-0" />
     },
     {
       id: 'catalog',
       label: 'Data Pedigree',
-      icon: <Database className="w-5 h-5" />
+      subtitle: 'Sources & Licences',
+      icon: <Database className="w-5 h-5 shrink-0" />
     }
   ];
 
@@ -73,14 +99,18 @@ export const Navigation: React.FC = () => {
     return null;
   }
 
+  const isExpanded = !isNavCollapsed;
+
   return (
     <aside
       role="navigation"
       aria-label="Subsurface Intelligence Workstations"
-      className="hidden md:flex w-16 shrink-0 h-full border-r border-slate-800/80 bg-slate-950/95 py-3 flex-col justify-between items-center z-20 select-none backdrop-blur-md shadow-xl"
+      className={`hidden md:flex ${
+        isExpanded ? 'w-52' : 'w-16'
+      } shrink-0 h-full border-r border-white/10 liquid-glass-elevated py-3 flex-col justify-between items-center z-20 select-none transition-all duration-200`}
     >
-      {/* Top Module Icons Rail */}
-      <div className="flex flex-col gap-2 w-full px-2" role="tablist">
+      {/* Top Module Icons & Labels Rail */}
+      <div className="flex flex-col gap-1.5 w-full px-2" role="tablist">
         {railItems.map((item, index) => {
           const isActive = activeModule === item.id;
           return (
@@ -96,24 +126,46 @@ export const Navigation: React.FC = () => {
                   setMainView('twin3d');
                 }
               }}
-              className={`w-full py-2.5 rounded-xl transition-all relative group flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer ${
+              className={`w-full ${
+                isExpanded ? 'px-3 py-2.5 justify-start gap-3' : 'py-3 justify-center'
+              } rounded-xl transition-all relative group flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer ${
                 isActive
-                  ? 'bg-sky-500/20 text-cyan-300 border border-sky-400/80 shadow-md shadow-sky-500/20'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/80 border border-transparent'
+                  ? 'bg-gradient-to-r from-cyan-500/25 to-sky-600/15 text-cyan-300 border border-cyan-400/60 glow-cyan-sm'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.07] border border-transparent'
               }`}
             >
               {/* Active left indicator bar */}
               {isActive && (
-                <div className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r bg-cyan-400 shadow-[0_0_8px_#38bdf8]" />
+                <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-cyan-400 shadow-[0_0_8px_#38bdf8]" />
               )}
 
               {item.icon}
 
-              {/* Tooltip on right - Only visible on inactive items to prevent blocking workstation content */}
-              {!isActive && (
-                <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-950/98 border border-slate-800 rounded-lg text-xs font-sans text-slate-200 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50 flex items-center gap-2">
-                  <span>{item.label}</span>
-                  <span className="text-[10px] font-mono text-cyan-400/80 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">
+              {isExpanded && (
+                <div className="flex flex-col items-start min-w-0 flex-1 text-left">
+                  <span className="text-xs font-semibold leading-tight truncate w-full">
+                    {item.label}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono truncate w-full">
+                    {item.subtitle}
+                  </span>
+                </div>
+              )}
+
+              {isExpanded && (
+                <span className="text-[10px] font-mono text-slate-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-white/10">
+                  {index + 1}
+                </span>
+              )}
+
+              {/* Tooltip on right when collapsed */}
+              {!isExpanded && !isActive && (
+                <div className="absolute left-full ml-3 px-3 py-2 liquid-glass-elevated rounded-xl text-xs font-sans text-slate-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex items-center gap-2.5 shadow-2xl">
+                  <div className="flex flex-col items-start">
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">{item.subtitle}</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-cyan-300 bg-slate-900/90 px-1.5 py-0.5 rounded border border-white/10">
                     {index + 1}
                   </span>
                 </div>
@@ -123,10 +175,25 @@ export const Navigation: React.FC = () => {
         })}
       </div>
 
-      {/* Bottom Status / Brand Accent */}
-      <div className="flex flex-col items-center gap-1.5 text-[9px] font-mono text-slate-500">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="System Online" />
-        <span className="tracking-widest uppercase">PRO</span>
+      {/* Bottom Expand/Collapse Toggle & Status */}
+      <div className="w-full px-2 flex flex-col gap-2 items-center">
+        <button
+          type="button"
+          onClick={() => setIsNavCollapsed(!isNavCollapsed)}
+          aria-label={isExpanded ? 'Collapse navigation sidebar' : 'Expand navigation sidebar with labels'}
+          title={isExpanded ? 'Collapse navigation labels' : 'Expand navigation labels'}
+          className={`w-full ${
+            isExpanded ? 'px-3 py-2 justify-between' : 'py-2 justify-center'
+          } rounded-xl liquid-glass-pill text-slate-300 hover:text-cyan-300 text-xs font-mono flex items-center transition-colors cursor-pointer`}
+        >
+          {isExpanded && <span className="text-[11px]">Compact Rail</span>}
+          {isExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
+        </button>
+
+        <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" title="System Online" />
+          <span className="tracking-widest uppercase">{isExpanded ? 'TERRANEXUS 4D' : '4D'}</span>
+        </div>
       </div>
     </aside>
   );

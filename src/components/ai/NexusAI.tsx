@@ -25,8 +25,7 @@ import {
   Database,
   Layers,
   Activity,
-  Compass,
-  Download
+  Compass
 } from 'lucide-react';
 
 export const NexusAI: React.FC = () => {
@@ -164,35 +163,6 @@ export const NexusAI: React.FC = () => {
       handleStopGeneration();
     }
     clearAiMessages();
-  };
-
-  // Export conversation transcript as Markdown
-  const handleExportTranscript = () => {
-    if (aiMessages.length === 0) return;
-    const header = `# TERRANEXUS 4D — NEXUS AI SCIENTIFIC DIALOGUE TRANSCRIPT\n` +
-      `**Target Location:** ${selectedLocation.name} (${selectedLocation.latitude.toFixed(4)}°N, ${selectedLocation.longitude.toFixed(4)}°E)\n` +
-      `**Geological Terrane:** ${selectedLocation.geologicalProvince || 'Indian Cratonic / Mobile Belt'}\n` +
-      `**Depth Slice:** -${depthMeters}m | **Time Epoch:** ${TIME_STEPS[currentTimeIndex]}\n` +
-      `**Exported Timestamp:** ${new Date().toISOString()}\n\n---\n\n`;
-
-    const body = aiMessages.map((msg) => {
-      const sender = msg.sender === 'user' ? 'EXPLORER / USER' : 'NEXUS AI SCIENTIFIC COPILOT';
-      let text = `### [${msg.timestamp}] ${sender}\n\n${msg.content}\n`;
-      if (msg.limitationsNoted && msg.limitationsNoted.length > 0) {
-        text += `\n**Scientific Guardrails & Limitations:**\n` + msg.limitationsNoted.map(l => `- ${l}`).join('\n') + '\n';
-      }
-      return text;
-    }).join('\n---\n\n');
-
-    const blob = new Blob([header + body], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `TERRANEXUS4D_AI_TRANSCRIPT_${selectedLocation.id}_${new Date().toISOString().substring(0, 10)}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   // Regenerate last response
@@ -414,17 +384,6 @@ export const NexusAI: React.FC = () => {
               <span>Stop</span>
             </button>
           )}
-
-          {/* Export Transcript Button */}
-          <button
-            onClick={handleExportTranscript}
-            disabled={aiMessages.length === 0}
-            title="Export conversation transcript as Markdown (.md)"
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700/70 text-slate-300 hover:text-cyan-300 rounded-lg transition-all shadow-sm cursor-pointer disabled:opacity-40"
-          >
-            <Download className="w-3 h-3 text-cyan-400" />
-            <span className="hidden sm:inline">Export</span>
-          </button>
 
           {/* Clear History Button */}
           <button

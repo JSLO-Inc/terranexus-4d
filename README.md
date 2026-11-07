@@ -362,24 +362,41 @@ terranexus-4d/
 │   └── types/                # TypeScript interfaces (Location, Dossier, Geology, Hydro)
 │
 ├── docs/                     # Documentation & Evidence
+│   └── screenshots/          # Curated high-resolution desktop application screenshots
+│
 ├── scripts/                  # Data engineering, map generation, and audit utilities
 └── test/                     # Automated regression test suites (18 suites, 3,520 checks)
 ```
 
 ---
 
-## 14. Application Visual Architecture & Interface Overview
+## 14. Actual Application Visual Showcase
 
-The TERRANEXUS 4D interface provides multiple real-time 3D geospatial and volumetric rendering modes:
+All screenshots below represent **genuine live application captures** taken from the running platform:
 
-| Interface Mode | Primary Engine | Core Capabilities & Rendering Features |
-| :--- | :--- | :--- |
-| **Orbital 3D Earth Globe** | CesiumJS | Full-screen interactive globe with Satellite and CARTO basemaps, nationwide administrative boundaries, and geological study loci markers. |
-| **3D Subsurface Corner Cut** | Three.js | Volumetric crustal excavation featuring continuous undulating terrain relief, incised river swales, dipping lithological strata, and exploratory borehole strings. |
-| **Full Geological Block** | Three.js | Solid volumetric crustal block showcasing topography, surface parcel texturing, and lateral stratigraphic contacts down to basement rock. |
-| **3D Stratigraphic Fence** | Three.js | Orthogonal fence diagram corridors connecting exploratory boreholes across regional stratigraphic horizons with depth slicing. |
-| **Nexus AI Scientific Copilot** | Google Gemini / Rules | Multimodal hydrogeological synthesis panel with transparent data tiering (`OBSERVED`, `MODELLED`, `DEMONSTRATION`). |
-| **Operations Centre Gateway** | Express / REST | Live API Registry, endpoint testing console, autonomous data discovery, and credentials monitoring. |
+### 14.1 Orbital 3D Earth Globe & Default Satellite Basemap (CesiumJS)
+![Orbital 3D Earth Globe](docs/screenshots/00-desktop-globe-1920x1080.png)
+*Figure 1: Default landing experience: Full-screen CesiumJS globe with Satellite imagery, nationwide administrative hierarchy, and study loci markers.*
+
+### 14.2 Reconstructed 3D Subsurface Corner Cut Excavation (Three.js)
+![3D Subsurface Cutaway](docs/screenshots/01-desktop-3d-cutaway-1920x1080.png)
+*Figure 2: Reconstructed 3D Corner Cut excavation featuring continuous displaced terrain relief, incised river channel, watertight dipping geological strata, and exploratory borehole drill string.*
+
+### 14.3 Full Volumetric Geological Block Mode
+![Full Block Mode](docs/screenshots/02-desktop-3d-full-block-1920x1080.png)
+*Figure 3: Full solid block mode showcasing rolling topography, agricultural parcel textures, and lateral stratigraphy.*
+
+### 14.4 3D Stratigraphic Fence Diagram
+![3D Fence Diagram](docs/screenshots/03-desktop-3d-fence-diagram-1920x1080.png)
+*Figure 4: Orthogonal 3D fence diagram corridors connecting the central exploratory borehole across regional stratigraphic horizons.*
+
+### 14.5 Nexus AI Scientific Copilot & Provenance Inspector
+![Nexus AI Copilot](docs/screenshots/04-desktop-nexus-ai-copilot.png)
+*Figure 5: Nexus AI Copilot synthesizing cross-disciplinary hydrogeological observations with transparent data provenance tiering.*
+
+### 14.6 Operations Centre & API Gateway
+![Operations Centre API Gateway](docs/screenshots/05-desktop-api-operations-center.png)
+*Figure 6: Backend Operations Centre featuring live API Registry, endpoint testing console, autonomous discovery engine, and credentials protection.*
 
 ---
 

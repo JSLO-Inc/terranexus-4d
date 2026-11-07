@@ -1,5 +1,5 @@
 # NASA JPL Tellus Land Mass Grids (RL06.1 v04)
-# Location: Zawar Mineral Belt - Udaipur (Resolved ID: locus-zawar-udaipur, Query: locus-zawar-udaipur)
+# Location: Zawar Mineral Belt - Udaipur (ID: locus-zawar-udaipur)
 # Latitude: 24.3564 N, Longitude: 73.7161 E
 # Spatial Resolution: 300km Gaussian Filter (~3 deg), 0.5 deg grid
 # Unit: Liquid Water Equivalent (LWE) thickness in cm

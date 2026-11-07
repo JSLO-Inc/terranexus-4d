@@ -13,6 +13,7 @@
 import { BaseEvidenceProvider } from './BaseEvidenceProvider';
 import { NormalizedObservation, QualityFlag } from '../types';
 import { computeHaversineDistanceKm } from '../../ingestion/spatialExtraction';
+import { isCoordinateWithinIndia } from '../../services/coordinateParser';
 
 export type { GroundwaterStationRecord } from '../../../src/data/cgwbStations';
 export { CGWB_NATIONAL_STATION_NETWORK } from '../../../src/data/cgwbStations';
@@ -39,6 +40,14 @@ export class CgwbWrisEvidenceProvider extends BaseEvidenceProvider {
     distanceKm: number | null;
     nearbyStations: Array<{ station: GroundwaterStationRecord; distanceKm: number }>;
   }> {
+    if (!isCoordinateWithinIndia(lat, lon)) {
+      return {
+        nearestStation: null,
+        distanceKm: null,
+        nearbyStations: []
+      };
+    }
+
     // 1. Calculate distances to all stations
     const stationsWithDistance = CGWB_NATIONAL_STATION_NETWORK.map(st => {
       const dist = computeHaversineDistanceKm(lat, lon, st.latitude, st.longitude);
@@ -51,7 +60,7 @@ export class CgwbWrisEvidenceProvider extends BaseEvidenceProvider {
       .sort((a, b) => a.distanceKm - b.distanceKm);
 
     if (nearby.length === 0) {
-      // Find absolute nearest even if outside radius
+      // Find absolute nearest even if outside radius (within India)
       const sorted = [...stationsWithDistance].sort((a, b) => a.distanceKm - b.distanceKm);
       return {
         nearestStation: sorted[0]?.station || null,
@@ -78,9 +87,29 @@ export class CgwbWrisEvidenceProvider extends BaseEvidenceProvider {
   async getObservations(lat: number, lon: number, regionalRadiusKm: number = 100): Promise<NormalizedObservation[]> {
     const { data } = await this.execute(lat, lon, regionalRadiusKm);
     const observations: NormalizedObservation[] = [];
+    const withinIndia = isCoordinateWithinIndia(lat, lon);
 
     const nearest = data?.nearestStation as GroundwaterStationRecord | null;
     const distanceKm = data?.distanceKm as number | null;
+
+    if (!withinIndia) {
+      observations.push(
+        this.createObservation({
+          parameter: 'groundwater_level',
+          name: 'In-Situ Borehole Telemetry (National Monitoring Network)',
+          value: null,
+          displayValue: 'Unavailable (Outside India-WRIS / CGWB Jurisdiction)',
+          units: 'meters below ground level (mbgl)',
+          category: 'unavailable',
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          spatialSupportM: 0,
+          qualityFlags: ['UNAVAILABLE', 'INSUFFICIENT_EVIDENCE'],
+          notes:
+            'Coordinate is outside the India-WRIS / CGWB national piezometer network. Regional groundwater storage trends are provided via NASA/GFZ GRACE-FO satellite gravimetry and WHYMAP global hydrogeological mapping; local borehole water-table depth is intentionally withheld.'
+        })
+      );
+      return observations;
+    }
 
     if (!data || !nearest || distanceKm === null || distanceKm > regionalRadiusKm) {
       observations.push(

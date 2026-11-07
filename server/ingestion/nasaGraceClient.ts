@@ -295,7 +295,7 @@ export async function downloadNasaGranuleFile(
             statusText: response.statusText,
             downloadStatus: 'AUTHENTICATION_REQUIRED',
             requiresEarthdataAuth: true,
-            error: `NASA endpoint issued authentication challenge (redirect to ${nextUrl.slice(0, 60)}...). Configure EARTHDATA_TOKEN in .env to authenticate.`
+            error: `NASA Earthdata Login authentication required (redirect to ${nextUrl.slice(0, 60)}...). Configure EARTHDATA_TOKEN in .env to authenticate.`
           };
         }
       }

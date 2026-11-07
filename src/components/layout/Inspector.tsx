@@ -306,7 +306,7 @@ export const Inspector: React.FC = () => {
 
               <div
                 onClick={() => setActiveModule('hydro')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors group"
               >
                 <div className="flex items-center gap-2.5">
                   <span className="p-1.5 rounded-lg bg-sky-950/80 text-sky-400 border border-sky-600/30">
@@ -319,7 +319,7 @@ export const Inspector: React.FC = () => {
                     <div className="text-[10px] text-slate-400">GRACE / GRACE-FO</div>
                   </div>
                 </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
               </div>
 
               <div

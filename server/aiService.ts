@@ -179,7 +179,10 @@ const geminiCircuitBreaker = new CircuitBreaker<
   AiExplanationResult
 >(
   async (userQuery, _context, apiKey, modelName, systemInstruction) => {
-    const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+    const ai = new GoogleGenAI({
+      apiKey: apiKey.trim(),
+      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+    });
     const response: any = await ai.models.generateContent({
       model: modelName,
       contents: [
@@ -277,7 +280,7 @@ export async function generateScientificExplanation(
   apiKey?: string,
   _timeoutMs: number = 15000
 ): Promise<AiExplanationResult> {
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   const hydrated = hydrateContext(context);
   const { loc, trendStr, observedMonths, totalMonths, nearestStation } = hydrated;
 
@@ -487,7 +490,7 @@ export async function generateScientificExplanationStream(
   onChunk?: (text: string) => void,
   isAborted?: () => boolean
 ): Promise<AiExplanationResult> {
-  const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const modelName = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   const hydrated = hydrateContext(context);
   const { loc, trendStr, observedMonths, totalMonths, nearestStation } = hydrated;
   const sources = computeSourceInspectionMetrics(context);
@@ -522,7 +525,10 @@ CURRENT PLATFORM SPATIOTEMPORAL CONTEXT:
 
   if (apiKey && apiKey.trim().length > 15) {
     try {
-      const ai = new GoogleGenAI({ apiKey: apiKey.trim() });
+      const ai = new GoogleGenAI({
+        apiKey: apiKey.trim(),
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
       const streamResult = await ai.models.generateContentStream({
         model: modelName,
         contents: [

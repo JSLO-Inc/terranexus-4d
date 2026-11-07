@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import { Target, BarChart2, Loader2, X, AlertCircle } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (typeof window === 'undefined' ? 'http://localhost:3001' : '');
 
 interface AreaAnalysisToolProps {
   centerLat: number;

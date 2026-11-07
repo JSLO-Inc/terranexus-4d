@@ -540,9 +540,10 @@ export const fetchLocationDossierImpl = async (lat: number, lon: number, radiusK
       const json = await res.json();
       if (json.success && json.data) {
         const nearestObs = json.data.groundwater?.nearestObservation;
-        const updatedDepth = nearestObs?.value !== null && typeof nearestObs?.value === 'number'
+        const matchedBh = AUTHENTIC_BOREHOLES.find(b => b.locationId === globalState.selectedLocation.id);
+        const updatedDepth = (nearestObs?.value !== null && typeof nearestObs?.value === 'number')
           ? nearestObs.value
-          : globalState.activeGroundwaterDepthMbgl;
+          : (matchedBh ? matchedBh.waterTableDepthMeters : (json.data.groundwater?.estimate?.medianDepthMbgl ?? null));
         globalState = {
           ...globalState,
           currentDossier: json.data,
@@ -598,6 +599,7 @@ export function useTerranexusStore(): TerranexusState {
     },
     setCutawayPreset: (cutawayPreset) => {
       globalState = { ...globalState, cutawayPreset };
+      saveUserPreferences(globalState);
       notify();
     },
     setIsInitialSearch: (isInitialSearch) => {
@@ -606,6 +608,7 @@ export function useTerranexusStore(): TerranexusState {
     },
     setMainView: (mainView) => {
       globalState = { ...globalState, mainView };
+      saveUserPreferences(globalState);
       notify();
     },
     setCurrentDossier: (currentDossier) => {
@@ -634,6 +637,7 @@ export function useTerranexusStore(): TerranexusState {
     },
     setGlobeBasemap: (globeBasemap) => {
       globalState = { ...globalState, globeBasemap };
+      saveUserPreferences(globalState);
       notify();
     },
     setActiveBasemap: (activeBasemap) => {
@@ -642,6 +646,7 @@ export function useTerranexusStore(): TerranexusState {
         activeBasemap,
         globeBasemap: activeBasemap as any
       };
+      saveUserPreferences(globalState);
       notify();
     },
     fetchLocationDossier: fetchLocationDossierImpl,
@@ -651,6 +656,7 @@ export function useTerranexusStore(): TerranexusState {
     },
     setViewMode: (viewMode) => {
       globalState = { ...globalState, viewMode };
+      saveUserPreferences(globalState);
       notify();
     },
     setSelectedLocation: (selectedLocation) => {
@@ -679,10 +685,12 @@ export function useTerranexusStore(): TerranexusState {
     },
     setWaterIntensity: (waterIntensity) => {
       globalState = { ...globalState, waterIntensity: Math.max(0, Math.min(1, waterIntensity)) };
+      saveUserPreferences(globalState);
       notify();
     },
     setWaterOpacity: (waterOpacity) => {
       globalState = { ...globalState, waterOpacity: Math.max(0, Math.min(1, waterOpacity)) };
+      saveUserPreferences(globalState);
       notify();
     },
     setActiveGroundwaterDepthMbgl: (activeGroundwaterDepthMbgl) => {
@@ -711,6 +719,7 @@ export function useTerranexusStore(): TerranexusState {
     },
     setCutawayExaggeration: (cutawayExaggeration) => {
       globalState = { ...globalState, cutawayExaggeration: Math.max(0.5, Math.min(4.0, cutawayExaggeration)) };
+      saveUserPreferences(globalState);
       notify();
     },
     setExplorationExtentKm: (explorationExtentKm) => {
@@ -718,7 +727,6 @@ export function useTerranexusStore(): TerranexusState {
       notify();
     },
     setTerrainElevationGrid: (terrainElevationGrid) => {
-      if (globalState.terrainElevationGrid === terrainElevationGrid) return;
       globalState = { ...globalState, terrainElevationGrid };
       notify();
     },

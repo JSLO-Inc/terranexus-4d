@@ -1,5 +1,5 @@
 # NASA JPL Tellus Land Mass Grids (RL06.1 v04)
-# Location: Kolar Schist Belt - Robertsonpet (Resolved ID: locus-dharwar-kolar, Query: locus-dharwar-kolar)
+# Location: Kolar Schist Belt - Robertsonpet (Resolved ID: locus-dharwar-kolar, Query: loc-16.5777-82.0033)
 # Latitude: 12.9602 N, Longitude: 78.2712 E
 # Spatial Resolution: 300km Gaussian Filter (~3 deg), 0.5 deg grid
 # Unit: Liquid Water Equivalent (LWE) thickness in cm

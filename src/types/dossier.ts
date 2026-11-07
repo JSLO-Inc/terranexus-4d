@@ -144,6 +144,42 @@ export interface ProviderExecutionMetric {
   error?: string;
 }
 
+export interface QuadrupleVerificationStage {
+  stageNumber: 1 | 2 | 3 | 4;
+  stageCode:
+    | 'STAGE_1_SOURCE_AUTHENTICITY'
+    | 'STAGE_2_GEOGRAPHICAL_ACCURACY'
+    | 'STAGE_3_SCIENTIFIC_VALIDATION'
+    | 'STAGE_4_PRESENTATION_CLAIMS';
+  title: string;
+  passed: boolean;
+  checksPerformed: number;
+  checksPassed: number;
+  summary: string;
+  details: string[];
+}
+
+export interface QuadrupleVerificationReport {
+  overallPassed: boolean;
+  verifiedAt: string;
+  totalChecks: number;
+  passedChecks: number;
+  verificationHash: string;
+  stages: QuadrupleVerificationStage[];
+}
+
+export interface GlobalCategoryCoverageItem {
+  categoryId: 'geographic' | 'terrain' | 'groundwater' | 'soil' | 'geology' | 'minerals' | 'satellite';
+  categoryName: string;
+  status: 'AVAILABLE' | 'PARTIALLY_AVAILABLE' | 'MODELLED' | 'UNAVAILABLE';
+  dataTier: DataCategory;
+  primarySource: string;
+  spatialResolution: string;
+  confidencePercent: number;
+  summary: string;
+  limitationNote: string;
+}
+
 export interface DossierResponse {
   status: 'SUCCESS' | 'DEGRADED' | 'ERROR';
   locationContext: LocationContext;
@@ -213,4 +249,7 @@ export interface DossierResponse {
     rationale: string;
     tier: 'HIGH' | 'MODERATE' | 'LIMITED' | 'INSUFFICIENT';
   };
+  globalCoverageMatrix?: GlobalCategoryCoverageItem[];
+  quadrupleVerification?: QuadrupleVerificationReport;
 }
+

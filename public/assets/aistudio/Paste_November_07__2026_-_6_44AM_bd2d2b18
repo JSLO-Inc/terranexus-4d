@@ -1,0 +1,904 @@
+TERRANEXUS 4D — ULTIMATE MASTER ENGINEERING, COMPLETE REPAIR, REDESIGN AND QUALITY ASSURANCE DIRECTIVE
+
+YOUR MISSION: TAKE THE EXISTING APPLICATION, FIND EVERY PROBLEM, FIX EVERYTHING AND DELIVER A PROFESSIONAL PRODUCT.
+
+You are being assigned the role of an entire world-class software engineering, geospatial science, 3D graphics, artificial intelligence, product design and quality assurance team.
+
+Your responsibility is to take my existing application, TERRANEXUS 4D, and turn it into a polished, reliable, scientifically accurate, globally functional and visually extraordinary Earth-intelligence platform.
+
+This is not a request to build another demonstration.
+
+This is not a request to add a few attractive UI components.
+
+This is not a request to write a report describing what should be fixed.
+
+I want you to investigate the actual application, identify its problems, repair the underlying causes, improve its architecture, correct its design, implement missing functionality and verify the finished result.
+
+I want you to dedicate the necessary development time to this task. Do not rush. Do not stop after the first successful build. Do not settle for superficial improvements.
+
+Work through the entire application systematically, repeatedly inspect your changes and continue improving it until the highest achievable quality is reached.
+
+---
+
+PART 1 — UNDERSTAND THE COMPLETE EXISTING APPLICATION
+
+Before making changes, thoroughly investigate the entire TERRANEXUS 4D codebase.
+
+Inspect every relevant:
+
+- Source file.
+- Component.
+- Page.
+- Module.
+- Hook.
+- Service.
+- Utility.
+- API integration.
+- Backend route.
+- Data-processing script.
+- State-management file.
+- Configuration file.
+- Dependency.
+- Rendering system.
+- Animation implementation.
+- Styling file.
+- Responsive layout.
+- Test file.
+- Build configuration.
+
+Perform a careful line-by-line review of the codebase, especially the code responsible for location search, geographical data retrieval, CesiumJS, Three.js, geological geometry, Nexus AI, navigation, UI positioning and animation.
+
+Do not merely open files and assume that their implementation is correct.
+
+Trace how data moves through the application.
+
+Understand how each feature communicates with the backend, which APIs it uses, what data it receives, how that data is processed and how it is displayed.
+
+Identify:
+
+1. Broken implementations.
+2. Incomplete functionality.
+3. Incorrect API endpoints.
+4. Invalid API requests.
+5. Missing environment variables.
+6. Incorrect API response parsing.
+7. Incorrect coordinate transformations.
+8. Broken state updates.
+9. Incorrect component dependencies.
+10. Rendering errors.
+11. Animation conflicts.
+12. Incorrect CSS positioning.
+13. Unresponsive layouts.
+14. Data-processing errors.
+15. Incorrect scientific calculations.
+16. Incorrect or misleading information.
+17. Unused or duplicate code.
+18. Performance problems.
+19. Memory leaks.
+20. Security vulnerabilities.
+
+Create an internal issue inventory and work through it systematically.
+
+Do not remove existing useful features just because they are difficult to repair.
+
+Preserve the existing project identity and the TERRANEXUS 4D name.
+
+---
+
+PART 2 — REPAIR THE LOCATION SEARCH SYSTEM FIRST
+
+THIS IS A CRITICAL EXISTING FAILURE. LOCATION SEARCH IS NOT WORKING PROPERLY. FIX IT.
+
+The location-search functionality must be investigated at every level.
+
+Do not simply redesign the search bar.
+
+Find out exactly why locations are not appearing.
+
+Investigate:
+
+- Search input handling.
+- Autocomplete implementation.
+- API configuration.
+- API keys and permissions.
+- Network requests.
+- Backend proxy routes.
+- API response structures.
+- Geocoding.
+- Place identification.
+- Search-result parsing.
+- Geographic coordinates.
+- State updates.
+- Debouncing.
+- Request cancellation.
+- Error handling.
+- Search-result rendering.
+- Map-camera navigation.
+- Location selection.
+- Geographic boundary retrieval.
+
+Determine the actual root cause of the failure.
+
+Fix the root cause rather than applying temporary workarounds.
+
+2.1 Global Search Requirements
+
+Users must be able to search for geographical locations throughout the entire world.
+
+Support, where the underlying geographical databases provide them:
+
+- Countries.
+- States.
+- Provinces.
+- Cities.
+- Towns.
+- Villages.
+- Settlements.
+- Districts.
+- Municipalities.
+- Administrative regions.
+- Islands.
+- Rivers.
+- Lakes.
+- Reservoirs.
+- Dams.
+- Mountains.
+- Forests.
+- Deserts.
+- Geological formations.
+- Mining regions.
+- Watersheds.
+- Natural landmarks.
+- Important human-made landmarks.
+- Coordinates.
+- Other geographical entities.
+
+A search for Bhimavaram, for example, should return the correct geographical location, identify its administrative context and navigate the globe to its actual coordinates.
+
+The same functionality must work for supported locations across other countries and continents.
+
+2.2 Search Integration
+
+Investigate and correctly implement appropriate geographical search services, including:
+
+- Google Places API.
+- Google Geocoding API.
+- OpenStreetMap.
+- GeoNames.
+- Other appropriate authoritative geographical databases.
+
+Verify the current API requirements and usage policies.
+
+Do not assume that an API works simply because its package has been installed.
+
+Test actual requests and actual returned results.
+
+Handle API failures properly.
+
+Never silently return fabricated search results.
+
+2.3 Search Experience
+
+Implement:
+
+- Large premium search bar.
+- Responsive autocomplete.
+- Accurate search results.
+- Clear location names.
+- Country and administrative context.
+- Coordinates where available.
+- Disambiguation for similarly named locations.
+- Alternative spellings.
+- Search history.
+- Saved locations.
+- Recently viewed locations.
+- Loading indicators.
+- No-results state.
+- Network-error state.
+- Smooth camera navigation.
+
+Acceptance requirement: I must be able to search for multiple real locations in different countries and see actual results, select them and navigate to the correct geographical position.
+
+Do not declare the location-search problem fixed until this has been tested.
+
+---
+
+PART 3 — REPAIR ALL SCIENTIFIC DATA INTEGRATIONS
+
+TERRANEXUS 4D must provide real, traceable scientific information.
+
+Investigate every data integration already present in the application.
+
+For each integration, verify:
+
+- Source authenticity.
+- API endpoint.
+- Authentication.
+- API permissions.
+- Response structure.
+- Units.
+- Coordinates.
+- Geographic coverage.
+- Spatial resolution.
+- Observation dates.
+- Data processing.
+- Attribution.
+- Licensing.
+- Error handling.
+- Actual availability.
+
+Do not keep broken APIs in the application merely because they were previously implemented.
+
+Repair them, replace them with a more appropriate authorised source, or clearly identify them as unavailable.
+
+Investigate appropriate scientific sources such as NASA, USGS, ESA, Copernicus, ISRO, NRSC, CGWB, GSI, CWC, FAO, ISRIC and relevant national scientific organisations.
+
+Use official and appropriate regional datasets wherever possible.
+
+3.1 Groundwater — Nexus Hydro
+
+Repair and validate the groundwater module.
+
+Display genuine available information, such as:
+
+- Observation-well measurements.
+- Groundwater levels.
+- Groundwater trends.
+- Aquifer information.
+- Surface-water information.
+- Rainfall.
+- Watersheds.
+- Drainage networks.
+- Groundwater quality.
+- Relevant water-resource indicators.
+
+Distinguish groundwater depth, groundwater elevation and groundwater-storage indicators.
+
+Never present GRACE total water storage anomalies as precise local groundwater depth.
+
+Where measurements are unavailable, investigate whether an appropriate scientific model can produce a defensible estimate.
+
+Do not invent numerical groundwater values.
+
+3.2 Terrain
+
+Repair the terrain data pipeline and rendering.
+
+Use genuine Digital Elevation Models and appropriate elevation datasets.
+
+Display:
+
+- Elevation.
+- Slope.
+- Aspect.
+- Hillshade.
+- Terrain profiles.
+- Valleys.
+- Mountains.
+- Ridges.
+- Drainage characteristics.
+
+Terrain must derive from actual elevation information.
+
+3.3 Soil
+
+Repair the soil information system.
+
+Investigate appropriate datasets such as NBSS&LUP, ISRIC SoilGrids and other relevant national soil surveys.
+
+Display available soil classifications and properties with correct units, dates, sources and resolution.
+
+Do not describe coarse global modelled soil information as a local laboratory soil test.
+
+3.4 Geology — Nexus Strata
+
+Repair geological data retrieval and geological visualisation.
+
+Use available authoritative geological information.
+
+Support:
+
+- Rock types.
+- Lithology.
+- Geological formations.
+- Stratigraphy.
+- Faults.
+- Geological boundaries.
+- Geological ages.
+- Cross-sections.
+- Subsurface interpretations.
+
+Do not invent underground structures.
+
+3.5 Minerals — Nexus Mineral
+
+Repair the mineral-information system.
+
+Display genuine published mineral occurrences, resource information, mining records and geological associations where available.
+
+Satellite anomalies must not be presented as confirmed mineral deposits.
+
+Clearly distinguish known occurrences, remote-sensing indicators and modelled prospectivity.
+
+---
+
+PART 4 — REBUILD THE 3D RENDERING TO MATCH THE PROVIDED VISUAL REFERENCES
+
+THIS IS A MAJOR DESIGN AND ENGINEERING PRIORITY.
+
+I am not satisfied with basic cube-shaped, block-like or artificial geological cutout rendering.
+
+I want the final 3D rendering to closely reproduce the visual direction of the reference images below.
+
+You MUST inspect the actual references.
+
+REFERENCE A — NATURAL GEOLOGICAL CUTAWAY
+
+https://www.sicilyactive.com/sites/default/files/blog/sicily_active_High-resolution_geological_cross-section_of_Valle_del_bove_.png
+
+Required visual characteristics:
+
+- Natural terrain surface.
+- Realistic elevation variations.
+- Natural geographical shape.
+- Detailed geological cross-section.
+- Convincing geological formations.
+- Realistic relationship between surface and subsurface.
+
+REFERENCE B — REALISTIC SUBSURFACE RENDERING
+
+https://cgconnect.chaos.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNHhXQVE9PSIsImV4cCI6bnVsbCwicHVyIjoibG9iX2lkIn19--2e93fcd3df1e80a723c8bbac251bd4c36eea42b3/aa342bcc.jpg
+
+Required visual characteristics:
+
+- Convincing three-dimensional appearance.
+- Realistic material representation.
+- Detailed subsurface surfaces.
+- Natural lighting.
+- Clear geological separation.
+
+REFERENCE C — GEOLOGICAL FORMATIONS AND LAYERING
+
+https://www.geomodelle.com/images/Block%20Model03.jpg
+
+Use its geological detail and layered geological representation as inspiration.
+
+Do not copy its rectangular overall shape.
+
+I want a natural geographical cutout, not a Minecraft-like block.
+
+REFERENCE D — CINEMATIC EARTH CROSS-SECTION
+
+https://ecweb.ecer.com/news-img/a5d8f32843d909a1b4fd0ac03d5a1063.webp
+
+Use this as an additional reference for geological depth, visual separation and presentation.
+
+REFERENCE E — REALISTIC 3D EARTH TERRAIN
+
+https://cesium.com/blog/2018/04/25/cesium-world-terrain-canada/
+
+https://www.maptiler.com/terrain/
+
+Use these references for natural terrain quality, elevation geometry and realistic surface appearance.
+
+4.1 WHAT I ACTUALLY WANT
+
+Imagine that the user searches for a real village.
+
+The application takes the actual geographical boundary of that location, obtains its available elevation information, constructs a realistic terrain surface and extracts that region from the Earth.
+
+The extracted region should look like a piece of real geographical landscape.
+
+Its upper surface should contain actual terrain geometry.
+
+Its sides should reveal a detailed geological cross-section where suitable geological data exists.
+
+The overall presentation must resemble a professional geological visualisation, not a basic 3D cube.
+
+The extracted region should preserve its natural geographical outline.
+
+Use:
+
+- Irregular polygon geometry.
+- Real elevation meshes.
+- Accurate geographic coordinates.
+- Appropriate geological surfaces.
+- Scientifically grounded subsurface geometry.
+- Natural terrain textures.
+- Proper material systems.
+- High-quality lighting.
+- Shadows.
+- Smooth camera movement.
+
+If actual subsurface geometry is unavailable, use a clearly labelled conceptual or modelled representation. Never pretend that a decorative geological layer is measured underground geology.
+
+---
+
+PART 5 — FIX THE GLOBE-TO-CUTOUT ANIMATION COMPLETELY
+
+The globe-to-cutout animation must be one of the signature experiences of TERRANEXUS 4D.
+
+Place a beautiful liquid-glass mode selector at the top:
+
+3D GLOBE | 3D CUTOUT
+
+When the user selects 3D CUTOUT:
+
+1. The camera smoothly approaches the selected location.
+2. The selected geographical area is highlighted.
+3. Its actual available boundary is displayed.
+4. The geographical surface is prepared.
+5. The region visually separates from the globe.
+6. The region rises smoothly out of the Earth.
+7. The surrounding globe transitions appropriately.
+8. The extracted terrain becomes the primary visual focus.
+9. The geological cutaway is revealed where supporting information exists.
+10. The user can inspect the extracted region from different angles.
+
+The transition should feel like a physical geographical section being lifted from the Earth.
+
+Implement the animation using appropriate CesiumJS and Three.js geometry and camera techniques.
+
+Do not fake the effect using simple scaling of a rectangular box.
+
+Animation repair
+
+Inspect every existing animation in the application.
+
+Fix:
+
+- Jerky movement.
+- Sudden camera jumps.
+- Flickering.
+- Incorrect easing.
+- Unnatural transitions.
+- Elements appearing suddenly.
+- Elements disappearing unexpectedly.
+- Overlapping animations.
+- Incorrect animation timing.
+- Layout shifts.
+- Geometry popping.
+- Texture stretching.
+- Memory leaks.
+
+Use carefully designed easing functions and appropriate interpolation.
+
+Ensure animations work in both directions.
+
+Make the interface feel exceptionally fluid while maintaining performance.
+
+---
+
+PART 6 — REPAIR NEXUS AI COMPLETELY
+
+Nexus AI is not supposed to be a decorative chatbot or a collection of predefined answers.
+
+It must work as an actual intelligent Earth-science assistant.
+
+Audit its complete implementation.
+
+Investigate:
+
+- Gemini API integration.
+- API authentication.
+- Model configuration.
+- Request construction.
+- Streaming.
+- Response parsing.
+- Conversation history.
+- Context management.
+- Error handling.
+- Token limits.
+- Tool integration.
+- Source retrieval.
+- Data grounding.
+- User-interface behaviour.
+
+Fix every issue discovered.
+
+Required Nexus AI behaviour
+
+It should understand:
+
+- The currently selected location.
+- The selected geographic boundary.
+- Available scientific datasets.
+- Their original sources.
+- Their dates.
+- Their limitations.
+- The active map layers.
+- The current visualisation mode.
+- Relevant analytical results.
+
+It should answer naturally and intelligently.
+
+It must be capable of explaining:
+
+- Groundwater information.
+- Terrain.
+- Soil.
+- Geological formations.
+- Mineral information.
+- Satellite observations.
+- Historical changes.
+- Scientific limitations.
+- Data reliability.
+
+It must not fabricate information.
+
+If information is unavailable, say so.
+
+If an answer is based on a model, identify the model and explain its limitations.
+
+Implement genuine contextual intelligence rather than simply passing the user's question to Gemini without geographical context.
+
+The AI interface should include:
+
+- Smooth streaming responses.
+- Readable messages.
+- Source references.
+- Useful loading indicators.
+- Error recovery.
+- Conversation history.
+- Context-aware questions.
+- Professional visual design.
+
+Test real conversations with multiple locations and different scientific questions.
+
+---
+
+PART 7 — COMPLETELY REPAIR AND POLISH THE UI
+
+The entire user interface requires a professional review.
+
+Do not assume that the current positioning and sizing of elements is correct.
+
+Inspect every screen at different resolutions.
+
+Fix:
+
+- Incorrect element placement.
+- Misalignment.
+- Uneven spacing.
+- Poor padding.
+- Overlapping components.
+- Unreadable text.
+- Inconsistent font sizes.
+- Incorrect card dimensions.
+- Poor navigation placement.
+- Excessively small controls.
+- Incorrect panel sizes.
+- Broken responsive layouts.
+- Poor visual hierarchy.
+- Unnecessary empty space.
+- Excessive scrolling.
+- Inconsistent colours.
+- Inconsistent border radii.
+- Incorrect transparency.
+- Unnecessary visual clutter.
+
+Design requirements
+
+Use the premium space-inspired liquid-glass design system.
+
+The interface should have:
+
+- Deep space backgrounds.
+- Subtle cosmic colour accents.
+- Translucent glass panels.
+- Realistic glass highlights.
+- Controlled reflections.
+- Premium typography.
+- Larger interactive elements.
+- Spacious layouts.
+- Beautiful navigation.
+- Consistent iconography.
+- Smooth transitions.
+
+Increase the overall scale of important elements.
+
+The application must feel comfortable, spacious and professional.
+
+Do not simply enlarge everything without adjusting the layout.
+
+Earth Explorer positioning
+
+Pay particular attention to:
+
+- Main navigation.
+- Search bar.
+- Globe/cutout selector.
+- Layer controls.
+- Data panels.
+- Location details.
+- Nexus AI access.
+- Timeline.
+- Camera controls.
+- Legends.
+- Loading indicators.
+- Measurement tools.
+
+The globe must remain the primary visual focus.
+
+Do not let panels unnecessarily obstruct it.
+
+Make panels expandable and collapsible where appropriate.
+
+---
+
+PART 8 — REVIEW EVERY OTHER MODULE
+
+Do not focus only on the globe.
+
+Inspect and repair:
+
+- Home.
+- 4D Earth Explorer.
+- Nexus Hydro.
+- Nexus Strata.
+- Nexus Mineral.
+- Nexus AI.
+- Data Catalogue.
+- API Gateway.
+- Location Search.
+- Location Dossiers.
+- Historical Exploration.
+- Reports.
+- Settings.
+- Navigation.
+- Saved Locations.
+- All supporting components.
+
+Every feature must perform the action its interface promises.
+
+A button that looks functional but does nothing is unacceptable.
+
+A chart with invented values is unacceptable.
+
+A map layer that does not load real data is unacceptable.
+
+A report that fills missing fields with guesses is unacceptable.
+
+Repair the actual underlying implementation.
+
+Add useful features where they improve the product, but do not introduce unnecessary complexity.
+
+---
+
+PART 9 — GLOBAL SCIENTIFIC ACCURACY AND FOUR-LEVEL VERIFICATION
+
+Every important scientific output must undergo rigorous validation.
+
+Use four verification stages:
+
+1. Source verification: Confirm that the source and dataset actually exist and that the data originates from the stated organisation.
+
+2. Geographic verification: Confirm the correct location, coordinates, boundaries, units, coverage and resolution.
+
+3. Scientific verification: Validate calculations, transformations, assumptions and interpretations.
+
+4. Presentation verification: Confirm that the displayed result, date, units, source, classification and AI explanation accurately represent the underlying information.
+
+Distinguish:
+
+- OBSERVED.
+- SATELLITE-DERIVED.
+- PROCESSED.
+- MODELLED.
+- PREDICTED.
+- SIMULATED.
+- UNAVAILABLE.
+- STALE.
+
+Never present an estimate as a direct measurement.
+
+Never fabricate a missing value.
+
+Never use a language model to invent scientific measurements.
+
+If information is not available, communicate that clearly.
+
+Maintain traceable source metadata.
+
+Do not claim that a result is quadruple-verified unless the corresponding checks were actually performed.
+
+---
+
+PART 10 — PERFORMANCE, STABILITY AND SECURITY
+
+Inspect and optimise the entire application.
+
+Fix:
+
+- Slow rendering.
+- Unnecessary re-rendering.
+- Memory leaks.
+- Excessive API requests.
+- Inefficient geometry.
+- Unnecessary dataset loading.
+- Slow search.
+- Slow camera transitions.
+- Large initial loading times.
+- Unhandled errors.
+- Resource-cleanup problems.
+- Security vulnerabilities.
+
+Use appropriate:
+
+- Lazy loading.
+- Caching.
+- Request cancellation.
+- Debouncing.
+- Progressive rendering.
+- Level of detail.
+- Web workers.
+- Efficient state management.
+- Geometry disposal.
+- API validation.
+- Backend secret management.
+
+Never expose private API keys in frontend code.
+
+Respect external API usage policies and data licences.
+
+The application must remain usable on ordinary hardware.
+
+---
+
+PART 11 — THE MOST IMPORTANT PART: ACTUALLY TEST EVERYTHING
+
+Do not mark a feature complete merely because its interface has been created.
+
+Execute actual tests.
+
+Test 1 — Location search
+
+Search for multiple real locations.
+
+Test Indian locations and international locations.
+
+Confirm actual search results, coordinates, selection and globe navigation.
+
+Investigate every failure.
+
+Test 2 — Scientific data
+
+Test every available scientific layer.
+
+Confirm actual data retrieval, correct units, source metadata, dates and geographical alignment.
+
+Test 3 — 3D rendering
+
+Test the globe, terrain, cutout geometry, geological layers, lighting and camera controls.
+
+Compare the output against all provided visual references.
+
+Test 4 — Animation
+
+Test every transition repeatedly.
+
+Check for flickering, geometry errors, camera jumps, layout shifts and frame-rate problems.
+
+Test 5 — Nexus AI
+
+Ask real geographical and scientific questions about multiple locations.
+
+Verify that answers are grounded in the selected location and actual datasets.
+
+Test 6 — UI
+
+Inspect every screen and interactive element at desktop, laptop, tablet and mobile sizes.
+
+Test 7 — Technical quality
+
+Run actual builds, TypeScript checks, unit tests, integration tests and end-to-end tests where available.
+
+Fix the failures.
+
+Then rerun the tests.
+
+---
+
+PART 12 — CONTINUOUS IMPROVEMENT LOOP
+
+Do not perform one audit and stop.
+
+Follow this cycle repeatedly:
+
+1. Inspect the existing implementation.
+2. Identify a real problem.
+3. Determine its root cause.
+4. Implement a proper fix.
+5. Run the relevant test.
+6. Inspect the actual result.
+7. Identify any remaining weaknesses.
+8. Refine the implementation.
+9. Retest.
+10. Check for regressions elsewhere.
+
+Continue this process across the entire application.
+
+When one fix breaks another feature, resolve the regression before moving forward.
+
+Do not hide errors to make the application appear functional.
+
+Do not disable failing features instead of repairing them.
+
+Do not replace working scientific functionality with static demonstration data.
+
+Do not create temporary hardcoded solutions and leave them in the final product.
+
+If an external API key or unavailable dataset blocks a feature, implement the correct integration structure and clearly document the dependency.
+
+---
+
+PART 13 — FINAL COMPLETION REQUIREMENTS
+
+At the end of the work, provide an honest engineering report.
+
+For every module, identify:
+
+- Original problem.
+- Root cause.
+- Changes implemented.
+- Files modified.
+- Actual test performed.
+- Test result.
+- Remaining limitations.
+
+Use these statuses:
+
+- COMPLETED AND TESTED.
+- IMPLEMENTED BUT NOT FULLY VERIFIED.
+- PARTIALLY IMPLEMENTED.
+- BLOCKED BY EXTERNAL DEPENDENCY.
+- NOT IMPLEMENTED.
+
+Include:
+
+1. Complete issue inventory.
+2. Location-search repair details.
+3. Scientific data integration results.
+4. Nexus Hydro repair details.
+5. Nexus Strata repair details.
+6. Nexus Mineral repair details.
+7. Nexus AI repair details.
+8. Globe and terrain improvements.
+9. Geological cutout improvements.
+10. Animation improvements.
+11. UI positioning and responsive corrections.
+12. Performance improvements.
+13. Security improvements.
+14. Automated test results.
+15. Remaining issues.
+16. Required API keys and external dependencies.
+
+Do not claim that every feature works if it has not been tested.
+
+---
+
+FINAL INSTRUCTION — DO NOT SETTLE FOR A SUPERFICIAL RESULT
+
+I want you to treat TERRANEXUS 4D as a serious professional software product being prepared for public demonstration and real-world use.
+
+I want the actual application repaired and improved, not a newly generated mock-up.
+
+Do not just give me suggestions.
+
+Do not stop at the planning stage.
+
+Do not simply add new UI components.
+
+Find the actual problems and fix them.
+
+Review the code carefully, improve the architecture where necessary, correct the scientific data pipelines, repair location search, rebuild the geological rendering, fix Nexus AI, correct every poorly positioned interface element and improve every broken animation.
+
+Compare the final 3D rendering directly against the reference images. The desired visual direction is natural, realistic terrain with a detailed geological cutaway, not a rectangular Minecraft-style block.
+
+I want a beautiful, immersive, fluid, globally searchable, scientifically responsible Earth-intelligence platform.
+
+Take the necessary time. Work systematically. Inspect, repair, test, refine and repeat. Do not declare the task finished just because the application builds successfully.
+
+Your final responsibility is to deliver the best technically achievable version of TERRANEXUS 4D, with every implemented feature genuinely working and every known limitation clearly disclosed.
+
+BEGIN WITH A COMPLETE CODEBASE AUDIT. THEN FIX THE APPLICATION, MODULE BY MODULE, UNTIL THE ENTIRE PRODUCT HAS BEEN REVIEWED AND TESTED.

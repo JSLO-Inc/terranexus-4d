@@ -109,49 +109,41 @@ export const App: React.FC = () => {
                 </div>
 
                 {/* Docked In-Flow Bottom Visualization Toolbar */}
-                <footer className="h-12 shrink-0 border-t border-slate-800/80 bg-slate-950/95 px-4 flex items-center justify-between gap-4 z-20 select-none">
-                  {/* Left: Observation Timeline & 2D Return Button */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setMainView('dossier2d')}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm"
-                      title="Return to 2D Location Evidence Dossier"
-                    >
-                      <Compass className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>2D Dossier</span>
-                    </button>
-
+                <footer className="h-12 shrink-0 border-t border-white/10 liquid-glass-elevated px-4 flex items-center justify-between gap-3 z-20 select-none overflow-hidden">
+                  {/* Left: Observation Timeline & Depth Controls */}
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <TimeControl />
 
                     {/* Depth & Aquifer Controls Drawer Toggle */}
                     <button
                       onClick={() => setShowDepthPanel(!showDepthPanel)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                         showDepthPanel
                           ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold shadow-sm'
-                          : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-amber-300 hover:border-slate-700'
+                          : 'liquid-glass-pill text-slate-200 hover:text-amber-300 hover:border-amber-400/50'
                       }`}
                       title="Toggle Subsurface Depth & Water Controls"
                     >
-                      <Sliders className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="hidden sm:inline">Depth & Aquifer Deck</span>
+                      <Sliders className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span className="hidden sm:inline">Depth Deck</span>
                       <span className="text-amber-400 font-bold">(-{depthMeters}m)</span>
                     </button>
                   </div>
 
-                  {/* Center: Real Piezometric Level Status */}
-                  <div className="hidden lg:flex items-center gap-2 text-xs font-mono text-slate-400">
-                    <span className="text-cyan-400">Water Table: {activeGroundwaterDepthMbgl !== null ? `-${activeGroundwaterDepthMbgl.toFixed(1)} mbgl` : 'No Local Well (<50km)'}</span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-amber-400">Slice: -{depthMeters}m</span>
-                  </div>
+                  {/* Right: Real Piezometric Level Status & Inspector Toggle */}
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-pill text-xs font-mono whitespace-nowrap">
+                      <span className="text-cyan-300 font-medium">
+                        WT: {activeGroundwaterDepthMbgl !== null ? `-${activeGroundwaterDepthMbgl.toFixed(1)} mbgl` : 'Sparse (<50km)'}
+                      </span>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-amber-300 font-medium">Slice: -{depthMeters}m</span>
+                    </div>
 
-                  {/* Right: Quick Inspector Locus Toggle if collapsed */}
-                  <div className="flex items-center gap-2">
                     {!inspectorOpen && (
                       <button
                         onClick={() => setInspectorOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-all shadow-sm whitespace-nowrap cursor-pointer"
                         title="Open Location & Evidence Inspector"
                       >
                         <Layers className="w-3.5 h-3.5 text-cyan-400" />

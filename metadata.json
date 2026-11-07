@@ -1,0 +1,8 @@
+{
+  "name": "TERRANEXUS 4D — National Subsurface Intelligence & Earth Digital Twin",
+  "description": "4D Earth, Subsurface, Groundwater & Mineral Intelligence Platform grounded in NASA GRACE/GRACE-FO, CGWB, GSI Bhukosh, and Copernicus Sentinel-2 geospatial datasets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

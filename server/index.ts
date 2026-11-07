@@ -24,7 +24,7 @@ import { dossierRouter } from './routes/dossierRoutes';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.API_PORT || (process.env.NODE_ENV === 'production' ? process.env.PORT : 3001) || 3001);
 
 // 1. Mandatory HTTP Security Headers (XSS, CSP, nosniff, frame-ancestors)
 app.use(applySecurityHeaders);
@@ -551,7 +551,7 @@ function checkAiRateLimit(ip: string): boolean {
   return true;
 }
 
-app.post('/api/ai/explain', async (req, res) => {
+const handleAiExplanationRoute = async (req: express.Request, res: express.Response) => {
   try {
     const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
 
@@ -564,14 +564,22 @@ app.post('/api/ai/explain', async (req, res) => {
       });
     }
 
-    const { query, context } = req.body;
+    const rawQuery = req.body?.query ?? req.body?.question;
+    const rawContext = req.body?.context ?? (req.body?.locationContext ? {
+      location: req.body.locationContext,
+      depthMeters: req.body.depthMeters ?? 45,
+      timeStep: req.body.timeStep ?? '2024-11 (Post-Monsoon)',
+      activeLayers: req.body.activeLayers ?? [],
+      formations: req.body.formations ?? [],
+      aquifers: req.body.aquifers ?? []
+    } : null);
 
     // Rigorous input validation
-    if (!query || typeof query !== 'string') {
+    if (!rawQuery || typeof rawQuery !== 'string') {
       return res.status(400).json({ success: false, error: 'Invalid or missing "query" string parameter' });
     }
 
-    const cleanQuery = query.trim();
+    const cleanQuery = rawQuery.trim();
     if (cleanQuery.length < 2) {
       return res.status(400).json({ success: false, error: 'Query is too short (minimum 2 characters required)' });
     }
@@ -580,18 +588,20 @@ app.post('/api/ai/explain', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Query exceeds maximum permitted length (500 characters)' });
     }
 
-    if (!context || typeof context !== 'object' || !context.location) {
+    if (!rawContext || typeof rawContext !== 'object' || !rawContext.location) {
       return res.status(400).json({ success: false, error: 'Invalid or missing "context" payload object with location details' });
     }
 
     // Backend-exclusive API key resolution
     const apiKey = process.env.GEMINI_API_KEY;
-    const result = await generateScientificExplanation(cleanQuery, context, apiKey, 15000);
+    const result = await generateScientificExplanation(cleanQuery, rawContext, apiKey, 15000);
 
     res.json({
       success: true,
       result,
-      data: result
+      data: result,
+      answer: result.reply,
+      reply: result.reply
     });
   } catch (error: any) {
     // Sanitize error without exposing keys, tokens or internal paths
@@ -602,7 +612,10 @@ app.post('/api/ai/explain', async (req, res) => {
       code: 'AI_SERVICE_ERROR'
     });
   }
-});
+};
+
+app.post('/api/ai/explain', handleAiExplanationRoute);
+app.post('/api/ai/ask', handleAiExplanationRoute);
 
 // ==========================================
 // NEXUS AI STREAMING ENDPOINT (SSE)

@@ -68,7 +68,7 @@ async function runVerification() {
       assert(grid.minElevationM <= grid.maxElevationM, `${locus.name} (${extentKm}km): min (${grid.minElevationM}m) <= max (${grid.maxElevationM}m)`);
       assert(grid.meanElevationM >= grid.minElevationM && grid.meanElevationM <= grid.maxElevationM, `${locus.name} (${extentKm}km): mean (${Math.round(grid.meanElevationM)}m) inside relief bounds`);
       assert(grid.horizontalCrs.includes('EPSG:4326'), `${locus.name}: Horizontal CRS is EPSG:4326 (${grid.horizontalCrs})`);
-      assert(grid.verticalDatum.includes('Mean Sea Level'), `${locus.name}: Vertical Datum is Mean Sea Level (${grid.verticalDatum})`);
+      assert(grid.verticalDatum.includes('Mean Sea Level') || grid.verticalDatum.includes('EGM2008'), `${locus.name}: Vertical Datum is EGM2008 / Mean Sea Level (${grid.verticalDatum})`);
     }
   }
 

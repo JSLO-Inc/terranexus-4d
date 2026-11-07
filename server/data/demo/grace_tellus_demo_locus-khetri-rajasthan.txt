@@ -1,5 +1,5 @@
 # NASA JPL Tellus Land Mass Grids (RL06.1 v04)
-# Location: Khetri Copper Belt - Jhunjhunu (Resolved ID: locus-khetri-rajasthan, Query: locus-khetri-rajasthan)
+# Location: Khetri Copper Belt - Jhunjhunu (ID: locus-khetri-rajasthan)
 # Latitude: 28.0039 N, Longitude: 75.7878 E
 # Spatial Resolution: 300km Gaussian Filter (~3 deg), 0.5 deg grid
 # Unit: Liquid Water Equivalent (LWE) thickness in cm

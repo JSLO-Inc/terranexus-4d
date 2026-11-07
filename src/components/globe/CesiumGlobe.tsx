@@ -8,6 +8,7 @@ import { NATIONWIDE_HIERARCHICAL_LABELS } from '../../data/nationwideLabels';
 import { reverseGeocodeMapClick } from '../../services/locationResolver';
 import { AVAILABLE_HYDRO_HEATMAP_LAYERS } from '../hydro/HeatmapLayerSelector';
 import { getCartoRasterTileUrl, CARTO_ATTRIBUTION } from '../../services/cartoBasemapService';
+import { getGeographicalBoundaryRadius } from '../subsurface/geologicalMaterials';
 import {
   Layers,
   Crosshair,
@@ -42,6 +43,33 @@ function generateCirclePositions(centerLon: number, centerLat: number, radiusMet
     const lat = centerLat + radiusDegLat * Math.sin(angle);
     const lon = centerLon + radiusDegLon * Math.cos(angle);
     positions.push(Cesium.Cartesian3.fromDegrees(lon, lat));
+  }
+  return positions;
+}
+
+/**
+ * Generates Cartesian3 positions for the natural irregular geographical boundary polygon
+ * matching the exact R(theta) morphology used in the 3D Subsurface Cutout.
+ */
+function generateIrregularRegionPositions(
+  centerLon: number,
+  centerLat: number,
+  extentKm: number,
+  locationId: string,
+  points: number = 64,
+  closeLoop: boolean = false
+): Cesium.Cartesian3[] {
+  const positions: Cesium.Cartesian3[] = [];
+  const baseRadiusKm = Math.max(1.5, extentKm * 0.65);
+  const cosLat = Math.max(0.1, Math.cos((centerLat * Math.PI) / 180));
+  const limit = closeLoop ? points : points - 1;
+  for (let i = 0; i <= limit; i++) {
+    const theta = ((i % points) / points) * Math.PI * 2;
+    const rKm = getGeographicalBoundaryRadius(theta, locationId, centerLat, centerLon, baseRadiusKm);
+    const dLon = (rKm * Math.cos(theta)) / (111.32 * cosLat);
+    // Note: in 3D Subsurface, +Z is South and -Z is North, so sin(theta) maps to -dLat
+    const dLat = -(rKm * Math.sin(theta)) / 111.32;
+    positions.push(Cesium.Cartesian3.fromDegrees(centerLon + dLon, centerLat + dLat));
   }
   return positions;
 }
@@ -278,6 +306,7 @@ export const CesiumGlobe: React.FC = () => {
     isAreaAnalysisOpen,
     explorationExtentKm,
     viewMode,
+    setViewMode,
     globeBasemap,
     setGlobeBasemap
   } = useTerranexusStore();
@@ -292,12 +321,40 @@ export const CesiumGlobe: React.FC = () => {
   const [showBasins, setShowBasins] = useState<boolean>(true);
   const [showNationwideLabels, setShowNationwideLabels] = useState<boolean>(true);
   const [hasRenderError, setHasRenderError] = useState<boolean>(false);
+  const [isExtractingCutout, setIsExtractingCutout] = useState<boolean>(false);
   const [viewerKey, setViewerKey] = useState<number>(0);
   const viewModeRef = useRef(viewMode);
   viewModeRef.current = viewMode;
 
   const basemapMenuRef = useRef<HTMLDivElement>(null);
   const layersMenuRef = useRef<HTMLDivElement>(null);
+
+  const handleExtractCutout = useCallback(() => {
+    setIsExtractingCutout(true);
+    const viewer = viewerRef.current;
+    if (viewer && !viewer.isDestroyed()) {
+      try {
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(
+            selectedLocation.longitude,
+            selectedLocation.latitude - 0.12,
+            42000
+          ),
+          orientation: {
+            heading: Cesium.Math.toRadians(0.0),
+            pitch: Cesium.Math.toRadians(-55.0),
+            roll: 0.0
+          },
+          duration: 0.55,
+          easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT
+        });
+      } catch {}
+    }
+    setTimeout(() => {
+      setIsExtractingCutout(false);
+      setViewMode('cutaway');
+    }, 520);
+  }, [selectedLocation.latitude, selectedLocation.longitude, setViewMode]);
 
   // Close popup menus on click outside
   useEffect(() => {
@@ -320,6 +377,7 @@ export const CesiumGlobe: React.FC = () => {
     let isSubscribed = true;
     let isInitializing = false;
     let renderFrameId: number | null = null;
+    let renderTimerId: ReturnType<typeof setTimeout> | null = null;
     let initFrameId: number | null = null;
     let resizeFrameId: number | null = null;
 
@@ -355,7 +413,11 @@ export const CesiumGlobe: React.FC = () => {
           }
         }
       }
-      renderFrameId = requestAnimationFrame(renderWhenReady);
+      renderTimerId = setTimeout(() => {
+        if (isSubscribed) {
+          renderFrameId = requestAnimationFrame(renderWhenReady);
+        }
+      }, 45);
     };
 
     resumeRenderLoopRef.current = () => {
@@ -862,6 +924,10 @@ export const CesiumGlobe: React.FC = () => {
         cancelAnimationFrame(initFrameId);
         initFrameId = null;
       }
+      if (renderTimerId !== null) {
+        clearTimeout(renderTimerId);
+        renderTimerId = null;
+      }
       if (renderFrameId !== null) {
         cancelAnimationFrame(renderFrameId);
         renderFrameId = null;
@@ -1063,72 +1129,73 @@ export const CesiumGlobe: React.FC = () => {
       calloutEntityRef.current.show = false;
     }
 
-    // Update 3D Subsurface Cutaway Geographic Footprint Rectangle
+    // Update 3D Subsurface Cutaway Natural Geographical Boundary Polygon
     const extentKm = explorationExtentKm || 5;
-    const latSpan = extentKm / 111.0;
-    const cosLat = Math.cos((selectedLocation.latitude * Math.PI) / 180);
-    const lonSpan = extentKm / (111.0 * (Math.abs(cosLat) > 0.1 ? cosLat : 1.0));
-
-    const minLon = selectedLocation.longitude - lonSpan / 2;
-    const maxLon = selectedLocation.longitude + lonSpan / 2;
-    const minLat = selectedLocation.latitude - latSpan / 2;
-    const maxLat = selectedLocation.latitude + latSpan / 2;
-    const rectCoords = Cesium.Rectangle.fromDegrees(minLon, minLat, maxLon, maxLat);
+    const polyPositions = generateIrregularRegionPositions(
+      selectedLocation.longitude,
+      selectedLocation.latitude,
+      extentKm,
+      selectedLocation.id,
+      64,
+      false
+    );
+    const polyHierarchy = new Cesium.PolygonHierarchy(polyPositions);
 
     if (!cutawayFootprintRef.current) {
       cutawayFootprintRef.current = viewer.entities.add({
         id: 'cutaway-block-footprint',
-        name: `3D Cutaway Subsurface Block Footprint (${extentKm} km × ${extentKm} km)`,
-        rectangle: {
-          coordinates: new Cesium.ConstantProperty(rectCoords),
-          material: Cesium.Color.fromCssColorString('#f59e0b').withAlpha(0.20),
+        name: `3D Extracted Geographical Region (${extentKm} km Watershed Boundary)`,
+        position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 120),
+        polygon: {
+          hierarchy: new Cesium.ConstantProperty(polyHierarchy),
+          material: Cesium.Color.fromCssColorString('#22d3ee').withAlpha(0.18),
           outline: false,
-          height: 100.0
+          height: 80.0,
+          extrudedHeight: new Cesium.CallbackProperty(() => {
+            return isExtractingCutout ? 2800.0 : 120.0;
+          }, false)
         },
         polyline: {
           positions: new Cesium.CallbackProperty(() => {
             const ext = explorationExtentKm || 5;
-            const lSpan = ext / 111.0;
-            const cLat = Math.cos((selectedLocation.latitude * Math.PI) / 180);
-            const lnSpan = ext / (111.0 * (Math.abs(cLat) > 0.1 ? cLat : 1.0));
-            const x0 = selectedLocation.longitude - lnSpan / 2;
-            const x1 = selectedLocation.longitude + lnSpan / 2;
-            const y0 = selectedLocation.latitude - lSpan / 2;
-            const y1 = selectedLocation.latitude + lSpan / 2;
-            return Cesium.Cartesian3.fromDegreesArray([
-              x0, y0,
-              x1, y0,
-              x1, y1,
-              x0, y1,
-              x0, y0
-            ]);
+            return generateIrregularRegionPositions(
+              selectedLocation.longitude,
+              selectedLocation.latitude,
+              ext,
+              selectedLocation.id,
+              64,
+              true
+            );
           }, false),
           clampToGround: true,
-          width: 2.5,
-          material: Cesium.Color.fromCssColorString('#f59e0b').withAlpha(0.95)
+          width: 3.0,
+          material: Cesium.Color.fromCssColorString('#22d3ee').withAlpha(0.95)
         },
         label: {
-          text: `3D CUTAWAY: ${extentKm} km × ${extentKm} km`,
+          text: `3D REGION BOUNDARY (${extentKm} km)`,
           font: 'bold 10px "JetBrains Mono", monospace',
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-          fillColor: Cesium.Color.fromCssColorString('#fde68a'),
+          fillColor: Cesium.Color.fromCssColorString('#a5f3fc'),
           outlineColor: Cesium.Color.BLACK,
           outlineWidth: 2,
           verticalOrigin: Cesium.VerticalOrigin.TOP,
-          pixelOffset: new Cesium.Cartesian2(0, 15),
+          pixelOffset: new Cesium.Cartesian2(0, 18),
           disableDepthTestDistance: Number.POSITIVE_INFINITY
         }
       });
     } else {
-      if (cutawayFootprintRef.current.rectangle) {
-        cutawayFootprintRef.current.rectangle.coordinates = new Cesium.ConstantProperty(rectCoords);
+      cutawayFootprintRef.current.position = new Cesium.ConstantPositionProperty(
+        Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 120)
+      );
+      if (cutawayFootprintRef.current.polygon) {
+        cutawayFootprintRef.current.polygon.hierarchy = new Cesium.ConstantProperty(polyHierarchy);
       }
       if (cutawayFootprintRef.current.label) {
-        cutawayFootprintRef.current.label.text = new Cesium.ConstantProperty(`3D CUTAWAY: ${extentKm} km × ${extentKm} km`);
+        cutawayFootprintRef.current.label.text = new Cesium.ConstantProperty(`3D REGION BOUNDARY (${extentKm} km)`);
       }
       cutawayFootprintRef.current.show = true;
     }
-  }, [selectedLocation, explorationExtentKm]);
+  }, [selectedLocation, explorationExtentKm, isExtractingCutout]);
 
   // Toggle Nationwide Labels Visibility
   useEffect(() => {
@@ -1385,25 +1452,56 @@ export const CesiumGlobe: React.FC = () => {
         </div>
       )}
 
-      {/* Top-Left: Minimal Locus & Attribution Pill */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 py-1.5 px-3 rounded-xl glass-panel text-xs pointer-events-none shadow-xl border border-slate-800/80">
-        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-        <span className="font-semibold text-slate-200">{selectedLocation.name.split(' - ')[0]}</span>
-        <span className="text-slate-600">•</span>
-        <span className="text-[10px] font-mono text-cyan-300/90 hidden sm:inline">{selectedLocation.district}, {selectedLocation.state}</span>
-        <span className="text-slate-600 hidden sm:inline">•</span>
-        <span className="px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-mono text-[9px]">
-          RL06 + DEM
-        </span>
+      {/* Animated Cutout Extraction Overlay when zooming into 3D Geological Cutout */}
+      {isExtractingCutout && (
+        <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center bg-cyan-950/20 backdrop-blur-[2px] animate-fadeIn">
+          <div className="liquid-glass-elevated px-6 py-4 rounded-2xl border border-cyan-400/60 flex flex-col items-center gap-2 shadow-2xl">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center">
+              <Layers className="w-6 h-6 text-cyan-300 animate-bounce" />
+            </div>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-300">
+              Extracting 3D Geological Cutout...
+            </span>
+            <span className="text-[11px] font-mono text-slate-300">
+              {selectedLocation.name.split(' - ')[0]} ({explorationExtentKm} km × {explorationExtentKm} km Block)
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Top-Left: Locus Pill & Extract 3D Cutout Action */}
+      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 py-1.5 px-3.5 rounded-full liquid-glass-hud text-xs pointer-events-none shadow-xl">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+          <span className="font-semibold text-slate-100">{selectedLocation.name.split(' - ')[0]}</span>
+          <span className="text-slate-600">•</span>
+          <span className="text-[11px] font-mono text-cyan-300/90 hidden sm:inline">{selectedLocation.district}, {selectedLocation.state}</span>
+          <span className="text-slate-600 hidden sm:inline">•</span>
+          <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-mono text-[9px]">
+            RL06 + DEM
+          </span>
+        </div>
+
+        {viewMode === 'globe' && (
+          <button
+            type="button"
+            onClick={handleExtractCutout}
+            className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-full liquid-glass-elevated hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all shadow-xl cursor-pointer glow-cyan-sm"
+            title="Extract 3D Subsurface Geological Cutout for Selected Location"
+          >
+            <Layers className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Extract 3D Cutout</span>
+          </button>
+        )}
       </div>
 
       {/* Top-Right: Floating GIS Controls Dock */}
-      <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 p-1 rounded-xl glass-panel shadow-2xl border border-slate-800/80">
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 p-1.5 rounded-2xl liquid-glass-hud shadow-2xl">
         {/* Basemap Picker Dropdown */}
         <div className="relative" ref={basemapMenuRef}>
           <button
             onClick={() => setShowBasemapMenu(!showBasemapMenu)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
             title="Change Basemap Imagery Layer"
           >
             <Satellite className="w-3.5 h-3.5 text-cyan-400" />
@@ -1412,7 +1510,7 @@ export const CesiumGlobe: React.FC = () => {
           </button>
 
           {showBasemapMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-slate-950/98 border border-slate-800 rounded-xl p-1.5 backdrop-blur-2xl shadow-2xl z-50 flex flex-col gap-1 text-xs font-mono animate-fadeIn">
+            <div className="absolute right-0 top-full mt-2 w-48 liquid-glass-elevated rounded-xl p-1.5 shadow-2xl z-50 flex flex-col gap-1 text-xs font-mono animate-fadeIn">
               <span className="text-[10px] uppercase tracking-wider text-slate-400 px-2 py-1 font-semibold">
                 Basemap Imagery
               </span>
@@ -1479,7 +1577,7 @@ export const CesiumGlobe: React.FC = () => {
         <div className="relative" ref={layersMenuRef}>
           <button
             onClick={() => setShowLayersMenu(!showLayersMenu)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/80 hover:border-cyan-400 text-slate-200 hover:text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-slate-200 hover:text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
             title="Toggle Geospatial Layers & Heatmaps"
           >
             <Layers className="w-3.5 h-3.5 text-cyan-400" />
@@ -1488,7 +1586,7 @@ export const CesiumGlobe: React.FC = () => {
           </button>
 
           {showLayersMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-slate-950/98 border border-slate-800 rounded-xl p-2 backdrop-blur-2xl shadow-2xl z-50 flex flex-col gap-1.5 text-xs font-mono animate-fadeIn">
+            <div className="absolute right-0 top-full mt-2 w-56 liquid-glass-elevated rounded-xl p-2 shadow-2xl z-50 flex flex-col gap-1.5 text-xs font-mono animate-fadeIn">
               <span className="text-[10px] uppercase tracking-wider text-slate-400 px-2 py-0.5 font-semibold">
                 Geospatial Overlays
               </span>
@@ -1537,8 +1635,8 @@ export const CesiumGlobe: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom-Left: Real-Time Coordinate & Telemetry HUD */}
-      <div className="absolute bottom-3 left-3 z-10 glass-pill px-3 py-1 font-mono text-xs text-slate-300 flex items-center gap-2.5 shadow-xl pointer-events-none">
+      {/* Bottom-Left: Real-Time Coordinate & Telemetry HUD (Positioned above Cesium credits) */}
+      <div className="absolute bottom-8 left-3 z-10 liquid-glass-hud rounded-full px-3.5 py-1.5 font-mono text-xs text-slate-300 flex items-center gap-2.5 shadow-xl pointer-events-none">
         <div className="flex items-center gap-1.5 text-cyan-400">
           <Crosshair className="w-3.5 h-3.5" />
           <span className="text-[10px] uppercase tracking-wider text-slate-400">COORDINATES:</span>
@@ -1548,12 +1646,12 @@ export const CesiumGlobe: React.FC = () => {
             {mouseCoords.lat.toFixed(4)}°N, {mouseCoords.lon.toFixed(4)}°E ({mouseCoords.height}m ASL)
           </span>
         ) : (
-          <span className="text-slate-500 text-[11px]">Point cursor to read coordinates</span>
+          <span className="text-slate-400 text-[11px]">Point cursor to read coordinates</span>
         )}
       </div>
 
       {/* Bottom-Right: High-Precision Camera Navigation Deck */}
-      <div className="absolute bottom-3 right-3 flex items-center gap-1 z-10 glass-panel p-1 rounded-xl shadow-2xl border border-slate-800/80">
+      <div className="absolute bottom-3 right-3 flex items-center gap-1 z-10 liquid-glass-hud p-1.5 rounded-2xl shadow-2xl">
         <button
           onClick={handleResetCompassNorth}
           className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"

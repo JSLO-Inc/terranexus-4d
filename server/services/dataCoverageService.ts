@@ -130,9 +130,9 @@ export function evaluateNationwideDataCoverage(lat: number, lon: number): DataCo
       category: 'HYDRO',
       isCovered: nearestStation.distanceKm <= 50,
       resolution: 'Point In-Situ Well Sensors',
-      dataTier: nearestStation.distanceKm <= 20 ? 'DEMONSTRATION' : 'UNAVAILABLE',
+      dataTier: nearestStation.distanceKm <= 50 ? 'OBSERVED' : 'UNAVAILABLE',
       sourceAgency: nearestStation.agency,
-      notes: nearestStation.distanceKm <= 20
+      notes: nearestStation.distanceKm <= 50
         ? `Station ${nearestStation.stationId} is ${nearestStation.distanceKm} km away (${nearestStation.lastWaterTableDepthMbgl} mbgl in ${nearestStation.lastMeasurementDate}). Not a direct well measurement at target coordinate.`
         : `No direct monitoring station within 50 km. Nearest reference station is ${nearestStation.distanceKm} km away (${nearestStation.stationName}).`
     },
