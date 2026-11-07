@@ -454,6 +454,119 @@ function deriveDynamicFormations(
     ];
   }
 
+  // Default / Global Geological Sequence
+  const isWithinIndia = (loc as any).isWithinIndia !== false && (lat >= 6.0 && lat <= 38.0 && lon >= 67.0 && lon <= 98.0);
+  if (!isWithinIndia) {
+    // Grand Canyon / Colorado Plateau
+    if (lat >= 34 && lat <= 41 && lon >= -115 && lon <= -107) {
+      return [
+        {
+          id: 'fmt-glb-gc-kaibab',
+          code: 'P-GC-KBB',
+          name: 'Kaibab Limestone & Toroweap Formation',
+          supergroup: 'Colorado Plateau Upper Paleozoic Sequence',
+          group: 'Permian Rim Carbonates',
+          age: 'Early Permian (~270 Ma)',
+          primaryLithology: 'Fossiliferous cherty limestone, sandy dolomite, and calcareous sandstone',
+          secondaryLithology: 'Gypsiferous siltstone interbeds',
+          typicalThicknessMeters: 110,
+          colorHex: '#d97706',
+          porosityAvg: 11.5,
+          densityGcm3: 2.58,
+          hardnessMohs: 4.2,
+          status: 'MODELLED'
+        },
+        {
+          id: 'fmt-glb-gc-coconino',
+          code: 'P-GC-CCN',
+          name: 'Coconino Cross-Bedded Aeolian Sandstone & Redwall Limestone',
+          supergroup: 'Colorado Plateau Paleozoic Sequence',
+          group: 'Coconino-Supai-Redwall Group',
+          age: 'Mississippian to Permian (340–275 Ma)',
+          primaryLithology: 'Well-sorted quartzose cross-bedded sandstone over karstic marine limestone',
+          secondaryLithology: 'Hermit Shale mudstone and siltstone',
+          typicalThicknessMeters: 340,
+          colorHex: '#b45309',
+          porosityAvg: 18.0,
+          densityGcm3: 2.42,
+          hardnessMohs: 5.5,
+          status: 'MODELLED'
+        },
+        {
+          id: 'fmt-glb-gc-vishnu',
+          code: 'PR-GC-VSH',
+          name: 'Vishnu Basement Complex (Schist & Zoroaster Granite)',
+          supergroup: 'Inner Gorge Crystalline Basement',
+          group: 'Vishnu Metamorphic Complex',
+          age: 'Paleoproterozoic (~1750 Ma)',
+          primaryLithology: 'Mica-hornblende schist intruded by pink granitic pegmatite dykes',
+          secondaryLithology: 'Brahma amphibolite and meta-volcanics',
+          typicalThicknessMeters: 1400,
+          colorHex: '#334155',
+          porosityAvg: 1.1,
+          densityGcm3: 2.82,
+          hardnessMohs: 6.8,
+          status: 'MODELLED'
+        }
+      ];
+    }
+
+    // Mount Etna / Volcanic Terranes
+    const provLower = (loc.geologicalProvince || '').toLowerCase();
+    if (provLower.includes('volcan') || provLower.includes('etna') || provLower.includes('basalt') || provLower.includes('caldera')) {
+      return [
+        {
+          id: 'fmt-glb-vol-tephra',
+          code: 'Q-VOL-TPH',
+          name: 'Recent Scoria, Tephra & Pahoehoe Lava Mantle',
+          supergroup: 'Mongibello Stratovolcanic Construct',
+          group: 'Holocene Eruptive Products',
+          age: 'Holocene to Recent',
+          primaryLithology: 'Vesicular trachybasalt lava flows, scoriaceous lapilli, and volcanic ash',
+          secondaryLithology: 'Volcaniclastic breccia and lahars',
+          typicalThicknessMeters: 95,
+          colorHex: '#475569',
+          porosityAvg: 24.0,
+          densityGcm3: 2.65,
+          hardnessMohs: 5.5,
+          status: 'MODELLED'
+        },
+        {
+          id: 'fmt-glb-vol-edifice',
+          code: 'Q-VOL-BSL',
+          name: 'Main Stratovolcanic Alkali-Basalt & Dyke Feeder Complex',
+          supergroup: 'Valle del Bove Volcanic Succession',
+          group: 'Pleistocene Volcanic Centres (Trifoglietto & Ellittico)',
+          age: 'Middle to Late Pleistocene',
+          primaryLithology: 'Dense porphyritic hawaiite-mugearite lavas and sub-vertical radial feeder dykes',
+          secondaryLithology: 'Autobrecciated lava flow bases',
+          typicalThicknessMeters: 420,
+          colorHex: '#334155',
+          porosityAvg: 8.5,
+          densityGcm3: 2.86,
+          hardnessMohs: 6.2,
+          status: 'MODELLED'
+        },
+        {
+          id: 'fmt-glb-vol-flysch',
+          code: 'MZ-SED-BMT',
+          name: 'Sub-Volcanic Apennine-Maghrebian Sedimentary Basement',
+          supergroup: 'Sicilian Thrust Belt Footwall',
+          group: 'Numidian Flysch & Carbonate Platform',
+          age: 'Mesozoic to Miocene',
+          primaryLithology: 'Quartzarenitic flysch sandstone, marly clay, and platform limestone',
+          secondaryLithology: 'Tectonized scaly clay (Argille Scagliose)',
+          typicalThicknessMeters: 1400,
+          colorHex: '#b45309',
+          porosityAvg: 6.0,
+          densityGcm3: 2.68,
+          hardnessMohs: 5.0,
+          status: 'MODELLED'
+        }
+      ];
+    }
+  }
+
   // Default Cratonic Sequence
   return [
     {
@@ -492,7 +605,7 @@ function deriveDynamicFormations(
 }
 
 /**
- * Derive scientifically plausible aquifers for any Indian coordinate.
+ * Derive scientifically plausible aquifers for any Indian or global coordinate.
  */
 function deriveDynamicAquifers(
   loc: SelectedLocation | GeoLocation,
@@ -505,8 +618,28 @@ function deriveDynamicAquifers(
   const lat = loc.latitude;
   const lon = loc.longitude;
   const state = ('state' in loc && loc.state) ? loc.state : '';
-
   const locId = loc.id || 'custom-loc';
+
+  const isWithinIndia = (loc as any).isWithinIndia !== false && (lat >= 6.0 && lat <= 38.0 && lon >= 67.0 && lon <= 98.0);
+  if (!isWithinIndia && dossier?.groundwater?.aquiferContext) {
+    const aqCtx = dossier.groundwater.aquiferContext;
+    return [
+      {
+        id: 'aq-glb-whymap-1',
+        locationId: locId,
+        name: aqCtx.name,
+        topDepthM: 18,
+        bottomDepthM: 145,
+        aquiferType: aqCtx.type.toLowerCase().includes('confined') ? 'Confined' : 'Unconfined',
+        principalRock: `${aqCtx.type} (${aqCtx.permeabilityRange})`,
+        transmissivityM2Day: 420,
+        specificYieldPercent: 8.5,
+        waterQualityTdsMgL: 520,
+        ecMicrosiemens: 780,
+        status: 'MODELLED'
+      }
+    ];
+  }
 
   if ((lat >= 14.0 && lat <= 19.5 && lon >= 79.5 && lon <= 84.5) || state.toLowerCase().includes('andhra')) {
     return [

@@ -817,7 +817,7 @@ export const CesiumGlobe: React.FC = () => {
         }
       }
 
-      // Universal Click-to-Inspect anywhere on Indian globe territory
+      // Universal Click-to-Inspect anywhere on Earth
       const ray = viewer.camera.getPickRay(click.position);
       if (ray) {
         const cartesian = viewer.scene.globe.pick(ray, viewer.scene);
@@ -825,8 +825,7 @@ export const CesiumGlobe: React.FC = () => {
           const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
           const clickLat = Cesium.Math.toDegrees(cartographic.latitude);
           const clickLon = Cesium.Math.toDegrees(cartographic.longitude);
-          // Check if coordinate is strictly within India territory bounds (Lat 6.0–38.0°N, Lon 67.0–98.0°E)
-          if (clickLat >= 6.0 && clickLat <= 38.0 && clickLon >= 67.0 && clickLon <= 98.0) {
+          if (clickLat >= -90.0 && clickLat <= 90.0 && clickLon >= -180.0 && clickLon <= 180.0) {
             reverseGeocodeMapClick(clickLat, clickLon).then(resolved => {
               if (resolved) {
                 setSelectedLocation(resolved);

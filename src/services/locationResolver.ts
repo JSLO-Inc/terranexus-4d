@@ -48,16 +48,17 @@ export async function resolveUserLocationQuery(query: string): Promise<LocationR
 /**
  * Searches places for autocomplete suggestions.
  */
-export async function searchPlaceSuggestions(query: string): Promise<GeocodingSuggestion[]> {
+export async function searchPlaceSuggestions(query: string, signal?: AbortSignal): Promise<GeocodingSuggestion[]> {
   const clean = query.trim();
   if (!clean || clean.length < 2) return [];
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/location/search?q=${encodeURIComponent(clean)}`);
+    const response = await fetch(`${API_BASE_URL}/api/location/search?q=${encodeURIComponent(clean)}`, { signal });
     if (!response.ok) return [];
     const data = await response.json();
     return data.suggestions || [];
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.name === 'AbortError') return [];
     console.warn('[locationResolver] Search suggestions failed:', err);
     return [];
   }

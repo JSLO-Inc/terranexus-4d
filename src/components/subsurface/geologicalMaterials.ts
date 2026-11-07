@@ -101,6 +101,91 @@ export function getTerraneStructuralAttitude(
     };
   }
 
+  // --- Global Earth Tectonic Provinces ---
+  // Colorado Plateau / Grand Canyon (Arizona, USA)
+  if (locLower.includes('canyon') || stateLower.includes('arizona') || (lat >= 34 && lat <= 41 && lon >= -115 && lon <= -107)) {
+    return {
+      strikeDeg: 345,
+      dipDeg: 2.6,
+      dipDirection: 'SSW',
+      structuralStyle: 'Colorado Plateau Paleozoic Sequence over Steeply Foliated Vishnu Basement Schist (Great Unconformity)',
+      undulationAmplitude: 0.6,
+      undulationWavelength: 24.0
+    };
+  }
+
+  // Mount Etna / Valle del Bove (Sicily, Italy)
+  if (locLower.includes('etna') || stateLower.includes('sicily') || (lat >= 36.5 && lat <= 38.8 && lon >= 13.5 && lon <= 16.0)) {
+    return {
+      strikeDeg: 30,
+      dipDeg: 9.8,
+      dipDirection: 'ESE',
+      structuralStyle: 'Etnean Stratovolcanic Alkali-Basalt Edifice & Valle del Bove Caldera Collapse Sector',
+      undulationAmplitude: 1.5,
+      undulationWavelength: 13.0
+    };
+  }
+
+  // Andean Cordillera / Atacama Porphyry Belt (Chile, Bolivia, Argentina)
+  if (locLower.includes('atacama') || locLower.includes('andes') || (lat >= -35 && lat <= -15 && lon >= -72 && lon <= -66)) {
+    return {
+      strikeDeg: 5,
+      dipDeg: 13.5,
+      dipDirection: 'ESE',
+      structuralStyle: 'Andean Domeyko Strike-Slip Fault Corridor & Porphyry Magmatic Arc',
+      undulationAmplitude: 1.3,
+      undulationWavelength: 14.0
+    };
+  }
+
+  // Sahara / Nubian Sandstone Basin (Egypt, North Africa)
+  if (locLower.includes('sahara') || locLower.includes('nubian') || (lat >= 14 && lat <= 32 && lon >= 20 && lon <= 35)) {
+    return {
+      strikeDeg: 100,
+      dipDeg: 2.1,
+      dipDirection: 'NNE',
+      structuralStyle: 'Nubian Intracratonic Continental Sandstone Megabasin',
+      undulationAmplitude: 0.5,
+      undulationWavelength: 24.0
+    };
+  }
+
+  // Great Artesian Basin (Australia)
+  if (locLower.includes('artesian') || (lat >= -30 && lat <= -18 && lon >= 135 && lon <= 148)) {
+    return {
+      strikeDeg: 40,
+      dipDeg: 2.5,
+      dipDirection: 'SW',
+      structuralStyle: 'Eromanga-Surat Confined Intracratonic Sandstone Sag Basin',
+      undulationAmplitude: 0.6,
+      undulationWavelength: 22.0
+    };
+  }
+
+  // Pilbara Craton / Hamersley Basin (Western Australia)
+  if (locLower.includes('pilbara') || (lat >= -24.5 && lat <= -20.0 && lon >= 116.0 && lon <= 121.0)) {
+    return {
+      strikeDeg: 110,
+      dipDeg: 11.5,
+      dipDirection: 'SSW',
+      structuralStyle: 'Hamersley Ophthalmia Fold-and-Thrust Banded Iron Formation Belt',
+      undulationAmplitude: 1.4,
+      undulationWavelength: 13.0
+    };
+  }
+
+  // Alpine / High Himalayan Collisional Orogen (Swiss Alps, Mount Everest)
+  if (locLower.includes('everest') || locLower.includes('alps') || (lat >= 45 && lat <= 48 && lon >= 6 && lon <= 12) || (lat >= 27 && lat <= 29 && lon >= 85 && lon <= 89)) {
+    return {
+      strikeDeg: 68,
+      dipDeg: 15.2,
+      dipDirection: 'NNW',
+      structuralStyle: 'Collisional Orogenic Nappe Stack & Crustal Detachment Shear Zone',
+      undulationAmplitude: 1.6,
+      undulationWavelength: 11.0
+    };
+  }
+
   // General Peninsular Shield / Cratonic Interior
   return {
     strikeDeg: 45,

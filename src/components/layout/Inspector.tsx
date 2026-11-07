@@ -175,7 +175,7 @@ export const Inspector: React.FC = () => {
               <div className="text-[11px] text-slate-200 font-medium">
                 {(selectedLocation as any).administrativeHierarchy ? (
                   <div className="flex flex-wrap items-center gap-1 text-slate-300">
-                    <span>India</span>
+                    <span>{(selectedLocation as any).administrativeHierarchy.country || ((selectedLocation as any).isWithinIndia !== false ? 'India' : 'International')}</span>
                     {((selectedLocation as any).administrativeHierarchy.state) && (
                       <>
                         <span className="text-slate-600">›</span>
@@ -208,7 +208,9 @@ export const Inspector: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <span>{selectedLocation.district}, {selectedLocation.state}, India</span>
+                  <span>
+                    {selectedLocation.district}, {selectedLocation.state}, {(selectedLocation as any).country || ((selectedLocation as any).isWithinIndia !== false ? 'India' : 'International')}
+                  </span>
                 )}
               </div>
               <div className="flex flex-col gap-1 text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">

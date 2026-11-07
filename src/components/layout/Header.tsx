@@ -176,36 +176,35 @@ export const Header: React.FC = () => {
         </button>
       </div>
 
-      {/* Center-Right: Segmented View Mode Switcher (md, lg, xl screens) */}
-      <div className="hidden md:flex items-center p-0.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs shrink-0" role="tablist" aria-label="View Mode">
+      {/* Center-Right: Liquid-Glass Segmented View Mode Switcher (3D GLOBE | SPLIT 3D | 3D CUTOUT | 2D DOSSIER) */}
+      <div className="hidden md:flex items-center p-1 rounded-2xl liquid-glass-pill text-xs shrink-0 gap-0.5" role="tablist" aria-label="View Mode">
         <button
           role="tab"
           aria-selected={isGlobeOnly}
           onClick={() => handleSelectViewMode('globe')}
-          className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isGlobeOnly
-              ? 'bg-cyan-500/20 border border-cyan-400/80 text-cyan-300 font-bold shadow-sm'
+              ? 'bg-cyan-500/20 border border-cyan-400/80 text-cyan-200 font-bold glow-cyan-sm'
               : 'text-slate-400 hover:text-slate-200 border border-transparent'
           }`}
-          title="3D Cesium Earth Digital Twin"
+          title="3D Cesium Earth Digital Twin (3D Globe)"
         >
-          <Globe className="w-3.5 h-3.5" />
-          <span className="hidden xl:inline">3D Globe</span>
-          <span className="hidden lg:inline xl:hidden">Globe</span>
+          <Globe className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="hidden lg:inline">3D Globe</span>
         </button>
 
         <button
           role="tab"
           aria-selected={isSplitActive}
           onClick={() => handleSelectViewMode('split')}
-          className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isSplitActive
-              ? 'bg-cyan-500/20 border border-cyan-400/80 text-cyan-300 font-bold shadow-sm'
+              ? 'bg-cyan-500/20 border border-cyan-400/80 text-cyan-200 font-bold glow-cyan-sm'
               : 'text-slate-400 hover:text-slate-200 border border-transparent'
           }`}
-          title="Synchronized Split View: 3D Earth + Subsurface Cutaway"
+          title="Synchronized Split View: 3D Earth + Subsurface Cutout"
         >
-          <Columns className="w-3.5 h-3.5" />
+          <Columns className="w-3.5 h-3.5 text-cyan-400" />
           <span className="hidden xl:inline">Split 3D</span>
           <span className="hidden lg:inline xl:hidden">Split</span>
         </button>
@@ -214,30 +213,29 @@ export const Header: React.FC = () => {
           role="tab"
           aria-selected={isCutawayOnly}
           onClick={() => handleSelectViewMode('cutaway')}
-          className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isCutawayOnly
-              ? 'bg-amber-500/20 border border-amber-400/80 text-amber-300 font-bold shadow-sm'
+              ? 'bg-amber-500/20 border border-amber-400/80 text-amber-200 font-bold glow-strata'
               : 'text-slate-400 hover:text-slate-200 border border-transparent'
           }`}
-          title="3D Geological & Subsurface Cutaway Workstation"
+          title="3D Geological & Subsurface Cutout Workstation (3D Cutout / Cutaway)"
         >
-          <Box className="w-3.5 h-3.5" />
-          <span className="hidden xl:inline">3D Cutaway</span>
-          <span className="hidden lg:inline xl:hidden">Cutaway</span>
+          <Box className="w-3.5 h-3.5 text-amber-400" />
+          <span className="hidden lg:inline">3D Cutout</span>
         </button>
 
         <button
           role="tab"
           aria-selected={isDossierActive}
           onClick={() => handleSelectViewMode('dossier')}
-          className={`flex items-center gap-1.5 px-2 lg:px-2.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
             isDossierActive
-              ? 'bg-cyan-500/20 border border-cyan-400/80 text-cyan-300 font-bold shadow-sm'
+              ? 'bg-emerald-500/20 border border-emerald-400/80 text-emerald-200 font-bold shadow-sm'
               : 'text-slate-400 hover:text-slate-200 border border-transparent'
           }`}
           title="Location Evidence Dossier & 2D GIS Map"
         >
-          <Layers className="w-3.5 h-3.5" />
+          <Layers className="w-3.5 h-3.5 text-emerald-400" />
           <span className="hidden xl:inline">2D Dossier</span>
           <span className="hidden lg:inline xl:hidden">Dossier</span>
         </button>
