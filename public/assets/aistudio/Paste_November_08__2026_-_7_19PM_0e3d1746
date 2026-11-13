@@ -1,0 +1,1694 @@
+# TERRANEXUS 4D — THE ULTIMATE AUTONOMOUS DEVELOPMENT, SCIENTIFIC INTELLIGENCE, DATA EXPANSION AND PRODUCT PERFECTION MASTER DIRECTIVE
+
+## COMPLETE CODEBASE REFINEMENT • GLOBAL SCIENTIFIC DATA INFRASTRUCTURE • GEMINI-POWERED NEXUS AI • CINEMATIC 3D EARTH EXTRACTION • LIQUID GLASS • AGRICULTURAL INTELLIGENCE • ENVIRONMENTAL ANALYSIS • AUTOMATED PDF REPORTS
+
+---
+
+# 0. THE MISSION
+
+You are responsible for transforming the existing TERRANEXUS 4D application into a sophisticated global Earth intelligence platform.
+
+This is not a request to create a few additional screens or make a superficial redesign.
+
+You must expand the application's scientific knowledge infrastructure, integrate Gemini deeply into Nexus AI, improve the reliability and coverage of its data, refine every existing feature, add meaningful new capabilities, and transform the complete user experience.
+
+The final product should combine:
+
+1. Global geographic discovery.
+2. Satellite and Earth observation intelligence.
+3. Groundwater and hydrological analysis.
+4. Geological and mineral intelligence.
+5. Soil and agricultural intelligence.
+6. Environmental monitoring.
+7. Climate and land-use analysis.
+8. Interactive 3D scientific visualization.
+9. Location-specific AI analysis.
+10. Evidence-backed recommendations.
+11. Automated scientific reports.
+12. A premium liquid-glass interface.
+13. Exceptionally smooth animations and transitions.
+14. Reliable, secure and maintainable engineering.
+
+**Do not create a separate demonstration application. Work directly on the existing TERRANEXUS 4D codebase. Preserve working features, repair broken ones and extend the existing architecture intelligently.**
+
+---
+
+# 1. USE ALL AVAILABLE AI STUDIO CAPABILITIES AND SPECIALIST AGENTS
+
+First inspect the actual capabilities of your current development environment.
+
+Identify available:
+
+- Gemini models.
+- Agentic coding tools.
+- Subagents and parallel agents.
+- Browser preview.
+- Terminal and command execution.
+- Code editing tools.
+- Project-wide search.
+- Design and prototyping tools.
+- Image and reference analysis.
+- Animation and rendering libraries.
+- Testing frameworks.
+- External integrations.
+- Package management.
+- Debugging tools.
+
+If subagents are available, create coordinated specialist workstreams:
+
+**Agent A — Principal Architect**
+- Audit the architecture.
+- Coordinate module development.
+- Review implementation quality.
+
+**Agent B — Data Infrastructure Specialist**
+- Discover scientific data providers.
+- Build data connectors.
+- Implement dataset ingestion, caching and metadata management.
+
+**Agent C — Geospatial and Satellite Specialist**
+- Implement geographic search.
+- Integrate satellite imagery and Earth observation datasets.
+- Improve geographic processing.
+
+**Agent D — 3D Visualization Specialist**
+- Improve the globe.
+- Engineer the geographic extraction animation.
+- Build scientific 3D visualizations for individual modules.
+
+**Agent E — Liquid Glass and Motion Designer**
+- Design the unified interface.
+- Implement liquid-glass styling.
+- Create the application-wide animation system.
+
+**Agent F — Gemini and Nexus AI Specialist**
+- Integrate Gemini.
+- Build location-aware scientific reasoning.
+- Implement retrieval, tool access, evidence verification and reporting.
+
+**Agent G — Agriculture and Environmental Intelligence Specialist**
+- Develop soil, crop, water and environmental analysis capabilities.
+- Build evidence-based recommendations.
+
+**Agent H — Independent QA and Security Specialist**
+- Test features.
+- Inspect regressions.
+- Verify security and performance.
+
+Coordinate all agents through one implementation plan and one shared architecture.
+
+If parallel agents are unavailable, perform these specialist workstreams systematically yourself.
+
+Use actual available tools. Do not claim to have used unavailable agents, software or capabilities.
+
+---
+
+# 2. COMPLETE SCIENTIFIC DATA EXPANSION
+
+## 2.1 Build a serious global scientific data infrastructure
+
+TERRANEXUS 4D currently needs a substantially stronger scientific data foundation.
+
+Do not restrict the application to a handful of hardcoded datasets or a small number of locations.
+
+Systematically discover, evaluate and integrate reliable, legally accessible scientific datasets from legitimate public institutions.
+
+Prioritize free and openly accessible satellite imagery, scientific APIs, government datasets, public geospatial services and authoritative research repositories.
+
+Investigate the following sources and their available services.
+
+### A. NASA Earth observation
+
+Official sources:
+
+- NASA Earthdata: https://www.earthdata.nasa.gov/
+- NASA Earthdata Search: https://search.earthdata.nasa.gov/
+- NASA Global Imagery Browse Services: https://www.earthdata.nasa.gov/data/tools/gibs
+- NASA Earthdata Harmony: https://harmony.earthdata.nasa.gov/docs
+- NASA Giovanni: https://giovanni.gsfc.nasa.gov/
+- NASA POWER: https://power.larc.nasa.gov/
+
+Investigate suitable datasets for:
+
+- Land surface observations.
+- Vegetation.
+- Rainfall.
+- Evapotranspiration.
+- Land surface temperature.
+- Soil moisture.
+- Water storage indicators.
+- Land cover.
+- Fires.
+- Atmospheric conditions.
+- Historical Earth observation.
+- Drought monitoring.
+- Environmental changes.
+
+Use appropriate official APIs, catalogues, OGC services, STAC-compatible access or other supported interfaces.
+
+### B. European Space Agency and Copernicus
+
+Official sources:
+
+- Copernicus Data Space Ecosystem: https://dataspace.copernicus.eu/
+- Copernicus API documentation: https://documentation.dataspace.copernicus.eu/APIs.html
+- Sentinel Hub: https://www.sentinel-hub.com/
+- Copernicus Land Monitoring Service: https://land.copernicus.eu/
+
+Investigate:
+
+- Sentinel-1 radar observations.
+- Sentinel-2 optical imagery.
+- Sentinel-3 observations.
+- Land cover.
+- Vegetation indices.
+- Surface-water observations.
+- Land-use changes.
+- Flood mapping.
+- Agricultural indicators.
+- Surface temperature where available.
+- Change detection.
+
+Evaluate the official catalogue, STAC, OData, openEO, Sentinel Hub and OGC interfaces.
+
+### C. USGS
+
+Official sources:
+
+- https://www.usgs.gov/
+- https://www.usgs.gov/centers/eros/data-access
+- https://m2m.cr.usgs.gov/
+- https://www.usgs.gov/products/data-and-tools/apis
+- https://api.waterdata.usgs.gov/
+
+Investigate:
+
+- Landsat.
+- Elevation.
+- Terrain.
+- Geological information.
+- Mineral occurrence information.
+- Surface-water observations.
+- Groundwater monitoring records.
+- Hydrological measurements.
+- Geological publications.
+
+Use the appropriate USGS services and APIs where legally and technically available.
+
+### D. Soil and agricultural data
+
+Investigate:
+
+- ISRIC SoilGrids: https://soilgrids.org/
+- ISRIC data services: https://www.isric.org/
+- FAO: https://www.fao.org/
+- FAO Hand-in-Hand Geospatial Platform: https://data.apps.fao.org/
+- FAO WaPOR: https://www.fao.org/in-action/remote-sensing-for-water-productivity/
+- Global soil and land suitability datasets.
+- National agricultural research datasets.
+- Public soil survey information.
+
+Explore available information about:
+
+- Soil texture.
+- Sand, silt and clay content.
+- Soil organic carbon.
+- Soil pH.
+- Soil depth.
+- Soil classification.
+- Soil nutrients where available.
+- Salinity.
+- Soil moisture.
+- Land suitability.
+- Agricultural constraints.
+
+Do not imply that a global gridded soil product provides laboratory-quality measurements for an individual farm.
+
+### E. Climate and weather
+
+Investigate:
+
+- NOAA: https://www.noaa.gov/
+- NOAA National Centers for Environmental Information: https://www.ncei.noaa.gov/
+- ECMWF: https://www.ecmwf.int/
+- Copernicus Climate Data Store: https://cds.climate.copernicus.eu/
+- NASA POWER.
+- Relevant national meteorological agencies.
+
+Explore:
+
+- Historical rainfall.
+- Temperature.
+- Seasonal patterns.
+- Drought.
+- Extreme weather.
+- Climate trends.
+- Evapotranspiration.
+- Agricultural climate suitability.
+- Available forecasts.
+
+Clearly distinguish historical observations, reanalysis products, forecasts and climate projections.
+
+### F. Indian government and scientific sources
+
+India should receive special attention because TERRANEXUS 4D must be particularly useful for Indian locations.
+
+Investigate official sources including:
+
+- ISRO: https://www.isro.gov.in/
+- NRSC: https://www.nrsc.gov.in/
+- Bhuvan: https://bhuvan.nrsc.gov.in/
+- Central Ground Water Board: https://cgwb.gov.in/
+- India-WRIS: https://indiawris.gov.in/
+- Geological Survey of India: https://www.gsi.gov.in/
+- Central Water Commission: https://cwc.gov.in/
+- India Meteorological Department: https://mausam.imd.gov.in/
+- Ministry of Agriculture and Farmers Welfare: https://agriwelfare.gov.in/
+- Soil Health Card: https://soilhealth.dac.gov.in/
+- data.gov.in: https://www.data.gov.in/
+- National Remote Sensing Centre datasets and services.
+- Relevant state groundwater, agriculture, geology and land-record departments.
+
+Investigate whether each source provides:
+
+- Public APIs.
+- Downloadable datasets.
+- GIS services.
+- WMS/WFS/WCS.
+- STAC catalogues.
+- Public dashboards.
+- Machine-readable records.
+- Documented access procedures.
+
+Do not assume that a government website automatically provides an unrestricted API.
+
+If access requires registration, authentication, an agreement or a specific API key, document it and implement the integration only in accordance with its actual terms.
+
+### G. Additional authoritative providers
+
+Discover additional suitable institutions and datasets for:
+
+- Rivers and watersheds.
+- Biodiversity.
+- Forest cover.
+- Protected areas.
+- Flood hazards.
+- Landslides.
+- Earthquakes.
+- Geohazards.
+- Environmental pollution.
+- Mining activity.
+- Industrial facilities.
+- Water quality.
+- Land use.
+- Coastal changes.
+
+Prefer authoritative government agencies, scientific institutions, recognized international organizations and peer-reviewed research.
+
+## 2.2 Data source verification
+
+Do not connect random APIs just to increase the number of sources.
+
+For every proposed data source, investigate:
+
+- Who operates it?
+- What does it measure?
+- Geographic coverage.
+- Temporal coverage.
+- Spatial resolution.
+- Temporal resolution.
+- Update frequency.
+- Units.
+- Data format.
+- API availability.
+- Authentication requirements.
+- Licensing.
+- Usage restrictions.
+- Known limitations.
+
+Record this information in a centralized data-source registry.
+
+Classify integrations as:
+
+- LIVE AND VERIFIED.
+- INTEGRATED BUT REQUIRES CREDENTIALS.
+- AVAILABLE THROUGH DOWNLOAD.
+- AVAILABLE THROUGH THIRD-PARTY PROCESSING.
+- UNDER DEVELOPMENT.
+- NOT ACCESSIBLE.
+
+Do not describe a dataset as integrated unless it has actually been retrieved and tested.
+
+## 2.3 Expand data coverage continuously
+
+Build a data discovery and ingestion system.
+
+It should:
+
+1. Discover available datasets.
+2. Retrieve metadata.
+3. Determine geographic coverage.
+4. Determine time coverage.
+5. Check licensing and access.
+6. Normalize metadata.
+7. Validate returned values.
+8. Store data appropriately.
+9. Cache repeated requests.
+10. Track freshness.
+11. Track source provenance.
+12. Report failed or unavailable integrations.
+
+Support common geospatial formats and standards where practical, including:
+
+- GeoJSON.
+- GeoTIFF.
+- Cloud Optimized GeoTIFF.
+- NetCDF.
+- CSV.
+- Shapefile.
+- GeoPackage.
+- STAC.
+- OGC services.
+- Relevant raster and vector formats.
+
+Use appropriate coordinate reference systems and spatial transformations.
+
+Do not download enormous global datasets unnecessarily. Use spatial and temporal subsetting wherever possible.
+
+---
+
+# 3. BUILD A LOCATION-CENTRIC SCIENTIFIC INTELLIGENCE ENGINE
+
+This is one of the most important new capabilities.
+
+A user must be able to search for a village, town, city, watershed, river, landmark or enter geographic coordinates.
+
+The application must then understand the exact selected location and retrieve relevant information for that place.
+
+## 3.1 Search by place name
+
+Support:
+
+- Village names.
+- Hamlets and settlements.
+- Towns.
+- Cities.
+- Districts.
+- States.
+- Countries.
+- Rivers.
+- Lakes.
+- Mountains.
+- Islands.
+- Watersheds.
+- Geographic landmarks.
+- Geological locations.
+- Agricultural areas.
+- Coordinates.
+
+For ambiguous names, present geographically distinct matches with their district, state, country and coordinates.
+
+Never silently choose the wrong village.
+
+## 3.2 Search by coordinates
+
+Allow users to enter:
+
+- Latitude and longitude.
+- Decimal coordinates.
+- Supported coordinate formats.
+
+For example:
+
+`16.5449, 81.5212`
+
+When coordinates are supplied:
+
+1. Validate the coordinates.
+2. Resolve the geographic location.
+3. Identify the relevant administrative area.
+4. Identify the appropriate watershed or geographic context where possible.
+5. Retrieve datasets intersecting the selected point or requested area.
+6. Show the exact coordinates used.
+7. Explain the spatial coverage of each dataset.
+
+## 3.3 Exact-location data retrieval
+
+This requirement is critical:
+
+**When a user selects a village or coordinates, Nexus AI must analyse that selected location—not produce generic information about the entire state, country or world.**
+
+Build a proper location context object.
+
+It should contain, where available:
+
+- Place name.
+- Administrative hierarchy.
+- Coordinates.
+- Selected geographic boundary.
+- Requested analysis radius.
+- Watershed.
+- Elevation.
+- Terrain.
+- Soil.
+- Geology.
+- Groundwater.
+- Surface water.
+- Climate.
+- Vegetation.
+- Land cover.
+- Agricultural information.
+- Environmental information.
+- Nearby relevant facilities.
+- Available historical observations.
+- Source metadata.
+- Missing data indicators.
+
+Every data query must be spatially constrained appropriately.
+
+If a dataset has coarse resolution, explicitly communicate that its values represent a larger area rather than an exact village measurement.
+
+Do not pretend that a 10 km or 25 km dataset represents an individual plot.
+
+## 3.4 Location-specific data coverage
+
+Create a location coverage assessment.
+
+For every selected location, show which information is:
+
+- Available at the selected point.
+- Available at village or administrative-area level.
+- Available only at regional scale.
+- Available only as satellite-derived indicators.
+- Available as model estimates.
+- Unavailable.
+
+This prevents false precision.
+
+---
+
+# 4. GEMINI INTEGRATION — MAKE NEXUS AI THE INTELLIGENCE CENTRE
+
+Integrate Google's Gemini into the existing Nexus AI system using the currently supported official Gemini API and SDK documentation.
+
+Do not assume old model names, deprecated endpoints or obsolete SDK patterns.
+
+Inspect the current project, identify the existing Gemini implementation and repair or extend it.
+
+## 4.1 Nexus AI must have controlled access to application intelligence
+
+Give Nexus AI access to the information it legitimately needs through structured application tools and retrieval.
+
+It should be able to access:
+
+- The selected location.
+- Available geographic boundaries.
+- The Data Catalogue.
+- Dataset metadata.
+- Retrieved scientific observations.
+- Active layers.
+- Historical observations.
+- Location dossiers.
+- Scientific analysis outputs.
+- Available comparison results.
+- Environmental information.
+- Agricultural information.
+- Previous conversation context where appropriate.
+
+Do not simply paste every available dataset into the Gemini prompt.
+
+Implement a proper retrieval and tool architecture.
+
+Use:
+
+- Location-aware retrieval.
+- Dataset search.
+- Spatial queries.
+- Temporal filtering.
+- Structured data summaries.
+- Source metadata.
+- Relevant calculations.
+- Server-side tools.
+- Appropriate context management.
+
+Gemini should request the exact data needed for the user's question.
+
+## 4.2 Give Gemini useful tools
+
+Where appropriate, expose controlled tools such as:
+
+- `resolve_location`
+- `get_location_context`
+- `search_datasets`
+- `get_groundwater_data`
+- `get_surface_water_data`
+- `get_soil_data`
+- `get_geology_data`
+- `get_mineral_occurrences`
+- `get_climate_data`
+- `get_land_cover`
+- `get_satellite_observations`
+- `get_agricultural_suitability`
+- `search_nearby_facilities`
+- `get_environmental_records`
+- `compare_locations`
+- `analyse_temporal_change`
+- `calculate_spatial_statistics`
+- `generate_scientific_report`
+
+Implement tools using the actual backend and data architecture.
+
+Gemini should not be allowed to invent tool results.
+
+Validate tool inputs and outputs.
+
+Use server-side credentials and secure API access.
+
+## 4.3 Nexus AI behaviour
+
+Nexus AI should answer questions such as:
+
+- What is the groundwater situation in this village?
+- What is the dominant soil type here?
+- Which crops may be suitable for this location?
+- How has vegetation changed over the past ten years?
+- What is the available geological information?
+- Are there known mineral occurrences nearby?
+- What are the possible reasons for water depletion?
+- What conservation measures should be considered?
+- Which scientific datasets support this conclusion?
+- What additional measurements would improve confidence?
+
+Answers must be based on actual retrieved information.
+
+Separate:
+
+1. Observed facts.
+2. Derived calculations.
+3. Model estimates.
+4. AI interpretations.
+5. Recommendations.
+6. Unknowns and data gaps.
+
+Every scientific conclusion should be traceable to its underlying data.
+
+## 4.4 Web verification
+
+For questions involving current companies, factories, industrial activity, government notices, environmental incidents or other changing public information, allow Nexus AI to use a controlled web-search or external research integration.
+
+It must:
+
+- Search relevant authoritative sources.
+- Check publication dates.
+- Cross-check important claims.
+- Prefer government records and primary sources.
+- Identify conflicting information.
+- Cite URLs and dates.
+- Avoid presenting search snippets as verified facts.
+
+Do not give Gemini unrestricted access to arbitrary tools or private application secrets.
+
+Implement controlled, permission-aware tool access.
+
+## 4.5 AI user experience
+
+Improve:
+
+- Streaming responses.
+- Clear thinking/loading feedback.
+- Source citations.
+- Interactive references to datasets.
+- Follow-up questions.
+- Selected-location awareness.
+- Conversation history.
+- Error recovery.
+- Report generation.
+- Scientific explanation quality.
+
+Nexus AI should feel like an integrated scientific assistant, not an ordinary chatbot disconnected from the application.
+
+---
+
+# 5. NEXUS HYDRO — ADVANCED WATER INTELLIGENCE
+
+Expand Nexus Hydro into a comprehensive water intelligence module.
+
+Include available information about:
+
+- Groundwater.
+- Aquifers.
+- Water tables.
+- Borewells.
+- Surface water.
+- Lakes.
+- Rivers.
+- Reservoirs.
+- Watersheds.
+- Rainfall.
+- Recharge.
+- Evapotranspiration.
+- Drought.
+- Water quality.
+- Water stress.
+- Historical water-level observations.
+
+Use actual source datasets and their correct spatial and temporal resolutions.
+
+## 5.1 Dedicated 3D Hydro visualization
+
+Do not leave Nexus Hydro as only charts and text.
+
+Create a visually impressive scientific 3D visualization.
+
+Potential elements:
+
+- 3D terrain surface.
+- Watershed boundaries.
+- River networks.
+- Lakes and reservoirs.
+- Aquifer conceptual models.
+- Groundwater level surfaces where supported.
+- Water-table cross-sections.
+- Recharge zones.
+- Groundwater flow illustrations where scientifically justified.
+- Water-resource indicators.
+- Historical comparison layers.
+
+When a user selects a location, the visualization must update to that location.
+
+For the 3D cutout, expose the terrain and appropriate subsurface water-related layers.
+
+Do not invent an exact aquifer geometry or groundwater depth.
+
+Label conceptual aquifer illustrations as conceptual.
+
+## 5.2 Groundwater assessment
+
+Where data permits, estimate or report:
+
+- Available water-level measurements.
+- Measurement dates.
+- Historical trends.
+- Seasonal variation.
+- Groundwater stress indicators.
+- Recharge indicators.
+- Rainfall context.
+- Available extraction information.
+
+Clearly distinguish actual borewell measurements from remotely sensed regional water-storage indicators.
+
+## 5.3 Water conservation recommendations
+
+When groundwater stress is detected, provide location-appropriate recommendations, such as:
+
+- Rainwater harvesting.
+- Rooftop collection.
+- Recharge structures.
+- Farm ponds.
+- Check dams.
+- Contour trenches.
+- Appropriate irrigation methods.
+- Watershed restoration.
+- Crop-water optimization.
+- Community groundwater monitoring.
+
+Recommendations must consider local soil, slope, geology, rainfall and hydrogeological suitability.
+
+Do not recommend constructing a recharge structure without considering its engineering and environmental suitability.
+
+---
+
+# 6. NEXUS STRATA — GEOLOGICAL INTELLIGENCE
+
+Give Nexus Strata its own interactive scientific visualization.
+
+Include, where supported:
+
+- Geological formations.
+- Rock types.
+- Lithology.
+- Stratigraphic units.
+- Geological boundaries.
+- Faults and fractures.
+- Geological structures.
+- Terrain.
+- Subsurface interpretations.
+- Available borehole information.
+- Geological cross-sections.
+
+## 6.1 3D geological visualization
+
+Create:
+
+- Natural geological layers.
+- 3D stratigraphic surfaces where data exists.
+- Terrain-conforming geological cutouts.
+- Interactive cross-sections.
+- Rock formation visualization.
+- Layer selection.
+- Depth inspection.
+- Legends and data provenance.
+
+Do not use generic coloured layers as if they were measured local geological structures.
+
+Clearly distinguish actual geological mapping from conceptual illustrations.
+
+---
+
+# 7. NEXUS MINERAL — MINERAL AND RESOURCE INTELLIGENCE
+
+Give Nexus Mineral its own rich 3D visualization.
+
+Potential visual elements:
+
+- Geological terrain.
+- Known mineral occurrence locations.
+- Mineral-bearing geological formations where documented.
+- Geological cross-sections.
+- Rock and mineral specimen visualizations.
+- Exploration indicators.
+- Remote-sensing layers.
+- Known deposits and occurrence records.
+- Geological structures.
+
+Allow users to inspect mineral information, including:
+
+- Mineral type.
+- Known occurrence.
+- Source.
+- Reported location.
+- Geological context.
+- Publication date.
+- Confidence and limitations.
+
+The 3D representation should explain the geology and mineral context of the selected location.
+
+Do not display a beautiful generic crystal or underground deposit and imply that it actually exists beneath the selected coordinates.
+
+Satellite anomalies must never be presented as confirmed mineral deposits.
+
+---
+
+# 8. NEW MODULE — NEXUS SOIL
+
+Create a dedicated Nexus Soil module if an equivalent comprehensive module does not already exist.
+
+This module should identify and explain available soil information for the selected location.
+
+Include:
+
+- Soil classification.
+- Soil texture.
+- Sand content.
+- Silt content.
+- Clay content.
+- Soil pH.
+- Organic carbon.
+- Soil depth.
+- Soil moisture.
+- Salinity.
+- Nutrient information where available.
+- Drainage characteristics.
+- Available laboratory measurements.
+- Soil limitations.
+
+## 8.1 Dedicated 3D soil visualization
+
+Create an interactive soil-profile visualization.
+
+Display:
+
+- Surface terrain.
+- Topsoil.
+- Subsoil.
+- Soil horizons where known.
+- Soil texture.
+- Available organic-carbon information.
+- Relevant depth intervals.
+- Water infiltration concepts.
+- Soil limitations.
+
+The visual must update according to the selected location's actual soil data.
+
+If a soil profile is generalized or conceptual, label it accordingly.
+
+---
+
+# 9. NEW MODULE — NEXUS AGRI: AGRICULTURAL INTELLIGENCE FOR FARMERS
+
+This is a major feature.
+
+Build an agricultural decision-support system that helps farmers understand their land and make better-informed decisions.
+
+It must be practical, location-specific and understandable.
+
+## 9.1 Identify soil and agricultural conditions
+
+When a farmer searches for a village, field or enters coordinates, retrieve available information about:
+
+- Soil type.
+- Soil texture.
+- Soil pH.
+- Soil organic carbon.
+- Soil moisture.
+- Nutrients where available.
+- Terrain slope.
+- Elevation.
+- Drainage.
+- Rainfall.
+- Temperature.
+- Water availability.
+- Land cover.
+- Growing-season conditions.
+- Available irrigation information.
+
+Where appropriate, ask for field-level information such as farm area, irrigation access, soil test results and intended growing season.
+
+Do not assume that village-level data represents every field within that village.
+
+## 9.2 Crop suitability intelligence
+
+Recommend potentially suitable crops based on:
+
+- Soil characteristics.
+- Climate.
+- Rainfall.
+- Temperature.
+- Water availability.
+- Terrain.
+- Growing season.
+- Crop duration.
+- Available agricultural research.
+- Local agricultural recommendations.
+
+For each suggested crop, explain:
+
+- Why it may be suitable.
+- Soil requirements.
+- Water requirements.
+- Seasonal requirements.
+- Potential constraints.
+- Important management considerations.
+- What additional field measurements are needed.
+
+Rank recommendations only when the underlying evidence supports a meaningful comparison.
+
+Do not guarantee yield.
+
+## 9.3 Crop yield intelligence
+
+Where appropriate validated models and suitable input data exist, estimate potential yield.
+
+Display:
+
+- Estimated yield range.
+- Model or methodology.
+- Input datasets.
+- Time period.
+- Uncertainty.
+- Main influencing factors.
+
+Never present an unsupported AI-generated yield as a scientific prediction.
+
+## 9.4 Agricultural land suitability
+
+Create a land suitability assessment.
+
+Help users identify areas that may be more suitable for particular crops.
+
+Consider:
+
+- Soil.
+- Slope.
+- Water availability.
+- Drainage.
+- Flood risk.
+- Salinity.
+- Climate.
+- Land constraints.
+- Protected areas.
+- Existing land use.
+
+Provide suitability maps with understandable legends.
+
+Do not recommend cultivating protected or restricted land.
+
+## 9.5 Borewell and irrigation suitability
+
+This is particularly important.
+
+Allow users to investigate potential areas for groundwater access.
+
+Analyse available:
+
+- Geological information.
+- Aquifer characteristics.
+- Groundwater observations.
+- Existing well records.
+- Terrain.
+- Lineaments where scientifically appropriate.
+- Recharge indicators.
+- Hydrogeological maps.
+- Water quality information.
+- Local groundwater assessments.
+
+Produce a **groundwater exploration suitability assessment**, not a guaranteed borewell success prediction.
+
+Explain:
+
+- Why a location may be relatively more suitable.
+- What evidence supports the assessment.
+- What data is missing.
+- Whether groundwater levels are known.
+- What field surveys are recommended.
+- What local permissions may be required.
+
+Never claim that a borewell will definitely find water at a specific depth.
+
+Do not encourage indiscriminate groundwater extraction.
+
+Include sustainable groundwater management recommendations.
+
+## 9.6 Farmer-friendly interface
+
+Design this module for practical use.
+
+Use:
+
+- Simple language.
+- Clear visual explanations.
+- Local units.
+- Understandable charts.
+- Regional crop names where verified.
+- Relevant seasonal information.
+- Visual soil profiles.
+- Clear recommendation summaries.
+
+Provide a detailed technical view for researchers and an easier farmer-oriented view.
+
+Where reliable translations are available, support relevant Indian languages.
+
+---
+
+# 10. NEW MODULE — NEXUS ENVIRONMENT
+
+Create or expand a dedicated environmental intelligence module.
+
+Analyse available information about:
+
+- Land-use change.
+- Forest cover.
+- Vegetation health.
+- Water-body changes.
+- Flooding.
+- Drought.
+- Surface temperature.
+- Urban expansion.
+- Industrial land use.
+- Environmental hazards.
+- Air-quality information.
+- Water-quality information.
+- Relevant pollution records.
+- Protected areas.
+
+Provide 3D and map-based visualizations where meaningful.
+
+Examples:
+
+- Historical vegetation changes.
+- Surface-water extent comparisons.
+- Urban growth.
+- Land degradation.
+- Flood extent.
+- Environmental risk indicators.
+
+Clearly distinguish observations from inferred causes.
+
+---
+
+# 11. ENVIRONMENTAL INVESTIGATION AND NEARBY INDUSTRIAL ACTIVITY
+
+Create a powerful but scientifically responsible environmental investigation capability.
+
+Example question:
+
+"Groundwater levels in this village appear to be declining. Are nearby industries contributing to the problem?"
+
+Nexus AI should investigate this rather than immediately accusing a company.
+
+## 11.1 Nearby facility discovery
+
+Where reliable public data exists, identify nearby:
+
+- Factories.
+- Industrial facilities.
+- Mines.
+- Manufacturing plants.
+- Waste treatment facilities.
+- Major water users.
+- Relevant infrastructure.
+- Other potentially relevant facilities.
+
+Retrieve:
+
+- Facility name.
+- Geographic location.
+- Approximate distance from the selected area.
+- Industry category.
+- Available public records.
+- Relevant permits.
+- Environmental compliance records.
+- Publicly documented water usage where available.
+- Relevant official reports.
+
+## 11.2 Cross-verification
+
+Use reliable sources such as:
+
+- Government pollution-control boards.
+- Official environmental clearances.
+- Public environmental impact assessments.
+- Government inspection reports.
+- Regulatory notices.
+- Public water-use information.
+- Peer-reviewed research.
+- Credible scientific publications.
+- Official company disclosures where relevant.
+
+Cross-check important claims using multiple independent sources wherever possible.
+
+## 11.3 Causation analysis
+
+Do not conclude that a nearby factory caused groundwater depletion merely because it is nearby.
+
+Investigate:
+
+- Distance.
+- Groundwater-flow direction where known.
+- Aquifer connectivity.
+- Historical water-level trends.
+- Rainfall changes.
+- Agricultural extraction.
+- Industrial water demand.
+- Land-use changes.
+- Water-quality indicators.
+- Regulatory findings.
+- Relevant time periods.
+
+Classify findings as:
+
+- VERIFIED FACT.
+- DOCUMENTED REGULATORY FINDING.
+- SUPPORTED POSSIBLE CONTRIBUTING FACTOR.
+- UNVERIFIED CLAIM.
+- INSUFFICIENT EVIDENCE.
+
+If there is insufficient evidence, explicitly say so.
+
+Never generate defamatory claims against an individual or organization.
+
+## 11.4 Actionable recommendations
+
+If the investigation identifies credible concerns, suggest appropriate actions:
+
+- Additional groundwater monitoring.
+- Water-quality testing.
+- Field inspection.
+- Official data requests.
+- Contacting the relevant pollution-control authority.
+- Consulting qualified hydrogeologists.
+- Reviewing public compliance records.
+- Sustainable water management.
+
+Generate a source-backed investigation report.
+
+---
+
+# 12. ADVANCED SCIENTIFIC REPORT GENERATION — PDF
+
+Create a dedicated **Generate Report** capability across the application.
+
+Users should be able to generate a detailed scientific report for a selected location or analysis.
+
+Reports must be based on actual retrieved data and clearly identify missing information.
+
+## 12.1 Report types
+
+Support reports such as:
+
+**Nexus Hydro Report**
+- Groundwater conditions.
+- Historical trends.
+- Water-resource indicators.
+- Rainfall context.
+- Groundwater stress.
+- Potential conservation measures.
+
+**Nexus Soil Report**
+- Soil classification.
+- Texture.
+- pH.
+- Organic carbon.
+- Available nutrient information.
+- Soil limitations.
+- Recommendations for further testing.
+
+**Nexus Agri Report**
+- Agricultural suitability.
+- Potential crop choices.
+- Soil and climate compatibility.
+- Irrigation requirements.
+- Potential constraints.
+- Evidence-based management recommendations.
+
+**Nexus Strata Report**
+- Geological setting.
+- Rock types.
+- Geological structures.
+- Available subsurface information.
+- Data gaps.
+
+**Nexus Mineral Report**
+- Known mineral occurrences.
+- Geological evidence.
+- Relevant datasets.
+- Exploration indicators.
+- Limitations.
+
+**Nexus Environment Report**
+- Environmental observations.
+- Land-use changes.
+- Water and vegetation trends.
+- Nearby relevant facilities.
+- Available regulatory records.
+- Environmental recommendations.
+
+**Comprehensive Location Report**
+- Geographic profile.
+- Terrain.
+- Water.
+- Soil.
+- Geology.
+- Minerals.
+- Agriculture.
+- Climate.
+- Environment.
+- Nearby facilities.
+- Key findings.
+- Recommendations.
+
+## 12.2 Example groundwater report workflow
+
+If the selected location has evidence of low or declining groundwater:
+
+1. Retrieve actual available groundwater measurements.
+2. Inspect their dates and locations.
+3. Check the measurement units.
+4. Analyse historical changes.
+5. Examine rainfall and drought context.
+6. Examine available extraction and land-use information.
+7. Review geological and hydrogeological context.
+8. Identify nearby relevant facilities.
+9. Cross-check relevant public environmental information.
+10. Distinguish confirmed findings from hypotheses.
+11. Identify additional measurements needed.
+12. Generate practical conservation recommendations.
+
+The report must not invent causes or assign blame without sufficient evidence.
+
+## 12.3 PDF report design
+
+Create professional downloadable PDF documents.
+
+Include:
+
+- TERRANEXUS 4D branding.
+- Report title.
+- Selected location.
+- Coordinates.
+- Administrative region.
+- Generation date.
+- Executive summary.
+- Methodology.
+- Maps.
+- Relevant 3D screenshots where appropriate.
+- Charts.
+- Scientific findings.
+- Data source references.
+- Dates and units.
+- Confidence and uncertainty.
+- Recommendations.
+- Limitations.
+- Suggested next steps.
+
+Use a clean, premium scientific publication layout.
+
+Support suitable page sizes, consistent typography, page numbering, headers, footers and readable charts.
+
+Generate PDFs using a reliable backend or client-side PDF library appropriate to the existing architecture.
+
+Do not create a PDF that merely prints the current webpage.
+
+The report should be a properly structured scientific document.
+
+## 12.4 Report verification
+
+Before allowing download:
+
+- Verify that the report was generated successfully.
+- Verify that charts and images render.
+- Verify that sources are included.
+- Verify that units and dates are correct.
+- Verify that the selected location is correct.
+- Verify that no fabricated values were introduced.
+
+---
+
+# 13. EVERY MODULE MUST HAVE ITS OWN VISUAL SCIENTIFIC EXPERIENCE
+
+Do not restrict 3D visualization to the main Earth Explorer.
+
+Give each relevant module a distinctive, useful and interactive visual representation.
+
+Examples:
+
+| Module | Visual experience |
+|---|---|
+| Earth Explorer | 3D Earth, terrain and natural geographic cutout |
+| Nexus Hydro | Aquifers, water table, watersheds and hydrological cross-sections |
+| Nexus Strata | Geological layers and natural terrain-conforming cross-sections |
+| Nexus Mineral | Mineral occurrences and geological structures |
+| Nexus Soil | Interactive soil profile and horizons |
+| Nexus Agri | 3D agricultural terrain, soil and suitability visualization |
+| Nexus Environment | Environmental change and land-cover visualization |
+| Nexus Climate | Climate surfaces, historical comparisons and relevant atmospheric data |
+
+The visuals must respond to the selected location and actual available data.
+
+Do not use unrelated stock illustrations or static decorative objects as substitutes for scientific visualization.
+
+---
+
+# 14. THE SIGNATURE GLOBE-TO-CUTOUT TRANSITION
+
+Retain and implement the complete cinematic geographical extraction system.
+
+The selected region must appear to physically separate from the Earth's surface, rise forward, reveal its exposed sides and settle into an inspection position.
+
+The transformation must be continuous and reversible.
+
+Do not use a rectangular block or a generic camera zoom.
+
+Implement actual geographic polygon geometry, terrain-conforming surfaces, correct registration, appropriate geological cross-sections and smooth camera interpolation.
+
+Use the visual references from the earlier directive:
+
+- https://www.sicilyactive.com/sites/default/files/blog/sicily_active_High-resolution_geological_cross-section_of_Valle_del_bove_.png
+- https://cgconnect.chaos.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNHhXQVE9PSIsImV4cCI6bnVsbCwicHVyIjoibG9iX2lkIn19--2e93fcd3df1e80a723c8bbac251bd4c36eea42b3/aa342bcc.jpg
+- https://www.geomodelle.com/images/Block%20Model03.jpg
+- https://ecweb.ecer.com/news-img/a5d8f32843d909a1b4fd0ac03d5a1063.webp
+- https://cesium.com/blog/2018/04/25/cesium-world-terrain-canada/
+- https://www.maptiler.com/terrain/
+
+The extracted geography must correspond to the selected location.
+
+Maintain continuous camera movement, terrain registration, texture continuity and natural irregular boundaries.
+
+Implement a robust animation state machine, interruption handling and reverse transition.
+
+---
+
+# 15. THE COMPLETE LIQUID-GLASS UI AND ANIMATION SYSTEM
+
+Implement a unified premium liquid-glass interface.
+
+Investigate and use suitable existing tools and engines rather than manually reinventing every effect.
+
+Evaluate compatible tools such as:
+
+- Motion / Framer Motion.
+- GSAP.
+- React Spring.
+- Three.js.
+- Custom WebGL shaders.
+- CSS backdrop filters.
+- Lottie.
+- Existing design systems.
+- Available visual prototyping and design tools.
+
+Do not install all of these indiscriminately.
+
+Choose a small, compatible and maintainable combination.
+
+Implement:
+
+- Realistic glass surfaces.
+- Layered transparency.
+- Controlled blur.
+- Fine highlights.
+- Subtle reflections.
+- Consistent depth.
+- Readable text.
+- Refined typography.
+- Smooth navigation.
+- Fluid panel transitions.
+- Polished controls.
+- Meaningful loading animations.
+- Smooth 3D camera movement.
+- Beautiful module transitions.
+- Consistent micro-interactions.
+
+Inspect every screen.
+
+Fix every overlapping panel, misaligned element, inconsistent size, broken control and unreadable label.
+
+The interface must be minimal, visually impressive, readable and easy to navigate.
+
+Animations must be smooth without compromising performance.
+
+Respect reduced-motion settings.
+
+---
+
+# 16. LOCATION DOSSIERS AND USER WORKSPACES
+
+Every location should have a consistent scientific dossier.
+
+Include available:
+
+- Geographic information.
+- Terrain.
+- Hydrology.
+- Soil.
+- Geology.
+- Minerals.
+- Agriculture.
+- Climate.
+- Environment.
+- Satellite observations.
+- Nearby relevant facilities.
+- Historical information.
+- Source metadata.
+- Data coverage.
+
+Allow users to save:
+
+- Locations.
+- Reports.
+- Comparisons.
+- Active layers.
+- Analysis configurations.
+- Relevant AI conversations.
+- Workspaces.
+
+Implement real persistence using the existing application architecture.
+
+---
+
+# 17. DATA QUALITY, PROVENANCE AND SCIENTIFIC HONESTY
+
+Every scientific dataset must retain:
+
+- Provider.
+- Dataset name.
+- Source URL or identifier.
+- Collection date.
+- Processing date where available.
+- Geographic coverage.
+- Spatial resolution.
+- Temporal resolution.
+- Units.
+- Methodology.
+- License.
+- Uncertainty.
+- Known limitations.
+
+Clearly distinguish:
+
+- Direct measurements.
+- Satellite observations.
+- Satellite-derived indicators.
+- Processed products.
+- Statistical calculations.
+- Model estimates.
+- Predictions.
+- AI interpretations.
+- Conceptual visualizations.
+
+Never present:
+
+- GRACE total water storage anomalies as exact local groundwater depth.
+- Satellite vegetation anomalies as direct proof of soil fertility.
+- Sentinel-2 anomalies as confirmed underground mineral deposits.
+- Regional geological maps as precise borewell logs.
+- Modelled crop yields as guaranteed harvests.
+- Proximity to an industrial facility as proof of environmental damage.
+
+Scientific reliability is more important than filling every panel with numbers.
+
+---
+
+# 18. TECHNICAL ARCHITECTURE AND PERFORMANCE
+
+Build a maintainable data architecture.
+
+Use appropriate:
+
+- Backend connectors.
+- Dataset registries.
+- Geospatial databases.
+- Spatial indexing.
+- Raster processing.
+- Vector processing.
+- Caching.
+- Background jobs.
+- API gateways.
+- Secure credential management.
+- Data validation.
+- Logging.
+- Monitoring.
+
+Avoid unnecessary duplication.
+
+Protect Gemini credentials and external API keys on the server side where appropriate.
+
+Do not expose secrets in frontend code.
+
+Optimize:
+
+- Large datasets.
+- Raster loading.
+- Terrain geometry.
+- 3D rendering.
+- GPU memory.
+- Animation loops.
+- API requests.
+- React rendering.
+- PDF generation.
+- Network usage.
+
+Use spatial and temporal filtering to avoid unnecessary downloads.
+
+Make the application stable on supported hardware.
+
+---
+
+# 19. COMPLETE EXISTING FEATURE REFINEMENT
+
+Audit every feature that already exists.
+
+For each feature:
+
+1. Inspect its current implementation.
+2. Determine whether it works.
+3. Identify its shortcomings.
+4. Improve the design.
+5. Improve the actual functionality.
+6. Improve data integration.
+7. Improve loading and error handling.
+8. Improve responsiveness.
+9. Test normal and abnormal workflows.
+10. Verify that other modules have not been broken.
+
+If complete perfection is not possible because of a missing dataset, API credential, external service or technical limitation, implement every independent improvement that is possible.
+
+Never abandon an entire feature because one dependency is unavailable.
+
+---
+
+# 20. TESTING AND QUALITY ASSURANCE
+
+Test the entire application.
+
+Include:
+
+- Global geographic search.
+- Village search.
+- Coordinate search.
+- Correct location selection.
+- Location-specific data retrieval.
+- Dataset provenance.
+- Satellite data access.
+- Nexus Hydro.
+- Nexus Strata.
+- Nexus Mineral.
+- Nexus Soil.
+- Nexus Agri.
+- Nexus Environment.
+- Nexus AI.
+- Gemini integration.
+- External web verification.
+- Report generation.
+- PDF export.
+- 3D visualizations.
+- Globe-to-cutout extraction.
+- Reverse extraction.
+- Animation interruption.
+- Liquid-glass interactions.
+- Responsive layouts.
+- Security.
+- Performance.
+- Error recovery.
+- Production build.
+
+Verify actual data retrieval and actual results.
+
+Do not fabricate successful API responses or test outcomes.
+
+---
+
+# 21. AUTONOMOUS EXECUTION STRATEGY
+
+Do not stop after adding screens.
+
+Do not stop after making the application look attractive.
+
+Do not stop after integrating Gemini.
+
+Do not stop after creating a data catalogue.
+
+Work systematically through the project using this cycle:
+
+**AUDIT → RESEARCH → ARCHITECT → IMPLEMENT → INTEGRATE → TEST → VISUALLY INSPECT → REFINE → REGRESSION TEST**
+
+Prioritize:
+
+1. Critical existing bugs.
+2. Global location search.
+3. Scientific data infrastructure.
+4. Gemini integration.
+5. Location-specific intelligence.
+6. Globe-to-cutout engineering.
+7. Module-specific scientific visualization.
+8. Agriculture and farmer assistance.
+9. Environmental investigation.
+10. PDF reporting.
+11. Liquid-glass design.
+12. Animation refinement.
+13. Performance and security.
+14. Additional useful features.
+
+Continue through as many tasks as the available working session permits.
+
+If the environment has time or context limits, preserve a clear progress record and prioritize the most important unfinished work.
+
+Do not claim to continue working in the background after the execution session has ended.
+
+---
+
+# 22. FINAL ACCEPTANCE CRITERIA
+
+TERRANEXUS 4D should satisfy these standards:
+
+**Global discovery:** Users can find villages, cities, landmarks and coordinates.
+
+**Location intelligence:** Results are constrained to the selected location and appropriate geographic context.
+
+**Scientific data:** Real, traceable, legally accessible datasets are integrated wherever possible.
+
+**Nexus AI:** Gemini understands the selected location and can retrieve and analyse actual application data.
+
+**Hydro:** Water intelligence is supported by useful 3D visualization and evidence-based recommendations.
+
+**Strata:** Geological information has an interactive and scientifically grounded visual representation.
+
+**Mineral:** Mineral information is evidence-based and visually explorable.
+
+**Soil:** Soil profiles and available properties are displayed clearly.
+
+**Agriculture:** Farmers receive location-specific soil, crop suitability, water and land guidance.
+
+**Environment:** Environmental changes and nearby facilities can be investigated responsibly.
+
+**Reports:** Users can generate professional PDF reports with sources, findings, limitations and recommendations.
+
+**3D Earth:** The globe and cutout are visually sophisticated and technically coherent.
+
+**Liquid glass:** The entire application uses a consistent premium design system.
+
+**Animations:** Transitions are smooth, natural and responsive.
+
+**Functionality:** Every advertised control is tested.
+
+**Reliability:** Errors, missing datasets and external dependencies are handled honestly.
+
+---
+
+# 23. FINAL DELIVERY REPORT
+
+Provide:
+
+1. Complete codebase audit.
+2. Data sources discovered.
+3. Data integrations completed.
+4. Integrations requiring credentials.
+5. New data modules implemented.
+6. Gemini architecture and capabilities.
+7. Location search improvements.
+8. Location-specific analysis improvements.
+9. 3D visualization improvements.
+10. Globe-to-cutout implementation details.
+11. Liquid-glass and animation improvements.
+12. Agriculture and farmer-assistance features.
+13. Environmental investigation capabilities.
+14. PDF reporting functionality.
+15. Performance and security improvements.
+16. Tests executed and actual results.
+17. External blockers.
+18. Remaining work.
+
+Classify every major feature as:
+
+- COMPLETED AND TESTED.
+- IMPLEMENTED BUT NOT FULLY VERIFIED.
+- PARTIALLY IMPLEMENTED.
+- BLOCKED BY EXTERNAL DEPENDENCY.
+- NOT IMPLEMENTED.
+
+Provide evidence of implementation wherever possible.
+
+Do not report a feature as completed simply because its interface exists.
+
+---
+
+# FINAL COMMAND
+
+Begin by auditing the existing TERRANEXUS 4D application and discovering every available development capability, agent, integration and tool.
+
+Then build the expanded scientific data infrastructure, improve all existing modules, integrate Gemini deeply into Nexus AI, implement location-specific intelligence, create the additional scientific visualizations, add agricultural and environmental decision-support capabilities, and build the professional PDF reporting system.
+
+At the same time, refine the entire application into a unified, minimal, premium liquid-glass experience with exceptionally smooth animations.
+
+The application must not merely tell users about the Earth. It must help them understand actual locations, investigate scientific conditions, compare evidence, identify possible problems and make better-informed decisions.
+
+**Build a platform that can help researchers understand the Earth, help communities understand their water resources, help farmers make informed agricultural decisions and help people investigate environmental changes through reliable scientific information.**
+
+Do not compromise scientific integrity for impressive visuals.
+
+Do not compromise functionality for beautiful design.
+
+Do not compromise performance for animations.
+
+Do not leave existing features unfinished when meaningful improvements are possible.
+
+**Make TERRANEXUS 4D an exceptionally capable, visually extraordinary, globally useful and scientifically credible Earth intelligence platform. Begin now.**

@@ -405,30 +405,32 @@ All screenshots below represent **genuine live application captures** taken from
 To maintain absolute scientific transparency, implemented capabilities are strictly separated from planned roadmap items:
 
 ### ✅ Fully Implemented & Verified Capabilities
-- Universal Indian place and coordinate geocoding with five-tier administrative parsing.
-- Default 3D Globe landing with high-resolution Satellite basemap imagery.
-- Official CARTO Basemaps integration (Dark Matter, Voyager, Positron styles) with graceful open fallbacks.
-- Reconstructed 3D Subsurface Cutaway with continuous undulating terrain relief, incised river swales, and watertight dipping strata.
-- Multiple subsurface visualization modes: Corner Cut, Full Block, 3D Fence Diagram, and 2D Orthogonal Section.
-- Dual-axis seasonal groundwater hydrographs (2015–2024) and NASA GRACE gravimetry time series.
-- In-situ CGWB groundwater monitoring station discovery with 50 km distance gating and state isolation.
-- Runtime `DataIntegrityGate` enforcing containment, scale disclaimers, and anti-fabrication rules.
-- Sentinel-2 MSI surface alteration indices (Iron Oxide, Hydroxyl, Ferrous Silicates).
-- CesiumJS defensive zero-width lifecycle guards preventing WebGL crashes.
-- Context-grounded Gemini AI copilot with offline rule-based fallback.
-- Centralized Operations Centre & API Gateway with SSRF protection, candidate discovery, and request telemetry.
+- **Global & Village Gazetteer Search (`geocodingService.ts`):** Supports countries, states, districts, cities, towns, rural Indian villages (*Ralegan Siddhi*, *Hiware Bazar*, *Piplantri*, *Punsari*, *Mawlynnong*, *Pochampally*, *Dharnai*, *Odanthurai*, *Doraha*, *Jagraon*, *Akividu*), Open-Meteo GeoNames (11M+ settlements), OSM Nominatim, and raw coordinates with resolution precision and multi-candidate disambiguation badges.
+- **8-Stage Reversible Globe-to-Cutout Extraction (`App.tsx` & `Subsurface3D.tsx`):** Natural non-cubic polygon terrain and dipping stratigraphic cutout with Copernicus DEM relief, glowing boundary rim, and reversible stage HUD (`GLOBE_IDLE` → `CUTOUT_READY` ↔ `RETURN_IN_PROGRESS`).
+- **Earth Intelligence Core (`server/eic/earthIntelligenceCore.ts` & `NexusEIC.tsx`):** 11-state epistemic availability classification, 7-step multi-source data fusion pipeline, cross-scale conflict reconciliation (GRACE vs. CGWB vs. NDVI), 9-node / 8-edge Location-Centered Knowledge Graph, Versioned Scientific Memory with LOO-CV prediction validation, and 16 Gemini EIC orchestration tools.
+- **All Scientific Domain Workspaces:**
+  - `Nexus Hydro`: CGWB NAQUIM aquifers, 50 km distance-gated piezometer network, NASA GRACE TWSA, and GPM IMERG precipitation.
+  - `Nexus Strata`: Dynamic lithostratigraphic columns, borehole core lithologs, and petrophysical matrices.
+  - `Nexus Mineral`: GSI metallogenic belts, mineral deposits, and Sentinel-2 MSI spectral alteration indices.
+  - `Nexus Soil`: 4-horizon pedological depth profile (`0–60 cm`), USDA texture triangle, pH, SOC, bulk density, CEC, infiltration rate, and PAWC.
+  - `Nexus Agri`: Live Open-Meteo 7-day agro-meteorological water balance (`ET0` vs. precipitation), FAO-56 multi-crop suitability across 6 crop systems, and salinity/groundwater sustainability diagnostics.
+  - `Nexus Environment`: Watershed health index, soil erosion hazard, drought/flood exposure, and groundwater contamination risk.
+  - `Nexus Climate & 4D Cycles`: Strict epistemic separation between Direct Observations (`VERIFIED_CACHED`), ERA5-Land Reanalysis (`PROCESSED`), 7-Day Synoptic Forecast (`PREDICTED`), and CMIP6 Decadal Projections (`MODELLED`).
+- **Automated Scientific PDF 1.4 Report Generator (`pdfReportService.ts` & `ScientificReportModal.tsx`):** Binary `%PDF-1.4` engine across 7 report types (`COMPREHENSIVE`, `HYDRO`, `SOIL`, `AGRI`, `STRATA`, `MINERAL`, `ENVIRONMENT`) enforced by a 6-point Pre-Download Verification Gate.
+- **19 Automated Regression & Security Test Suites (`npm run test:all` & `npm run test:eic`):** Comprehensive verification of geospatial accuracy, EIC fusion, knowledge graph provenance, PDF 1.4 generation, and SSRF/security guards.
 
 ### 📋 Planned Future Capabilities (Roadmap)
 - Real-time automated ingestion from live India-WRIS telemetry endpoints once official machine APIs stabilize.
 - Ingestion of GSI Bhukosh OGC WMS/WMTS vector layers for direct map streaming.
 - Subsurface electrical resistivity tomography (ERT) profile rendering.
 - Integration of ISRO Bhuvan satellite imagery basemaps.
-- Automated export of compliant hydrogeological reports in PDF/GeoTIFF formats.
 
 ---
 
-## 16. Licensing & Legal Compliance
+## 16. Recommended GitHub Repository Metadata & Licensing
 
+- **Recommended Repository Description:** `TERRANEXUS 4D — Global 4D Geospatial, Hydrogeological, Pedological, Agro-Meteorological & Subsurface Earth-Intelligence Platform with Multi-Source Scientific Data Fusion and Knowledge Graph`
+- **Recommended Repository Topics:** `geospatial`, `cesiumjs`, `threejs`, `hydrogeology`, `geology`, `earth-observation`, `knowledge-graph`, `data-fusion`, `remote-sensing`, `typescript`, `react`
 - **Software License:** Distributed under the [MIT License](LICENSE). Copyright © 2026 JSLO-Inc.
 - **Third-Party Software Notices:** Full list of open-source libraries and copyright statements available in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - **Scientific Data Compliance:** Geospatial layers and government datasets are accessed in compliance with:
@@ -438,3 +440,4 @@ To maintain absolute scientific transparency, implemented capabilities are stric
   - CARTO Basemaps Terms of Service and OpenStreetMap ODbL.
   - Detailed dataset citations and legal terms available in [DATA_LICENSES_AND_ATTRIBUTION.md](DATA_LICENSES_AND_ATTRIBUTION.md).
 - **Contributions:** Contributions adhering to our scientific code of conduct are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests.
+

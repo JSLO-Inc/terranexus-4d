@@ -19,9 +19,12 @@ export interface LocationResolveResponse {
  * Resolves any user query (coordinates, Google Maps link, or address/place name)
  * into a fully grounded SelectedLocation object with coverage assessment.
  */
-export async function resolveUserLocationQuery(query: string): Promise<LocationResolveResponse> {
+export async function resolveUserLocationQuery(
+  query: string,
+  suggestion?: GeocodingSuggestion
+): Promise<LocationResolveResponse> {
   const clean = query.trim();
-  if (!clean || clean.length < 2) {
+  if ((!clean || clean.length < 2) && !suggestion) {
     return { success: false, error: 'Please enter a valid coordinate, place name, or Google Maps URL.' };
   }
 
@@ -31,7 +34,7 @@ export async function resolveUserLocationQuery(query: string): Promise<LocationR
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ query: clean })
+      body: JSON.stringify({ query: clean, suggestion })
     });
 
     const data = await response.json();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTerranexusStore, ActiveModule } from '../../state/useTerranexusStore';
-import { Globe, Droplet, Layers, Sparkles, Bot } from 'lucide-react';
+import { Globe, Droplet, Sprout, Wheat, Layers, Sparkles, TreePine, Network, Bot } from 'lucide-react';
 
 interface DockItem {
   id: ActiveModule;
@@ -19,18 +19,38 @@ export const BottomNavDock: React.FC = () => {
     },
     {
       id: 'hydro',
-      label: 'Nexus Hydro',
+      label: 'Hydro',
       icon: <Droplet className="w-4 h-4" />
     },
     {
+      id: 'soil',
+      label: 'Soil',
+      icon: <Sprout className="w-4 h-4" />
+    },
+    {
+      id: 'agri',
+      label: 'Agri',
+      icon: <Wheat className="w-4 h-4" />
+    },
+    {
       id: 'strata',
-      label: 'Nexus Strata',
+      label: 'Strata',
       icon: <Layers className="w-4 h-4" />
     },
     {
       id: 'mineral',
-      label: 'Nexus Mineral',
+      label: 'Mineral',
       icon: <Sparkles className="w-4 h-4" />
+    },
+    {
+      id: 'environment',
+      label: 'Env',
+      icon: <TreePine className="w-4 h-4" />
+    },
+    {
+      id: 'eic',
+      label: 'EIC',
+      icon: <Network className="w-4 h-4" />
     },
     {
       id: 'ai',
@@ -40,14 +60,14 @@ export const BottomNavDock: React.FC = () => {
   ];
 
   return (
-    <div className="glass-panel flex items-center gap-1.5 p-1.5 rounded-2xl shadow-2xl select-none">
+    <div className="glass-panel flex items-center gap-1 p-1.5 rounded-2xl shadow-2xl select-none overflow-x-auto max-w-[95vw]">
       {dockItems.map((item) => {
         const isActive = activeModule === item.id;
         return (
           <button
             key={item.id}
             onClick={() => setActiveModule(item.id)}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer ${
               isActive
                 ? 'bg-sky-500/20 border border-sky-400/80 text-cyan-300 shadow-lg shadow-sky-500/10 font-semibold'
                 : 'border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'

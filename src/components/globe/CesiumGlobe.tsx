@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import gsap from 'gsap';
 import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import { useTerranexusStore, TIME_STEPS } from '../../state/useTerranexusStore';
@@ -9,6 +10,7 @@ import { reverseGeocodeMapClick } from '../../services/locationResolver';
 import { AVAILABLE_HYDRO_HEATMAP_LAYERS } from '../hydro/HeatmapLayerSelector';
 import { getCartoRasterTileUrl, CARTO_ATTRIBUTION } from '../../services/cartoBasemapService';
 import { getGeographicalBoundaryRadius } from '../subsurface/geologicalMaterials';
+import { interpolateCesiumCameraExtraction } from '../../utils/cutoutExtractionKinematics';
 import {
   Layers,
   Crosshair,
@@ -328,32 +330,83 @@ export const CesiumGlobe: React.FC = () => {
 
   const basemapMenuRef = useRef<HTMLDivElement>(null);
   const layersMenuRef = useRef<HTMLDivElement>(null);
+  const extrudedCutoutHeightRef = useRef<number>(120.0);
+  const cameraExtractionTweenRef = useRef<gsap.core.Tween | null>(null);
 
   const handleExtractCutout = useCallback(() => {
     setIsExtractingCutout(true);
     const viewer = viewerRef.current;
+
+    if (cameraExtractionTweenRef.current) {
+      cameraExtractionTweenRef.current.kill();
+      cameraExtractionTweenRef.current = null;
+    }
+
     if (viewer && !viewer.isDestroyed()) {
       try {
-        viewer.camera.flyTo({
-          destination: Cesium.Cartesian3.fromDegrees(
-            selectedLocation.longitude,
-            selectedLocation.latitude - 0.12,
-            42000
-          ),
-          orientation: {
-            heading: Cesium.Math.toRadians(0.0),
-            pitch: Cesium.Math.toRadians(-55.0),
-            roll: 0.0
+        const carto = viewer.camera.positionCartographic;
+        const startCam = {
+          longitude: Cesium.Math.toDegrees(carto.longitude),
+          latitude: Cesium.Math.toDegrees(carto.latitude),
+          height: Math.max(45000, Math.min(carto.height, 950000)),
+          headingDeg: Cesium.Math.toDegrees(viewer.camera.heading),
+          pitchDeg: Cesium.Math.toDegrees(viewer.camera.pitch),
+          rollDeg: Cesium.Math.toDegrees(viewer.camera.roll)
+        };
+        const targetLoc = {
+          longitude: selectedLocation.longitude,
+          latitude: selectedLocation.latitude,
+          targetHeightM: 38000,
+          targetPitchDeg: -52.0,
+          targetHeadingDeg: 0.0
+        };
+
+        const proxy = { t: 0 };
+        cameraExtractionTweenRef.current = gsap.to(proxy, {
+          t: 1,
+          duration: 0.64,
+          ease: 'none',
+          onUpdate: () => {
+            if (!viewer || viewer.isDestroyed()) return;
+            const pose = interpolateCesiumCameraExtraction(startCam, targetLoc, proxy.t);
+            extrudedCutoutHeightRef.current = pose.extrudedHeightM;
+            viewer.camera.setView({
+              destination: Cesium.Cartesian3.fromDegrees(pose.longitude, pose.latitude, pose.height),
+              orientation: {
+                heading: Cesium.Math.toRadians(pose.headingDeg),
+                pitch: Cesium.Math.toRadians(pose.pitchDeg),
+                roll: Cesium.Math.toRadians(pose.rollDeg)
+              }
+            });
+            if (containerRef.current && isViewerRenderable(viewer, containerRef.current)) {
+              try {
+                viewer.render();
+              } catch {}
+            }
           },
-          duration: 0.55,
-          easingFunction: Cesium.EasingFunction.CUBIC_IN_OUT
+          onComplete: () => {
+            cameraExtractionTweenRef.current = null;
+            extrudedCutoutHeightRef.current = 120.0;
+            setIsExtractingCutout(false);
+            setViewMode('cutaway');
+          }
         });
+        return;
       } catch {}
     }
-    setTimeout(() => {
-      setIsExtractingCutout(false);
-      setViewMode('cutaway');
-    }, 520);
+
+    // Fallback if viewer is not initialized yet
+    const proxy = { t: 0 };
+    cameraExtractionTweenRef.current = gsap.to(proxy, {
+      t: 1,
+      duration: 0.52,
+      onComplete: () => {
+        cameraExtractionTweenRef.current = null;
+        extrudedCutoutHeightRef.current = 120.0;
+        setIsExtractingCutout(false);
+        setViewMode('cutaway');
+      }
+    });
   }, [selectedLocation.latitude, selectedLocation.longitude, setViewMode]);
 
   // Close popup menus on click outside
@@ -918,6 +971,10 @@ export const CesiumGlobe: React.FC = () => {
       isSubscribed = false;
       isInitializing = false;
       resumeRenderLoopRef.current = null;
+      if (cameraExtractionTweenRef.current) {
+        cameraExtractionTweenRef.current.kill();
+        cameraExtractionTweenRef.current = null;
+      }
       window.removeEventListener('resize', onWindowResize);
       if (initFrameId !== null) {
         cancelAnimationFrame(initFrameId);
@@ -1151,7 +1208,7 @@ export const CesiumGlobe: React.FC = () => {
           outline: false,
           height: 80.0,
           extrudedHeight: new Cesium.CallbackProperty(() => {
-            return isExtractingCutout ? 2800.0 : 120.0;
+            return isExtractingCutout ? extrudedCutoutHeightRef.current : 120.0;
           }, false)
         },
         polyline: {

@@ -17,7 +17,7 @@ import { isCoordinateWithinIndia } from './coordinateParser';
 export interface LocalGeoPlace {
   id: string;
   name: string;
-  type: 'STATE' | 'UNION_TERRITORY' | 'DISTRICT' | 'CITY' | 'TOWN' | 'GEOLOGICAL_PROVINCE' | 'WATERSHED' | 'COUNTRY' | 'MOUNTAIN' | 'VOLCANO' | 'GLACIER' | 'DESERT' | 'MINERAL_BELT' | 'DAM';
+  type: 'STATE' | 'UNION_TERRITORY' | 'DISTRICT' | 'CITY' | 'TOWN' | 'VILLAGE' | 'GEOLOGICAL_PROVINCE' | 'WATERSHED' | 'COUNTRY' | 'MOUNTAIN' | 'VOLCANO' | 'GLACIER' | 'DESERT' | 'MINERAL_BELT' | 'DAM';
   country?: string;
   state: string;
   district?: string;
@@ -85,10 +85,21 @@ export const LOCAL_INDIAN_GEOGRAPHIC_INDEX: LocalGeoPlace[] = [
   { id: 'geo-in-ct-bld', name: 'Bailadila', type: 'MINERAL_BELT', state: 'Chhattisgarh', district: 'Dantewada', latitude: 18.7100, longitude: 81.2300, elevationMeters: 1150, basin: 'Godavari-Indravati Sub-basin', geologicalProvince: 'Bastar Craton Banded Iron Formation (BIF)', aliases: ['bailadila iron ore', 'dantewada', 'bastar craton'] },
   { id: 'geo-in-mp-mlj', name: 'Malanjkhand', type: 'MINERAL_BELT', state: 'Madhya Pradesh', district: 'Balaghat', latitude: 22.0200, longitude: 80.7100, elevationMeters: 575, basin: 'Wainganga-Godavari Sub-basin', geologicalProvince: 'Central Indian Tectonic Zone (Porphyry Copper Granitoid)', aliases: ['malanjkhand copper', 'balaghat'] },
   { id: 'geo-in-wb-sdb', name: 'Sundarbans Delta', type: 'WATERSHED', state: 'West Bengal', district: 'South 24 Parganas', latitude: 21.9497, longitude: 89.1833, elevationMeters: 4, basin: 'Ganga-Brahmaputra-Meghna Bengal Delta', geologicalProvince: 'Holocene Estuarine & Mangrove Fluvio-Marine Sediments', aliases: ['sundarbans', 'bengal delta', 'mangrove forest'] },
-  { id: 'geo-in-rj-thr', name: 'Thar Desert (Jaisalmer)', type: 'DESERT', state: 'Rajasthan', district: 'Jaisalmer', latitude: 26.9157, longitude: 70.9083, elevationMeters: 225, basin: 'Western Rajasthan Aeolian Arid Basin', geologicalProvince: 'Jaisalmer Mesozoic Marine, Lathi Sandstone Aquifer & Quaternary Aeolian Dunes', aliases: ['thar desert', 'jaisalmer', 'great indian desert', 'marusthali', 'lathi aquifer'] },
+  { id: 'geo-in-rj-thr', name: 'Thar Desert (Jaisalmer)', type: 'DESERT', state: 'Rajasthan', district: 'Jaisalmer', latitude: 26.9157, longitude: 70.9083, elevationMeters: 225, basin: 'Western Rajasthan Aeolian Arid Basin', geologicalProvince: 'Jaisalmer Mesozoic Marine & Quaternary Aeolian Dunes', aliases: ['thar desert', 'jaisalmer', 'great indian desert', 'marusthali'] },
   { id: 'geo-in-hp-bhk', name: 'Bhakra Nangal Dam', type: 'DAM', state: 'Himachal Pradesh', district: 'Bilaspur', latitude: 31.4114, longitude: 76.4334, elevationMeters: 518, basin: 'Sutlej River Basin (Gobind Sagar Reservoir)', geologicalProvince: 'Sub-Himalayan Siwalik Molasse Foreland Thrust Belt', aliases: ['bhakra dam', 'gobind sagar', 'sutlej dam'] },
   { id: 'geo-in-an-pbl', name: 'Port Blair (Andaman Islands)', type: 'UNION_TERRITORY', state: 'Andaman and Nicobar Islands', district: 'South Andaman', latitude: 11.6234, longitude: 92.7265, elevationMeters: 16, basin: 'Andaman Sea Island Drainage', geologicalProvince: 'Andaman-Nicobar Accretionary Prism & Ophiolite Melange', aliases: ['andaman', 'nicobar', 'barren island'] },
-  { id: 'geo-in-up-gnr', name: 'Ganga River Basin (Prayagraj Confluence)', type: 'WATERSHED', state: 'Uttar Pradesh', district: 'Prayagraj', latitude: 25.4358, longitude: 81.8463, elevationMeters: 98, basin: 'Ganga-Yamuna Alluvial Megabasin', geologicalProvince: 'Central Gangetic Foreland Basin Multi-Tier Quaternary Alluvium', aliases: ['ganges river', 'ganga river', 'sangam', 'prayagraj', 'allahabad'] }
+  // --- Curated Indian Villages & Rural Watershed Habitations ---
+  { id: 'geo-in-mh-rls', name: 'Ralegan Siddhi', type: 'VILLAGE', state: 'Maharashtra', district: 'Ahmednagar', subDistrict: 'Parner Taluka', latitude: 18.9211, longitude: 74.4144, elevationMeters: 685, basin: 'Godavari-Bhima Watershed Divide', geologicalProvince: 'Deccan Volcanic Province (Weathered Vesicular Basalt Watershed)', aliases: ['ralegan siddhi village', 'parner', 'ahmednagar watershed village'] },
+  { id: 'geo-in-mh-hwb', name: 'Hiware Bazar', type: 'VILLAGE', state: 'Maharashtra', district: 'Ahmednagar', subDistrict: 'Nagar Taluka', latitude: 19.0642, longitude: 74.5961, elevationMeters: 660, basin: 'Upper Godavari-Mula Catchment', geologicalProvince: 'Deccan Basalt Micro-Watershed Recharge Model Village', aliases: ['hiware bazar village', 'ideal watershed village'] },
+  { id: 'geo-in-rj-pip', name: 'Piplantri', type: 'VILLAGE', state: 'Rajasthan', district: 'Rajsamand', subDistrict: 'Rajsamand Tehsil', latitude: 25.0833, longitude: 73.8167, elevationMeters: 590, basin: 'Banas-Chambal Headwaters', geologicalProvince: 'Aravalli Supergroup Marble & Dolomitic Schist Belt', aliases: ['piplantri village', 'rajsamand village'] },
+  { id: 'geo-in-gj-pun', name: 'Punsari', type: 'VILLAGE', state: 'Gujarat', district: 'Sabarkantha', subDistrict: 'Talod Taluka', latitude: 23.4017, longitude: 72.9764, elevationMeters: 112, basin: 'Sabarmati-Meshwo Alluvial Basin', geologicalProvince: 'North Gujarat Quaternary Alluvial & Aeolian Loam', aliases: ['punsari village', 'sabarkantha village'] },
+  { id: 'geo-in-ml-maw', name: 'Mawlynnong', type: 'VILLAGE', state: 'Meghalaya', district: 'East Khasi Hills', subDistrict: 'Pynursla Block', latitude: 25.2017, longitude: 91.9161, elevationMeters: 540, basin: 'Meghalaya Southern Escarpment Catchment', geologicalProvince: 'Shillong Plateau Cretaceous-Eocene Sylhet Sandstone & Limestone', aliases: ['mawlynnong village', 'cleanest village', 'khasi hills'] },
+  { id: 'geo-in-tg-pch', name: 'Pochampally', type: 'VILLAGE', state: 'Telangana', district: 'Yadadri Bhuvanagiri', subDistrict: 'Bhoodan Pochampally Mandal', latitude: 17.3458, longitude: 78.8236, elevationMeters: 445, basin: 'Musi-Krishna Sub-Basin', geologicalProvince: 'Peninsular Gneissic Complex (Archean Fractured Granitoid Aquifer)', aliases: ['bhoodan pochampally', 'pochampally village'] },
+  { id: 'geo-in-br-dhr', name: 'Dharnai', type: 'VILLAGE', state: 'Bihar', district: 'Jehanabad', subDistrict: 'Makhdumpur Block', latitude: 25.0725, longitude: 84.9850, elevationMeters: 68, basin: 'Middle Ganga-Son-Punpun Alluvial Plain', geologicalProvince: 'Indo-Gangetic Older Alluvium (Bangar Silt-Sand)', aliases: ['dharnai village', 'jehanabad village'] },
+  { id: 'geo-in-tn-odn', name: 'Odanthurai', type: 'VILLAGE', state: 'Tamil Nadu', district: 'Coimbatore', subDistrict: 'Mettupalayam Taluk', latitude: 11.2981, longitude: 76.9244, elevationMeters: 335, basin: 'Bhavani-Cauvery Foothill Basin', geologicalProvince: 'Southern Granulite Terrane (Nilgiri Foothill Charnockite & Hornblende Gneiss)', aliases: ['odanthurai village', 'mettupalayam'] },
+  { id: 'geo-in-pb-drh', name: 'Doraha', type: 'VILLAGE', state: 'Punjab', district: 'Ludhiana', subDistrict: 'Payal Tehsil', latitude: 30.8005, longitude: 76.0322, elevationMeters: 254, basin: 'Sutlej-Sirhind Canal Command', geologicalProvince: 'Indo-Gangetic Quaternary Alluvial Plains', aliases: ['doraha village', 'payal ludhiana'] },
+  { id: 'geo-in-pb-jgr', name: 'Jagraon', type: 'TOWN', state: 'Punjab', district: 'Ludhiana', subDistrict: 'Jagraon Tehsil', latitude: 30.7878, longitude: 75.4739, elevationMeters: 235, basin: 'Sutlej Alluvial Plain', geologicalProvince: 'Indo-Gangetic Deep Alluvial Aquifer', aliases: ['jagraon ludhiana'] },
+  { id: 'geo-in-ap-akv', name: 'Akividu', type: 'VILLAGE', state: 'Andhra Pradesh', district: 'West Godavari', subDistrict: 'Akividu Mandal', latitude: 16.5833, longitude: 81.3833, elevationMeters: 5, basin: 'Kolleru-Upputeru Deltaic Basin', geologicalProvince: 'Krishna-Godavari Holocene Fluvio-Lacustrine Clay & Sand', aliases: ['akividu village', 'kolleru village'] }
 ];
 
 /**
@@ -103,15 +114,11 @@ export const GLOBAL_EARTH_GEOGRAPHIC_INDEX: LocalGeoPlace[] = [
   { id: 'global-us-yst', name: 'Yellowstone Caldera', type: 'VOLCANO', country: 'United States', state: 'Wyoming', district: 'Yellowstone National Park', latitude: 44.4280, longitude: -110.5885, elevationMeters: 2400, basin: 'Upper Missouri-Yellowstone Headwaters', geologicalProvince: 'Yellowstone Hotspot Rhyolitic Ignimbrite & Hydrothermal Caldera', aliases: ['yellowstone', 'old faithful', 'wyoming supervolcano'] },
   { id: 'global-us-ogl', name: 'Ogallala Aquifer (High Plains)', type: 'WATERSHED', country: 'United States', state: 'Nebraska', district: 'Sandhills / High Plains', latitude: 41.1500, longitude: -100.7500, elevationMeters: 860, basin: 'Platte-Missouri Great Plains Basin', geologicalProvince: 'Miocene-Pliocene Ogallala Formation Unconsolidated Fluvial Sand & Gravel', aliases: ['ogallala aquifer', 'high plains aquifer', 'nebraska aquifer', 'great plains'] },
   { id: 'global-us-prm', name: 'Permian Basin (Midland)', type: 'GEOLOGICAL_PROVINCE', country: 'United States', state: 'Texas', district: 'Midland County', latitude: 31.9973, longitude: -102.0779, elevationMeters: 848, basin: 'Rio Grande-Pecos Sedimentary Basin', geologicalProvince: 'Permian Delaware & Midland Evaporite-Carbonate Intracratonic Basin', aliases: ['permian basin', 'midland texas', 'delaware basin'] },
-  { id: 'global-us-dvl', name: 'Death Valley (Badwater Basin)', type: 'DESERT', country: 'United States', state: 'California', district: 'Inyo County', latitude: 36.2300, longitude: -116.7669, elevationMeters: -86, basin: 'Amargosa-Death Valley Endorheic Graben', geologicalProvince: 'Basin and Range Extensional Detachment Faults & Quaternary Halite Playa', aliases: ['death valley', 'badwater basin', 'mojave desert', 'basin and range'] },
-  { id: 'global-us-bng', name: 'Bingham Canyon (Kennecott)', type: 'MINERAL_BELT', country: 'United States', state: 'Utah', district: 'Salt Lake County', latitude: 40.5230, longitude: -112.1510, elevationMeters: 2040, basin: 'Great Salt Lake Endorheic Basin', geologicalProvince: 'Eocene Bingham Stock Quartz Monzonite Porphyry Cu-Au-Mo System', aliases: ['bingham canyon', 'kennecott copper', 'utah porphyry'] },
   { id: 'global-ca-sud', name: 'Sudbury Basin', type: 'MINERAL_BELT', country: 'Canada', state: 'Ontario', district: 'Greater Sudbury', latitude: 46.4917, longitude: -80.9930, elevationMeters: 347, basin: 'Great Lakes-Laurentian Watershed', geologicalProvince: 'Paleoproterozoic Sudbury Astrobleme Impact Melt Complex (Ni-Cu-PGE)', aliases: ['sudbury', 'ontario nickel belt', 'canadian shield'] },
-  { id: 'global-ca-tor', name: 'Toronto', type: 'CITY', country: 'Canada', state: 'Ontario', district: 'Golden Horseshoe', latitude: 43.6532, longitude: -79.3832, elevationMeters: 76, basin: 'Lake Ontario-St. Lawrence Great Lakes Basin', geologicalProvince: 'Paleozoic St. Lawrence Platform Georgian Bay Shale & Oak Ridges Moraine Aquifer', aliases: ['toronto canada', 'lake ontario', 'oak ridges moraine'] },
 
   // --- South America ---
   { id: 'global-cl-atc', name: 'Atacama Desert (Escondida)', type: 'MINERAL_BELT', country: 'Chile', state: 'Antofagasta Region', district: 'Atacama Porphyry Belt', latitude: -24.2667, longitude: -69.0667, elevationMeters: 3050, basin: 'Endorheic Atacama Salar Basin', geologicalProvince: 'Andean Eocene-Oligocene Porphyry Copper Metallogenic Belt (Domeyko Fault)', aliases: ['atacama', 'escondida', 'chuquicamata', 'chile copper', 'antofagasta'] },
   { id: 'global-br-amz', name: 'Amazon River Basin (Manaus)', type: 'WATERSHED', country: 'Brazil', state: 'Amazonas', district: 'Manaus', latitude: -3.1190, longitude: -60.0217, elevationMeters: 92, basin: 'Amazon Cratonic Fluvial Megabasin (Alter do Chão Aquifer)', geologicalProvince: 'Solimões-Amazonas Intracratonic Sedimentary Basin (Cretaceous Alter do Chão Sandstone)', aliases: ['amazon', 'amazon river', 'manaus', 'brazil', 'amazon rainforest'] },
-  { id: 'global-br-gua', name: 'Guarani Aquifer System (São Paulo)', type: 'WATERSHED', country: 'Brazil', state: 'São Paulo', district: 'Paraná Basin', latitude: -23.5505, longitude: -46.6333, elevationMeters: 760, basin: 'Paraná-La Plata Transboundary Basin', geologicalProvince: 'Mesozoic Botucatu Aeolian Sandstone Confined Aquifer under Serra Geral Flood Basalts', aliases: ['guarani aquifer', 'sao paulo', 'parana basin', 'botucatu sandstone'] },
   { id: 'global-bo-uyu', name: 'Salar de Uyuni', type: 'MINERAL_BELT', country: 'Bolivia', state: 'Potosí', district: 'Daniel Campos', latitude: -20.1338, longitude: -67.4891, elevationMeters: 3656, basin: 'Altiplano Endorheic Evaporite Basin', geologicalProvince: 'Andean Altiplano Quaternary Halite-Lithium Brine Crust', aliases: ['uyuni', 'lithium triangle', 'bolivia salt flats', 'altiplano'] },
   { id: 'global-ar-acn', name: 'Mount Aconcagua (Andes)', type: 'MOUNTAIN', country: 'Argentina', state: 'Mendoza', district: 'Las Heras', latitude: -32.6532, longitude: -70.0109, elevationMeters: 6961, basin: 'Mendoza-Colorado Andean Catchment', geologicalProvince: 'Principal Andean Cordillera Fold-and-Thrust Belt & Miocene Volcanics', aliases: ['aconcagua', 'andes', 'andes mountains', 'mendoza'] },
 
@@ -120,24 +127,19 @@ export const GLOBAL_EARTH_GEOGRAPHIC_INDEX: LocalGeoPlace[] = [
   { id: 'global-fr-par', name: 'Paris', type: 'CITY', country: 'France', state: 'Île-de-France', district: 'Paris', latitude: 48.8566, longitude: 2.3522, elevationMeters: 35, basin: 'Seine River Basin', geologicalProvince: 'Paris Intracratonic Sedimentary Basin (Cenozoic Lutetian Limestone & Albian Greensand Aquifer)', aliases: ['paris france', 'paris basin', 'seine basin'] },
   { id: 'global-it-etn', name: 'Mount Etna (Valle del Bove)', type: 'VOLCANO', country: 'Italy', state: 'Sicily', district: 'Catania', latitude: 37.7510, longitude: 14.9934, elevationMeters: 3357, basin: 'Simeto-Alcantara Eastern Sicily Catchment', geologicalProvince: 'Etnean Stratovolcanic Alkali-Basalt & Trachybasalt Complex over Apennine-Maghrebian Flysch', aliases: ['mount etna', 'valle del bove', 'sicily', 'catania', 'italy volcano'] },
   { id: 'global-ch-mat', name: 'Swiss Alps (Zermatt / Matterhorn)', type: 'MOUNTAIN', country: 'Switzerland', state: 'Valais', district: 'Visp', latitude: 45.9766, longitude: 7.6585, elevationMeters: 4478, basin: 'Upper Rhône Alpine Glacial Basin', geologicalProvince: 'Austroalpine Dent Blanche Nappe Gneiss over Penninic Ophiolite Suture', aliases: ['matterhorn', 'zermatt', 'swiss alps', 'alps', 'switzerland'] },
-  { id: 'global-is-eyj', name: 'Vatnajökull & Iceland Rift', type: 'GLACIER', country: 'Iceland', state: 'Austurland', district: 'Vatnajökull National Park', latitude: 64.4000, longitude: -16.8000, elevationMeters: 1450, basin: 'Jökulsá Glacial Outwash Basin', geologicalProvince: 'Mid-Atlantic Ridge Tholeiitic Flood Basalt & Subglacial Volcanic Rift Zone', aliases: ['iceland', 'vatnajokull', 'eyjafjallajokull', 'glacier', 'reykjavik'] },
+  { id: 'global-is-eyj', name: 'Vatnajökull & Iceland Rift', type: 'GLACIER', country: 'Iceland', state: 'Austurland', district: 'Vatnajökull National Park', latitude: 64.4000, longitude: -16.8000, elevationMeters: 1450, basin: 'Jökulsá Glacial Outwash Basin', geologicalProvince: 'Mid-Atlantic Ridge Tholeiitic Flood Basalt & Subglacial Volcanic Rift Zone', aliases: ['iceland', 'vatnajokull', 'eyjafjallajokull', 'glacier'] },
 
   // --- Africa ---
   { id: 'global-eg-cai', name: 'Cairo & Nile Delta', type: 'CITY', country: 'Egypt', state: 'Cairo Governorate', district: 'Greater Cairo', latitude: 30.0444, longitude: 31.2357, elevationMeters: 23, basin: 'Lower Nile River & Delta Basin', geologicalProvince: 'Nile Delta Quaternary Fluvio-Marine Aquifer & Eocene Mokattam Limestone', aliases: ['cairo', 'nile river', 'nile delta', 'egypt'] },
   { id: 'global-eg-sah', name: 'Sahara Desert (Nubian Aquifer)', type: 'DESERT', country: 'Egypt', state: 'New Valley Governorate', district: 'Dakhla Oasis', latitude: 25.4900, longitude: 28.9700, elevationMeters: 122, basin: 'Nubian Sandstone Transboundary Fossil Aquifer System', geologicalProvince: 'Paleozoic-Mesozoic Nubian Continental Sandstone Kratonic Basin', aliases: ['sahara', 'sahara desert', 'nubian sandstone aquifer', 'dakhla'] },
-  { id: 'global-za-jnb', name: 'Witwatersrand Basin (Johannesburg)', type: 'MINERAL_BELT', country: 'South Africa', state: 'Gauteng', district: 'Johannesburg', latitude: -26.2041, longitude: 28.0473, elevationMeters: 1753, basin: 'Vaal-Limpopo Continental Divide', geologicalProvince: 'Archean Witwatersrand Supergroup Auriferous Quartz-Pebble Conglomerates (Kaapvaal Craton)', aliases: ['johannesburg', 'witwatersrand', 'south africa gold', 'kaapvaal craton', 'bushveld'] },
+  { id: 'global-za-jnb', name: 'Witwatersrand Basin (Johannesburg)', type: 'MINERAL_BELT', country: 'South Africa', state: 'Gauteng', district: 'Johannesburg', latitude: -26.2041, longitude: 28.0473, elevationMeters: 1753, basin: 'Vaal-Limpopo Continental Divide', geologicalProvince: 'Archean Witwatersrand Supergroup Auriferous Quartz-Pebble Conglomerates (Kaapvaal Craton)', aliases: ['johannesburg', 'witwatersrand', 'south africa gold', 'kaapvaal craton'] },
   { id: 'global-et-afr', name: 'East African Rift (Danakil / Afar)', type: 'GEOLOGICAL_PROVINCE', country: 'Ethiopia', state: 'Afar Region', district: 'Danakil Depression', latitude: 14.2417, longitude: 40.3000, elevationMeters: -125, basin: 'Afar Endorheic Rift Basin', geologicalProvince: 'Afar Triple Junction Continental Rift Basalts & Quaternary Evaporite Sequence', aliases: ['east african rift', 'afar triangle', 'danakil', 'ethiopia rift', 'great rift valley'] },
-  { id: 'global-ke-nbo', name: 'Nairobi (Gregory Rift Margin)', type: 'CITY', country: 'Kenya', state: 'Nairobi County', district: 'Central Kenya Highlands', latitude: -1.2921, longitude: 36.8219, elevationMeters: 1795, basin: 'Athi-Galana-Sabaki Rift Margin Basin', geologicalProvince: 'Neogene Nairobi Phonolite, Kerichwa Valley Tuff & East African Rift Volcanics', aliases: ['nairobi', 'kenya', 'gregory rift'] },
 
   // --- Asia & Middle East ---
   { id: 'global-jp-tyo', name: 'Tokyo', type: 'CITY', country: 'Japan', state: 'Tokyo Metropolis', district: 'Kanto Plain', latitude: 35.6762, longitude: 139.6503, elevationMeters: 40, basin: 'Tone-Arakawa Kanto Basin', geologicalProvince: 'Kanto Forearc Tectonic Basin (Quaternary Kazusa-Shimosa Marine-Alluvial Group & Tephra Loam)', aliases: ['tokyo japan', 'kanto plain', 'japan'] },
   { id: 'global-jp-fuj', name: 'Mount Fuji', type: 'VOLCANO', country: 'Japan', state: 'Shizuoka / Yamanashi', district: 'Fuji-Hakone-Izu', latitude: 35.3606, longitude: 138.7274, elevationMeters: 3776, basin: 'Fuji River Catchment', geologicalProvince: 'Izu-Bonin-Mariana Arc Triple Junction Basaltic Stratovolcano', aliases: ['mount fuji', 'fujisan'] },
   { id: 'global-np-evr', name: 'Mount Everest (Sagarmatha)', type: 'MOUNTAIN', country: 'Nepal', state: 'Koshi Province', district: 'Solukhumbu', latitude: 27.9881, longitude: 86.9250, elevationMeters: 8848, basin: 'Dudh Koshi-Ganga Glacial Headwaters', geologicalProvince: 'Greater Himalayan Sequence Leucogranite, Sillimanite Gneiss & Ordovician Qomolangma Limestone (South Tibetan Detachment)', aliases: ['mount everest', 'everest', 'sagarmatha', 'chomolungma', 'khumbu glacier'] },
   { id: 'global-ae-dxb', name: 'Dubai', type: 'CITY', country: 'United Arab Emirates', state: 'Dubai', district: 'Persian Gulf Coast', latitude: 25.2048, longitude: 55.2708, elevationMeters: 12, basin: 'Arabian Gulf Coastal Sabkha & Rub al Khali Margin', geologicalProvince: 'Arabian Platform Quaternary Carbonate Sand Dunes, Coastal Sabkha Evaporites & Cenozoic Fars-Dammam Carbonates', aliases: ['dubai uae', 'united arab emirates', 'arabian desert'] },
-  { id: 'global-il-dse', name: 'Dead Sea Transform Rift', type: 'GEOLOGICAL_PROVINCE', country: 'Jordan / Israel', state: 'Jordan Rift Valley', district: 'Dead Sea Basin', latitude: 31.5590, longitude: 35.4732, elevationMeters: -430, basin: 'Jordan-Dead Sea Endorheic Pull-Apart Basin', geologicalProvince: 'Dead Sea Transform Strike-Slip Graben (Plio-Pleistocene Sedom Halite & Lisan Marl)', aliases: ['dead sea', 'jordan rift valley', 'lowest point on earth'] },
-  { id: 'global-ru-bkl', name: 'Lake Baikal Rift Zone', type: 'WATERSHED', country: 'Russia', state: 'Irkutsk / Buryatia', district: 'Baikal Continental Rift', latitude: 53.5587, longitude: 108.1650, elevationMeters: 455, basin: 'Angara-Yenisei Baikal Rift Basin', geologicalProvince: 'Cenozoic Baikal Continental Rift Graben along Siberian Craton Suture', aliases: ['lake baikal', 'baikal rift', 'siberia'] },
-  { id: 'global-cn-bjs', name: 'Beijing (North China Plain)', type: 'CITY', country: 'China', state: 'Beijing Municipality', district: 'North China Plain', latitude: 39.9042, longitude: 116.4074, elevationMeters: 43, basin: 'Haihe-North China Alluvial Plain Basin', geologicalProvince: 'North China Craton Piedmont Alluvial Fan & Mesoproterozoic Jixian Carbonate Karst Aquifer', aliases: ['beijing', 'north china plain', 'china'] },
-  { id: 'global-sg-sin', name: 'Singapore', type: 'CITY', country: 'Singapore', state: 'Central Region', district: 'Bukit Timah', latitude: 1.3521, longitude: 103.8198, elevationMeters: 15, basin: 'Singapore Strait Coastal Catchment', geologicalProvince: 'Triassic Bukit Timah I-Type Granite, Jurong Sedimentary Series & Kallang Marine Clay', aliases: ['singapore', 'bukit timah granite'] },
 
   // --- Oceania & Australia ---
   { id: 'global-au-syd', name: 'Sydney', type: 'CITY', country: 'Australia', state: 'New South Wales', district: 'Sydney Basin', latitude: -33.8688, longitude: 151.2093, elevationMeters: 39, basin: 'Hawkesbury-Nepean Coastal Basin', geologicalProvince: 'Permian-Triassic Sydney Foreland Basin (Hawkesbury Quartzose Sandstone & Wianamatta Shale)', aliases: ['sydney australia', 'new south wales', 'hawkesbury sandstone'] },
@@ -214,7 +216,10 @@ export function searchLocalGeographicIndex(query: string, maxResults: number = 8
         state: place.state,
         district: place.district,
         subDistrict: place.subDistrict,
-        relevanceScore: score
+        village: place.type === 'VILLAGE' ? place.name : undefined,
+        relevanceScore: score,
+        resolutionPrecision: 'GAZETTEER_CENTROID',
+        sourceProvider: 'Benchmark Scientific Gazetteer'
       });
     }
   }
@@ -299,8 +304,80 @@ export function parseIndianAdministrativeAddress(addr: any, displayName?: string
 }
 
 /**
- * Searches OpenStreetMap Nominatim for addresses and place names within India.
- * Falls back transparently to local geographic index on error or rate limiting.
+ * Queries Open-Meteo / GeoNames Global Geocoding API (11M+ global cities, towns, villages, mountains, landmarks).
+ * Fast (<100ms), no strict 1s rate limit, includes elevation and administrative hierarchy.
+ */
+async function searchOpenMeteoGlobal(query: string): Promise<GeocodingSuggestion[]> {
+  try {
+    const cleanQuery = query.split(',')[0].trim();
+    if (cleanQuery.length < 2) return [];
+    const qualifierParts = query
+      .split(',')
+      .slice(1)
+      .map(s => s.trim().toLowerCase())
+      .filter(Boolean);
+
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanQuery)}&count=10&language=en&format=json`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(2500)
+    });
+    if (!response.ok) return [];
+    const data: any = await response.json();
+    if (!Array.isArray(data?.results)) return [];
+
+    return data.results
+      .filter((item: any) => {
+        if (!Number.isFinite(item.latitude) || !Number.isFinite(item.longitude)) return false;
+        if (qualifierParts.length === 0) return true;
+        const haystack = `${item.admin1 || ''} ${item.admin2 || ''} ${item.admin3 || ''} ${item.country || ''} ${item.country_code || ''}`.toLowerCase();
+        return qualifierParts.every(q => haystack.includes(q));
+      })
+      .map((item: any, idx: number): GeocodingSuggestion => {
+        const isIndia =
+          item.country_code === 'IN' ||
+          (item.country || '').toLowerCase() === 'india' ||
+          isCoordinateWithinIndia(item.latitude, item.longitude);
+        const stateName = item.admin1 || item.country || (isIndia ? 'India' : 'Global Region');
+        const districtName = item.admin2 || item.admin3 || item.admin1 || item.name;
+        const fcode = String(item.feature_code || '').toUpperCase();
+        let type: GeocodingSuggestion['type'] = 'CITY';
+        if (fcode.startsWith('PPL')) {
+          type = item.population && item.population < 25000 ? 'VILLAGE' : item.population && item.population < 100000 ? 'TOWN' : 'CITY';
+        } else if (fcode.startsWith('ADM2')) {
+          type = 'DISTRICT';
+        } else if (fcode.startsWith('ADM1')) {
+          type = 'STATE';
+        } else if (fcode.startsWith('MT') || fcode.startsWith('PK') || fcode.startsWith('VLC') || fcode.startsWith('STM') || fcode.startsWith('LK')) {
+          type = 'PLACE';
+        }
+
+        const displayParts = [item.name, item.admin2, item.admin1, item.country].filter(Boolean);
+        const dedupedDisplay = displayParts.filter((p, i) => displayParts.indexOf(p) === i).join(', ');
+
+        return {
+          id: `geonames-${item.id || idx}`,
+          name: item.name,
+          displayName: dedupedDisplay,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          type,
+          state: isIndia ? stateName : `${stateName}${item.country && item.country !== stateName ? `, ${item.country}` : ''}`,
+          district: districtName,
+          subDistrict: item.admin3 || undefined,
+          village: type === 'VILLAGE' ? item.name : undefined,
+          relevanceScore: Math.max(55, 88 - idx * 3),
+          resolutionPrecision: 'GAZETTEER_CENTROID',
+          sourceProvider: 'Open-Meteo GeoNames Gazetteer'
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Searches global and Indian gazetteers (Curated Local/Global Index + Open-Meteo GeoNames + OpenStreetMap Nominatim).
+ * Falls back transparently to local geographic index on network error or rate limiting.
  */
 export async function searchPlacesInIndia(query: string): Promise<GeocodingSuggestion[]> {
   const clean = query.trim();
@@ -311,35 +388,45 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
     return geocodeCache.get(cacheKey)!;
   }
 
-  // 1. Check local index first for instant match
-  const localResults = searchLocalGeographicIndex(clean, 5);
-  if (localResults.length > 0 && localResults[0].relevanceScore >= 80) {
-    geocodeCache.set(cacheKey, localResults);
-    return localResults;
-  }
+  // 1. Check local & global benchmark index first (never short-circuit so villages/homonyms from Open-Meteo & Nominatim are also included)
+  const localResults = searchLocalGeographicIndex(clean, 8);
 
-  // 2. Query Nominatim with safe rate limiting and User-Agent
-  try {
-    await throttleNominatim();
-    // Support global searches across India and internationally
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&addressdetails=1&limit=8`;
-    
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Terranexus4D/0.5.0 (contact: info@terranexus.internal; research earth twin)',
-        'Accept-Language': 'en'
-      },
-      signal: AbortSignal.timeout(2500)
-    });
+  // 2. Query Open-Meteo Global Geocoder and Nominatim in parallel
+  const openMeteoPromise = searchOpenMeteoGlobal(clean);
 
-    if (response.ok) {
+  const nominatimPromise = (async (): Promise<GeocodingSuggestion[]> => {
+    try {
+      await throttleNominatim();
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&addressdetails=1&limit=8`;
+
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Terranexus4D/0.5.0 (contact: info@terranexus.internal; research earth twin)',
+          'Accept-Language': 'en'
+        },
+        signal: AbortSignal.timeout(2500)
+      });
+
+      if (!response.ok) return [];
       const data: any[] = await response.json();
-      const nominatimResults: GeocodingSuggestion[] = data
+      return data
         .map((item, idx) => {
           const lat = parseFloat(item.lat);
           const lon = parseFloat(item.lon);
           const parsed = parseIndianAdministrativeAddress(item.address || {}, item.display_name, item.name);
-          const name = item.name || parsed.town || parsed.city || item.display_name.split(',')[0];
+          const name = item.name || parsed.village || parsed.town || parsed.city || item.display_name.split(',')[0];
+          const isIndia = parsed.country.toLowerCase() === 'india' || isCoordinateWithinIndia(lat, lon);
+          const stateLabel = isIndia
+            ? parsed.state || 'India'
+            : `${parsed.state || parsed.country}${parsed.country && parsed.state !== parsed.country ? `, ${parsed.country}` : ''}`;
+
+          const rawType = (item.type || item.class || 'PLACE').toUpperCase();
+          const normalizedType =
+            rawType === 'HAMLET' || rawType === 'VILLAGE' || parsed.village
+              ? 'VILLAGE'
+              : rawType === 'ADMINISTRATIVE' && parsed.village
+              ? 'VILLAGE'
+              : rawType;
 
           return {
             id: `osm-${item.place_id || idx}`,
@@ -347,33 +434,39 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
             displayName: item.display_name,
             latitude: lat,
             longitude: lon,
-            type: item.type || item.class || 'PLACE',
-            state: parsed.state || parsed.country,
+            type: normalizedType as GeocodingSuggestion['type'],
+            state: stateLabel,
             district: parsed.district,
             subDistrict: parsed.subDistrict,
-            relevanceScore: Math.round((1 - (idx * 0.1)) * 90)
+            village: parsed.village,
+            relevanceScore: Math.round((1 - idx * 0.08) * 86),
+            resolutionPrecision: 'GAZETTEER_CENTROID' as const,
+            sourceProvider: 'OpenStreetMap Nominatim'
           };
         })
         .filter(r => !isNaN(r.latitude) && !isNaN(r.longitude));
-
-      // Combine with local Indian index matches (avoiding coordinate duplicates)
-      const combined = [...nominatimResults];
-      for (const loc of localResults) {
-        if (!combined.some(c => Math.abs(c.latitude - loc.latitude) < 0.05 && Math.abs(c.longitude - loc.longitude) < 0.05)) {
-          combined.push(loc);
-        }
-      }
-
-      geocodeCache.set(cacheKey, combined);
-      return combined;
+    } catch (err) {
+      console.warn('[GeocodingService] Nominatim query failed, using Open-Meteo + local index:', (err as any)?.message);
+      return [];
     }
-  } catch (err) {
-    console.warn('[GeocodingService] Nominatim query failed, using local index:', (err as any)?.message);
+  })();
+
+  const [openMeteoResults, nominatimResults] = await Promise.all([openMeteoPromise, nominatimPromise]);
+
+  // Merge local benchmarks + Open-Meteo GeoNames + Nominatim, avoiding coordinate duplicates (<2.5km)
+  const combined: GeocodingSuggestion[] = [...localResults];
+  for (const candidate of [...openMeteoResults, ...nominatimResults]) {
+    const exists = combined.some(
+      c => Math.abs(c.latitude - candidate.latitude) < 0.022 && Math.abs(c.longitude - candidate.longitude) < 0.022
+    );
+    if (!exists) {
+      combined.push(candidate);
+    }
   }
 
-  // Fallback to local results
-  geocodeCache.set(cacheKey, localResults);
-  return localResults;
+  const sorted = combined.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 10);
+  geocodeCache.set(cacheKey, sorted);
+  return sorted;
 }
 
 /**
@@ -386,6 +479,25 @@ export async function reverseGeocodeCoordinate(lat: number, lon: number): Promis
 
   if (reverseCache.has(cacheKey)) {
     return reverseCache.get(cacheKey)!;
+  }
+
+  // Fast path: if within ~8km of a curated Indian or Global benchmark, return immediately without network latency
+  for (const place of [...LOCAL_INDIAN_GEOGRAPHIC_INDEX, ...GLOBAL_EARTH_GEOGRAPHIC_INDEX]) {
+    const dLat = Math.abs(place.latitude - lat);
+    const dLon = Math.abs(place.longitude - lon);
+    if (dLat < 0.07 && dLon < 0.07) {
+      const country = place.country || (isCoordinateWithinIndia(lat, lon) ? 'India' : 'International');
+      const fastMatch: AdministrativeHierarchy = {
+        country,
+        state: place.state,
+        district: place.district || place.name,
+        city: place.type === 'CITY' ? place.name : undefined,
+        town: place.type === 'TOWN' ? place.name : undefined,
+        formattedAddress: `${place.name}, ${place.district}, ${place.state}, ${country}`
+      };
+      reverseCache.set(cacheKey, fastMatch);
+      return fastMatch;
+    }
   }
 
   // 1. Try Nominatim Reverse API

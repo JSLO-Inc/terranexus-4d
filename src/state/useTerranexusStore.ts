@@ -6,8 +6,20 @@ import { INDIA_LOCATIONS } from '../data/locationsIndia';
 import { AUTHENTIC_BOREHOLES } from '../data/strataData';
 import { DossierResponse } from '../types/dossier';
 import { CartoBasemapStyle } from '../services/cartoBasemapService';
+import { EicSynthesisResponse, ScientificReportType, ExtractionAnimationStage } from '../types/eic';
 
-export type ActiveModule = 'globe' | 'hydro' | 'strata' | 'mineral' | 'time' | 'ai' | 'catalog';
+export type ActiveModule =
+  | 'globe'
+  | 'hydro'
+  | 'strata'
+  | 'mineral'
+  | 'soil'
+  | 'agri'
+  | 'environment'
+  | 'eic'
+  | 'time'
+  | 'ai'
+  | 'catalog';
 export type ViewMode = 'globe' | 'cutaway' | 'split' | 'underground';
 export type StrataMode = 'both' | 'cutaway' | 'litholog';
 export type ProviderDataStatus = 'LIVE' | 'CACHED' | 'BENCHMARK' | 'RATE_LIMITED' | 'UNAVAILABLE';
@@ -308,8 +320,16 @@ export interface TerranexusState {
   isPumpingActive: boolean; // Pumping scenario active (controls Thiem drawdown cone deformation)
   activePumpingWell: string | null; // Pumping borehole identifier
   cutawayPreset: 'isometric' | 'front' | 'side' | 'top' | 'corner-cut' | 'fence'; // 3D Camera & view preset
+  eicSynthesis: EicSynthesisResponse | null;
+  isEicLoading: boolean;
+  showReportModal: boolean;
+  reportModalType: ScientificReportType;
+  extractionStage: ExtractionAnimationStage;
   
   // Actions
+  fetchEicSynthesis: (lat?: number, lon?: number) => Promise<void>;
+  setShowReportModal: (show: boolean, reportType?: ScientificReportType) => void;
+  setExtractionStage: (stage: ExtractionAnimationStage) => void;
   setGeologicalDisplayMode: (mode: 'EVIDENCE_BASED' | 'ILLUSTRATIVE') => void;
   setIsPumpingActive: (active: boolean) => void;
   setActivePumpingWell: (well: string | null) => void;
@@ -464,6 +484,14 @@ let globalState: TerranexusState = {
   isPumpingActive: false,
   activePumpingWell: null,
   cutawayPreset: storedPrefs.cutawayPreset || 'corner-cut', // DEFAULT 3: Corner Cut is default 3D excavation mode
+  eicSynthesis: null,
+  isEicLoading: false,
+  showReportModal: false,
+  reportModalType: 'COMPREHENSIVE',
+  extractionStage: 'GLOBE_IDLE',
+  fetchEicSynthesis: async () => {},
+  setShowReportModal: () => {},
+  setExtractionStage: () => {},
   resetToDefaults: () => {},
   setGeologicalDisplayMode: () => {},
   setIsPumpingActive: () => {},
@@ -484,9 +512,9 @@ let globalState: TerranexusState = {
     {
       id: 'welcome-msg',
       sender: 'assistant',
-      content: 'Welcome to TERRANEXUS 4D — National Subsurface Intelligence & Earth Digital Twin Platform. I am Nexus AI, your scientific copilot. Select any location in India, adjust depth beneath the surface, scrub through time, or ask me to explain the verified hydrological, geological and mineral evidence.',
+      content: 'Welcome to TERRANEXUS 4D — Global & National Subsurface Intelligence & Earth Digital Twin Platform. I am Nexus AI, your scientific copilot. Select any location on Earth (including deep Indian national survey benchmarks), adjust depth beneath the surface, scrub through time, or ask me to explain the verified hydrological, geological, pedological, and mineral evidence.',
       timestamp: '2026-11-02 12:30',
-      groundedLocation: 'Pan-India',
+      groundedLocation: 'Global & Pan-India',
       limitationsNoted: [
         'All scientific layers are classified as OBSERVED, MODELLED, PREDICTED, or SIMULATED.',
         'Remote sensing alteration indices reflect surface reflectance only, not deep ore deposits.',
@@ -531,9 +559,62 @@ function notify() {
   listeners.forEach(listener => listener());
 }
 
+let extractionTimers: Array<ReturnType<typeof setTimeout>> = [];
+
+function clearExtractionTimers() {
+  for (const t of extractionTimers) {
+    clearTimeout(t);
+  }
+  extractionTimers = [];
+}
+
+function runExtractionSequence(stages: Array<{ stage: ExtractionAnimationStage; delayMs: number }>) {
+  clearExtractionTimers();
+  for (const item of stages) {
+    if (item.delayMs === 0) {
+      globalState = { ...globalState, extractionStage: item.stage };
+      notify();
+    } else {
+      const timer = setTimeout(() => {
+        globalState = { ...globalState, extractionStage: item.stage };
+        notify();
+      }, item.delayMs);
+      extractionTimers.push(timer);
+    }
+  }
+}
+
+export const fetchEicSynthesisImpl = async (lat?: number, lon?: number) => {
+  const targetLat = typeof lat === 'number' && Number.isFinite(lat) ? lat : globalState.selectedLocation.latitude;
+  const targetLon = typeof lon === 'number' && Number.isFinite(lon) ? lon : globalState.selectedLocation.longitude;
+  globalState = { ...globalState, isEicLoading: true };
+  notify();
+  try {
+    const res = await fetch(`/api/eic/synthesize?lat=${targetLat}&lon=${targetLon}&radiusKm=50`);
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        globalState = {
+          ...globalState,
+          eicSynthesis: json.data,
+          isEicLoading: false
+        };
+        notify();
+        return;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch EIC synthesis:', err);
+  }
+  globalState = { ...globalState, isEicLoading: false };
+  notify();
+};
+
 export const fetchLocationDossierImpl = async (lat: number, lon: number, radiusKm: number = 50) => {
   globalState = { ...globalState, isDossierLoading: true };
   notify();
+  // Trigger parallel EIC synthesis
+  fetchEicSynthesisImpl(lat, lon);
   try {
     const res = await fetch(`/api/location-dossier?lat=${lat}&lon=${lon}&radiusKm=${radiusKm}`);
     if (res.ok) {
@@ -562,6 +643,7 @@ export const fetchLocationDossierImpl = async (lat: number, lon: number, radiusK
 };
 
 globalState.fetchLocationDossier = fetchLocationDossierImpl;
+globalState.fetchEicSynthesis = fetchEicSynthesisImpl;
 
 export function useTerranexusStore(): TerranexusState {
   const [, setTick] = useState(0);
@@ -650,14 +732,46 @@ export function useTerranexusStore(): TerranexusState {
       notify();
     },
     fetchLocationDossier: fetchLocationDossierImpl,
+    fetchEicSynthesis: fetchEicSynthesisImpl,
+    setShowReportModal: (showReportModal, reportModalType) => {
+      globalState = {
+        ...globalState,
+        showReportModal,
+        ...(reportModalType ? { reportModalType } : {})
+      };
+      notify();
+    },
+    setExtractionStage: (extractionStage) => {
+      clearExtractionTimers();
+      globalState = { ...globalState, extractionStage };
+      notify();
+    },
     setActiveModule: (activeModule) => {
       globalState = { ...globalState, activeModule };
       notify();
     },
     setViewMode: (viewMode) => {
+      const prevMode = globalState.viewMode;
       globalState = { ...globalState, viewMode };
       saveUserPreferences(globalState);
       notify();
+
+      if ((viewMode === 'cutaway' || viewMode === 'split' || viewMode === 'underground') && prevMode === 'globe') {
+        runExtractionSequence([
+          { stage: 'REGION_HIGHLIGHTED', delayMs: 0 },
+          { stage: 'EXTRACTION_START', delayMs: 180 },
+          { stage: 'EXTRACTION_IN_PROGRESS', delayMs: 420 },
+          { stage: 'SUBSURFACE_REVEAL', delayMs: 700 },
+          { stage: 'FOREGROUND_TRANSITION', delayMs: 980 },
+          { stage: 'CUTOUT_READY', delayMs: 1280 }
+        ]);
+      } else if (viewMode === 'globe' && prevMode !== 'globe') {
+        runExtractionSequence([
+          { stage: 'RETURN_IN_PROGRESS', delayMs: 0 },
+          { stage: 'GLOBE_RESTORED', delayMs: 480 },
+          { stage: 'GLOBE_IDLE', delayMs: 960 }
+        ]);
+      }
     },
     setSelectedLocation: (selectedLocation) => {
       const bh = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id) || null;
@@ -675,6 +789,21 @@ export function useTerranexusStore(): TerranexusState {
         isInitialSearch: false
       };
       notify();
+      if (globalState.viewMode === 'globe') {
+        runExtractionSequence([
+          { stage: 'LOCATION_SELECTED', delayMs: 0 },
+          { stage: 'CAMERA_APPROACH', delayMs: 250 },
+          { stage: 'REGION_HIGHLIGHTED', delayMs: 750 },
+          { stage: 'GLOBE_IDLE', delayMs: 1500 }
+        ]);
+      } else {
+        runExtractionSequence([
+          { stage: 'LOCATION_SELECTED', delayMs: 0 },
+          { stage: 'EXTRACTION_START', delayMs: 220 },
+          { stage: 'SUBSURFACE_REVEAL', delayMs: 550 },
+          { stage: 'CUTOUT_READY', delayMs: 950 }
+        ]);
+      }
       if (typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
         fetchLocationDossierImpl(loc.latitude, loc.longitude);
       }
@@ -778,9 +907,9 @@ export function useTerranexusStore(): TerranexusState {
           {
             id: 'welcome-msg',
             sender: 'assistant',
-            content: 'Welcome to TERRANEXUS 4D — National Subsurface Intelligence & Earth Digital Twin Platform. I am Nexus AI, your scientific copilot. Select any location in India, adjust depth beneath the surface, scrub through time, or ask me to explain the verified hydrological, geological and mineral evidence.',
+            content: 'Welcome to TERRANEXUS 4D — Global & National Subsurface Intelligence & Earth Digital Twin Platform. I am Nexus AI, your scientific copilot. Select any location on Earth (including deep Indian national survey benchmarks), adjust depth beneath the surface, scrub through time, or ask me to explain the verified hydrological, geological, pedological, and mineral evidence.',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            groundedLocation: 'Pan-India',
+            groundedLocation: 'Global & Pan-India',
             limitationsNoted: [
               'All scientific layers are classified as OBSERVED, MODELLED, PREDICTED, or SIMULATED.',
               'Remote sensing alteration indices reflect surface reflectance only, not deep ore deposits.',

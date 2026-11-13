@@ -55,15 +55,12 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const searchAbortRef = useRef<AbortController | null>(null);
   const suppressAutocompleteRef = useRef<boolean>(false);
-  const [isSearchingSuggestions, setIsSearchingSuggestions] = useState<boolean>(false);
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const recordRecentPlace = (loc: { name: string; state?: string; latitude: number; longitude: number }) => {
     const entry: SavedPlaceEntry = {
       name: loc.name.split(' - ')[0],
-      state: loc.state || 'Global Locus',
+      state: loc.state || 'India',
       latitude: loc.latitude,
       longitude: loc.longitude
     };
@@ -100,7 +97,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       const next: SavedPlaceEntry[] = [
         {
           name: shortName,
-          state: ('state' in selectedLocation && selectedLocation.state) || 'Global Locus',
+          state: ('state' in selectedLocation && selectedLocation.state) || 'India',
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude
         },
@@ -128,10 +125,6 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
   useEffect(() => {
     const trimmed = query.trim();
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-    if (searchAbortRef.current) {
-      searchAbortRef.current.abort();
-      searchAbortRef.current = null;
-    }
 
     if (suppressAutocompleteRef.current) {
       suppressAutocompleteRef.current = false;
@@ -140,8 +133,6 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
 
     if (trimmed.length < 2) {
       setSuggestions([]);
-      setHasSearched(false);
-      setIsSearchingSuggestions(false);
       setErrorMessage(null);
       return;
     }
@@ -152,34 +143,15 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     }
 
     debounceTimerRef.current = setTimeout(async () => {
-      const controller = new AbortController();
-      searchAbortRef.current = controller;
-      setIsSearchingSuggestions(true);
-      const results = await searchPlaceSuggestions(trimmed, controller.signal);
-      if (controller.signal.aborted) return;
+      const results = await searchPlaceSuggestions(trimmed);
       setSuggestions(results);
-      setHasSearched(true);
-      setIsSearchingSuggestions(false);
       setIsOpen(true);
     }, 220);
 
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
-      if (searchAbortRef.current) {
-        searchAbortRef.current.abort();
-        searchAbortRef.current = null;
-      }
     };
   }, [query]);
-
-  const updateQuerySilently = (nextQuery: string) => {
-    setQuery((prev) => {
-      if (prev !== nextQuery) {
-        suppressAutocompleteRef.current = true;
-      }
-      return nextQuery;
-    });
-  };
 
   // Handle immediate form submission (Enter key or Search click)
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -196,8 +168,9 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       if (response.success && response.location) {
         recordRecentPlace(response.location);
         onLocationSelected(response.location);
+        suppressAutocompleteRef.current = true;
         setIsOpen(false);
-        updateQuerySilently(response.location.name);
+        setQuery(response.location.name);
       } else {
         setErrorMessage(response.error || 'Location could not be resolved. Try a place name or coordinates.');
       }
@@ -213,16 +186,17 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const response = await resolveUserLocationQuery(`${item.latitude}, ${item.longitude}`);
+      const response = await resolveUserLocationQuery(item.name, item);
       if (response.success && response.location) {
         const enhancedLocation: SelectedLocation = {
           ...response.location,
           name: item.name,
-          displayName: item.displayName
+          displayName: item.displayName || response.location.displayName
         };
         recordRecentPlace(enhancedLocation);
         onLocationSelected(enhancedLocation);
-        updateQuerySilently(item.name);
+        suppressAutocompleteRef.current = true;
+        setQuery(item.name);
         setIsOpen(false);
       } else {
         setErrorMessage('Failed to load details for selected place.');
@@ -243,7 +217,8 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     if (matchedBenchmark) {
       recordRecentPlace(matchedBenchmark);
       onLocationSelected(matchedBenchmark as unknown as SelectedLocation);
-      updateQuerySilently(place.name);
+      suppressAutocompleteRef.current = true;
+      setQuery(place.name);
       setIsOpen(false);
       return;
     }
@@ -257,7 +232,8 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
         };
         recordRecentPlace(enhanced);
         onLocationSelected(enhanced);
-        updateQuerySilently(place.name);
+        suppressAutocompleteRef.current = true;
+        setQuery(place.name);
         setIsOpen(false);
       }
     } finally {
@@ -303,7 +279,6 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
           type="text"
           value={query}
           onChange={(e) => {
-            suppressAutocompleteRef.current = false;
             setQuery(e.target.value);
             setErrorMessage(null);
             setSelectedIndex(-1);
@@ -482,13 +457,12 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       {isOpen && !showQuickDrawer && (
         <LocationResults
           suggestions={suggestions}
-          isLoading={isLoading || isSearchingSuggestions}
+          isLoading={isLoading}
           error={errorMessage}
+          query={query}
           selectedIndex={selectedIndex}
           onSelectSuggestion={handleSelectSuggestion}
           onClose={() => setIsOpen(false)}
-          query={query}
-          showNoResults={hasSearched && query.trim().length >= 2 && suggestions.length === 0 && !isLoading && !isSearchingSuggestions}
         />
       )}
     </div>

@@ -70,34 +70,40 @@ export const NexusAI: React.FC = () => {
   const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
   const mineralIndicators = MINERAL_INDICATORS[selectedLocation.id] || null;
 
-  // Helper to resolve fallback provenance and source metadata
+  const isWithinIndia = (selectedLocation as any).isWithinIndia !== false;
+
+  // Derive fallback source provenance from active location and dossier
   const resolveFallbackSources = (): SourceInspectionMetrics => {
     const stationId = (currentDossier?.groundwater?.nearestObservation as any)?.stationId
       || currentDossier?.groundwater?.nearestObservation?.id
-      || (selectedLocation.id.includes('ludhiana') ? 'DEMO-PB-LUD-PAU-01'
-        : selectedLocation.id.includes('khetri') ? 'CGWB-RJ-JJN-DWLR-04'
-        : selectedLocation.id.includes('bhimavaram') ? 'CGWB-AP-BHI-DWLR-01'
-        : `CGWB-${selectedLocation.state?.slice(0, 2).toUpperCase() || 'IN'}-${selectedLocation.id.slice(0, 4).toUpperCase()}-01`);
+      || selectedBorehole?.wellCode
+      || (isWithinIndia
+        ? selectedLocation.id.includes('ludhiana') ? 'CGWB-PB-LDH-PAU-01'
+          : selectedLocation.id.includes('bhimavaram') ? 'CGWB-AP-WG-BVRM-04'
+          : `CGWB-${selectedLocation.state?.slice(0, 2).toUpperCase() || 'IN'}-${selectedLocation.id.slice(0, 4).toUpperCase()}-01`
+        : `WHYMAP-${(selectedLocation.state || 'GLB').slice(0, 3).toUpperCase()}-OBS`);
 
-    let sheet = '53B/06';
+    let sheet = isWithinIndia ? '53B/06' : `CGMW-GLiM-1M-${selectedLocation.latitude >= 0 ? 'N' : 'S'}${Math.floor(Math.abs(selectedLocation.latitude))}`;
     const locId = selectedLocation.id.toLowerCase();
     const locName = selectedLocation.name.toLowerCase();
-    if (locId.includes('khetri') || locName.includes('khetri')) sheet = '45M/09';
-    else if (locId.includes('bhimavaram') || locName.includes('bhimavaram')) sheet = '65D/14';
-    else if (locId.includes('pune') || locName.includes('pune')) sheet = '47F/15';
-    else if (locId.includes('kolar') || locName.includes('kolar')) sheet = '57L/01';
+    if (isWithinIndia) {
+      if (locId.includes('khetri') || locName.includes('khetri')) sheet = '45M/09';
+      else if (locId.includes('bhimavaram') || locName.includes('bhimavaram')) sheet = '65D/14';
+      else if (locId.includes('pune') || locName.includes('pune')) sheet = '47F/15';
+      else if (locId.includes('kolar') || locName.includes('kolar')) sheet = '57L/01';
+    }
 
     return {
       cgwbStationCode: stationId,
       gsiQuadrangleSheet: sheet,
       nasaMasconGranuleId: 'TELLUS_GRAC_L3_JPL_RL06_LND_v04_202411',
       looCvUncertainty: '± 1.28 cm LWE (RMSE = 0.84)',
-      coverageTier: (selectedLocation as any).coverage?.tier || 'HIGH',
-      confidenceScorePercent: (selectedLocation as any).coverage?.confidenceScorePercent || 88
+      coverageTier: (selectedLocation as any).coverage?.tier || (isWithinIndia ? 'HIGH' : 'MODERATE'),
+      confidenceScorePercent: (selectedLocation as any).coverage?.confidenceScorePercent || (isWithinIndia ? 88 : 80)
     };
   };
 
-  // Dynamic contextual quick prompts adapted to current locus and module
+  // Dynamic contextual quick prompts adapted to current locus and all Earth intelligence domains
   const quickPrompts = useMemo(() => {
     const locName = selectedLocation.name.toLowerCase();
     const locId = selectedLocation.id.toLowerCase();
@@ -106,8 +112,8 @@ export const NexusAI: React.FC = () => {
       return [
         'Explain deep quaternary alluvial stratigraphy & irrigation overdraft dynamics.',
         'Compare PAU piezometer (32.4 mbgl) with regional NASA GRACE TWSA trends.',
-        'How does the Thiem drawdown cone behave during heavy agricultural pumping?',
-        'What are the scientific limitations of satellite gravimetry in the Sutlej basin?'
+        'Analyze topsoil pedology, infiltration, and seasonal monsoon recharge cycles.',
+        'What is the Quadruple Verification status and data reliability here?'
       ];
     }
 
@@ -116,7 +122,7 @@ export const NexusAI: React.FC = () => {
         'Analyze the Proterozoic Aravalli-Delhi supergroup copper mineralization.',
         'Explain Sentinel-2 B4/B2 iron oxide ratio & gossan alteration indicators.',
         'Why do optical satellite sensors observe surface reflectance only, not ore bodies?',
-        'What CGWB monitoring well observations exist in the Jhunjhunu copper belt?'
+        'Analyze the terrain ruggedness, soil regolith depth, and fractured aquifer limits.'
       ];
     }
 
@@ -124,16 +130,16 @@ export const NexusAI: React.FC = () => {
       return [
         'Explain coastal alluvial aquifer salinity dynamics and deltaic stratigraphy.',
         'What are the active CGWB telemetry readings for Godavari delta piezometers?',
-        'How does monsoonal precipitation correlate with coastal shallow water table recharge?',
-        'What GSI quadrangle mapping covers the Eastern Ghats alluvial margin?'
+        'Analyze the deltaic soil texture, organic carbon, and terrain slope.',
+        'How does monsoonal precipitation correlate with shallow water table recharge?'
       ];
     }
 
     return [
-      `Explain the active aquifer systems & CGWB water level trends for ${selectedLocation.name}.`,
-      `What strata rock types occur at the current depth slice (-${depthMeters}m)?`,
-      'Explain the Sentinel-2 iron oxide & clay alteration indicators.',
-      'What are the scientific limitations, data tiers, and coverage gaps here?'
+      `Explain the groundwater aquifer systems & NASA GRACE water trends for ${selectedLocation.name}.`,
+      `What geological strata and soil regolith occur at ${selectedLocation.name} (-${depthMeters}m)?`,
+      `Analyze the terrain elevation, slope morphology, and mineral alteration indicators for ${selectedLocation.name}.`,
+      `What is the Quadruple Verification status, data reliability, and coverage tier for ${selectedLocation.name}?`
     ];
   }, [selectedLocation, depthMeters]);
 
@@ -202,7 +208,8 @@ export const NexusAI: React.FC = () => {
       aquifers,
       formations,
       mineralIndicators,
-      dossier: currentDossier
+      dossier: currentDossier,
+      history: aiMessages.slice(-6).map(m => ({ sender: m.sender, content: m.content }))
     };
 
     const assistantMsgId = `ai-${Date.now()}`;

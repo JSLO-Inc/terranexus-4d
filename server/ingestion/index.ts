@@ -22,6 +22,15 @@ const INDIAN_LOCATIONS_META: Record<string, { name: string; latitude: number; lo
   'locus-godavari-kothagudem': { name: 'Pranhita-Godavari Graben - Kothagudem', latitude: 17.5511, longitude: 80.6178 }
 };
 
+const EXTENDED_LOCATIONS_META: Record<string, { name: string; latitude: number; longitude: number }> = {
+  'loc-bhimavaram': { name: 'Bhimavaram - West Godavari Delta', latitude: 16.5449, longitude: 81.5212 },
+  'global-grand-canyon': { name: 'Grand Canyon - Colorado Plateau', latitude: 36.1069, longitude: -112.1129 },
+  'global-atacama-escondida': { name: 'Atacama Copper Belt - Antofagasta', latitude: -23.8634, longitude: -69.1328 },
+  'global-mount-etna': { name: 'Mount Etna - Valle del Bove', latitude: 37.7510, longitude: 14.9934 },
+  'global-great-artesian': { name: 'Great Artesian Basin - Lake Eyre', latitude: -26.5000, longitude: 138.5000 },
+  'global-sahara-nubian': { name: 'Nubian Sandstone Aquifer - Kharga Oasis', latitude: 25.6872, longitude: 28.8500 }
+};
+
 let currentPipelineStatus: IngestionStatus = 'IDLE';
 let lastRunTimestamp: string = new Date().toISOString();
 
@@ -36,7 +45,7 @@ export function ingestLocationHydro(locationId: string, force: boolean = false):
     }
   }
 
-  const meta = INDIAN_LOCATIONS_META[locationId] || {
+  const meta = INDIAN_LOCATIONS_META[locationId] || EXTENDED_LOCATIONS_META[locationId] || {
     name: locationId,
     latitude: 20.5937,
     longitude: 78.9629

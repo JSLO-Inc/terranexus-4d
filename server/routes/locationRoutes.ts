@@ -89,24 +89,77 @@ function enrichLocationWithProviders(baseLoc: Partial<SelectedLocation>, lat: nu
 locationRouter.all('/resolve', async (req: Request, res: Response) => {
   try {
     const rawQuery = req.body?.query || (req.query?.query as string) || (req.query?.q as string);
-    if (!rawQuery || typeof rawQuery !== 'string' || rawQuery.trim().length < 2) {
+    const suggestion = req.body?.suggestion;
+    if ((!rawQuery || typeof rawQuery !== 'string' || rawQuery.trim().length < 2) && !suggestion) {
       return res.status(400).json({
         success: false,
         error: 'Query parameter must be a non-empty string of at least 2 characters (via JSON body { query } or query parameter ?query=).'
       });
     }
-    const query = rawQuery;
 
+    // 0a. Fast path when user selected a specific suggestion from autocomplete
+    if (suggestion && Number.isFinite(suggestion.latitude) && Number.isFinite(suggestion.longitude)) {
+      const lat = Number(suggestion.latitude);
+      const lon = Number(suggestion.longitude);
+      const withinIndia = isCoordinateWithinIndia(lat, lon);
+      const coverage = evaluateNationwideDataCoverage(lat, lon);
+      const eleRes = await providerRegistry.getElevation().getElevationForCoordinate(lat, lon);
+      const gazetteerMatch = [...LOCAL_INDIAN_GEOGRAPHIC_INDEX, ...GLOBAL_EARTH_GEOGRAPHIC_INDEX].find(
+        p => p.id === suggestion.id || (Math.abs(p.latitude - lat) < 0.12 && Math.abs(p.longitude - lon) < 0.12)
+      );
+      const rawState = String(suggestion.state || gazetteerMatch?.state || (withinIndia ? 'India' : 'Global Region'));
+      const stateParts = rawState.split(',').map(s => s.trim()).filter(Boolean);
+      const stateName = stateParts[0] || (withinIndia ? 'India' : 'Global Region');
+      const countryName =
+        gazetteerMatch?.country ||
+        (stateParts.length > 1 ? stateParts[stateParts.length - 1] : withinIndia ? 'India' : 'International');
+      const districtName = suggestion.district || gazetteerMatch?.district || suggestion.name || stateName;
+
+      const baseResolved: SelectedLocation = {
+        id: gazetteerMatch?.id || suggestion.id || `loc-${lat.toFixed(4)}-${lon.toFixed(4)}`,
+        name: suggestion.name || gazetteerMatch?.name || `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`,
+        displayName: suggestion.displayName || `${suggestion.name}, ${districtName}, ${stateName}, ${countryName}`,
+        state: stateName,
+        district: districtName,
+        basin: gazetteerMatch?.basin || `${districtName} River Basin / Regional Catchment`,
+        geologicalProvince: gazetteerMatch?.geologicalProvince || `${stateName} Lithological Terrane (CGMW GLiM)`,
+        description: `Earth & Subsurface Intelligence Locus in ${districtName}, ${stateName} (${countryName}).`,
+        latitude: lat,
+        longitude: lon,
+        elevationMeters: gazetteerMatch?.elevationMeters ?? eleRes.elevationM,
+        elevationSource: eleRes.source,
+        inputType: 'ADDRESS',
+        rawInput: rawQuery || suggestion.name,
+        isWithinIndia: withinIndia,
+        administrativeHierarchy: {
+          country: countryName,
+          state: stateName,
+          district: districtName,
+          subDistrict: suggestion.subDistrict,
+          city: suggestion.type === 'CITY' ? suggestion.name : undefined,
+          town: suggestion.type === 'TOWN' ? suggestion.name : undefined,
+          village: suggestion.type === 'VILLAGE' ? suggestion.name : undefined,
+          formattedAddress: suggestion.displayName || `${suggestion.name}, ${districtName}, ${stateName}, ${countryName}`
+        },
+        coverage,
+        resolvedAt: new Date().toISOString()
+      };
+
+      const resolved = enrichLocationWithProviders(baseResolved, lat, lon, stateName) as SelectedLocation;
+      return res.json({ success: true, location: resolved });
+    }
+
+    const query = rawQuery;
     const clean = query.trim();
     const cleanLower = clean.toLowerCase();
 
-    // 0. Check if query matches any of the 7 Canonical Indian Regional Study Loci
+    // 0b. Check if query matches any of the 7 Canonical Indian Regional Study Loci
     const canonicalMatch = INDIA_LOCATIONS.find(loc => 
       loc.id.toLowerCase() === cleanLower ||
       loc.name.toLowerCase() === cleanLower ||
       loc.name.toLowerCase().startsWith(cleanLower) ||
       loc.district.toLowerCase() === cleanLower ||
-      (cleanLower.length >= 4 && (
+      (cleanLower.length >= 4 && !cleanLower.includes(',') && (
         loc.name.toLowerCase().includes(cleanLower) ||
         loc.district.toLowerCase().includes(cleanLower) ||
         cleanLower.includes(loc.district.toLowerCase())

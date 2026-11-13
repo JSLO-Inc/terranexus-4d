@@ -20,6 +20,7 @@ import { validateOutboundUrl } from './security/urlValidator';
 import { validateAndSanitizeFilename } from './security/pathGuard';
 
 import { dossierRouter } from './routes/dossierRoutes';
+import eicRouter from './routes/eicRoutes';
 
 dotenv.config();
 
@@ -64,6 +65,9 @@ app.use('/api/providers', providerRouter);
 
 // 6. Universal Location & Discovery API (with dedicated rate limiting)
 app.use('/api/location', locationSearchLimiter, locationRouter);
+
+// 6b. Earth Intelligence Core (EIC) — Multi-Source Fusion, Knowledge Graph & Tool Orchestration
+app.use('/api/eic', eicRouter);
 
 // 7. Location Evidence Engine & Dossier API (Direct & /api paths)
 app.use('/api', dossierRouter);
@@ -656,8 +660,10 @@ app.post('/api/ai/stream', async (req, res) => {
     }
 
     let isClientClosed = false;
-    req.on('close', () => {
-      isClientClosed = true;
+    res.on('close', () => {
+      if (!res.writableEnded) {
+        isClientClosed = true;
+      }
     });
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -667,14 +673,14 @@ app.post('/api/ai/stream', async (req, res) => {
       context,
       apiKey,
       (chunk: string) => {
-        if (!isClientClosed) {
+        if (!isClientClosed && !res.writableEnded) {
           res.write(`data: ${JSON.stringify({ type: 'chunk', text: chunk })}\n\n`);
         }
       },
-      () => isClientClosed
+      () => isClientClosed || res.writableEnded
     );
 
-    if (!isClientClosed) {
+    if (!isClientClosed && !res.writableEnded) {
       res.write(`data: ${JSON.stringify({
         type: 'done',
         result: explanation

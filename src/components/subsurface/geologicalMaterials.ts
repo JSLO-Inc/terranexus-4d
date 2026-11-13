@@ -203,6 +203,215 @@ export function getTerraneStructuralAttitude(
  * - Normal / Bump Map (`bumpMap`): Procedural micro-relief, joint fractures, and crystal grains
  * - Roughness Map (`roughnessMap`): Differential specular reflectivity (vitreous quartz vs dull clay)
  */
+export function computeTangentSpaceNormalMapFromHeightCanvas(
+  heightCanvas: HTMLCanvasElement,
+  strength: number = 2.4
+): THREE.CanvasTexture {
+  const w = heightCanvas.width;
+  const h = heightCanvas.height;
+  const normalCanvas = document.createElement('canvas');
+  normalCanvas.width = w;
+  normalCanvas.height = h;
+
+  const srcCtx = heightCanvas.getContext('2d');
+  const dstCtx = normalCanvas.getContext('2d');
+  if (!srcCtx || !dstCtx) {
+    return new THREE.CanvasTexture(normalCanvas);
+  }
+
+  const srcData = srcCtx.getImageData(0, 0, w, h).data;
+  const dstImage = dstCtx.createImageData(w, h);
+  const dstData = dstImage.data;
+
+  const sampleHeight = (x: number, y: number): number => {
+    const wx = (x + w) % w;
+    const wy = (y + h) % h;
+    return srcData[(wy * w + wx) * 4] / 255.0;
+  };
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      // 3x3 Sobel operator for crisp rock & terrain micro-relief normals
+      const tl = sampleHeight(x - 1, y - 1);
+      const t = sampleHeight(x, y - 1);
+      const tr = sampleHeight(x + 1, y - 1);
+      const l = sampleHeight(x - 1, y);
+      const r = sampleHeight(x + 1, y);
+      const bl = sampleHeight(x - 1, y + 1);
+      const b = sampleHeight(x, y + 1);
+      const br = sampleHeight(x + 1, y + 1);
+
+      const dX = (tr + 2.0 * r + br) - (tl + 2.0 * l + bl);
+      const dY = (bl + 2.0 * b + br) - (tl + 2.0 * t + tr);
+      const nX = -dX * strength;
+      const nY = -dY * strength;
+      const nZ = 1.0;
+
+      const invLen = 1.0 / Math.sqrt(nX * nX + nY * nY + nZ * nZ);
+      const idx = (y * w + x) * 4;
+      dstData[idx] = Math.round(((nX * invLen) * 0.5 + 0.5) * 255);
+      dstData[idx + 1] = Math.round(((nY * invLen) * 0.5 + 0.5) * 255);
+      dstData[idx + 2] = Math.round(((nZ * invLen) * 0.5 + 0.5) * 255);
+      dstData[idx + 3] = 255;
+    }
+  }
+
+  dstCtx.putImageData(dstImage, 0, 0);
+  const normalTexture = new THREE.CanvasTexture(normalCanvas);
+  normalTexture.wrapS = THREE.RepeatWrapping;
+  normalTexture.wrapT = THREE.RepeatWrapping;
+  return normalTexture;
+}
+
+/**
+ * Generates a realistic procedural Planetary Earth Albedo + Bump + Roughness texture set
+ * for the 3D Curved Earth Sphere beneath the extracted regional cutout.
+ */
+export function generatePlanetaryEarthTextures(centerLat: number = 25, centerLon: number = 78): {
+  map: THREE.CanvasTexture;
+  bumpMap: THREE.CanvasTexture;
+  roughnessMap: THREE.CanvasTexture;
+} {
+  const w = 1024;
+  const h = 512;
+
+  const colorCanvas = document.createElement('canvas');
+  colorCanvas.width = w;
+  colorCanvas.height = h;
+  const cCtx = colorCanvas.getContext('2d')!;
+
+  const bumpCanvas = document.createElement('canvas');
+  bumpCanvas.width = w;
+  bumpCanvas.height = h;
+  const bCtx = bumpCanvas.getContext('2d')!;
+
+  const roughCanvas = document.createElement('canvas');
+  roughCanvas.width = w;
+  roughCanvas.height = h;
+  const rCtx = roughCanvas.getContext('2d')!;
+
+  // 1. Deep Bathymetric Ocean Base
+  const oceanGrad = cCtx.createLinearGradient(0, 0, 0, h);
+  oceanGrad.addColorStop(0, '#041226');
+  oceanGrad.addColorStop(0.25, '#072247');
+  oceanGrad.addColorStop(0.5, '#0a2e5c');
+  oceanGrad.addColorStop(0.75, '#072247');
+  oceanGrad.addColorStop(1, '#041226');
+  cCtx.fillStyle = oceanGrad;
+  cCtx.fillRect(0, 0, w, h);
+
+  bCtx.fillStyle = '#303030';
+  bCtx.fillRect(0, 0, w, h);
+
+  // Ocean is specular (low roughness ~0.22)
+  rCtx.fillStyle = '#383838';
+  rCtx.fillRect(0, 0, w, h);
+
+  // 2. Continental Landmasses & Mountain Chains (seeded around selected coordinates)
+  const seed = Math.abs(Math.round(centerLat * 17 + centerLon * 31));
+  for (let i = 0; i < 42; i++) {
+    const cx = ((i * 173 + seed) % w);
+    const cy = 60 + ((i * 97 + seed) % (h - 120));
+    const rx = 55 + ((i * 47) % 140);
+    const ry = 35 + ((i * 37) % 90);
+
+    // Continental shelf glow
+    const shelfGrad = cCtx.createRadialGradient(cx, cy, rx * 0.2, cx, cy, rx * 1.15);
+    shelfGrad.addColorStop(0, 'rgba(14, 116, 144, 0.55)');
+    shelfGrad.addColorStop(0.65, 'rgba(3, 105, 161, 0.25)');
+    shelfGrad.addColorStop(1, 'rgba(3, 105, 161, 0)');
+    cCtx.fillStyle = shelfGrad;
+    cCtx.beginPath();
+    cCtx.ellipse(cx, cy, rx * 1.15, ry * 1.15, (i % 7) * 0.4, 0, Math.PI * 2);
+    cCtx.fill();
+
+    // Landmass biomes (forest emerald, alluvial olive, desert ochre, mountain brown)
+    const landGrad = cCtx.createRadialGradient(cx, cy, 4, cx, cy, rx);
+    if (i % 3 === 0) {
+      landGrad.addColorStop(0, '#78552b');
+      landGrad.addColorStop(0.45, '#365314');
+      landGrad.addColorStop(0.85, '#1e3a1e');
+      landGrad.addColorStop(1, 'rgba(20, 45, 28, 0)');
+    } else if (i % 3 === 1) {
+      landGrad.addColorStop(0, '#a16207');
+      landGrad.addColorStop(0.55, '#4d7c0f');
+      landGrad.addColorStop(0.9, '#14532d');
+      landGrad.addColorStop(1, 'rgba(20, 83, 45, 0)');
+    } else {
+      landGrad.addColorStop(0, '#cbd5e1'); // High mountain snow ridge
+      landGrad.addColorStop(0.3, '#57534e');
+      landGrad.addColorStop(0.75, '#3f6212');
+      landGrad.addColorStop(1, 'rgba(63, 98, 18, 0)');
+    }
+    cCtx.fillStyle = landGrad;
+    cCtx.beginPath();
+    cCtx.ellipse(cx, cy, rx, ry, (i % 5) * 0.5, 0, Math.PI * 2);
+    cCtx.fill();
+
+    // Continental elevation in bump map & higher roughness on land
+    const bumpGrad = bCtx.createRadialGradient(cx, cy, 2, cx, cy, rx);
+    bumpGrad.addColorStop(0, '#f0f0f0');
+    bumpGrad.addColorStop(0.6, '#989898');
+    bumpGrad.addColorStop(1, 'rgba(48, 48, 48, 0)');
+    bCtx.fillStyle = bumpGrad;
+    bCtx.beginPath();
+    bCtx.ellipse(cx, cy, rx, ry, (i % 5) * 0.5, 0, Math.PI * 2);
+    bCtx.fill();
+
+    rCtx.fillStyle = '#c8c8c8';
+    rCtx.beginPath();
+    rCtx.ellipse(cx, cy, rx * 0.85, ry * 0.85, (i % 5) * 0.5, 0, Math.PI * 2);
+    rCtx.fill();
+  }
+
+  // 3. Subtle Orbital Latitudinal/Longitudinal Graticule & Atmospheric Cloud Wisps
+  cCtx.strokeStyle = 'rgba(56, 189, 248, 0.09)';
+  cCtx.lineWidth = 1;
+  for (let latLine = 32; latLine < h; latLine += 32) {
+    cCtx.beginPath();
+    cCtx.moveTo(0, latLine);
+    cCtx.lineTo(w, latLine);
+    cCtx.stroke();
+  }
+  for (let lonLine = 64; lonLine < w; lonLine += 64) {
+    cCtx.beginPath();
+    cCtx.moveTo(lonLine, 0);
+    cCtx.lineTo(lonLine, h);
+    cCtx.stroke();
+  }
+
+  // Soft orbital cloud wisps
+  for (let cl = 0; cl < 28; cl++) {
+    const x = (cl * 139 + 40) % w;
+    const y = 30 + ((cl * 83) % (h - 60));
+    const crx = 45 + (cl % 5) * 24;
+    const cry = 8 + (cl % 3) * 6;
+    const clGrad = cCtx.createRadialGradient(x, y, 2, x, y, crx);
+    clGrad.addColorStop(0, 'rgba(248, 250, 252, 0.24)');
+    clGrad.addColorStop(0.6, 'rgba(226, 232, 240, 0.10)');
+    clGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    cCtx.fillStyle = clGrad;
+    cCtx.beginPath();
+    cCtx.ellipse(x, y, crx, cry, -0.2, 0, Math.PI * 2);
+    cCtx.fill();
+  }
+
+  const map = new THREE.CanvasTexture(colorCanvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.wrapS = THREE.RepeatWrapping;
+  map.wrapT = THREE.ClampToEdgeWrapping;
+
+  const bumpMap = new THREE.CanvasTexture(bumpCanvas);
+  bumpMap.wrapS = THREE.RepeatWrapping;
+  bumpMap.wrapT = THREE.ClampToEdgeWrapping;
+
+  const roughnessMap = new THREE.CanvasTexture(roughCanvas);
+  roughnessMap.wrapS = THREE.RepeatWrapping;
+  roughnessMap.wrapT = THREE.ClampToEdgeWrapping;
+
+  return { map, bumpMap, roughnessMap };
+}
+
 export function generateLithologyPbrTextures(
   formationCode: string,
   lithologyText: string,
@@ -210,6 +419,7 @@ export function generateLithologyPbrTextures(
 ): {
   map: THREE.CanvasTexture;
   bumpMap: THREE.CanvasTexture;
+  normalMap: THREE.CanvasTexture;
   roughnessMap: THREE.CanvasTexture;
   roughness: number;
   metalness: number;
@@ -711,9 +921,12 @@ export function generateLithologyPbrTextures(
   roughTexture.wrapS = THREE.RepeatWrapping;
   roughTexture.wrapT = THREE.RepeatWrapping;
 
+  const normalTexture = computeTangentSpaceNormalMapFromHeightCanvas(bumpCanvas, 2.2);
+
   return {
     map: mapTexture,
     bumpMap: bumpTexture,
+    normalMap: normalTexture,
     roughnessMap: roughTexture,
     roughness: materialRoughness,
     metalness: materialMetalness

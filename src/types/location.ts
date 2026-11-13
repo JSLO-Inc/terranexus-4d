@@ -132,6 +132,8 @@ export interface SelectedLocation {
     typicalYieldLitersPerSec: string;
   };
   resolvedAt: string;
+  resolutionPrecision?: 'EXACT_COORDINATE' | 'GAZETTEER_CENTROID' | 'APPROXIMATE_REGIONAL_BUFFER';
+  sourceProvider?: string;
 }
 
 export interface GeocodingSuggestion {
@@ -146,6 +148,8 @@ export interface GeocodingSuggestion {
   subDistrict?: string;
   village?: string;
   relevanceScore: number;
+  resolutionPrecision?: 'EXACT_COORDINATE' | 'GAZETTEER_CENTROID' | 'APPROXIMATE_REGIONAL_BUFFER';
+  sourceProvider?: string;
 }
 
 export interface CoordinateParseResult {

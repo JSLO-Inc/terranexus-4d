@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.2.0-EIC-MASTER-RELEASE] — 2026-11-08
+
+### Added
+- **Earth Intelligence Core (`server/eic/earthIntelligenceCore.ts` & `src/components/eic/NexusEIC.tsx`):** Implemented a central multi-source scientific orchestration engine with an 11-state epistemic availability taxonomy (`VERIFIED_LIVE`, `VERIFIED_CACHED`, `VERIFIED_STATIC`, `PROCESSED`, `MODELLED`, `PREDICTED`, `CONCEPTUAL`, `PARTIAL`, `UNAVAILABLE`, `FAILED`, `STALE`), 7-step cross-scale data fusion pipeline, 9-node / 8-edge Location-Centered Knowledge Graph, Versioned Scientific Memory with LOO-CV prediction validation, and 16 Gemini EIC orchestration tools.
+- **Nexus Soil, Nexus Agri & Nexus Environment (`NexusSoil.tsx`, `NexusAgri.tsx`, `NexusEnvironment.tsx`):** Added dedicated scientific workspaces for 4-horizon soil profiles (0–60 cm), live Open-Meteo agro-meteorological water balance (`ET0` vs precipitation), FAO-56 multi-crop suitability across 6 crop systems, and environmental/watershed hazard diagnostics.
+- **Nexus Climate Epistemic Separation (`NexusTime.tsx`):** Explicitly separated Direct Satellite/Gauge Observations (`VERIFIED_CACHED`), ECMWF ERA5-Land Reanalysis (`PROCESSED`), Short-Range Synoptic Weather Forecasts (`PREDICTED`), and CMIP6 Decadal Climate Projections (`MODELLED`) so projections are never mixed with historical observations.
+- **Global & Village Gazetteer Disambiguation (`geocodingService.ts` & `LocationResults.tsx`):** Added authentic Indian village benchmarks (*Ralegan Siddhi*, *Hiware Bazar*, *Piplantri*, *Punsari*, *Mawlynnong*, *Pochampally*, *Dharnai*, *Odanthurai*, *Doraha*, *Jagraon*, *Akividu*), merged Open-Meteo GeoNames (11M+ settlements) with OSM Nominatim, and added resolution precision & multi-candidate disambiguation badges in the search dropdown.
+- **8-Stage Reversible Globe-to-Cutout Extraction HUD (`App.tsx` & `Subsurface3D.tsx`):** Added interactive stage progression HUD (`GLOBE_IDLE` → `CUTOUT_READY` ↔ `RETURN_IN_PROGRESS`) over non-cubic polygon terrain and dipping stratigraphic extrusions.
+- **Automated Scientific PDF 1.4 Report Engine (`pdfReportService.ts` & `ScientificReportModal.tsx`):** Built a standards-compliant binary `%PDF-1.4` report generator across 7 report types (`COMPREHENSIVE`, `HYDRO`, `SOIL`, `AGRI`, `STRATA`, `MINERAL`, `ENVIRONMENT`) enforced by a 6-point Pre-Download Verification Gate.
+- **EIC Automated Regression Suite (`test/test-eic-core.ts`):** Added 19th automated test suite (`npm run test:eic`) validating EIC synthesis, 16 Gemini tools, village search, and PDF 1.4 binary generation.
+
+---
+
 ## [0.1.0-FINAL-RELEASE] — 2026-11-05
 
 ### Added

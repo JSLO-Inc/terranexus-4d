@@ -4,14 +4,16 @@ import { AQUIFER_SYSTEMS, HYDRO_TIMESERIES } from '../../data/hydroData';
 import {
   X,
   Droplet,
+  Sprout,
+  Wheat,
   Layers,
   Sparkles,
+  TreePine,
+  Network,
   Bot,
   ArrowRight,
   ShieldCheck,
-  Download,
-  Info,
-  CheckCircle2,
+  FileDown,
   MapPin,
   Box,
   Maximize2
@@ -33,7 +35,8 @@ export const Inspector: React.FC = () => {
     depthMeters,
     activeGroundwaterDepthMbgl,
     terrainElevationGrid,
-    explorationExtentKm
+    explorationExtentKm,
+    setShowReportModal
   } = useTerranexusStore();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'layers' | 'data' | 'provenance'>('overview');
@@ -139,7 +142,7 @@ export const Inspector: React.FC = () => {
               {selectedLocation.name.split(' - ')[0]}
             </h2>
             <p className="text-[10px] font-mono text-cyan-300 font-medium">
-              {selectedLocation.latitude.toFixed(4)}° N, {selectedLocation.longitude.toFixed(4)}° E • {selectedLocation.elevationMeters}m ASL
+              {Math.abs(selectedLocation.latitude).toFixed(4)}° {selectedLocation.latitude >= 0 ? 'N' : 'S'}, {Math.abs(selectedLocation.longitude).toFixed(4)}° {selectedLocation.longitude >= 0 ? 'E' : 'W'} • {selectedLocation.elevationMeters}m ASL
             </p>
           </div>
         </div>
@@ -175,7 +178,10 @@ export const Inspector: React.FC = () => {
               <div className="text-[11px] text-slate-200 font-medium">
                 {(selectedLocation as any).administrativeHierarchy ? (
                   <div className="flex flex-wrap items-center gap-1 text-slate-300">
-                    <span>{(selectedLocation as any).administrativeHierarchy.country || ((selectedLocation as any).isWithinIndia !== false ? 'India' : 'International')}</span>
+                    <span>
+                      {(selectedLocation as any).administrativeHierarchy.country ||
+                        ((selectedLocation as any).isWithinIndia === false ? 'International' : 'India')}
+                    </span>
                     {((selectedLocation as any).administrativeHierarchy.state) && (
                       <>
                         <span className="text-slate-600">›</span>
@@ -208,9 +214,7 @@ export const Inspector: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <span>
-                    {selectedLocation.district}, {selectedLocation.state}, {(selectedLocation as any).country || ((selectedLocation as any).isWithinIndia !== false ? 'India' : 'International')}
-                  </span>
+                  <span>{selectedLocation.district}, {selectedLocation.state}, India</span>
                 )}
               </div>
               <div className="flex flex-col gap-1 text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">
@@ -318,7 +322,43 @@ export const Inspector: React.FC = () => {
                     <div className="font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
                       Nexus Hydro
                     </div>
-                    <div className="text-[10px] text-slate-400">GRACE / GRACE-FO</div>
+                    <div className="text-[10px] text-slate-400">GRACE / GRACE-FO & Piezometers</div>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+              </div>
+
+              <div
+                onClick={() => setActiveModule('soil')}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-600/30">
+                    <Sprout className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <div className="font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">
+                      Nexus Soil
+                    </div>
+                    <div className="text-[10px] text-slate-400">3D Monolith & Horizon Profile</div>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+              </div>
+
+              <div
+                onClick={() => setActiveModule('agri')}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-emerald-950/80 text-emerald-400 border border-emerald-600/30">
+                    <Wheat className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <div className="font-semibold text-slate-200 group-hover:text-emerald-300 transition-colors">
+                      Nexus Agri
+                    </div>
+                    <div className="text-[10px] text-slate-400">Crop Suitability & Borewell Advisory</div>
                   </div>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
@@ -336,7 +376,7 @@ export const Inspector: React.FC = () => {
                     <div className="font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">
                       Nexus Strata
                     </div>
-                    <div className="text-[10px] text-slate-400">Geological Layers</div>
+                    <div className="text-[10px] text-slate-400">Geological Layers & Lithology</div>
                   </div>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
@@ -354,7 +394,43 @@ export const Inspector: React.FC = () => {
                     <div className="font-semibold text-slate-200 group-hover:text-purple-300 transition-colors">
                       Nexus Mineral
                     </div>
-                    <div className="text-[10px] text-slate-400">Spectral Analysis</div>
+                    <div className="text-[10px] text-slate-400">Spectral & Deposit Analysis</div>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+              </div>
+
+              <div
+                onClick={() => setActiveModule('environment')}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-teal-950/80 text-teal-400 border border-teal-600/30">
+                    <TreePine className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <div className="font-semibold text-slate-200 group-hover:text-teal-300 transition-colors">
+                      Nexus Environment
+                    </div>
+                    <div className="text-[10px] text-slate-400">NDVI/NDWI & Industrial Audit</div>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+              </div>
+
+              <div
+                onClick={() => setActiveModule('eic')}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="p-1.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-600/30">
+                    <Network className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <div className="font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
+                      Intelligence Core (EIC)
+                    </div>
+                    <div className="text-[10px] text-slate-400">Knowledge Graph & 7-Step Fusion</div>
                   </div>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
@@ -372,11 +448,22 @@ export const Inspector: React.FC = () => {
                     <div className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors">
                       Nexus AI
                     </div>
-                    <div className="text-[10px] text-slate-400">Insight Assistant</div>
+                    <div className="text-[10px] text-slate-400">Grounded Scientific Copilot</div>
                   </div>
                 </div>
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
               </div>
+
+              <button
+                onClick={() => setShowReportModal(true, 'COMPREHENSIVE')}
+                className="mt-1 flex items-center justify-between p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 text-emerald-300 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <FileDown className="w-4 h-4 text-emerald-400" />
+                  <span className="font-semibold text-xs">Download Scientific PDF Report</span>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+              </button>
             </div>
 
             {/* TWSA Trend Mini Sparkline Chart */}

@@ -1,0 +1,933 @@
+# TERRANEXUS 4D — ULTIMATE AUTONOMOUS ENGINEERING, BUG ELIMINATION, UI/UX, NAVIGATION & LIQUID GLASS TRANSFORMATION DIRECTIVE
+
+## YOUR MISSION
+
+You are now responsible for conducting a comprehensive engineering, debugging, design and quality transformation of the existing TERRANEXUS 4D application.
+
+Your mission is NOT to create a new application, replace the existing architecture unnecessarily, or merely make superficial visual improvements.
+
+Your mission is to inspect the entire existing application, understand how every component works, identify every defect, coordinate specialised subagents, fix the actual underlying problems, refine the entire user experience and deliver a stable, visually exceptional, responsive and professionally engineered application.
+
+TERRANEXUS 4D must feel like a premium, professionally designed scientific intelligence platform — not an AI-generated website, generic SaaS dashboard, template-based admin panel or collection of disconnected components.
+
+**The final result should demonstrate exceptional engineering, deliberate visual design, consistency, functionality, performance and attention to detail.**
+
+You have permission to make necessary improvements directly to the existing codebase. Preserve working features and existing project identity. Do not unnecessarily remove, simplify or replace functionality.
+
+---
+
+# PART 1 — ESTABLISH A SPECIALISED SUBAGENT TEAM
+
+Use the available subagent, agent orchestration or parallel-task capabilities of your environment.
+
+Do not pretend that a subagent has been deployed if the environment does not support it. If subagents are unavailable, perform the same responsibilities through clearly separated review passes.
+
+First, inspect the repository and establish the actual technology stack, application architecture, component structure, dependencies, routing, state management, rendering systems and backend integration.
+
+Then delegate the following responsibilities.
+
+### SUBAGENT 1 — PRINCIPAL SOFTWARE ARCHITECT
+
+Responsibilities:
+- Understand the complete existing application architecture.
+- Inspect the frontend, backend, shared libraries and data-processing components.
+- Identify architectural weaknesses, unnecessary complexity, duplicate implementations and tightly coupled components.
+- Review component boundaries, data flow, state management and API communication.
+- Identify broken dependencies, outdated libraries and compatibility problems.
+- Evaluate maintainability, extensibility and performance.
+- Recommend improvements without unnecessarily rewriting stable systems.
+
+Deliverable: An architecture audit with specific defects, root causes, proposed corrections and implementation priorities.
+
+### SUBAGENT 2 — FRONTEND BUG HUNTER
+
+Responsibilities:
+- Inspect every frontend component and relevant source file.
+- Identify runtime errors, rendering defects, incorrect state updates, broken event handlers and asynchronous race conditions.
+- Find console errors and warnings.
+- Identify components that render incorrectly or fail under different screen sizes.
+- Check incorrect imports, missing dependencies, invalid props, undefined values and faulty conditional rendering.
+- Investigate memory leaks, unnecessary re-renders and event-listener problems.
+- Fix actual defects rather than hiding errors.
+
+Deliverable: A verified frontend defect report and implemented fixes.
+
+### SUBAGENT 3 — UI/UX DESIGN DIRECTOR
+
+Responsibilities:
+- Review the entire existing application visually and functionally.
+- Examine every screen, menu, navigation element, modal, sidebar, toolbar, panel, card, form, input, button and control.
+- Identify inconsistent spacing, poor alignment, weak hierarchy, unnecessary clutter and visual inconsistencies.
+- Identify generic AI-generated design patterns.
+- Establish a unified visual language and design system.
+- Improve typography, visual hierarchy, contrast, proportions, spacing and component consistency.
+- Ensure the Earth visualization remains the primary focal point.
+
+Deliverable: A complete design audit and implemented UI improvements.
+
+### SUBAGENT 4 — LIQUID GLASS SPECIALIST
+
+Responsibilities:
+- Design and implement a sophisticated liquid-glass visual system.
+- Develop consistent glass surfaces, depth, transparency, subtle reflections, borders, highlights and layered surfaces.
+- Ensure text and controls remain readable.
+- Avoid excessive blur and transparency.
+- Use different glass treatments according to component importance.
+- Ensure glass surfaces work over the changing Earth, satellite imagery, terrain and dark backgrounds.
+- Optimize effects to prevent rendering bottlenecks.
+
+Deliverable: A consistent, performant liquid-glass design system.
+
+### SUBAGENT 5 — MOTION DESIGN AND ANIMATION ENGINEER
+
+Responsibilities:
+- Audit every existing animation and transition.
+- Identify choppy movement, abrupt changes, inconsistent timing and broken animation states.
+- Design a complete motion system for the application.
+- Implement fluid navigation, panel transitions, menus, modals, loading states, globe interactions and micro-interactions.
+- Coordinate animation behaviour with scrolling, resizing, user input and asynchronous data loading.
+- Ensure transitions can be interrupted safely and do not produce visual glitches.
+- Optimize animation performance.
+
+Deliverable: A complete motion specification and implemented animations.
+
+### SUBAGENT 6 — NAVIGATION AND INTERACTION ENGINEER
+
+Responsibilities:
+- Review the complete navigation architecture.
+- Verify that every navigation destination works.
+- Check active, inactive, expanded, collapsed, selected and disabled states.
+- Identify confusing navigation paths and inconsistent interaction behaviour.
+- Improve transitions between modules.
+- Ensure browser back/forward behaviour, deep links and route state work correctly where applicable.
+- Verify keyboard interaction and accessibility.
+- Ensure no button or control is decorative when it is expected to perform an action.
+
+Deliverable: A fully tested navigation and interaction system.
+
+### SUBAGENT 7 — RESPONSIVENESS AND TYPOGRAPHY SPECIALIST
+
+Responsibilities:
+- Review the application across different viewport sizes and aspect ratios.
+- Check desktop, laptop, tablet and mobile layouts.
+- Identify overflow, clipping, overlapping, distorted components and inconsistent scaling.
+- Check font sizes, line heights, text wrapping, truncation and readability.
+- Verify that panels, menus, cards, tooltips, forms and controls adapt correctly.
+- Ensure the application remains usable at browser zoom levels and different display densities.
+- Prevent text and interface elements from becoming disproportionately large or small.
+
+Deliverable: A responsive-layout and typography audit with verified fixes.
+
+### SUBAGENT 8 — PERFORMANCE AND RENDERING ENGINEER
+
+Responsibilities:
+- Investigate slow rendering, excessive CPU/GPU use and unnecessary network requests.
+- Audit CesiumJS, Three.js and other rendering systems actually used by the project.
+- Investigate frame-rate drops during camera movement, globe transitions and interface animations.
+- Optimize unnecessary component re-renders.
+- Inspect texture sizes, geometry complexity, render loops, post-processing and resource disposal.
+- Identify memory leaks and excessive allocations.
+- Verify that animations remain smooth while scientific data and 3D scenes are loading.
+- Optimize without visibly degrading the quality of the Earth visualization.
+
+Deliverable: A performance report and implemented optimizations.
+
+### SUBAGENT 9 — TESTING AND QUALITY ASSURANCE ENGINEER
+
+Responsibilities:
+- Independently test the application after other agents implement changes.
+- Verify that previously working features still function.
+- Test critical user journeys.
+- Identify regressions introduced by other fixes.
+- Test navigation, forms, APIs, animations, resizing and application state.
+- Run available automated tests and build checks.
+- Create additional tests for important defects.
+- Verify actual browser behaviour rather than relying solely on code inspection.
+
+Deliverable: An independent verification report with reproducible results.
+
+### SUBAGENT 10 — INTEGRATION AND RELEASE ENGINEER
+
+Responsibilities:
+- Coordinate changes across all agents.
+- Resolve conflicting recommendations and overlapping code changes.
+- Ensure all modifications are integrated into the correct architecture.
+- Verify that shared components and design tokens remain consistent.
+- Run the final build, tests and integration checks.
+- Identify incomplete tasks and unresolved blockers.
+- Produce the final implementation report.
+
+Deliverable: A verified integrated application and a complete delivery report.
+
+---
+
+# PART 2 — MANDATORY COLLABORATION AND EXECUTION PROCESS
+
+Do not allow subagents to work independently without coordination.
+
+Follow this process:
+
+1. Conduct an initial repository-wide inspection.
+2. Establish the existing application architecture and baseline.
+3. Assign independent audits to specialised agents.
+4. Collect and consolidate their findings.
+5. Identify duplicate issues and conflicting recommendations.
+6. Establish a prioritised implementation plan.
+7. Fix critical functionality and runtime problems first.
+8. Implement the unified visual design system.
+9. Implement navigation and interaction improvements.
+10. Implement the complete animation system.
+11. Optimize rendering and responsiveness.
+12. Run independent regression testing.
+13. Fix all newly discovered defects.
+14. Perform a final visual and functional inspection.
+
+Every identified issue must have:
+- A unique issue identifier.
+- Affected component or file.
+- Reproduction steps where applicable.
+- Root cause.
+- Severity.
+- Proposed correction.
+- Implementation status.
+- Verification result.
+
+Prioritize issues as:
+- Critical: application crashes, data corruption, major feature failures.
+- High: broken navigation, unusable screens, major rendering defects.
+- Medium: interaction defects, responsive problems, significant visual inconsistencies.
+- Low: minor alignment, typography and polish issues.
+
+**Do not mark an issue fixed merely because code was changed. It must be tested.**
+
+If agents disagree, the integration engineer must investigate the actual implementation and select the technically justified solution.
+
+Do not overwrite one another's work or introduce incompatible changes.
+
+---
+
+# PART 3 — THE VISUAL IDENTITY: PREMIUM LIQUID GLASS
+
+I want a refined, sophisticated, modern liquid-glass interface.
+
+The design should feel intentional and professionally art-directed.
+
+It must not resemble:
+- Generic AI-generated dashboards.
+- Template-based SaaS websites.
+- Random collections of floating cards.
+- Excessively glowing futuristic interfaces.
+- Excessive gradients and neon outlines.
+- Interfaces where every element has the same glass effect.
+- Interfaces with unnecessary decorative icons and labels.
+- Visually cluttered control panels.
+
+### Design principles
+
+1. The 3D Earth must remain the visual centrepiece.
+2. Interface elements must support the Earth rather than compete with it.
+3. Use a restrained, space-inspired visual palette.
+4. Use depth, contrast and material differentiation.
+5. Use a consistent typography system.
+6. Use deliberate negative space.
+7. Keep navigation discoverable and intuitive.
+8. Use subtle, sophisticated visual details.
+9. Prioritize readability over decorative effects.
+10. Make the interface feel like one cohesive product.
+
+### Liquid-glass implementation
+
+Develop a reusable glass design system containing:
+
+- Primary navigation glass.
+- Secondary navigation glass.
+- Floating toolbar glass.
+- Control panel glass.
+- Information panel glass.
+- Modal and dialog glass.
+- Dropdown and popover glass.
+- Search interface glass.
+- Context menu glass.
+- Data inspector glass.
+- Notification glass.
+- Tooltip glass.
+- Floating action controls.
+
+Use appropriate combinations of:
+- Background translucency.
+- Backdrop blur.
+- Fine translucent borders.
+- Subtle inner highlights.
+- Controlled reflections.
+- Layered depth.
+- Carefully managed shadows.
+- Gentle surface gradients.
+- Appropriate corner radii.
+
+Not every surface should have identical opacity, blur or border intensity.
+
+Important: Text, numbers, icons and interactive controls must remain clear over every background.
+
+Test the glass system against:
+- Dark space backgrounds.
+- Bright satellite imagery.
+- Daytime Earth textures.
+- Night-time Earth textures.
+- Terrain and geological cutouts.
+- High-contrast data overlays.
+
+Avoid excessive blur because it can reduce performance and make the interface look muddy.
+
+Use progressive enhancement and appropriate fallbacks where browser support differs.
+
+---
+
+# PART 4 — BUILD A COMPLETE MOTION DESIGN SYSTEM
+
+I want animations throughout the application.
+
+However, I do not want random animations simply added for decoration.
+
+Every animation must have a purpose, feel natural, be consistent with the interface and maintain excellent performance.
+
+You must inspect the application and independently determine where additional animations would improve usability and visual quality.
+
+Create a central motion system with reusable timing, easing, transition and interaction rules.
+
+### A. Application entry and initial loading
+
+Implement:
+- A refined application entrance.
+- Smooth appearance of the primary interface.
+- A controlled transition from loading state to the interactive Earth.
+- Progressive appearance of navigation and controls.
+- Elegant loading indicators.
+- Smooth removal of loading overlays.
+- No sudden layout jumps when the application finishes loading.
+
+Do not delay usability with unnecessary intro animations.
+
+### B. Main navigation animations
+
+Implement:
+- Smooth active navigation indicators.
+- Fluid movement between navigation destinations.
+- Subtle selected-state transitions.
+- Animated expansion and collapse of navigation panels.
+- Smooth icon state transitions where appropriate.
+- Natural sidebar opening and closing.
+- Smooth dock or toolbar interactions.
+- Controlled hover and focus effects.
+- Smooth menu and submenu appearance.
+
+Navigation must feel responsive, not sluggish.
+
+### C. Panel and drawer animations
+
+Implement:
+- Smooth panel entrance and exit.
+- Natural expansion and collapse.
+- Fluid resizing.
+- Smooth transition between panel states.
+- Proper content appearance during expansion.
+- No sudden text reflow or visual popping.
+- Correct layering and stacking.
+- Safe interruption and reversal of animations.
+
+Panels must not obscure important Earth interactions unnecessarily.
+
+### D. Modal, dropdown and popover animations
+
+Implement:
+- Smooth appearance and disappearance.
+- Subtle scale and opacity transitions.
+- Proper background dimming where appropriate.
+- Natural dropdown expansion.
+- Smooth submenu transitions.
+- Consistent positioning and alignment.
+- Correct dismissal behaviour.
+
+Prevent menus from appearing outside the viewport or being clipped.
+
+### E. Buttons, switches and controls
+
+Implement:
+- Subtle hover responses.
+- Smooth pressed states.
+- Clear focus states.
+- Fluid toggle transitions.
+- Smooth slider movement.
+- Animated selection indicators.
+- Natural checkbox and radio transitions.
+- Responsive feedback when actions are triggered.
+
+Do not make buttons bounce excessively or scale so much that the interface feels playful or unprofessional.
+
+### F. Search and location selection
+
+Implement:
+- Smooth search-field expansion where appropriate.
+- Refined focus transitions.
+- Animated search results.
+- Smooth loading and result replacement.
+- Clear selection feedback.
+- Smooth transitions between search results and the selected location.
+- Elegant empty states and error states.
+
+Do not animate results in a way that makes rapid searching feel slow.
+
+### G. Data loading and visualization
+
+Implement:
+- Progressive data-layer appearance.
+- Smooth opacity transitions for map layers.
+- Smooth legend changes.
+- Controlled chart and graph entrance.
+- Subtle loading placeholders.
+- Smooth replacement of old data with new data.
+- Animated changes in numerical indicators where meaningful.
+- Smooth time-slider and timeline interactions.
+
+Do not animate scientific values in a way that misrepresents their meaning.
+
+### H. 3D Earth and camera interactions
+
+This is one of the most important areas.
+
+Implement and refine:
+- Smooth globe rotation.
+- Natural zoom-in and zoom-out.
+- Fluid camera movement.
+- Smooth location targeting.
+- Gentle camera easing.
+- Natural transitions between viewing altitudes.
+- Smooth activation and deactivation of geographic layers.
+- Seamless transitions between globe and regional inspection modes.
+- Smooth restoration of the global view.
+- No abrupt camera jumps.
+- No unnecessary camera shaking.
+- No sudden scene replacement.
+
+The globe should feel like a professional scientific visualization environment.
+
+### I. Signature globe-to-geological-cutout transition
+
+Give special attention to the TERRANEXUS 4D globe-to-cutout experience.
+
+The transition must:
+1. Begin from the current Earth camera position.
+2. Smoothly approach the selected geographic region.
+3. Reveal the exact geographic boundary.
+4. Highlight the selected region.
+5. Gradually separate the terrain-conforming region from the globe.
+6. Reveal its sides and available geological layers.
+7. Bring the extracted region into an inspectable position.
+8. Allow smooth rotation, zooming and inspection.
+9. Reverse naturally back into the Earth.
+10. Handle interruptions and rapid user input safely.
+
+The region must follow its actual geographic boundary rather than becoming a generic rectangular block.
+
+Maintain geographic alignment, terrain continuity and texture registration.
+
+Do not fake scientific layers or claim unavailable geological measurements.
+
+The animation must remain smooth even when the region contains complex geometry or large datasets. Use progressive loading and rendering optimizations where necessary.
+
+### J. Notifications and feedback
+
+Implement:
+- Smooth notification appearance.
+- Natural dismissal.
+- Clear success and failure feedback.
+- Animated progress indicators.
+- Subtle status transitions.
+- Smooth connection-state changes.
+- Elegant error recovery messages.
+
+Avoid excessive notification movement.
+
+### K. Scrolling and content transitions
+
+Implement:
+- Smooth scrolling where appropriate.
+- Sticky-header transitions.
+- Smooth content expansion.
+- Stable layout during content loading.
+- Controlled transitions between tab contents.
+- No unexpected scroll-position resets.
+
+### L. Micro-interactions
+
+Inspect the complete application and identify additional opportunities for subtle interactions.
+
+Examples:
+- Small changes in icon states.
+- Gentle highlight transitions.
+- Contextual hover feedback.
+- Animated information disclosure.
+- Smooth chart selection.
+- Subtle focus indicators.
+- Data-layer activation feedback.
+- Interactive 3D object selection.
+- Responsive cursor feedback.
+
+You must decide which interactions deserve animation and which should remain immediate.
+
+Do not animate every text character or every numerical update.
+
+---
+
+# PART 5 — MOTION QUALITY AND PERFORMANCE REQUIREMENTS
+
+The words "buttery smooth" must translate into measurable engineering decisions.
+
+Establish and enforce these principles:
+
+### Animation performance
+- Prefer transform and opacity animations when possible.
+- Avoid unnecessarily animating expensive layout properties.
+- Avoid excessive backdrop-filter recalculation.
+- Avoid unnecessary JavaScript-driven animation loops.
+- Use GPU-accelerated techniques appropriately.
+- Avoid creating unnecessary rendering layers.
+- Keep animation code isolated and reusable.
+- Cancel or clean up animations when components unmount.
+- Avoid memory leaks.
+- Avoid conflicting animation systems.
+- Coordinate animations with the rendering engine.
+
+### Timing and easing
+
+Establish a coherent motion language.
+
+Use short, responsive transitions for controls and longer, smoother transitions for major navigation and spatial movements.
+
+Choose easing based on the movement:
+- Ease-out for entering elements.
+- Ease-in for exiting elements.
+- Ease-in-out for state changes and spatial movement.
+- Spring-like movement only where it feels appropriate.
+- Linear movement for continuous processes that should represent uniform progression.
+
+Treat the following as starting points, not universal fixed values:
+
+- Micro-interactions: approximately 100–180 ms.
+- Button and control feedback: approximately 120–220 ms.
+- Dropdowns and popovers: approximately 160–240 ms.
+- Panel transitions: approximately 200–350 ms.
+- Major navigation transitions: approximately 250–450 ms.
+- Cinematic geographic transitions: determined by distance, geometry, loading and user interaction.
+
+The animation must not feel slow merely because a longer duration has been chosen.
+
+### Frame-rate targets
+
+Aim for:
+- 60 FPS on supported standard displays.
+- 120 FPS where hardware and display support make it practical.
+- No avoidable frame drops during ordinary UI interactions.
+- Graceful quality adaptation on lower-performance devices.
+
+Measure actual frame behaviour instead of claiming these targets were achieved without testing.
+
+### Accessibility
+
+Respect the operating system's reduced-motion preference.
+
+Provide an appropriate reduced-motion experience:
+- Remove unnecessary decorative movement.
+- Reduce large camera and panel movements.
+- Preserve essential interaction feedback.
+- Avoid flashing and disorienting effects.
+
+Animation must never be required to understand the interface.
+
+---
+
+# PART 6 — RESPONSIVE SCALING AND TYPOGRAPHY
+
+This is a mandatory quality requirement.
+
+I do not want text, buttons, panels, controls or icons to become distorted at different screen sizes.
+
+Audit every screen and fix:
+
+- Text clipping.
+- Text overlapping.
+- Incorrect line wrapping.
+- Unexpected font resizing.
+- Inconsistent typography.
+- Tiny unreadable labels.
+- Oversized headings.
+- Buttons with distorted dimensions.
+- Icons that appear stretched.
+- Incorrectly scaled charts.
+- Panels extending outside the viewport.
+- Modal overflow.
+- Dropdown clipping.
+- Incorrect sidebar dimensions.
+- Broken responsive layouts.
+- Horizontal scrolling where it is not intended.
+- Elements overlapping the globe.
+- Incorrect spacing at different resolutions.
+
+### Typography system
+
+Create a consistent typography scale.
+
+Define:
+- Display typography.
+- Page titles.
+- Section headings.
+- Panel headings.
+- Body text.
+- Secondary text.
+- Labels.
+- Captions.
+- Numeric data.
+- Scientific measurements.
+- Buttons and controls.
+
+Use appropriate font weights, line heights, letter spacing and text contrast.
+
+Ensure numeric data is easy to scan.
+
+Scientific measurements must remain legible and must not be truncated in a way that changes their meaning.
+
+### Responsive layout
+
+Test at a range of realistic viewport dimensions, including:
+
+- 1920 × 1080.
+- 1600 × 900.
+- 1440 × 900.
+- 1366 × 768.
+- 1280 × 720.
+- 1024 × 768.
+- 768 × 1024.
+- 390 × 844.
+
+Also test browser zoom and different display scaling settings.
+
+These are test cases, not a restriction on supported dimensions.
+
+Use appropriate fluid sizing, responsive breakpoints, flexible containers and overflow handling.
+
+Do not simply shrink the desktop interface to fit mobile. Reorganize the layout appropriately.
+
+---
+
+# PART 7 — NAVIGATION AND USER EXPERIENCE RECONSTRUCTION
+
+Review the complete navigation system.
+
+Determine whether the existing structure is intuitive for a scientific intelligence platform.
+
+Audit:
+- Primary navigation.
+- Secondary navigation.
+- Module navigation.
+- Floating toolbars.
+- Contextual actions.
+- Search.
+- Settings.
+- Location selection.
+- Data-layer selection.
+- Analysis panels.
+- Information panels.
+- Dialogs and menus.
+
+Every navigation element must have:
+- A clear purpose.
+- A consistent interaction pattern.
+- A meaningful active state.
+- A working destination or action.
+- Appropriate keyboard accessibility.
+- Proper responsive behaviour.
+
+Do not add navigation elements merely to make the interface look more complicated.
+
+Reduce unnecessary navigation depth and avoid hiding important features behind confusing menus.
+
+Preserve access to the existing TERRANEXUS 4D modules, including its Earth exploration and scientific intelligence capabilities.
+
+Verify that moving between modules does not unnecessarily reset the selected location, camera state, active data layers or relevant analysis context.
+
+Where state should persist, preserve it correctly. Where state should reset, make that behaviour deliberate and consistent.
+
+---
+
+# PART 8 — COMPLETE FUNCTIONALITY AUDIT
+
+Inspect every existing feature and control.
+
+For each one, verify:
+1. Does it appear correctly?
+2. Does it respond to user input?
+3. Does it perform the correct action?
+4. Does it update application state correctly?
+5. Does it communicate with the correct service or API?
+6. Does it handle loading?
+7. Does it handle errors?
+8. Does it behave correctly when data is missing?
+9. Does it work after navigation?
+10. Does it work at different screen sizes?
+
+Investigate:
+- Broken search.
+- Failed location selection.
+- Missing geographic results.
+- Broken module navigation.
+- Nonfunctional buttons.
+- Incorrect data-layer activation.
+- Broken filters.
+- Incorrect charts.
+- Failed API requests.
+- Stale state.
+- Incorrect loading indicators.
+- Broken modals.
+- Broken dropdowns.
+- Missing tooltips.
+- Failed report generation.
+- Broken AI interactions.
+- Rendering defects.
+- Console errors.
+- Network errors.
+- Type errors.
+- Build errors.
+
+Do not create fake data or placeholder responses to hide broken integrations.
+
+If a feature depends on an unavailable API or credential, clearly identify the dependency and provide a graceful error state.
+
+---
+
+# PART 9 — CODE QUALITY AND TECHNICAL CLEANUP
+
+Inspect the actual project before changing the architecture.
+
+Where justified:
+- Remove dead code.
+- Remove duplicate components.
+- Fix incorrect imports.
+- Fix invalid dependencies.
+- Improve type safety.
+- Resolve inconsistent state management.
+- Improve error handling.
+- Remove unnecessary rendering work.
+- Fix event-listener cleanup.
+- Improve component reusability.
+- Centralize design tokens.
+- Centralize motion tokens.
+- Improve API error handling.
+- Improve loading-state management.
+- Add appropriate tests.
+- Improve code organization.
+
+Do not:
+- Rewrite everything just to make the code look different.
+- Replace stable libraries without a clear reason.
+- Remove useful existing functionality.
+- Introduce unnecessary dependencies.
+- Hardcode secrets.
+- Disable linting or type checks to hide problems.
+- Suppress errors without fixing their causes.
+- Make unverified claims about integrations.
+
+---
+
+# PART 10 — VISUAL REGRESSION AND AUTOMATED TESTING
+
+The quality assurance agent must independently verify the application.
+
+Use available browser preview, browser automation, screenshots, terminal, testing tools and debugging facilities.
+
+Test:
+- Initial application loading.
+- Every primary navigation destination.
+- Every module.
+- Search and location selection.
+- Panel opening and closing.
+- Modal and dropdown interactions.
+- Globe camera movement.
+- Geographic selection.
+- Globe-to-cutout transition.
+- Cutout-to-globe transition.
+- Data-layer switching.
+- Charts and timelines.
+- Forms and controls.
+- Error states.
+- Loading states.
+- Empty states.
+- Browser resizing.
+- Browser zoom.
+- Reduced-motion mode.
+- Keyboard navigation.
+
+Capture before-and-after screenshots for important screens.
+
+Compare visual consistency across screen sizes.
+
+Check for:
+- Layout shifts.
+- Text clipping.
+- Misaligned controls.
+- Inconsistent glass surfaces.
+- Animation flickering.
+- Incorrect z-index.
+- Broken scroll behaviour.
+- Unresponsive controls.
+- Performance regressions.
+
+Run available:
+- TypeScript checks.
+- Lint checks.
+- Unit tests.
+- Integration tests.
+- Build checks.
+- Browser tests.
+- Rendering and performance checks.
+
+Add tests for critical defects where practical.
+
+A successful build does not automatically mean the application works correctly.
+
+---
+
+# PART 11 — FINAL ACCEPTANCE CRITERIA
+
+Do not consider this assignment complete until the following requirements have been addressed and verified.
+
+### Engineering
+- [ ] Existing architecture inspected.
+- [ ] All critical defects identified.
+- [ ] Root causes investigated.
+- [ ] Critical and high-severity bugs fixed.
+- [ ] No new critical regressions.
+- [ ] Type and build checks pass.
+- [ ] Available automated tests pass.
+
+### Design
+- [ ] Cohesive premium liquid-glass design.
+- [ ] No generic AI-dashboard appearance.
+- [ ] Consistent typography.
+- [ ] Consistent spacing and alignment.
+- [ ] Clear visual hierarchy.
+- [ ] Earth remains the main focal point.
+- [ ] Controls are readable and discoverable.
+
+### Animation
+- [ ] Unified motion system.
+- [ ] Smooth navigation transitions.
+- [ ] Smooth panel and modal transitions.
+- [ ] Responsive control feedback.
+- [ ] Smooth data-layer transitions.
+- [ ] Refined globe camera movement.
+- [ ] Smooth globe-to-cutout transition.
+- [ ] Smooth reverse transition.
+- [ ] No avoidable flickering or choppy movement.
+- [ ] Reduced-motion support.
+
+### Responsiveness
+- [ ] Desktop verified.
+- [ ] Laptop verified.
+- [ ] Tablet verified.
+- [ ] Mobile layout verified where supported.
+- [ ] Browser zoom checked.
+- [ ] No unintended overflow.
+- [ ] No clipped or overlapping text.
+- [ ] Correct scaling of interface elements.
+
+### Functionality
+- [ ] All primary navigation works.
+- [ ] All visible controls work.
+- [ ] Location search tested.
+- [ ] Existing modules tested.
+- [ ] Data loading and error states tested.
+- [ ] AI interactions tested where configured.
+- [ ] No decorative controls pretending to be functional.
+
+### Performance
+- [ ] No avoidable memory leaks.
+- [ ] No unnecessary animation loops.
+- [ ] Rendering performance measured.
+- [ ] Major transitions tested under realistic load.
+- [ ] Appropriate performance fallbacks implemented.
+
+---
+
+# PART 12 — FINAL REPORT AND HANDOVER
+
+At completion, provide a detailed report containing:
+
+1. The actual architecture discovered.
+2. The subagents used and their responsibilities.
+3. Every major issue identified.
+4. Root causes of critical defects.
+5. Bugs fixed.
+6. UI improvements implemented.
+7. Liquid-glass components created or improved.
+8. Animations implemented.
+9. Navigation changes.
+10. Responsiveness improvements.
+11. Performance improvements.
+12. Tests executed and their actual results.
+13. Remaining defects or limitations.
+14. Features blocked by missing credentials, APIs or external dependencies.
+15. Files and components significantly modified.
+16. Final build status.
+
+Clearly distinguish:
+- Implemented and tested.
+- Implemented but not fully verified.
+- Investigated but not fixed.
+- Blocked by external dependencies.
+- Recommended for future work.
+
+Do not fabricate successful tests, performance figures, screenshots or implementation results.
+
+If a test fails, investigate and fix it where possible. If it cannot be fixed, explain why.
+
+---
+
+# FINAL DIRECTIVE
+
+I want you to approach TERRANEXUS 4D as a principal engineering team building a serious, premium scientific software product.
+
+Do not settle for a superficial redesign.
+
+Do not simply add blur to existing cards and call it liquid glass.
+
+Do not randomly animate interface elements.
+
+Do not sacrifice scientific functionality for appearance.
+
+Do not sacrifice performance for visual effects.
+
+Do not sacrifice readability for transparency.
+
+Do not sacrifice stable functionality for unnecessary architectural changes.
+
+**Think independently. Inspect deeply. Identify problems I may not have noticed. Use specialised agents to challenge and verify one another's work. Make technically justified improvements.**
+
+You have creative freedom to identify additional design improvements, interaction patterns, animations and engineering optimizations that I have not explicitly listed.
+
+If you identify an improvement that would materially change the application's behaviour or remove an existing feature, evaluate its impact before implementing it.
+
+The final experience should feel:
+
+- Premium.
+- Minimal.
+- Sophisticated.
+- Scientifically credible.
+- Visually coherent.
+- Exceptionally responsive.
+- Fluid and natural.
+- Intuitive.
+- Technically reliable.
+- Beautiful without being unnecessarily decorative.
+
+**The objective is not to make TERRANEXUS 4D look like an AI made it. The objective is to make it look and behave like an exceptional product designed, engineered and quality-tested by a world-class software, design and motion-engineering team.**
+
+Begin with the complete audit, then execute the improvements systematically. Continue through implementation and verification rather than stopping after producing a plan.

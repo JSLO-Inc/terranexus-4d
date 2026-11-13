@@ -8,6 +8,10 @@ import {
   SlidersHorizontal,
   Clock,
   Droplets,
+  Sprout,
+  Trees,
+  Network,
+  FlaskConical,
   PanelLeftClose,
   PanelLeftOpen
 } from 'lucide-react';
@@ -35,52 +39,76 @@ export const Navigation: React.FC = () => {
       id: 'globe',
       label: '4D Digital Twin',
       subtitle: 'Globe & 3D Cutout',
-      icon: <Globe className="w-5 h-5 shrink-0" />
+      icon: <Globe className="w-4 h-4 shrink-0" />
     },
     {
       id: 'hydro',
       label: 'Nexus Hydro',
       subtitle: 'Aquifers & GRACE',
-      icon: <Droplets className="w-5 h-5 shrink-0" />
+      icon: <Droplets className="w-4 h-4 shrink-0" />
     },
     {
       id: 'strata',
       label: 'Nexus Strata',
       subtitle: 'GSI Lithology Logs',
-      icon: <Layers className="w-5 h-5 shrink-0" />
+      icon: <Layers className="w-4 h-4 shrink-0" />
     },
     {
       id: 'mineral',
       label: 'Nexus Mineral',
       subtitle: 'Spectral & Belts',
-      icon: <SlidersHorizontal className="w-5 h-5 shrink-0" />
+      icon: <SlidersHorizontal className="w-4 h-4 shrink-0" />
+    },
+    {
+      id: 'soil',
+      label: 'Nexus Soil',
+      subtitle: 'Horizons & SoilGrids',
+      icon: <FlaskConical className="w-4 h-4 shrink-0" />
+    },
+    {
+      id: 'agri',
+      label: 'Nexus Agri',
+      subtitle: 'Crops & Borewell',
+      icon: <Sprout className="w-4 h-4 shrink-0" />
+    },
+    {
+      id: 'environment',
+      label: 'Nexus Environment',
+      subtitle: 'NDVI & Causation Audit',
+      icon: <Trees className="w-4 h-4 shrink-0" />
+    },
+    {
+      id: 'eic',
+      label: 'Intelligence Core',
+      subtitle: 'Knowledge Graph & Fusion',
+      icon: <Network className="w-4 h-4 shrink-0" />
     },
     {
       id: 'time',
       label: 'Timeline & Cycles',
       subtitle: '2014–2024 Epochs',
-      icon: <Clock className="w-5 h-5 shrink-0" />
+      icon: <Clock className="w-4 h-4 shrink-0" />
     },
     {
       id: 'ai',
       label: 'Nexus AI Copilot',
       subtitle: 'Grounded Reasoning',
-      icon: <Sparkles className="w-5 h-5 shrink-0" />
+      icon: <Sparkles className="w-4 h-4 shrink-0" />
     },
     {
       id: 'catalog',
       label: 'Data Pedigree',
       subtitle: 'Sources & Licences',
-      icon: <Database className="w-5 h-5 shrink-0" />
+      icon: <Database className="w-4 h-4 shrink-0" />
     }
   ];
 
-  // Global Keyboard shortcuts: Alt+1..7 or 1..7 when not in input
+  // Global Keyboard shortcuts: 1..9 when not in input
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) return;
       const keyNum = parseInt(e.key, 10);
-      if (keyNum >= 1 && keyNum <= railItems.length) {
+      if (keyNum >= 1 && keyNum <= Math.min(9, railItems.length)) {
         const item = railItems[keyNum - 1];
         if (item) {
           setActiveModule(item.id);
@@ -107,10 +135,10 @@ export const Navigation: React.FC = () => {
       aria-label="Subsurface Intelligence Workstations"
       className={`hidden md:flex ${
         isExpanded ? 'w-52' : 'w-16'
-      } shrink-0 h-full border-r border-white/10 liquid-glass-elevated py-3 flex-col justify-between items-center z-20 select-none transition-all duration-200`}
+      } shrink-0 h-full border-r border-white/10 liquid-glass-elevated py-2.5 flex-col justify-between items-center z-20 select-none transition-all duration-200`}
     >
       {/* Top Module Icons & Labels Rail */}
-      <div className="flex flex-col gap-1.5 w-full px-2" role="tablist">
+      <div className="flex flex-col gap-1 w-full px-2 overflow-y-auto flex-1 min-h-0" role="tablist">
         {railItems.map((item, index) => {
           const isActive = activeModule === item.id;
           return (

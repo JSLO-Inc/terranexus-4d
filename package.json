@@ -26,7 +26,8 @@
     "test:defaults": "tsx test/test-default-landing-and-persistence.ts",
     "test:gemini-streaming": "tsx test/test-gemini-streaming-and-offline.ts",
     "test:api-registry": "tsx test/test-api-registry-and-operations.ts",
-    "test:all": "tsx test/test-system.ts && tsx test/test-ingestion.ts && tsx test/test-nasa-pipeline.ts && tsx test/test-api-routes.ts && tsx test/test-phase4-suite.ts && tsx test/test-phase5-suite.ts && tsx test/test-national-data-security.ts && tsx test/test-cutaway-geology.ts && tsx test/test-cesium-lifecycle.ts && tsx test/test-cesium-zero-width-guard.ts && tsx test/test-geospatial-accuracy-and-integrity.ts && tsx test/test-photorealistic-cutaway.ts && tsx test/test-location-evidence-engine.ts && tsx test/test-carto-basemap-integration.ts && tsx test/test-debiasing-and-global-coverage.ts && tsx test/test-default-landing-and-persistence.ts && tsx test/test-gemini-streaming-and-offline.ts && tsx test/test-api-registry-and-operations.ts",
+    "test:eic": "tsx test/test-eic-core.ts",
+    "test:all": "tsx test/test-system.ts && tsx test/test-ingestion.ts && tsx test/test-nasa-pipeline.ts && tsx test/test-api-routes.ts && tsx test/test-phase4-suite.ts && tsx test/test-phase5-suite.ts && tsx test/test-national-data-security.ts && tsx test/test-cutaway-geology.ts && tsx test/test-cesium-lifecycle.ts && tsx test/test-cesium-zero-width-guard.ts && tsx test/test-geospatial-accuracy-and-integrity.ts && tsx test/test-photorealistic-cutaway.ts && tsx test/test-location-evidence-engine.ts && tsx test/test-carto-basemap-integration.ts && tsx test/test-debiasing-and-global-coverage.ts && tsx test/test-default-landing-and-persistence.ts && tsx test/test-gemini-streaming-and-offline.ts && tsx test/test-api-registry-and-operations.ts && tsx test/test-eic-core.ts",
     "bkp:screenshots": "tsx scripts/backup-screenshots.ts",
     "check:env": "tsx scripts/check-config.ts",
     "preview": "vite preview"
@@ -39,6 +40,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "gsap": "^3.15.1",
     "lucide-react": "^0.460.0",
     "maplibre-gl": "^4.7.1",
     "react": "^18.3.1",

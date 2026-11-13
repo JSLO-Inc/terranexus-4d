@@ -1,0 +1,1067 @@
+# TERRANEXUS 4D — THE ULTIMATE AUTONOMOUS PRODUCT TRANSFORMATION DIRECTIVE
+## COMPLETE APPLICATION PERFECTION • CINEMATIC EARTH EXTRACTION • WORLD-CLASS LIQUID GLASS DESIGN • ADVANCED ANIMATION ENGINEERING • MULTI-AGENT DEVELOPMENT • TOTAL FUNCTIONALITY
+
+---
+
+# 0. YOUR ROLE AND THE FINAL OBJECTIVE
+
+You are not being asked to make a few UI improvements.
+
+You are being entrusted with the complete refinement, engineering, redesign, optimization and quality transformation of **TERRANEXUS 4D**.
+
+Act as an elite multidisciplinary product engineering organization consisting of:
+
+- Principal software architect.
+- Senior frontend engineer.
+- Senior backend engineer.
+- Scientific visualization engineer.
+- CesiumJS and 3D geospatial specialist.
+- Three.js and WebGL/WebGPU specialist.
+- Motion design director.
+- Liquid-glass UI designer.
+- Interaction designer.
+- GIS and geospatial data engineer.
+- Scientific data validation specialist.
+- AI integration engineer.
+- Performance engineer.
+- Accessibility specialist.
+- Cybersecurity engineer.
+- QA and automated testing engineer.
+
+Your objective is to transform the existing TERRANEXUS 4D application into an exceptionally beautiful, scientifically credible, technically sophisticated and genuinely functional global Earth intelligence platform.
+
+The final experience should feel like a product designed by an outstanding combination of world-class software engineers, scientific visualization specialists and award-winning interface designers.
+
+I want the application to be visually extraordinary, but never at the expense of scientific accuracy or functionality.
+
+**Every existing feature must be inspected, refined and tested. Every possible improvement must be implemented. Every incomplete feature must be advanced as far as the available resources and dependencies permit.**
+
+Do not settle for an acceptable result when a substantially better result is achievable.
+
+---
+
+# 1. FIRST: DISCOVER AND USE EVERY AVAILABLE DEVELOPMENT CAPABILITY
+
+Before beginning implementation, inspect the actual capabilities available in your current Google AI Studio environment.
+
+I explicitly authorize you to make full use of the development capabilities that are genuinely available to you.
+
+Investigate:
+
+- Available AI models.
+- Agentic coding capabilities.
+- Subagents or specialist agents.
+- Parallel task execution.
+- Project-wide code understanding.
+- File inspection and editing.
+- Terminal or command execution, if available.
+- Browser preview and interaction testing, if available.
+- Available design and prototyping tools.
+- Image and visual reference analysis.
+- Animation and rendering libraries.
+- Package and dependency management.
+- Existing project integrations.
+- Available testing frameworks.
+- Build and debugging tools.
+- Any supported external development tools or connected services.
+
+## Multi-agent execution strategy
+
+If the environment supports subagents or parallel agents, use them intelligently.
+
+Create specialist workstreams such as:
+
+**Agent 1 — Principal Architect**
+- Inspect the complete architecture.
+- Identify technical weaknesses.
+- Design the implementation plan.
+- Review changes made by other agents.
+
+**Agent 2 — Liquid Glass UI Specialist**
+- Inspect every screen.
+- Establish a consistent design system.
+- Improve all panels, controls, typography and layouts.
+- Implement the premium liquid-glass treatment.
+
+**Agent 3 — Motion Design and Animation Specialist**
+- Design a unified motion system.
+- Improve every transition.
+- Engineer the globe-to-cutout extraction animation.
+- Eliminate abrupt and unnatural movement.
+
+**Agent 4 — 3D Earth and Geospatial Specialist**
+- Improve terrain rendering.
+- Improve globe navigation.
+- Engineer natural geographical extraction.
+- Improve cross-section geometry and 3D interaction.
+
+**Agent 5 — Application Functionality Specialist**
+- Inspect every existing feature.
+- Find broken workflows.
+- Repair state management, controls, navigation and integrations.
+- Verify real functionality.
+
+**Agent 6 — Nexus AI and Scientific Data Specialist**
+- Inspect AI behaviour.
+- Improve data grounding.
+- Verify scientific data pipelines.
+- Improve source attribution and uncertainty communication.
+
+**Agent 7 — Performance and Security Specialist**
+- Inspect memory usage.
+- Optimize rendering.
+- Find security weaknesses.
+- Review dependencies and application stability.
+
+**Agent 8 — Independent QA Specialist**
+- Test all major features.
+- Identify regressions.
+- Compare visual results against the design requirements.
+- Report failures honestly.
+
+These are specialist responsibilities, not permission to create artificial or disconnected implementations.
+
+If parallel agents are unavailable, simulate these specialist roles systematically within your own workflow.
+
+If the environment offers a better orchestration capability, use it.
+
+Do not claim that you used subagents, external software or tools unless you actually did.
+
+## Coordination requirements
+
+- Establish one shared implementation plan.
+- Establish one consistent design system.
+- Ensure all agents work on the same application architecture.
+- Avoid conflicting modifications.
+- Assign clear file and module responsibilities.
+- Integrate work carefully.
+- Review the combined implementation.
+- Run regression tests after integration.
+
+Do not allow individual agents to independently redesign the same application using inconsistent styles.
+
+---
+
+# 2. COMPLETE CODEBASE INTELLIGENCE AND REPAIR
+
+Inspect the existing project before changing it.
+
+Review every relevant source-code file and understand its dependencies and relationships.
+
+Inspect:
+
+- Application architecture.
+- Frontend.
+- Backend.
+- API services.
+- Database interactions.
+- State management.
+- Routing.
+- UI components.
+- 3D rendering engine.
+- Scientific data pipelines.
+- AI integration.
+- Animation system.
+- Build configuration.
+- Dependencies.
+- Tests.
+- Error handling.
+- Environment configuration.
+
+Identify:
+
+- Broken functionality.
+- Incomplete functionality.
+- Misleading interface elements.
+- Duplicate logic.
+- Unnecessary dependencies.
+- Memory leaks.
+- Rendering inefficiencies.
+- Incorrect API handling.
+- State synchronization problems.
+- Inconsistent design.
+- Accessibility issues.
+- Security vulnerabilities.
+- Runtime errors.
+- Unhandled edge cases.
+
+Do not assume that a feature is implemented simply because its button or panel exists.
+
+Test its actual behaviour.
+
+Do not unnecessarily replace the existing architecture. Preserve stable functionality and improve it intelligently.
+
+---
+
+# 3. THE MOST IMPORTANT REQUIREMENT: THE ULTIMATE GLOBE-TO-CUTOUT TRANSITION
+
+## THIS IS A CRITICAL SIGNATURE FEATURE OF TERRANEXUS 4D.
+
+I want the transition between 3D GLOBE and 3D CUTOUT to become one of the most visually impressive, natural and technically sophisticated experiences in the entire application.
+
+Understand the exact intended effect:
+
+**A real geographical region must appear to be physically extracted from the surface of the Earth and brought forward for detailed inspection.**
+
+This must not be implemented as:
+
+- A normal camera zoom.
+- A simple transition between two screens.
+- A rectangular terrain block appearing suddenly.
+- A generic 3D cube.
+- A static image.
+- A separate model that does not correspond to the selected globe location.
+- A sudden replacement of the globe with a cutout.
+- A fake animation hiding geometry changes.
+
+I want a continuous transformation.
+
+## 3.1 The intended cinematic sequence
+
+When a user selects a location and switches to 3D CUTOUT:
+
+**Stage 1 — Geographic selection**
+
+- The user selects an actual geographic location.
+- Its geographic boundary is identified.
+- The globe highlights the selected region.
+- The selected region remains geographically registered to the Earth.
+- A subtle selection effect communicates which region is being extracted.
+
+**Stage 2 — Cinematic camera approach**
+
+- The camera begins a smooth, controlled approach.
+- The selected region gradually becomes the visual focus.
+- The camera maintains a natural perspective.
+- The atmosphere, terrain and lighting remain visually coherent.
+- The movement must not cause disorientation.
+
+**Stage 3 — Boundary isolation**
+
+- The actual selected geographic polygon becomes visually distinct.
+- Its perimeter receives a refined highlight.
+- The terrain inside the selected boundary remains visible.
+- The boundary must follow real geographic geometry.
+- Avoid artificial rectangular selection edges unless the user explicitly selects a rectangular region.
+
+**Stage 4 — Physical extraction begins**
+
+This is the most important moment.
+
+The selected region should visually separate from the Earth's surface.
+
+Create the impression that the geographical area is being gently lifted out of the globe.
+
+The movement must communicate actual spatial separation.
+
+- The selected terrain should retain its geographic shape.
+- The surrounding Earth should remain visible.
+- The extracted region must stay aligned with its original location during the initial separation.
+- A natural gap should gradually become visible.
+- The extraction should be gradual and continuous.
+- The terrain surface must not suddenly change.
+- The selected region must not visibly detach through a crude scaling operation.
+
+**Stage 5 — Natural subsurface reveal**
+
+As the region rises, the exposed edges and underside should reveal an appropriate geological cross-section.
+
+The cutout must have:
+
+- Natural irregular geographical boundaries.
+- Realistic terrain elevation.
+- Terrain-conforming geometry.
+- Realistic surface materials.
+- Natural edge profiles.
+- Geological layers where data supports them.
+- Scientifically appropriate subsurface representation.
+- Realistic depth and lighting.
+
+The cross-section must follow the selected geographical region instead of becoming an unrelated rectangular block.
+
+**Stage 6 — Foreground presentation**
+
+The extracted region gradually moves into a comfortable inspection position.
+
+The camera transitions naturally into a suitable viewing angle.
+
+The globe remains present as geographic context.
+
+The extracted piece becomes the central 3D inspection object.
+
+The user should immediately understand that this is the same location that was selected on the globe.
+
+**Stage 7 — Final inspection state**
+
+The user can:
+
+- Rotate the extracted region.
+- Zoom in and out.
+- Inspect the terrain.
+- Examine the exposed sides.
+- View geological layers where supported.
+- Activate scientific layers.
+- Inspect available measurements.
+- Change visualization settings.
+- Select different locations.
+- Switch between supported cross-section views.
+
+**Stage 8 — Reverse extraction**
+
+When the user returns to 3D GLOBE:
+
+- The extracted region returns to its original geographic position.
+- Its shape and alignment remain consistent.
+- The gap closes naturally.
+- The surrounding Earth reconnects visually.
+- The camera transitions smoothly back to its globe position.
+- The original globe state is restored.
+
+The reverse animation must be as polished as the extraction itself.
+
+## 3.2 Technical implementation requirements
+
+Do not achieve this effect using only CSS transforms or camera movement.
+
+Investigate the actual 3D rendering architecture and implement the most appropriate technical solution.
+
+Evaluate the following approaches where compatible with the existing project:
+
+- Geographic polygon clipping.
+- Terrain mesh extraction.
+- Terrain-conforming mesh generation.
+- Dynamic mesh separation.
+- Custom vertex and fragment shaders.
+- GPU-based deformation.
+- Custom geometry generation.
+- Depth-aware rendering.
+- Texture preservation.
+- Procedural edge geometry.
+- Physically coherent lighting.
+- Smooth camera interpolation.
+- Scene graph transformations.
+- Geographic coordinate transformations.
+- Cesium terrain and 3D Tiles integration.
+- Three.js custom geometry and shader techniques.
+- WebGL or WebGPU techniques where supported.
+
+Choose the architecture that produces the best result without destabilizing the existing application.
+
+Do not introduce a new rendering engine merely for novelty.
+
+If using CesiumJS and Three.js together, ensure their coordinate systems, camera transformations, scale, orientation and geographic registration are handled correctly.
+
+Prevent:
+
+- Floating-point precision problems.
+- Terrain misalignment.
+- Texture stretching.
+- Visible polygon cracks.
+- Z-fighting.
+- Geometry popping.
+- Sudden scale changes.
+- Inconsistent lighting.
+- Missing surfaces.
+- Camera discontinuities.
+- Memory leaks.
+
+## 3.3 The animation must feel physically continuous
+
+Create a dedicated animation state machine.
+
+For example:
+
+- GLOBE_IDLE
+- LOCATION_SELECTED
+- CAMERA_APPROACH
+- REGION_HIGHLIGHTED
+- EXTRACTION_START
+- EXTRACTION_IN_PROGRESS
+- SUBSURFACE_REVEAL
+- FOREGROUND_TRANSITION
+- CUTOUT_READY
+- RETURN_IN_PROGRESS
+- GLOBE_RESTORED
+
+Transitions must be interruptible or safely queued where appropriate.
+
+If the user changes locations or switches modes during an animation, the application must not enter an inconsistent state.
+
+Use appropriate easing, interpolation and timing.
+
+Evaluate physically inspired motion rather than applying arbitrary easing to every object.
+
+The region should initially move with controlled acceleration, lift naturally and settle smoothly.
+
+Avoid bounce effects unless they genuinely improve the physical impression.
+
+The movement must feel cinematic, deliberate and sophisticated.
+
+## 3.4 Visual quality references
+
+Study these references for visual inspiration and technical direction:
+
+1. https://www.sicilyactive.com/sites/default/files/blog/sicily_active_High-resolution_geological_cross-section_of_Valle_del_bove_.png
+
+2. https://cgconnect.chaos.com/rails/active_storage/representations/proxy/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNHhXQVE9PSIsImV4cCI6bnVsbCwicHVyIjoibG9iX2lkIn19--2e93fcd3df1e80a723c8bbac251bd4c36eea42b3/aa342bcc.jpg
+
+3. https://www.geomodelle.com/images/Block%20Model03.jpg
+
+4. https://ecweb.ecer.com/news-img/a5d8f32843d909a1b4fd0ac03d5a1063.webp
+
+5. https://cesium.com/blog/2018/04/25/cesium-world-terrain-canada/
+
+6. https://www.maptiler.com/terrain/
+
+Technical documentation:
+
+- https://cesium.com/learn/cesiumjs-learn/cesiumjs-terrain/
+- https://cesium.com/learn/3d-tiling/ion-tile-terrain/
+- https://cesium.com/platform/cesium-ion/3d-tiling-pipeline/terrain/
+
+The goal is to achieve the visual sophistication, realistic terrain and geological presentation of the references.
+
+Do not copy the geology of the reference images and present it as the actual selected location.
+
+Scientific correctness takes priority over visual imitation.
+
+## 3.5 Important data limitation
+
+The Earth's surface can be visualized using available terrain data, but detailed underground geological information is not uniformly available.
+
+Never invent geological layers or precise underground measurements.
+
+Where data is available, render it accurately.
+
+Where data is incomplete, distinguish measured information from generalized geological interpretation or conceptual visualization.
+
+Make the difference clear to users.
+
+---
+
+# 4. CREATE A WORLD-CLASS LIQUID-GLASS DESIGN SYSTEM
+
+I want the entire application to have a unified, exceptionally refined liquid-glass visual identity.
+
+Do not create a random collection of glass cards.
+
+Design a coherent interface language.
+
+## Visual direction
+
+The application should feel like a premium next-generation scientific instrument.
+
+Use:
+
+- Elegant translucent surfaces.
+- Controlled background blur.
+- Layered glass depth.
+- Subtle light reflections.
+- Fine edge highlights.
+- Soft shadows.
+- Carefully controlled transparency.
+- Refined contrast.
+- Consistent rounded geometry.
+- Professional typography.
+- Minimal visual noise.
+
+Avoid:
+
+- Excessive glowing effects.
+- Overuse of gradients.
+- Unnecessary neon borders.
+- Excessive glass panels.
+- Unreadable translucent text.
+- Giant empty cards.
+- Inconsistent spacing.
+- Unnecessary decorative icons.
+- Overly complicated navigation.
+
+## Create reusable design tokens
+
+Define consistent variables for:
+
+- Colours.
+- Typography.
+- Spacing.
+- Radius.
+- Shadows.
+- Blur.
+- Transparency.
+- Borders.
+- Elevation.
+- Motion duration.
+- Easing curves.
+- Component dimensions.
+
+All modules must use the same design language.
+
+---
+
+# 5. REBUILD THE ENTIRE MOTION DESIGN SYSTEM
+
+Animations are not optional decorations.
+
+They are an essential part of the user experience.
+
+Create a unified animation architecture for the complete application.
+
+Improve:
+
+- Page transitions.
+- Module transitions.
+- Panel expansion.
+- Panel collapse.
+- Navigation.
+- Dropdown menus.
+- Dialogs.
+- Search suggestions.
+- Location selection.
+- Layer activation.
+- Dataset switching.
+- Chart updates.
+- AI response appearance.
+- Loading indicators.
+- Notifications.
+- Hover effects.
+- Press feedback.
+- Globe movement.
+- Cutout extraction.
+- Cutout rotation.
+- Camera transitions.
+
+Use appropriate tools already compatible with the project.
+
+Investigate options such as:
+
+- Framer Motion or Motion.
+- GSAP.
+- React Spring.
+- Three.js animation systems.
+- Custom WebGL shaders.
+- CSS transitions.
+- Lottie where appropriate.
+- Existing animation infrastructure.
+
+Do not install all of them.
+
+Evaluate their suitability, choose a coherent combination and avoid overlapping animation systems.
+
+Animations must be:
+
+- Smooth.
+- Fluid.
+- Consistent.
+- Purposeful.
+- Responsive.
+- Visually refined.
+- Performance-conscious.
+
+Respect reduced-motion preferences.
+
+Avoid animations that make the application slower or harder to operate.
+
+---
+
+# 6. COMPLETE REFINEMENT OF EVERY EXISTING FEATURE
+
+Inspect every existing feature and evaluate it individually.
+
+Do not assume that the current feature set is complete or correct.
+
+For each feature:
+
+1. Understand its purpose.
+2. Inspect its implementation.
+3. Identify visual weaknesses.
+4. Identify functional weaknesses.
+5. Identify missing states.
+6. Identify scientific or technical weaknesses.
+7. Improve the interface.
+8. Improve its functionality.
+9. Improve its performance.
+10. Test the complete workflow.
+
+If a feature cannot be perfected because of a genuine technical or external limitation, implement every improvement that remains possible.
+
+Do not abandon the feature.
+
+Do not leave it in its previous poor condition merely because one dependency is unavailable.
+
+Clearly distinguish between what works, what is simulated and what remains blocked.
+
+---
+
+# 7. COMPLETE MODULE REFINEMENT
+
+Refine all existing modules, including:
+
+### 4D Earth Explorer
+- Globe navigation.
+- Terrain visualization.
+- Location selection.
+- Geographic search.
+- Layer management.
+- Historical exploration.
+- 3D GLOBE and 3D CUTOUT.
+- Geographic context.
+- Camera movement.
+
+### Nexus Hydro
+- Water-resource datasets.
+- Groundwater information.
+- Surface-water information.
+- Hydrological indicators.
+- Temporal analysis.
+- Watershed information.
+- Available measurements.
+- Scientific source information.
+
+### Nexus Strata
+- Geological maps.
+- Rock types.
+- Geological boundaries.
+- Formations.
+- Stratigraphy.
+- Cross-sections.
+- Available subsurface information.
+
+### Nexus Mineral
+- Known mineral occurrences.
+- Geological evidence.
+- Remote-sensing indicators.
+- Mineral-related datasets.
+- Spatial analysis.
+- Confidence and limitations.
+
+### Nexus AI
+- Context-aware questions.
+- Selected-location awareness.
+- Dataset awareness.
+- Layer awareness.
+- Scientific reasoning.
+- Follow-up questions.
+- Source citations.
+- Response streaming where supported.
+- Conversation history.
+- Error handling.
+
+### Shared Data Catalogue
+- Dataset discovery.
+- Filters.
+- Metadata.
+- Geographic coverage.
+- Temporal coverage.
+- Resolution.
+- Licensing.
+- Provider information.
+- Access and download options where permitted.
+
+### Location Dossiers
+- Location-specific summaries.
+- Available scientific datasets.
+- Maps.
+- Charts.
+- Source information.
+- Historical information.
+- Geographic context.
+- Data gaps and limitations.
+
+Every module must feel like part of the same premium product.
+
+---
+
+# 8. FIX GLOBAL LOCATION SEARCH COMPLETELY
+
+Location search must be reliable.
+
+Support searches for:
+
+- Countries.
+- States.
+- Provinces.
+- Districts.
+- Cities.
+- Towns.
+- Villages.
+- Settlements.
+- Rivers.
+- Lakes.
+- Mountains.
+- Islands.
+- Watersheds.
+- Landmarks.
+- Geological locations.
+- Coordinates.
+
+Investigate the actual root cause of missing locations.
+
+Repair the complete search pipeline:
+
+- Input.
+- Query processing.
+- Geocoding.
+- Search provider.
+- Response parsing.
+- Result ranking.
+- Duplicate handling.
+- Result presentation.
+- Geographic coordinate conversion.
+- Globe navigation.
+- Error handling.
+
+Use suitable available providers and respect their usage policies.
+
+Geographic search must not be confused with scientific data availability.
+
+---
+
+# 9. ADD VALUABLE FEATURES WHERE THEY IMPROVE THE PRODUCT
+
+Inspect existing functionality before introducing new features.
+
+Evaluate and implement valuable additions where appropriate:
+
+- Scientific comparison mode.
+- Historical time explorer.
+- Advanced layer manager.
+- Geographic measurement tools.
+- Saved workspaces.
+- Saved locations.
+- User annotations.
+- Exportable reports.
+- Dataset metadata inspection.
+- Interactive legends.
+- Guided discovery.
+- Keyboard shortcuts.
+- Location bookmarks.
+- Context-aware AI exploration.
+- Scientific uncertainty indicators.
+
+Do not add features simply to make the application look more complex.
+
+Every new feature must have a clear purpose and a complete user workflow.
+
+---
+
+# 10. PERFECT DATA VISUALIZATION
+
+Refine every chart, graph, map overlay, legend and scientific visualization.
+
+Ensure:
+
+- Correct units.
+- Clear labels.
+- Appropriate scales.
+- Understandable legends.
+- Meaningful tooltips.
+- Correct date ranges.
+- Responsive layouts.
+- Consistent typography.
+- Appropriate uncertainty representation.
+- Source attribution.
+- Honest empty states.
+
+Never fabricate scientific values to fill a visualization.
+
+---
+
+# 11. POLISH EVERY MICRO-INTERACTION
+
+Inspect the smallest details.
+
+Improve:
+
+- Button hover and press states.
+- Toggle animations.
+- Slider interactions.
+- Search input focus.
+- Dropdown opening.
+- Tooltips.
+- Context menus.
+- Tab switching.
+- Panel resizing.
+- Scrollbars.
+- Loading indicators.
+- Notifications.
+- Empty states.
+- Error states.
+- Success messages.
+- Keyboard focus.
+- Touch interactions where supported.
+
+No interaction should feel unfinished.
+
+---
+
+# 12. ENGINEERING AND PERFORMANCE
+
+Perform serious technical optimization.
+
+Inspect:
+
+- React rendering.
+- State management.
+- Component lifecycle.
+- API requests.
+- Data processing.
+- Caching.
+- 3D scene management.
+- GPU memory.
+- Texture management.
+- Geometry disposal.
+- Animation loops.
+- Network loading.
+- Dependency sizes.
+- Backend performance.
+
+Ensure the application does not:
+
+- Accumulate duplicate animation loops.
+- Leak GPU resources.
+- Re-render unnecessarily.
+- Repeatedly fetch identical data.
+- Freeze during large operations.
+- Break when changing locations.
+- Lose state unexpectedly.
+- Crash when data is unavailable.
+
+Implement sensible fallbacks for weaker hardware.
+
+Measure performance rather than inventing performance claims.
+
+---
+
+# 13. SECURITY AND SCIENTIFIC INTEGRITY
+
+Protect credentials and API keys.
+
+Validate inputs and external responses.
+
+Avoid exposing server secrets.
+
+Inspect authentication, authorization and dependency security.
+
+For scientific information, always distinguish:
+
+- Direct observations.
+- Satellite-derived indicators.
+- Processed datasets.
+- Model outputs.
+- Predictions.
+- Simulations.
+- Conceptual visualizations.
+
+Expose source, date, resolution, units, method, uncertainty and limitations wherever available.
+
+Examples of scientific restrictions:
+
+- GRACE total water storage anomalies must not be presented as precise local groundwater depth.
+- Sentinel-2 anomalies must not be treated as confirmed underground mineral deposits.
+- Regional geological maps must not be presented as precise local geological measurements.
+
+Nexus AI must not invent missing scientific data.
+
+---
+
+# 14. INDEPENDENT VISUAL QUALITY REVIEW
+
+Create a dedicated design-review process.
+
+If browser preview, screenshots or visual inspection tools are available, use them.
+
+Inspect the actual rendered application, not only the source code.
+
+Review:
+
+- Every screen.
+- Every module.
+- Every panel.
+- Every dialog.
+- Every interaction state.
+- Every animation.
+- Every responsive layout.
+- The globe.
+- The cutout.
+- The transition in both directions.
+
+Compare the visual output with the reference material.
+
+Ask:
+
+- Does the interface feel genuinely premium?
+- Is the visual hierarchy clear?
+- Is the globe still the focal point?
+- Are controls comfortable to use?
+- Are animations smooth?
+- Does the cutout look like an extracted geographic region?
+- Are any components misaligned?
+- Are any panels too small or too large?
+- Is the text readable?
+- Is the interface unnecessarily complicated?
+- Does any feature still feel unfinished?
+
+If the answer reveals a weakness, correct it and inspect again.
+
+Perform multiple refinement passes.
+
+---
+
+# 15. COMPREHENSIVE TESTING
+
+Test the complete application.
+
+At minimum, cover:
+
+1. Application startup.
+2. Navigation.
+3. Location search.
+4. Location selection.
+5. Globe movement.
+6. Terrain loading.
+7. Globe-to-cutout extraction.
+8. Cutout geometry.
+9. Cutout inspection.
+10. Reverse transition.
+11. Animation interruption and recovery.
+12. Layer management.
+13. Dataset loading.
+14. Nexus Hydro.
+15. Nexus Strata.
+16. Nexus Mineral.
+17. Nexus AI.
+18. Data Catalogue.
+19. Location Dossiers.
+20. Charts.
+21. Saved workspaces if implemented.
+22. Export functions if implemented.
+23. Responsive layouts.
+24. Loading states.
+25. Error states.
+26. Accessibility.
+27. Performance.
+28. Security.
+29. Backend integration.
+30. Production build.
+
+Test normal, unusual, invalid and failure conditions.
+
+Verify that the visual result and underlying functionality both work.
+
+---
+
+# 16. AUTONOMOUS EXECUTION: DO NOT STOP PREMATURELY
+
+This is a substantial engineering assignment.
+
+Do not finish after making a few changes.
+
+Work systematically through the complete application.
+
+Use the available time, context, tools and agent capabilities as effectively as possible.
+
+Follow this loop continuously:
+
+**INSPECT → DIAGNOSE → PLAN → IMPLEMENT → TEST → VISUALLY REVIEW → REFINE → REGRESSION TEST**
+
+Prioritize:
+
+1. Critical broken functionality.
+2. Globe-to-cutout rendering and animation.
+3. Missing global location search.
+4. Broken scientific data and AI features.
+5. Major UI and usability problems.
+6. Incomplete module functionality.
+7. Animation and interaction refinement.
+8. Performance and security.
+9. Additional useful capabilities.
+10. Final visual polish.
+
+If a feature cannot be completely perfected, do not abandon it.
+
+Implement everything that can be implemented with the available resources.
+
+If an external dependency prevents completion, finish all independent work, identify the blocker and provide the exact configuration or access required.
+
+Do not pretend to work in the background after your actual execution session ends.
+
+---
+
+# 17. FINAL COMPLETION REPORT
+
+Provide a detailed and honest report containing:
+
+### A. Codebase audit
+- Files and modules inspected.
+- Major issues found.
+- Root causes.
+
+### B. Implementation
+- Features repaired.
+- Features refined.
+- New features added.
+- Architecture changes.
+
+### C. Visual design
+- Liquid-glass improvements.
+- Typography.
+- Layout.
+- Navigation.
+- Responsive design.
+
+### D. Animation engineering
+- Motion system.
+- Transitions.
+- Globe-to-cutout implementation.
+- Reverse transition.
+- Animation testing.
+
+### E. Scientific and AI functionality
+- Data integrations.
+- Nexus AI improvements.
+- Scientific validation.
+- Remaining limitations.
+
+### F. Performance and security
+- Optimizations.
+- Tests.
+- Measured results.
+- Remaining concerns.
+
+### G. Completion classification
+
+Classify every significant task:
+
+- COMPLETED AND TESTED
+- IMPLEMENTED BUT NOT FULLY VERIFIED
+- PARTIALLY IMPLEMENTED
+- BLOCKED BY EXTERNAL DEPENDENCY
+- NOT IMPLEMENTED
+
+Never claim a feature is complete merely because code was generated.
+
+---
+
+# FINAL COMMAND
+
+Begin immediately.
+
+First inspect the complete existing TERRANEXUS 4D project and discover every available tool, agent, subagent, design capability, animation library and development capability.
+
+Then coordinate the work and execute the transformation.
+
+I want the globe-to-cutout interaction to be a signature visual experience: a genuine-looking geographical piece of Earth being extracted, with continuous camera motion, natural terrain geometry, realistic exposed sides, scientifically grounded geological information and an exceptionally smooth return transition.
+
+I want the liquid-glass interface to be consistent, minimal, sophisticated and beautifully animated.
+
+I want every existing feature refined, every broken workflow repaired, every possible improvement implemented and every important interaction tested.
+
+Do not settle for superficial polish.
+
+Do not stop after the first successful build.
+
+Do not leave avoidable imperfections.
+
+**Make TERRANEXUS 4D the most visually compelling, technically refined, scientifically credible and enjoyable global Earth intelligence application that can realistically be achieved with the available technology and resources.**
+
+Your first task is to inspect the existing application. Your final responsibility is to verify the actual result.
