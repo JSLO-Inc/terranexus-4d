@@ -126,9 +126,13 @@ design-references/
 # 11. Local Forensic Audit Scratch & Working Notes (Kept on Local PC, Excluded from Git)
 PHASE5E_*
 
-# 12. Uncurated Docs Root Images (Preserve only curated docs/screenshots/*.png)
+# 12. Screenshots, Images & AI Studio Artifacts
+docs/screenshots/
 docs/*.png
-!docs/screenshots/*.png
+docs/*.jpg
+docs/*.jpeg
+.aistudio/
+public/assets/aistudio/
 
 # 13. Ad-hoc GIS Data Ingestion & Geometry Scripts (Kept on Local PC, Excluded from Git)
 server/data/gis/*.py
