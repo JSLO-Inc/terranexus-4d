@@ -3,7 +3,7 @@ import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { MINERAL_INDICATORS } from '../../data/mineralData';
 import { Subsurface3D } from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
-import { Sparkles, AlertOctagon, Scan, Target, ShieldCheck, CheckCircle2, Box } from 'lucide-react';
+import { Gem, AlertOctagon, Scan, Target, ShieldCheck, CheckCircle2, Box } from 'lucide-react';
 
 export const NexusMineral: React.FC = () => {
   const { selectedLocation, currentDossier, mineralDisplayMode, setMineralDisplayMode } = useTerranexusStore();
@@ -104,13 +104,13 @@ export const NexusMineral: React.FC = () => {
     };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Module Title Banner */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-purple-950 border border-purple-600/40 text-purple-400">
-              <Sparkles className="w-5 h-5" />
+              <Gem className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold tracking-tight">NEXUS MINERAL — Remote Sensing & Alteration</h2>
             <StatusBadge status="MODELLED" size="md" />
@@ -170,7 +170,7 @@ export const NexusMineral: React.FC = () => {
 
       {/* Prospectivity & Deposit Context */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between shadow-md">
+        <div className="liquid-glass p-4 rounded-xl flex flex-col justify-between shadow-md">
           <span className="text-xs text-slate-400">Deposit Model Analogue</span>
           <h4 className="text-sm font-bold text-slate-100 mt-1">{mineralSummary.depositStyle}</h4>
           <span className="text-[10px] font-mono text-cyan-400 mt-2 block">
@@ -178,7 +178,7 @@ export const NexusMineral: React.FC = () => {
           </span>
         </div>
 
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between shadow-md">
+        <div className="liquid-glass p-4 rounded-xl flex flex-col justify-between shadow-md">
           <span className="text-xs text-slate-400">Target Commodities</span>
           <div className="flex flex-wrap gap-1.5 mt-2">
             {mineralSummary.targetCommodities?.map((c: string, i: number) => (
@@ -190,7 +190,7 @@ export const NexusMineral: React.FC = () => {
           <span className="text-[10px] text-slate-500 mt-2">Derived from regional geological synthesis</span>
         </div>
 
-        <div className="glass-panel p-4 rounded-xl flex flex-col justify-between shadow-md">
+        <div className="liquid-glass p-4 rounded-xl flex flex-col justify-between shadow-md">
           <span className="text-xs text-slate-400">Regional Prospectivity Category</span>
           <div className="my-1">
             <span className={`text-base font-bold font-mono px-2.5 py-1 rounded-lg border ${
@@ -208,7 +208,7 @@ export const NexusMineral: React.FC = () => {
       </div>
 
       {/* Validated Spectral Alteration Band Ratios */}
-      <div className="glass-panel rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
+      <div className="liquid-glass rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Scan className="w-5 h-5 text-purple-400" />
@@ -242,7 +242,7 @@ export const NexusMineral: React.FC = () => {
                 'Surface spectral reflectance ratio indicates surficial regolith and weathering only. Does NOT indicate subterranean ore bodies or depth.';
 
               return (
-                <div key={idx.id || idx.name} className="glass-panel p-4 rounded-xl flex flex-col justify-between gap-3 shadow-md hover:border-purple-500/50 transition-all">
+                <div key={idx.id || idx.name} className="liquid-glass p-4 rounded-xl flex flex-col justify-between gap-3 shadow-md hover:border-purple-500/50 transition-all">
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-mono text-[10px] text-purple-300">{idx.sensor || 'Copernicus Sentinel-2 MSI'}</span>
@@ -260,7 +260,7 @@ export const NexusMineral: React.FC = () => {
                     </div>
                     <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-purple-500 to-amber-400 h-full rounded-full"
+                        className="bg-purple-400 h-full rounded-full"
                         style={{ width: `${barPercent}%` }}
                       />
                     </div>

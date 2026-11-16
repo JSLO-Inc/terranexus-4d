@@ -27,7 +27,7 @@ export const LocationResults: React.FC<LocationResultsProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="absolute top-full left-0 right-0 mt-2 p-3 bg-slate-900/95 backdrop-blur-md border border-slate-750 rounded-xl shadow-2xl z-50 text-xs text-cyan-400 flex items-center justify-center space-x-2">
+      <div className="fixed left-3 right-3 top-14 mt-1.5 sm:mt-2 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:w-[420px] p-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl z-50 text-xs text-cyan-400 flex items-center justify-center space-x-2">
         <div className="w-3.5 h-3.5 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
         <span>Searching global geographical & scientific gazetteers...</span>
       </div>
@@ -36,7 +36,7 @@ export const LocationResults: React.FC<LocationResultsProps> = ({
 
   if (error) {
     return (
-      <div className="absolute top-full left-0 right-0 mt-2 p-3.5 bg-slate-900/95 backdrop-blur-md border border-amber-500/40 rounded-xl shadow-2xl z-50 text-xs text-amber-300 flex items-start space-x-2.5">
+      <div className="fixed left-3 right-3 top-14 mt-1.5 sm:mt-2 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:w-[420px] p-3.5 bg-slate-900/95 backdrop-blur-md border border-amber-500/40 rounded-xl shadow-2xl z-50 text-xs text-amber-300 flex items-start space-x-2.5">
         <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
         <div className="flex-1">
           <p className="font-medium text-amber-200">Location Not Found</p>
@@ -49,10 +49,10 @@ export const LocationResults: React.FC<LocationResultsProps> = ({
   if (suggestions.length === 0) {
     if (query.trim().length < 2) return null;
     return (
-      <div className="absolute top-full left-0 right-0 mt-2 p-3.5 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl z-50 text-xs text-slate-300">
+      <div className="fixed left-3 right-3 top-14 mt-1.5 sm:mt-2 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:w-[420px] p-3.5 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl shadow-2xl z-50 text-xs text-slate-300">
         <p className="font-semibold text-white">No matching locations found for &ldquo;{query.trim()}&rdquo;</p>
         <p className="text-[11px] text-slate-400 mt-1">
-          Press <span className="text-cyan-300 font-mono">Enter</span> to resolve directly, include a state/country qualifier, or enter <span className="text-emerald-300 font-mono">latitude, longitude</span> coordinates.
+          Press <span className="text-cyan-300 font-mono">Enter</span> or click <span className="text-cyan-300 font-mono">Go</span> to resolve directly, include a state/country qualifier, or enter <span className="text-emerald-300 font-mono">latitude, longitude</span> coordinates.
         </p>
       </div>
     );
@@ -60,91 +60,62 @@ export const LocationResults: React.FC<LocationResultsProps> = ({
 
   return (
     <div
+      id="terranexus-location-listbox"
       role="listbox"
       aria-label="Suggested Locations"
-      className="absolute top-full left-0 right-0 sm:min-w-[420px] max-w-[560px] mt-2 max-h-80 overflow-y-auto bg-slate-950/98 backdrop-blur-xl border border-slate-700 rounded-xl shadow-2xl z-50 divide-y divide-slate-800/80 scrollbar-thin scrollbar-thumb-slate-700"
+      className="fixed left-3 right-3 top-14 mt-1.5 sm:absolute sm:top-full sm:left-0 sm:right-auto sm:w-[440px] sm:max-w-[540px] max-h-80 overflow-y-auto bg-[#0b1019] border border-slate-700 rounded-lg shadow-2xl z-50 divide-y divide-slate-800/70 scrollbar-thin scrollbar-thumb-slate-700"
     >
-      <div className="px-3 py-2 bg-slate-900/90 text-[10px] uppercase font-mono tracking-wider text-slate-300 flex items-center justify-between border-b border-slate-800">
-        <span className="font-semibold text-cyan-400">Global & Village Geographical Matches</span>
-        <span className="text-slate-400 font-mono">{suggestions.length} {suggestions.length === 1 ? 'Candidate' : 'Candidates'}</span>
+      <div className="px-3 py-1.5 bg-slate-900/90 text-[10px] uppercase font-mono tracking-wider text-slate-400 flex items-center justify-between border-b border-slate-800">
+        <span>Locations</span>
+        <span className="tabular-nums">{suggestions.length} {suggestions.length === 1 ? 'result' : 'results'}</span>
       </div>
-
-      {suggestions.length > 1 && (
-        <div className="px-3 py-1.5 bg-amber-950/35 border-b border-amber-500/20 text-[10px] font-mono text-amber-200/90 flex items-center justify-between">
-          <span>Multiple candidates resolved — select exact state/district/country match below:</span>
-          <span className="text-amber-400 font-semibold">DISAMBIGUATION ACTIVE</span>
-        </div>
-      )}
 
       {suggestions.map((item, idx) => {
         const isHighlighted = idx === selectedIndex;
-        const precisionLabel =
-          item.resolutionPrecision === 'EXACT_COORDINATE'
-            ? 'Exact Coordinate'
-            : item.resolutionPrecision === 'APPROXIMATE_REGIONAL_BUFFER'
-            ? 'Regional Buffer (~10–25km)'
-            : 'Gazetteer Centroid (~1–5km)';
         return (
           <button
             key={item.id}
+            id={`location-option-${idx}`}
+            type="button"
             role="option"
             aria-selected={isHighlighted}
             tabIndex={0}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => {
               onSelectSuggestion(item);
-              onClose();
             }}
-            className={`w-full px-3 py-2.5 text-left transition-colors flex items-center space-x-3 group cursor-pointer ${
-              isHighlighted ? 'bg-cyan-950/80 text-cyan-100' : 'hover:bg-slate-900/90'
+            className={`w-full px-3 py-2 text-left transition-colors flex items-center justify-between gap-3 group cursor-pointer ${
+              isHighlighted ? 'bg-slate-800 text-slate-100' : 'hover:bg-slate-900/90'
             }`}
           >
-            <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
-              isHighlighted
-                ? 'bg-cyan-900/80 border-cyan-400 text-cyan-300 scale-105'
-                : 'bg-cyan-950/70 border-cyan-500/40 text-cyan-400 group-hover:border-cyan-400 group-hover:scale-105'
-            }`}>
-              {item.type === 'CITY' || item.type === 'TOWN' ? (
-                <Building className="w-4 h-4" />
-              ) : (
-                <MapPin className="w-4 h-4" />
-              )}
-            </div>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-md bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0 text-sky-400">
+                {item.type === 'CITY' || item.type === 'TOWN' ? (
+                  <Building className="w-3.5 h-3.5" />
+                ) : (
+                  <MapPin className="w-3.5 h-3.5" />
+                )}
+              </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-sm font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-slate-100 truncate group-hover:text-sky-300 transition-colors">
                   {item.name}
-                </span>
-                {item.type && (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-cyan-950/80 text-cyan-300 border border-cyan-500/30 shrink-0">
-                    {item.type.replace(/_/g, ' ')}
-                  </span>
-                )}
-                {item.state && (
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-200 border border-slate-700 shrink-0">
-                    {item.state}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-300 truncate mt-0.5">
-                {item.displayName}
-              </p>
-              <div className="flex flex-wrap items-center gap-2 mt-1 text-[10px] font-mono text-slate-400">
-                <span>
-                  {item.latitude.toFixed(4)}°N, {item.longitude.toFixed(4)}°E
-                </span>
-                <span>•</span>
-                <span className="text-emerald-300/90">{precisionLabel}</span>
-                {item.sourceProvider && (
-                  <>
-                    <span>•</span>
-                    <span className="text-slate-400 truncate">{item.sourceProvider}</span>
-                  </>
-                )}
+                </div>
+                <p className="text-[11px] text-slate-400 truncate">
+                  {item.displayName}
+                </p>
               </div>
             </div>
 
-            <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 shrink-0" />
+            <div className="flex items-center gap-2 shrink-0 text-right">
+              <div className="text-[10px] font-mono text-slate-400 tabular-nums">
+                <div className="text-slate-300 uppercase">{item.type ? item.type.replace(/_/g, ' ') : 'PLACE'}</div>
+                <div>
+                  {Math.abs(item.latitude).toFixed(3)}°{item.latitude >= 0 ? 'N' : 'S'}, {Math.abs(item.longitude).toFixed(3)}°{item.longitude >= 0 ? 'E' : 'W'}
+                </div>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 shrink-0" />
+            </div>
           </button>
         );
       })}

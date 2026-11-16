@@ -203,7 +203,7 @@ export interface CropSuitabilityItem {
   cropId: string;
   cropName: string;
   regionalNames: string;
-  season: 'Kharif (Monsoon)' | 'Rabi (Winter)' | 'Zaid / Summer' | 'Annual / Perennial';
+  season: string;
   suitabilityClass: 'HIGHLY_SUITABLE' | 'MODERATELY_SUITABLE' | 'MARGINAL_WITH_CONSTRAINTS' | 'NOT_RECOMMENDED';
   evidenceClass: EvidenceQualitativeClass;
   durationDays: string;

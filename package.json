@@ -1,5 +1,11 @@
 {
   "name": "terranexus-4d",
+  "description": "TERRANEXUS 4D — Open-Source 4D Earth Digital Twin & Subsurface Intelligence Platform integrating NASA GRACE/GRACE-FO satellite gravimetry, Copernicus 90m DEM terrain, 3D volumetric geological & phreatic water cutouts, CGWB/GSI/USGS subsurface models, and grounded AI.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JSLO-Inc/terranexus-4d.git"
+  },
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -34,7 +40,6 @@
   },
   "dependencies": {
     "@google/genai": "^2.32.0",
-    "@google/generative-ai": "^0.24.1",
     "cesium": "^1.121.0",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",

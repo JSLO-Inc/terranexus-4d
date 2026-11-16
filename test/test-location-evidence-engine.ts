@@ -146,26 +146,31 @@ async function runTestSuite() {
     assert(imdObs[0].quality_flags.includes('NOT_CONFIGURED'), 'IMD observation carries "NOT_CONFIGURED" quality flag');
     assert(!imd.isConfigured(), 'IMD adapter correctly reports isConfigured() === false');
 
-    // 2.5 NASA GPM IMERG Rainfall
+    // 2.5 Open-Meteo / ECMWF IFS Gridded Precipitation & Hydroclimatic Analysis
     const gpmObs = await gpm.getObservations(18.5204, 73.8567, 10);
-    assert(gpmObs.length >= 3, 'NASA GPM provides 7d, 30d, and seasonal anomaly observations');
+    assert(gpmObs.length >= 3, 'Climate/Rainfall adapter provides 7d, 30d, and water balance observations');
     const rain30d = gpmObs.find(o => o.parameter === 'precipitation_30d');
-    assert(!!rain30d, 'NASA GPM provides 30-day accumulated rainfall (precipitation_30d)');
-    assert(rain30d?.category === 'remote', 'NASA GPM observation is categorized as "remote"');
-    assert(rain30d?.spatial_support_m === 10000, 'NASA GPM 0.1° pixel support is 10 km');
+    assert(!!rain30d, 'Climate adapter provides 30-day accumulated rainfall (precipitation_30d)');
+    assert(rain30d?.category === 'remote' || rain30d?.category === 'unavailable', '30d precipitation is categorized as "remote" or honest "unavailable"');
+    assert(rain30d?.spatial_support_m === 9000, 'Open-Meteo ECMWF IFS pixel support is ~9 km (9000m)');
 
-    // 2.6 Sentinel STAC Precomputed Indices
+    // 2.6 Sentinel STAC Scene & SCL Classification Indices
     const stacObs = await stac.getObservations(18.5204, 73.8567, 10);
-    assert(stacObs.length >= 3, 'Sentinel STAC returns metadata and precomputed indices');
-    const ndwi = stacObs.find(o => o.parameter === 'surface_water_ndwi');
-    assert(!!ndwi, 'Sentinel STAC provides NDWI water index (surface_water_ndwi)');
-    assert(ndwi?.category === 'remote', 'Sentinel NDWI is categorized as "remote"');
+    assert(stacObs.length >= 1, 'Sentinel STAC returns scene metadata or explicit unavailable notice');
+    const stacWater = stacObs.find(o => o.parameter === 'sentinel2_water_fraction');
+    const stacUnavail = stacObs.find(o => o.parameter === 'sentinel2_stac_discovery');
+    assert(!!stacWater || !!stacUnavail, 'Sentinel STAC provides SCL surface water fraction or honest unavailable notice');
+    if (stacWater) {
+      assert(stacWater.category === 'remote', 'Sentinel-2 SCL water fraction is categorized as "remote"');
+    } else {
+      assert(stacUnavail?.category === 'unavailable', 'Offline STAC fallback is categorized as "unavailable"');
+    }
 
     // 2.7 SoilGrids
     const soilObs = await soil.getObservations(18.5204, 73.8567, 10);
     const profile = soilObs.find(o => o.parameter === 'soil_profile');
     assert(!!profile, 'SoilGrids provides soil_profile');
-    assert(profile?.category === 'derived', 'SoilGrids property is categorized as "derived"');
+    assert(profile?.category === 'modelled' || profile?.category === 'unavailable', 'SoilGrids property is categorized as "modelled" (or "unavailable" when offline)');
 
     // 2.8 Mandatory Schema Integrity Check on all generated observations
     const allSampleObs = [...cgwbObs, ...demObs, ...gsiObs, ...imdObs, ...gpmObs, ...stacObs, ...soilObs];
@@ -196,16 +201,23 @@ async function runTestSuite() {
     }
     assert(allValid, 'All provider observations strictly satisfy mandatory NormalizedObservation schema');
 
-    // 2.9 SMAP & GRACE-FO Observations Verification
+    // 2.9 Surface Soil Moisture & GRACE-FO Honest Observations Verification
     const engine = LocationEvidenceEngine.getInstance();
     const dossierSample = await engine.generateDossier(18.5204, 73.8567, 50);
-    const smap = dossierSample.evidence.remote.find(o => o.parameter === 'regional_surface_soil_moisture_smap');
-    assert(!!smap, 'Dossier includes NASA SMAP 36-km regional surface soil moisture observation');
-    assert(smap?.spatial_support_m === 36000, 'NASA SMAP spatial support is strictly 36,000 meters (36 km)');
-    assert(smap?.do_not_use_for.includes('neighborhood_soil_moisture'), 'SMAP includes explicit "neighborhood_soil_moisture" prohibition');
+    const allDossierObs = [...dossierSample.evidence.remote, ...dossierSample.evidence.unavailable];
+    const smap = allDossierObs.find(
+      o => o.parameter === 'regional_surface_soil_moisture_ecmwf' || o.parameter === 'regional_surface_soil_moisture_smap'
+    );
+    assert(!!smap, 'Dossier includes surface soil moisture observation (remote or honest unavailable)');
+    assert(smap?.spatial_support_m === 9000 || smap?.spatial_support_m === 36000, 'Surface soil moisture spatial support is strictly reported (9 km ECMWF / 36 km SMAP)');
+    assert(
+      smap?.do_not_use_for.includes('site_geotechnical_moisture_certification') ||
+        smap?.do_not_use_for.includes('neighborhood_soil_moisture'),
+      'Surface soil moisture includes explicit site-level prohibition'
+    );
 
-    const grace = dossierSample.evidence.remote.find(o => o.parameter === 'basin_water_storage_trend_grace');
-    assert(!!grace, 'Dossier includes NASA/GFZ GRACE-FO basin total water storage trend observation');
+    const grace = allDossierObs.find(o => o.parameter === 'basin_water_storage_trend_grace');
+    assert(!!grace, 'Dossier includes NASA/GFZ GRACE-FO basin total water storage trend observation (or honest unavailable notice)');
     assert(grace?.spatial_support_m === 300000, 'GRACE-FO spatial support is strictly 300,000 meters (~300 km)');
     assert(grace?.do_not_use_for.includes('address_level_water_depletion_prediction'), 'GRACE-FO includes explicit "address_level_water_depletion_prediction" prohibition');
   }

@@ -93,4 +93,9 @@ export interface AIMessage {
   limitationsNoted?: string[];
   sources?: SourceInspectionMetrics;
   isStreaming?: boolean;
+  isLiveGemini?: boolean;
+  modelUsed?: string;
+  dataTier?: 'GENUINE_AI_INFERENCE' | 'DETERMINISTIC_OFFLINE_RULES';
+  fallbackReason?: string;
+  appliedSceneActions?: string[];
 }

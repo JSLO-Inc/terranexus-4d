@@ -105,7 +105,7 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
       const coverage = evaluateNationwideDataCoverage(lat, lon);
       const eleRes = await providerRegistry.getElevation().getElevationForCoordinate(lat, lon);
       const gazetteerMatch = [...LOCAL_INDIAN_GEOGRAPHIC_INDEX, ...GLOBAL_EARTH_GEOGRAPHIC_INDEX].find(
-        p => p.id === suggestion.id || (Math.abs(p.latitude - lat) < 0.12 && Math.abs(p.longitude - lon) < 0.12)
+        p => p.id === suggestion.id || (Math.abs(p.latitude - lat) < 0.015 && Math.abs(p.longitude - lon) < 0.015)
       );
       const rawState = String(suggestion.state || gazetteerMatch?.state || (withinIndia ? 'India' : 'Global Region'));
       const stateParts = rawState.split(',').map(s => s.trim()).filter(Boolean);
@@ -121,8 +121,8 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
         displayName: suggestion.displayName || `${suggestion.name}, ${districtName}, ${stateName}, ${countryName}`,
         state: stateName,
         district: districtName,
-        basin: gazetteerMatch?.basin || `${districtName} River Basin / Regional Catchment`,
-        geologicalProvince: gazetteerMatch?.geologicalProvince || `${stateName} Lithological Terrane (CGMW GLiM)`,
+        basin: gazetteerMatch?.basin || 'Regional HydroSHEDS Catchment',
+        geologicalProvince: gazetteerMatch?.geologicalProvince || 'Regional Geological Sequence',
         description: `Earth & Subsurface Intelligence Locus in ${districtName}, ${stateName} (${countryName}).`,
         latitude: lat,
         longitude: lon,
@@ -153,17 +153,12 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
     const clean = query.trim();
     const cleanLower = clean.toLowerCase();
 
-    // 0b. Check if query matches any of the 7 Canonical Indian Regional Study Loci
-    const canonicalMatch = INDIA_LOCATIONS.find(loc => 
+    // 0b. Check if query directly matches any of the 7 Canonical Indian Regional Study Loci
+    const canonicalMatch = INDIA_LOCATIONS.find(loc =>
       loc.id.toLowerCase() === cleanLower ||
       loc.name.toLowerCase() === cleanLower ||
-      loc.name.toLowerCase().startsWith(cleanLower) ||
       loc.district.toLowerCase() === cleanLower ||
-      (cleanLower.length >= 4 && !cleanLower.includes(',') && (
-        loc.name.toLowerCase().includes(cleanLower) ||
-        loc.district.toLowerCase().includes(cleanLower) ||
-        cleanLower.includes(loc.district.toLowerCase())
-      ))
+      (cleanLower.length >= 5 && loc.name.toLowerCase().startsWith(cleanLower))
     );
 
     if (canonicalMatch) {
@@ -212,17 +207,17 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
       const stateName = admin.state || (withinIndia ? 'India' : admin.country || 'Global Region');
       const districtName = admin.district || admin.city || 'Regional Sector';
       const gazetteerMatch = [...LOCAL_INDIAN_GEOGRAPHIC_INDEX, ...GLOBAL_EARTH_GEOGRAPHIC_INDEX].find(
-        p => Math.abs(p.latitude - lat) < 0.25 && Math.abs(p.longitude - lon) < 0.25
+        p => Math.abs(p.latitude - lat) < 0.015 && Math.abs(p.longitude - lon) < 0.015
       );
 
       const baseResolved: SelectedLocation = {
         id: gazetteerMatch?.id || `loc-${lat.toFixed(4)}-${lon.toFixed(4)}`,
-        name: gazetteerMatch?.name || admin.city || admin.town || admin.village || admin.district || `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`,
+        name: gazetteerMatch?.name || admin.village || admin.town || admin.city || admin.district || `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`,
         displayName: admin.formattedAddress,
         state: stateName,
         district: districtName,
-        basin: gazetteerMatch?.basin || `${districtName} River Catchment / Regional Basin`,
-        geologicalProvince: gazetteerMatch?.geologicalProvince || `${stateName} Geological Terrane (CGMW GLiM)`,
+        basin: gazetteerMatch?.basin || 'Regional HydroSHEDS Catchment',
+        geologicalProvince: gazetteerMatch?.geologicalProvince || 'Regional Geological Sequence',
         description: `Earth & Subsurface Intelligence Locus in ${districtName}, ${stateName} (${admin.country || (withinIndia ? 'India' : 'Global')}).`,
         latitude: lat,
         longitude: lon,
@@ -250,9 +245,15 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
       const coverage = evaluateNationwideDataCoverage(best.latitude, best.longitude);
       const eleRes = await providerRegistry.getElevation().getElevationForCoordinate(best.latitude, best.longitude);
       const gazetteerMatch = [...LOCAL_INDIAN_GEOGRAPHIC_INDEX, ...GLOBAL_EARTH_GEOGRAPHIC_INDEX].find(
-        p => p.id === best.id || (Math.abs(p.latitude - best.latitude) < 0.15 && Math.abs(p.longitude - best.longitude) < 0.15)
+        p => p.id === best.id || (Math.abs(p.latitude - best.latitude) < 0.015 && Math.abs(p.longitude - best.longitude) < 0.015)
       );
-      const stateName = gazetteerMatch?.state || admin.state || best.state || (withinIndia ? 'India' : admin.country || 'Global Region');
+      const rawBestState = best.state || '';
+      const bestStateParts = rawBestState.split(',').map(s => s.trim()).filter(Boolean);
+      const stateName = gazetteerMatch?.state || admin.state || bestStateParts[0] || (withinIndia ? 'India' : admin.country || 'Global Region');
+      const countryName =
+        gazetteerMatch?.country ||
+        admin.country ||
+        (bestStateParts.length > 1 ? bestStateParts[bestStateParts.length - 1] : withinIndia ? 'India' : 'International');
       const districtName = gazetteerMatch?.district || admin.district || best.district || best.name;
 
       const baseResolved: SelectedLocation = {
@@ -261,9 +262,9 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
         displayName: best.displayName,
         state: stateName,
         district: districtName,
-        basin: gazetteerMatch?.basin || `${districtName} River Basin / Regional Catchment`,
-        geologicalProvince: gazetteerMatch?.geologicalProvince || `${stateName} Lithological Terrane (CGMW GLiM)`,
-        description: `Earth & Subsurface Intelligence Locus in ${districtName}, ${stateName}.`,
+        basin: gazetteerMatch?.basin || 'Regional HydroSHEDS Catchment',
+        geologicalProvince: gazetteerMatch?.geologicalProvince || 'Regional Geological Sequence',
+        description: `Earth & Subsurface Intelligence Locus in ${districtName}, ${stateName} (${countryName}).`,
         latitude: best.latitude,
         longitude: best.longitude,
         elevationMeters: gazetteerMatch?.elevationMeters ?? eleRes.elevationM,
@@ -273,7 +274,7 @@ locationRouter.all('/resolve', async (req: Request, res: Response) => {
         isWithinIndia: withinIndia,
         administrativeHierarchy: {
           ...admin,
-          country: gazetteerMatch?.country || admin.country || (withinIndia ? 'India' : 'International'),
+          country: countryName,
           state: stateName,
           district: districtName
         },
@@ -340,17 +341,17 @@ locationRouter.get('/reverse', async (req: Request, res: Response) => {
     const coverage = evaluateNationwideDataCoverage(lat, lon);
     const eleRes = await providerRegistry.getElevation().getElevationForCoordinate(lat, lon);
 
-    const stateName = admin.state || 'India';
+    const stateName = admin.state || admin.country || (withinIndia ? 'India' : 'Global Region');
     const districtName = admin.district || admin.city || 'Regional Sector';
 
     const baseLocation: SelectedLocation = {
       id: `click-${lat.toFixed(4)}-${lon.toFixed(4)}`,
-      name: admin.city || admin.town || admin.village || admin.district || `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`,
+      name: admin.village || admin.town || admin.city || admin.district || `${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`,
       displayName: admin.formattedAddress,
       state: stateName,
       district: districtName,
-      basin: `${districtName} River Basin`,
-      geologicalProvince: `${stateName} Geological Terrane`,
+      basin: 'Regional HydroSHEDS Catchment',
+      geologicalProvince: 'Regional Geological Sequence',
       description: `Target Coordinate at ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E in ${districtName}, ${stateName}.`,
       latitude: lat,
       longitude: lon,

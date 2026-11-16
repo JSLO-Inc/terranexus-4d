@@ -13,6 +13,7 @@
 
 import { GeocodingSuggestion, AdministrativeHierarchy } from '../../src/types/location';
 import { isCoordinateWithinIndia } from './coordinateParser';
+import { safeOutboundFetch } from '../security/urlValidator';
 
 export interface LocalGeoPlace {
   id: string;
@@ -239,25 +240,27 @@ export function searchLocalGeographicIndex(query: string, maxResults: number = 8
  * Level 5: City / Town (e.g. Bhimavaram)
  * Level 6: Village / Suburb / Locality (e.g. Narasa Agraharam)
  */
-export function parseIndianAdministrativeAddress(addr: any, displayName?: string, fallbackName?: string): AdministrativeHierarchy {
-  const country = addr.country || 'India';
-  const state = addr.state || addr.province || '';
+export function parseIndianAdministrativeAddress(
+  addr: any,
+  displayName?: string,
+  fallbackName?: string,
+  withinIndiaHint?: boolean
+): AdministrativeHierarchy {
+  const defaultCountry = withinIndiaHint === false ? 'International' : 'India';
+  const country = addr.country || defaultCountry;
+  const state = addr.state || addr.province || addr.region || (withinIndiaHint === false ? country : '');
 
-  // 1. Resolve true revenue district
-  // In OSM India, 'state_district' is almost always the actual revenue district (e.g. "West Godavari District", "Palnadu District")
-  // 'district' is also used. 'county' is frequently used by OSM for Mandals / Tehsils (e.g. "Bhimavaram Mandal").
   let district = '';
   if (addr.state_district) {
-    district = addr.state_district.replace(/\s+District$/i, '').trim();
+    district = String(addr.state_district).replace(/\s+District$/i, '').trim();
   } else if (addr.district && !/mandal|tehsil|taluk/i.test(addr.district)) {
-    district = addr.district.replace(/\s+District$/i, '').trim();
+    district = String(addr.district).replace(/\s+District$/i, '').trim();
   } else if (addr.county && !/mandal|tehsil|taluk/i.test(addr.county)) {
-    district = addr.county.replace(/\s+District$/i, '').trim();
+    district = String(addr.county).replace(/\s+District$/i, '').trim();
   } else if (addr.city && !/mandal|tehsil|taluk/i.test(addr.city)) {
-    district = addr.city;
+    district = String(addr.city);
   }
 
-  // 2. Resolve sub-district / mandal / tehsil / taluk
   let subDistrict: string | undefined = undefined;
   if (addr.subdistrict) {
     subDistrict = addr.subdistrict;
@@ -271,36 +274,167 @@ export function parseIndianAdministrativeAddress(addr: any, displayName?: string
     subDistrict = addr.district;
   }
 
-  // If district is still empty, and subDistrict has something, fallback
   if (!district && subDistrict) {
     district = subDistrict;
   }
 
-  // 3. Resolve city / town / urban locus
   const city = addr.city || (addr.town ? undefined : addr.municipality);
-  const town = addr.town || (!city && !addr.village ? fallbackName : undefined);
-  const village = addr.village || addr.hamlet;
+  const town = addr.town || (!city && !addr.village && !addr.hamlet ? fallbackName : undefined);
+  const village = addr.village || addr.hamlet || addr.locality;
+  const suburb = addr.suburb || addr.neighbourhood || addr.quarter;
 
-  // 4. Locality / suburb
-  const suburb = addr.suburb || addr.neighbourhood;
-
-  // Ensure district is never a local suburb
   if (district === suburb && addr.state_district) {
-    district = addr.state_district.replace(/\s+District$/i, '').trim();
+    district = String(addr.state_district).replace(/\s+District$/i, '').trim();
   }
 
   return {
     country,
     state,
-    district: district || state || 'Regional Sector',
+    district: district || state || country || 'Regional Sector',
     subDistrict: subDistrict || (suburb && suburb !== town ? suburb : undefined),
     city,
     town,
     village,
     locality: suburb,
     pincode: addr.postcode,
-    formattedAddress: displayName || [town || city || village, subDistrict, district, state, country].filter(Boolean).join(', ')
+    formattedAddress:
+      displayName || [village || town || city || fallbackName, subDistrict, district, state, country].filter(Boolean).join(', ')
   };
+}
+
+function classifyOsmType(osmValue: string | undefined, osmKey: string | undefined, name: string | undefined, queryLower?: string): GeocodingSuggestion['type'] {
+  const val = String(osmValue || '').toLowerCase();
+  const key = String(osmKey || '').toLowerCase();
+  if (val === 'village' || val === 'hamlet' || val === 'isolated_dwelling' || val === 'farm') return 'VILLAGE';
+  if (val === 'town' || val === 'suburb' || val === 'quarter' || val === 'neighbourhood' || val === 'locality') return 'TOWN';
+  if (val === 'city' || val === 'borough' || val === 'municipality') return 'CITY';
+  if (val === 'county' || val === 'district') return 'DISTRICT';
+  if (val === 'state' || val === 'province' || val === 'region') return 'STATE';
+  if (val === 'country') return 'COUNTRY';
+  if (key === 'natural' || key === 'mountain_pass' || val === 'peak' || val === 'volcano' || val === 'glacier' || val === 'valley') return 'MOUNTAIN';
+  if (key === 'waterway' || val === 'river' || val === 'lake' || val === 'reservoir' || val === 'dam') return 'WATERSHED';
+  if (queryLower && name?.toLowerCase().includes('village')) return 'VILLAGE';
+  return 'PLACE';
+}
+
+/**
+ * Queries Komoot Photon API (OpenStreetMap global fuzzy autocomplete engine).
+ * Google-Maps-speed global search across all villages, hamlets, neighbourhoods, towns, cities, rivers, peaks, and landmarks.
+ */
+async function searchPhotonGlobal(query: string): Promise<GeocodingSuggestion[]> {
+  try {
+    const clean = query.trim();
+    if (clean.length < 2) return [];
+    const queryLower = clean.toLowerCase();
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(clean)}&limit=10&lang=en`;
+
+    const res = await safeOutboundFetch(url, {
+      timeoutMs: 2800,
+      maxResponseSizeBytes: 512 * 1024,
+      headers: {
+        'User-Agent': 'Terranexus4D/0.6.0 (Earth Science Platform)'
+      }
+    });
+    if (res.status !== 200) return [];
+    const data: any = JSON.parse(res.data);
+    if (!Array.isArray(data?.features)) return [];
+
+    return data.features
+      .map((f: any, idx: number): GeocodingSuggestion | null => {
+        const coords = f?.geometry?.coordinates;
+        if (!Array.isArray(coords) || coords.length < 2) return null;
+        const lon = Number(coords[0]);
+        const lat = Number(coords[1]);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+
+        const p = f.properties || {};
+        const name = p.name || p.city || p.town || p.village || p.locality || p.county || p.state || p.country;
+        if (!name) return null;
+
+        const country = p.country || (isCoordinateWithinIndia(lat, lon) ? 'India' : 'International');
+        const isIndia = String(country).toLowerCase() === 'india' || p.countrycode === 'IN' || isCoordinateWithinIndia(lat, lon);
+        const stateRaw = p.state || p.country || 'International';
+        const stateLabel = isIndia ? stateRaw : `${stateRaw}${country && stateRaw !== country ? `, ${country}` : ''}`;
+        const district = p.county || p.district || p.city || p.state || name;
+        const type = classifyOsmType(p.osm_value, p.osm_key, name, queryLower);
+        const isVillage = type === 'VILLAGE';
+
+        const displayParts = [
+          name,
+          p.locality && p.locality !== name ? p.locality : undefined,
+          p.district && p.district !== name ? p.district : undefined,
+          p.county && p.county !== name && p.county !== p.district ? p.county : undefined,
+          p.city && p.city !== name ? p.city : undefined,
+          p.state && p.state !== name ? p.state : undefined,
+          country
+        ].filter(Boolean);
+        const displayName = displayParts.filter((item, i) => displayParts.indexOf(item) === i).join(', ');
+
+        const nameLower = String(name).toLowerCase();
+        const exactBoost = nameLower === queryLower ? 95 : nameLower.startsWith(queryLower) ? 90 : 80;
+
+        return {
+          id: `photon-${p.osm_type || 'N'}-${p.osm_id || idx}`,
+          name: String(name),
+          displayName: displayName || String(name),
+          latitude: lat,
+          longitude: lon,
+          type,
+          state: stateLabel,
+          district: String(district),
+          subDistrict: p.locality || p.district || undefined,
+          village: isVillage ? String(name) : undefined,
+          relevanceScore: Math.max(52, exactBoost - idx * 2),
+          resolutionPrecision: 'GAZETTEER_CENTROID',
+          sourceProvider: 'OpenStreetMap Photon Global'
+        };
+      })
+      .filter((x: GeocodingSuggestion | null): x is GeocodingSuggestion => Boolean(x));
+  } catch {
+    return [];
+  }
+}
+
+async function reversePhotonGlobal(lat: number, lon: number): Promise<AdministrativeHierarchy | null> {
+  try {
+    const url = `https://photon.komoot.io/reverse?lat=${lat.toFixed(5)}&lon=${lon.toFixed(5)}&lang=en`;
+    const res = await safeOutboundFetch(url, {
+      timeoutMs: 2200,
+      maxResponseSizeBytes: 256 * 1024,
+      headers: {
+        'User-Agent': 'Terranexus4D/0.6.0 (Earth Science Platform)'
+      }
+    });
+    if (res.status !== 200) return null;
+    const data: any = JSON.parse(res.data);
+    const p = data?.features?.[0]?.properties;
+    if (!p) return null;
+
+    const withinIndia = isCoordinateWithinIndia(lat, lon);
+    const country = p.country || (withinIndia ? 'India' : 'International');
+    const state = p.state || country;
+    const district = p.county || p.district || p.city || state;
+    const isVillage = ['village', 'hamlet', 'isolated_dwelling', 'locality'].includes(String(p.osm_value || '').toLowerCase());
+    const city = p.city || (String(p.osm_value).toLowerCase() === 'city' ? p.name : undefined);
+    const town = String(p.osm_value).toLowerCase() === 'town' ? p.name : undefined;
+    const village = isVillage ? p.name : undefined;
+
+    const parts = [p.name, p.locality, district !== p.name ? district : undefined, state !== district ? state : undefined, country].filter(Boolean);
+    return {
+      country,
+      state,
+      district,
+      subDistrict: p.locality || undefined,
+      city,
+      town,
+      village,
+      locality: p.district || p.locality,
+      pincode: p.postcode,
+      formattedAddress: parts.filter((v, i) => parts.indexOf(v) === i).join(', ')
+    };
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -318,11 +452,12 @@ async function searchOpenMeteoGlobal(query: string): Promise<GeocodingSuggestion
       .filter(Boolean);
 
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanQuery)}&count=10&language=en&format=json`;
-    const response = await fetch(url, {
-      signal: AbortSignal.timeout(2500)
+    const response = await safeOutboundFetch(url, {
+      timeoutMs: 2500,
+      maxResponseSizeBytes: 512 * 1024
     });
-    if (!response.ok) return [];
-    const data: any = await response.json();
+    if (response.status !== 200) return [];
+    const data: any = JSON.parse(response.data);
     if (!Array.isArray(data?.results)) return [];
 
     return data.results
@@ -376,8 +511,8 @@ async function searchOpenMeteoGlobal(query: string): Promise<GeocodingSuggestion
 }
 
 /**
- * Searches global and Indian gazetteers (Curated Local/Global Index + Open-Meteo GeoNames + OpenStreetMap Nominatim).
- * Falls back transparently to local geographic index on network error or rate limiting.
+ * Searches global and Indian gazetteers (Curated Local/Global Index + OpenStreetMap Photon + Open-Meteo GeoNames + Nominatim).
+ * Resolves villages, hamlets, towns, cities, rivers, mountains, and landmarks globally.
  */
 export async function searchPlacesInIndia(query: string): Promise<GeocodingSuggestion[]> {
   const clean = query.trim();
@@ -388,10 +523,11 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
     return geocodeCache.get(cacheKey)!;
   }
 
-  // 1. Check local & global benchmark index first (never short-circuit so villages/homonyms from Open-Meteo & Nominatim are also included)
-  const localResults = searchLocalGeographicIndex(clean, 8);
+  // 1. Check curated scientific benchmark index
+  const localResults = searchLocalGeographicIndex(clean, 6);
 
-  // 2. Query Open-Meteo Global Geocoder and Nominatim in parallel
+  // 2. Query Photon OSM (global village/address autocomplete), Open-Meteo GeoNames, and Nominatim in parallel
+  const photonPromise = searchPhotonGlobal(clean);
   const openMeteoPromise = searchOpenMeteoGlobal(clean);
 
   const nominatimPromise = (async (): Promise<GeocodingSuggestion[]> => {
@@ -399,23 +535,25 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
       await throttleNominatim();
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&addressdetails=1&limit=8`;
 
-      const response = await fetch(url, {
+      const response = await safeOutboundFetch(url, {
         headers: {
-          'User-Agent': 'Terranexus4D/0.5.0 (contact: info@terranexus.internal; research earth twin)',
+          'User-Agent': 'Terranexus4D/0.6.0 (Earth Science Platform)',
           'Accept-Language': 'en'
         },
-        signal: AbortSignal.timeout(2500)
+        timeoutMs: 2800,
+        maxResponseSizeBytes: 512 * 1024
       });
 
-      if (!response.ok) return [];
-      const data: any[] = await response.json();
+      if (response.status !== 200) return [];
+      const data: any[] = JSON.parse(response.data);
       return data
         .map((item, idx) => {
           const lat = parseFloat(item.lat);
           const lon = parseFloat(item.lon);
-          const parsed = parseIndianAdministrativeAddress(item.address || {}, item.display_name, item.name);
+          const withinIndia = isCoordinateWithinIndia(lat, lon);
+          const parsed = parseIndianAdministrativeAddress(item.address || {}, item.display_name, item.name, withinIndia);
           const name = item.name || parsed.village || parsed.town || parsed.city || item.display_name.split(',')[0];
-          const isIndia = parsed.country.toLowerCase() === 'india' || isCoordinateWithinIndia(lat, lon);
+          const isIndia = parsed.country.toLowerCase() === 'india' || withinIndia;
           const stateLabel = isIndia
             ? parsed.state || 'India'
             : `${parsed.state || parsed.country}${parsed.country && parsed.state !== parsed.country ? `, ${parsed.country}` : ''}`;
@@ -439,33 +577,39 @@ export async function searchPlacesInIndia(query: string): Promise<GeocodingSugge
             district: parsed.district,
             subDistrict: parsed.subDistrict,
             village: parsed.village,
-            relevanceScore: Math.round((1 - idx * 0.08) * 86),
+            relevanceScore: Math.round((1 - idx * 0.06) * 86),
             resolutionPrecision: 'GAZETTEER_CENTROID' as const,
             sourceProvider: 'OpenStreetMap Nominatim'
           };
         })
         .filter(r => !isNaN(r.latitude) && !isNaN(r.longitude));
     } catch (err) {
-      console.warn('[GeocodingService] Nominatim query failed, using Open-Meteo + local index:', (err as any)?.message);
+      console.warn('[GeocodingService] Nominatim query failed, using Photon + Open-Meteo + local index:', (err as any)?.message);
       return [];
     }
   })();
 
-  const [openMeteoResults, nominatimResults] = await Promise.all([openMeteoPromise, nominatimPromise]);
+  const [photonResults, openMeteoResults, nominatimResults] = await Promise.all([
+    photonPromise,
+    openMeteoPromise,
+    nominatimPromise
+  ]);
 
-  // Merge local benchmarks + Open-Meteo GeoNames + Nominatim, avoiding coordinate duplicates (<2.5km)
+  // Merge without conflating nearby distinct villages (< 0.008 deg ≈ 800m)
   const combined: GeocodingSuggestion[] = [...localResults];
-  for (const candidate of [...openMeteoResults, ...nominatimResults]) {
+  for (const candidate of [...photonResults, ...openMeteoResults, ...nominatimResults]) {
     const exists = combined.some(
-      c => Math.abs(c.latitude - candidate.latitude) < 0.022 && Math.abs(c.longitude - candidate.longitude) < 0.022
+      c => Math.abs(c.latitude - candidate.latitude) < 0.008 && Math.abs(c.longitude - candidate.longitude) < 0.008
     );
     if (!exists) {
       combined.push(candidate);
     }
   }
 
-  const sorted = combined.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 10);
-  geocodeCache.set(cacheKey, sorted);
+  const sorted = combined.sort((a, b) => b.relevanceScore - a.relevanceScore).slice(0, 12);
+  if (sorted.length > 0) {
+    geocodeCache.set(cacheKey, sorted);
+  }
   return sorted;
 }
 
@@ -481,11 +625,11 @@ export async function reverseGeocodeCoordinate(lat: number, lon: number): Promis
     return reverseCache.get(cacheKey)!;
   }
 
-  // Fast path: if within ~8km of a curated Indian or Global benchmark, return immediately without network latency
+  // Fast path ONLY for exact/tight (~1.5km) match on curated benchmark coordinates, so nearby villages keep their real name
   for (const place of [...LOCAL_INDIAN_GEOGRAPHIC_INDEX, ...GLOBAL_EARTH_GEOGRAPHIC_INDEX]) {
     const dLat = Math.abs(place.latitude - lat);
     const dLon = Math.abs(place.longitude - lon);
-    if (dLat < 0.07 && dLon < 0.07) {
+    if (dLat < 0.015 && dLon < 0.015) {
       const country = place.country || (isCoordinateWithinIndia(lat, lon) ? 'India' : 'International');
       const fastMatch: AdministrativeHierarchy = {
         country,
@@ -493,29 +637,37 @@ export async function reverseGeocodeCoordinate(lat: number, lon: number): Promis
         district: place.district || place.name,
         city: place.type === 'CITY' ? place.name : undefined,
         town: place.type === 'TOWN' ? place.name : undefined,
-        formattedAddress: `${place.name}, ${place.district}, ${place.state}, ${country}`
+        village: place.type === 'VILLAGE' ? place.name : undefined,
+        formattedAddress: `${place.name}${place.district && place.district !== place.name ? `, ${place.district}` : ''}, ${place.state}, ${country}`
       };
       reverseCache.set(cacheKey, fastMatch);
       return fastMatch;
     }
   }
 
-  // 1. Try Nominatim Reverse API
+  // 1. Try fast Photon reverse API first, then Nominatim Reverse API
+  const photonRev = await reversePhotonGlobal(roundedLat, roundedLon);
+  if (photonRev) {
+    reverseCache.set(cacheKey, photonRev);
+    return photonRev;
+  }
+
   try {
     await throttleNominatim();
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${roundedLat}&lon=${roundedLon}&addressdetails=1&zoom=14`;
-    
-    const response = await fetch(url, {
+
+    const response = await safeOutboundFetch(url, {
       headers: {
-        'User-Agent': 'Terranexus4D/0.5.0 (contact: info@terranexus.internal; research earth twin)',
+        'User-Agent': 'Terranexus4D/0.6.0 (Earth Science Platform)',
         'Accept-Language': 'en'
       },
-      signal: AbortSignal.timeout(2000)
+      timeoutMs: 2400,
+      maxResponseSizeBytes: 256 * 1024
     });
 
-    if (response.ok) {
-      const data: any = await response.json();
-      const hierarchy = parseIndianAdministrativeAddress(data.address || {}, data.display_name, data.name);
+    if (response.status === 200) {
+      const data: any = JSON.parse(response.data);
+      const hierarchy = parseIndianAdministrativeAddress(data.address || {}, data.display_name, data.name, isCoordinateWithinIndia(lat, lon));
 
       reverseCache.set(cacheKey, hierarchy);
       return hierarchy;

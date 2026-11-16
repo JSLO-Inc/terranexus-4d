@@ -4,7 +4,7 @@ import {
   Globe,
   Layers,
   Database,
-  Sparkles,
+  Cpu,
   SlidersHorizontal,
   Clock,
   Droplets,
@@ -62,7 +62,7 @@ export const Navigation: React.FC = () => {
     {
       id: 'soil',
       label: 'Nexus Soil',
-      subtitle: 'Horizons & SoilGrids',
+      subtitle: 'SoilGrids & Horizons',
       icon: <FlaskConical className="w-4 h-4 shrink-0" />
     },
     {
@@ -73,14 +73,14 @@ export const Navigation: React.FC = () => {
     },
     {
       id: 'environment',
-      label: 'Nexus Environment',
-      subtitle: 'NDVI & Causation Audit',
+      label: 'Environment',
+      subtitle: 'NDVI & Causation',
       icon: <Trees className="w-4 h-4 shrink-0" />
     },
     {
       id: 'eic',
       label: 'Intelligence Core',
-      subtitle: 'Knowledge Graph & Fusion',
+      subtitle: 'Knowledge Graph',
       icon: <Network className="w-4 h-4 shrink-0" />
     },
     {
@@ -93,7 +93,7 @@ export const Navigation: React.FC = () => {
       id: 'ai',
       label: 'Nexus AI Copilot',
       subtitle: 'Grounded Reasoning',
-      icon: <Sparkles className="w-4 h-4 shrink-0" />
+      icon: <Cpu className="w-4 h-4 shrink-0" />
     },
     {
       id: 'catalog',
@@ -134,7 +134,7 @@ export const Navigation: React.FC = () => {
       role="navigation"
       aria-label="Subsurface Intelligence Workstations"
       className={`hidden md:flex ${
-        isExpanded ? 'w-52' : 'w-16'
+        isExpanded ? 'w-56' : 'w-16'
       } shrink-0 h-full border-r border-white/10 liquid-glass-elevated py-2.5 flex-col justify-between items-center z-20 select-none transition-all duration-200`}
     >
       {/* Top Module Icons & Labels Rail */}
@@ -155,16 +155,16 @@ export const Navigation: React.FC = () => {
                 }
               }}
               className={`w-full ${
-                isExpanded ? 'px-3 py-2.5 justify-start gap-3' : 'py-3 justify-center'
-              } rounded-xl transition-all relative group flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer ${
+                isExpanded ? 'px-3 py-2 justify-start gap-3' : 'py-2.5 justify-center'
+              } rounded-lg transition-colors relative group flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 cursor-pointer ${
                 isActive
-                  ? 'bg-gradient-to-r from-cyan-500/25 to-sky-600/15 text-cyan-300 border border-cyan-400/60 glow-cyan-sm'
-                  : 'text-slate-300 hover:text-white hover:bg-white/[0.07] border border-transparent'
+                  ? 'bg-slate-800/80 text-sky-300 border border-slate-700'
+                  : 'text-slate-300 hover:text-white hover:bg-white/[0.05] border border-transparent'
               }`}
             >
               {/* Active left indicator bar */}
               {isActive && (
-                <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-cyan-400 shadow-[0_0_8px_#38bdf8]" />
+                <div className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-sky-400" />
               )}
 
               {item.icon}
@@ -181,19 +181,19 @@ export const Navigation: React.FC = () => {
               )}
 
               {isExpanded && (
-                <span className="text-[10px] font-mono text-slate-400 bg-slate-900/80 px-1.5 py-0.5 rounded border border-white/10">
+                <span className="text-[10px] font-mono text-slate-500 tabular-nums">
                   {index + 1}
                 </span>
               )}
 
               {/* Tooltip on right when collapsed */}
               {!isExpanded && !isActive && (
-                <div className="absolute left-full ml-3 px-3 py-2 liquid-glass-elevated rounded-xl text-xs font-sans text-slate-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex items-center gap-2.5 shadow-2xl">
+                <div className="absolute left-full ml-2.5 px-2.5 py-1.5 liquid-glass-elevated rounded-lg text-xs font-sans text-slate-100 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 flex items-center gap-2.5 shadow-xl">
                   <div className="flex flex-col items-start">
                     <span className="font-semibold">{item.label}</span>
                     <span className="text-[10px] text-slate-400 font-mono">{item.subtitle}</span>
                   </div>
-                  <span className="text-[10px] font-mono text-cyan-300 bg-slate-900/90 px-1.5 py-0.5 rounded border border-white/10">
+                  <span className="text-[10px] font-mono text-slate-500 tabular-nums">
                     {index + 1}
                   </span>
                 </div>
@@ -218,9 +218,8 @@ export const Navigation: React.FC = () => {
           {isExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
         </button>
 
-        <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" title="System Online" />
-          <span className="tracking-widest uppercase">{isExpanded ? 'TERRANEXUS 4D' : '4D'}</span>
+        <div className="flex items-center justify-center text-[10px] font-mono text-slate-400 pt-0.5">
+          <span className="tracking-widest uppercase font-semibold">{isExpanded ? 'TERRANEXUS 4D' : '4D'}</span>
         </div>
       </div>
     </aside>

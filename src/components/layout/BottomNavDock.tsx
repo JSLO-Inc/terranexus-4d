@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTerranexusStore, ActiveModule } from '../../state/useTerranexusStore';
-import { Globe, Droplet, Sprout, Wheat, Layers, Sparkles, TreePine, Network, Bot } from 'lucide-react';
+import { Globe, Droplet, Sprout, Wheat, Layers, Gem, TreePine, Network, Bot } from 'lucide-react';
 
 interface DockItem {
   id: ActiveModule;
@@ -40,7 +40,7 @@ export const BottomNavDock: React.FC = () => {
     {
       id: 'mineral',
       label: 'Mineral',
-      icon: <Sparkles className="w-4 h-4" />
+      icon: <Gem className="w-4 h-4" />
     },
     {
       id: 'environment',
@@ -60,26 +60,31 @@ export const BottomNavDock: React.FC = () => {
   ];
 
   return (
-    <div className="glass-panel flex items-center gap-1 p-1.5 rounded-2xl shadow-2xl select-none overflow-x-auto max-w-[95vw]">
+    <nav
+      aria-label="Mobile Module Navigation"
+      className="liquid-glass-elevated flex items-center gap-0.5 p-1 rounded-2xl shadow-2xl select-none overflow-x-auto max-w-[calc(100vw-16px)]"
+    >
       {dockItems.map((item) => {
         const isActive = activeModule === item.id;
         return (
           <button
             key={item.id}
+            type="button"
             onClick={() => setActiveModule(item.id)}
-            className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-all shrink-0 cursor-pointer ${
+            aria-current={isActive ? 'page' : undefined}
+            className={`flex items-center gap-1 px-2 py-1.5 min-h-[38px] rounded-xl text-[11px] font-medium transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               isActive
-                ? 'bg-sky-500/20 border border-sky-400/80 text-cyan-300 shadow-lg shadow-sky-500/10 font-semibold'
-                : 'border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                ? 'bg-cyan-500/20 border border-cyan-400/70 text-cyan-200 font-semibold glow-cyan-sm'
+                : 'border border-transparent text-slate-300 hover:text-white hover:bg-white/[0.06]'
             }`}
           >
-            <span className={isActive ? 'text-cyan-400' : 'text-slate-400'}>
+            <span className={isActive ? 'text-cyan-300' : 'text-slate-400'}>
               {item.icon}
             </span>
-            <span className="tracking-wide">{item.label}</span>
+            <span className="tracking-tight">{item.label}</span>
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 };

@@ -4,7 +4,6 @@ import { useTerranexusStore } from './state/useTerranexusStore';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import { Inspector } from './components/layout/Inspector';
-import { TimeControl } from './components/layout/TimeControl';
 import { DepthControl } from './components/layout/DepthControl';
 import { CesiumGlobe } from './components/globe/CesiumGlobe';
 import { Subsurface3D } from './components/subsurface/Subsurface3D';
@@ -24,7 +23,12 @@ import { InitialSearchGateway } from './components/location/InitialSearchGateway
 import { NexusTime } from './components/time/NexusTime';
 import { ModuleErrorBoundary } from './components/common/ModuleErrorBoundary';
 import { BottomNavDock } from './components/layout/BottomNavDock';
-import { ArrowLeft, Layers, Sliders, Box, FileDown } from 'lucide-react';
+import { ArrowLeft, Layers, Sliders, FileDown } from 'lucide-react';
+import { prefersReducedMotion } from './utils/motion';
+import {
+  resolveExtractionTransitionSpec,
+  runContainerTransitionTimeline
+} from './utils/extractionStageTransition';
 import { ExtractionAnimationStage } from './types/eic';
 
 const EXTRACTION_STAGE_LABELS: Record<ExtractionAnimationStage, { step: number; title: string; subtitle: string }> = {
@@ -56,6 +60,7 @@ export const App: React.FC = () => {
     isGlobeFullscreen,
     setIsGlobeFullscreen,
     extractionStage,
+    setExtractionStage,
     fetchEicSynthesis,
     setShowReportModal
   } = useTerranexusStore();
@@ -79,57 +84,72 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showDepthPanel, isGlobeFullscreen, setIsGlobeFullscreen]);
 
-  const showExtractionHud =
-    extractionStage !== 'GLOBE_IDLE' &&
-    extractionStage !== 'CUTOUT_READY' &&
-    extractionStage !== 'GLOBE_RESTORED';
-
-  const stageMeta = EXTRACTION_STAGE_LABELS[extractionStage] || EXTRACTION_STAGE_LABELS.GLOBE_IDLE;
   const globeContainerRef = React.useRef<HTMLDivElement>(null);
-  const extractionProgressBarRef = React.useRef<HTMLDivElement>(null);
+  const cutoutContainerRef = React.useRef<HTMLDivElement>(null);
+  const transitionTimelineRef = React.useRef<gsap.core.Timeline | null>(null);
 
-  // High-precision GSAP interpolation for Globe container transform during 3D Cutout extraction
-  React.useEffect(() => {
-    const el = globeContainerRef.current;
-    if (!el) return;
-    const isDescending =
-      viewMode !== 'split' &&
-      (extractionStage === 'EXTRACTION_IN_PROGRESS' ||
-        extractionStage === 'SUBSURFACE_REVEAL' ||
-        extractionStage === 'FOREGROUND_TRANSITION');
+  const transitionSpec = resolveExtractionTransitionSpec(viewMode, extractionStage);
 
-    gsap.killTweensOf(el);
-    gsap.to(el, {
-      y: isDescending ? 36 : 0,
-      scale: isDescending ? 0.972 : 1,
-      opacity: isDescending ? 0.9 : 1,
-      duration: 0.62,
-      ease: 'power3.out',
-      force3D: true,
-      overwrite: 'auto'
+  // Unified GSAP timeline coordinating opacity, transform, visibility & GPU cleanup across globe <-> cutout switches
+  React.useLayoutEffect(() => {
+    if (activeModule !== 'globe' || isInitialSearch || mainView !== 'twin3d') return;
+
+    if (transitionTimelineRef.current) {
+      transitionTimelineRef.current.kill();
+      transitionTimelineRef.current = null;
+    }
+
+    let isDisposed = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const advanceStageSafely = (nextStage: ExtractionAnimationStage) => {
+      if (isDisposed) return;
+      if (fallbackTimer !== null) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+      }
+      transitionTimelineRef.current = null;
+      setExtractionStage(nextStage);
+    };
+
+    const tl = runContainerTransitionTimeline({
+      globeEl: globeContainerRef.current,
+      cutoutEl: cutoutContainerRef.current,
+      viewMode,
+      extractionStage,
+      reducedMotion: prefersReducedMotion(),
+      onStageComplete: advanceStageSafely
     });
+    transitionTimelineRef.current = tl;
+
+    if (tl && transitionSpec.nextSettledStage) {
+      const targetNext = transitionSpec.nextSettledStage;
+      fallbackTimer = setTimeout(() => {
+        advanceStageSafely(targetNext);
+      }, Math.round((transitionSpec.durationSec + 0.25) * 1000));
+    }
 
     return () => {
-      gsap.killTweensOf(el);
+      isDisposed = true;
+      if (fallbackTimer !== null) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+      }
+      if (transitionTimelineRef.current) {
+        transitionTimelineRef.current.kill();
+        transitionTimelineRef.current = null;
+      }
     };
-  }, [extractionStage, viewMode]);
-
-  // High-precision GSAP interpolation for Extraction HUD progress bar
-  React.useEffect(() => {
-    const barEl = extractionProgressBarRef.current;
-    if (!barEl || !showExtractionHud) return;
-    const targetPct = Math.max(12, (stageMeta.step / 8) * 100);
-    gsap.killTweensOf(barEl);
-    gsap.to(barEl, {
-      width: `${targetPct}%`,
-      duration: 0.28,
-      ease: 'power2.out',
-      overwrite: 'auto'
-    });
-    return () => {
-      gsap.killTweensOf(barEl);
-    };
-  }, [stageMeta.step, showExtractionHud]);
+  }, [
+    viewMode,
+    extractionStage,
+    activeModule,
+    isInitialSearch,
+    mainView,
+    setExtractionStage,
+    transitionSpec.durationSec,
+    transitionSpec.nextSettledStage
+  ]);
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#030712] text-slate-100 font-sans flex flex-col">
@@ -155,52 +175,29 @@ export const App: React.FC = () => {
             ) : (
               /* Optional Mode: Full 3D Digital Twin & Subsurface 3D Cutaway */
               <>
-                <div className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-[#050811]">
-                  {/* 8-Stage Cinematic Globe-to-Cutout Extraction HUD Banner */}
-                  {showExtractionHud && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
-                      <div className="px-4 py-2.5 rounded-2xl bg-slate-950/90 border border-cyan-500/50 shadow-2xl backdrop-blur-xl flex items-center gap-3.5 min-w-[340px]">
-                        <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shrink-0">
-                          <Box className="w-4 h-4 animate-pulse" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 text-[10px] font-mono text-cyan-400 uppercase tracking-wider">
-                            <span>STAGE {stageMeta.step}/8 • {extractionStage}</span>
-                            <span>{Math.round((stageMeta.step / 8) * 100)}%</span>
-                          </div>
-                          <div className="text-xs font-bold text-white truncate">{stageMeta.title}</div>
-                          <div className="text-[10px] text-slate-400 truncate">{stageMeta.subtitle}</div>
-                          <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden mt-1.5">
-                            <div
-                              ref={extractionProgressBarRef}
-                              className="h-full bg-gradient-to-r from-cyan-400 to-amber-400"
-                              style={{ width: `${Math.max(12, (stageMeta.step / 8) * 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                <div className="flex-1 relative w-full h-full min-h-0 overflow-hidden bg-[#060911]">
+                  {/* Cesium 3D Globe (GSAP controls opacity/visibility/pointerEvents exclusively for zero-flicker crossfade) */}
+                  <div
+                    ref={globeContainerRef}
+                    aria-hidden={!transitionSpec.globe.visible}
+                    className={`absolute inset-0 h-full ${
+                      viewMode === 'split'
+                        ? 'w-1/2 left-0 z-10'
+                        : transitionSpec.globe.visible
+                        ? 'w-full left-0 z-10'
+                        : 'w-full left-0 z-0'
+                    }`}
+                  >
+                    <ModuleErrorBoundary moduleName="Cesium 3D Globe">
+                      <CesiumGlobe />
+                    </ModuleErrorBoundary>
+                  </div>
 
-                  {/* Cesium 3D Globe - Protected against zero-width allocation & GSAP-interpolated during extraction */}
-                  {viewMode !== 'cutaway' && viewMode !== 'underground' && (
+                  {/* Subsurface 3D Cutaway Land Block (kept mounted through RETURN_IN_PROGRESS fade-out) */}
+                  {transitionSpec.isCutoutMounted && (
                     <div
-                      ref={globeContainerRef}
-                      className={`absolute inset-0 h-full will-change-transform ${
-                        viewMode === 'split'
-                          ? 'w-1/2 left-0 pointer-events-auto z-10'
-                          : 'w-full left-0 pointer-events-auto z-10'
-                      }`}
-                    >
-                      <ModuleErrorBoundary moduleName="Cesium 3D Globe">
-                        <CesiumGlobe />
-                      </ModuleErrorBoundary>
-                    </div>
-                  )}
-
-                  {/* Subsurface 3D Cutaway Land Block */}
-                  {(viewMode === 'split' || viewMode === 'cutaway' || viewMode === 'underground') && (
-                    <div
+                      ref={cutoutContainerRef}
+                      aria-hidden={!transitionSpec.cutout.visible}
                       className={`absolute inset-0 h-full z-20 ${
                         viewMode === 'split'
                           ? 'left-1/2 w-1/2 border-l border-slate-800/80 shadow-2xl'
@@ -215,44 +212,44 @@ export const App: React.FC = () => {
                 </div>
 
                 {/* Docked In-Flow Bottom Visualization Toolbar */}
-                <footer className="h-12 shrink-0 border-t border-white/10 liquid-glass-elevated px-4 flex items-center justify-between gap-3 z-20 select-none overflow-hidden">
-                  {/* Left: Observation Timeline & Depth Controls */}
+                <footer className="h-11 shrink-0 border-t border-slate-800/80 bg-[#070b14] px-3 md:px-4 flex items-center justify-between gap-3 z-20 select-none overflow-hidden mb-14 md:mb-0">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <TimeControl />
-
-                    {/* Depth & Aquifer Controls Drawer Toggle */}
                     <button
+                      type="button"
                       onClick={() => setShowDepthPanel(!showDepthPanel)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                      aria-expanded={showDepthPanel}
+                      aria-label="Toggle Subsurface Depth Deck"
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-mono transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                         showDepthPanel
-                          ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold shadow-sm'
-                          : 'liquid-glass-pill text-slate-200 hover:text-amber-300 hover:border-amber-400/50'
+                          ? 'bg-amber-500/15 border-amber-400/70 text-amber-200 font-semibold'
+                          : 'bg-slate-900 border-slate-700/80 text-slate-300 hover:text-amber-200 hover:border-amber-400/50'
                       }`}
                       title="Toggle Subsurface Depth & Water Controls"
                     >
                       <Sliders className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                       <span className="hidden sm:inline">Depth Deck</span>
-                      <span className="text-amber-400 font-bold">(-{depthMeters}m)</span>
+                      <span className="text-amber-300 font-semibold">(-{depthMeters}m)</span>
                     </button>
                   </div>
 
-                  {/* Right: Real Piezometric Level Status & Inspector Toggle */}
                   <div className="flex items-center gap-2.5 shrink-0">
-                    <div className="hidden 2xl:flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-pill text-xs font-mono whitespace-nowrap">
-                      <span className="text-cyan-300 font-medium">
-                        WT: {activeGroundwaterDepthMbgl !== null ? `-${activeGroundwaterDepthMbgl.toFixed(1)} mbgl` : 'Sparse (<50km)'}
+                    <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-[11px] font-mono whitespace-nowrap tabular-nums">
+                      <span className="text-sky-300">
+                        WT: {activeGroundwaterDepthMbgl !== null ? `-${activeGroundwaterDepthMbgl.toFixed(1)} mbgl` : 'Unmonitored'}
                       </span>
-                      <span className="text-slate-600">•</span>
-                      <span className="text-amber-300 font-medium">Slice: -{depthMeters}m</span>
+                      <span className="text-slate-600">|</span>
+                      <span className="text-amber-300">Slice: -{depthMeters}m</span>
                     </div>
 
                     {!inspectorOpen && (
                       <button
+                        type="button"
                         onClick={() => setInspectorOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-all shadow-sm whitespace-nowrap cursor-pointer"
+                        aria-label="Open Location and Evidence Inspector"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700/80 hover:border-sky-400/60 text-sky-300 text-xs font-mono transition-colors whitespace-nowrap cursor-pointer"
                         title="Open Location & Evidence Inspector"
                       >
-                        <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                        <Layers className="w-3.5 h-3.5 text-sky-400" />
                         <span>Inspect Locus</span>
                       </button>
                     )}
@@ -265,8 +262,10 @@ export const App: React.FC = () => {
                     <div className="relative">
                       <DepthControl />
                       <button
+                        type="button"
                         onClick={() => setShowDepthPanel(false)}
-                        className="absolute top-3 right-3 p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs"
+                        aria-label="Close Depth Deck"
+                        className="absolute top-3 right-3 p-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs cursor-pointer"
                         title="Close Depth Deck"
                       >
                         ✕
@@ -278,25 +277,29 @@ export const App: React.FC = () => {
             )
           ) : (
             /* Dedicated Scientific Workstations (Hydro, Soil, Agri, Strata, Mineral, Environment, EIC, Time, AI, Catalog) */
-            <div className="flex-1 overflow-hidden flex flex-col bg-[#080c14]">
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-[#080c14]">
               {/* Module Header Bar */}
-              <div className="h-10 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 bg-slate-950/90">
+              <div className="h-11 border-b border-white/10 px-3 md:px-4 flex items-center justify-between gap-2 shrink-0 liquid-glass-elevated">
                 <button
+                  type="button"
                   onClick={() => setActiveModule('globe')}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg liquid-glass-pill text-cyan-300 text-xs font-mono whitespace-nowrap transition-colors cursor-pointer"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Return to 3D Digital Twin</span>
+                  <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline">Return to 3D Twin</span>
+                  <span className="sm:hidden">Twin</span>
                 </button>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 min-w-0">
                   <button
+                    type="button"
                     onClick={() => setShowReportModal(true)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 text-[11px] font-mono transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-400/40 hover:border-emerald-300 text-emerald-200 text-[11px] font-mono whitespace-nowrap transition-colors cursor-pointer"
                   >
-                    <FileDown className="w-3 h-3" />
-                    <span>Export PDF Dossier</span>
+                    <FileDown className="w-3 h-3 shrink-0" />
+                    <span className="hidden sm:inline">Export PDF Dossier</span>
+                    <span className="sm:hidden">PDF</span>
                   </button>
-                  <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+                  <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider truncate hidden md:inline">
                     Module: {activeModule}
                   </span>
                 </div>
@@ -365,7 +368,9 @@ export const App: React.FC = () => {
         {/* Floating Exit Fullscreen Control */}
         {isGlobeFullscreen && (
           <button
+            type="button"
             onClick={() => setIsGlobeFullscreen(false)}
+            aria-label="Exit Fullscreen Exploration Mode"
             className="absolute top-4 right-4 z-50 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border border-amber-500/60 text-amber-300 font-mono text-xs shadow-2xl backdrop-blur-md hover:bg-slate-900 transition-all cursor-pointer"
             title="Exit Immersive Fullscreen Mode (Esc)"
           >

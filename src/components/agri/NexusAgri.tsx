@@ -31,7 +31,7 @@ export const NexusAgri: React.FC = () => {
   if (isEicLoading || !agri || !soil) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 bg-[#060a12] text-slate-300 font-mono text-sm">
-        <div className="flex flex-col items-center gap-3 liquid-glass-panel p-6 rounded-2xl border border-emerald-500/30">
+        <div className="flex flex-col items-center gap-3 liquid-glass p-6 rounded-2xl border border-emerald-500/30">
           <div className="w-7 h-7 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
           <span>Synthesizing Agro-Climatic & Crop Suitability Intelligence for {selectedLocation.name}...</span>
         </div>
@@ -42,9 +42,9 @@ export const NexusAgri: React.FC = () => {
   const bw = agri.borewellAssessment;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#060a12] text-slate-100">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 space-y-5 bg-[#060a12] text-slate-100">
       {/* Header Bar */}
-      <div className="liquid-glass-panel rounded-2xl p-4 md:p-5 border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="liquid-glass rounded-2xl p-4 md:p-5 border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
@@ -94,7 +94,7 @@ export const NexusAgri: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowReportModal(true, 'AGRI')}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-gradient-to-r from-emerald-500/25 to-teal-500/20 border border-emerald-400/60 text-emerald-200 hover:border-emerald-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/60 text-emerald-200 hover:border-emerald-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
           >
             <FileText className="w-3.5 h-3.5 text-emerald-300" />
             <span>Generate Agri PDF Report</span>
@@ -104,7 +104,7 @@ export const NexusAgri: React.FC = () => {
 
       {/* Farmer Summary & Interactive Field Context Bar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-8 liquid-glass-panel rounded-2xl p-4 border border-emerald-500/30 space-y-2.5">
+        <div className="lg:col-span-8 liquid-glass rounded-2xl p-4 border border-emerald-500/30 space-y-2.5">
           <div className="flex items-center justify-between">
             <h2 className="text-xs font-mono uppercase tracking-wider text-emerald-300 font-bold flex items-center gap-2">
               <Sprout className="w-4 h-4 text-emerald-400" />
@@ -129,7 +129,7 @@ export const NexusAgri: React.FC = () => {
         </div>
 
         {/* Interactive Farm Parcel Calculator */}
-        <div className="lg:col-span-4 liquid-glass-panel rounded-2xl p-4 border border-white/10 space-y-3">
+        <div className="lg:col-span-4 liquid-glass rounded-2xl p-4 border border-white/10 space-y-3">
           <div className="text-xs font-mono uppercase text-cyan-300 font-bold">
             Field Parcel Water Budget Calculator
           </div>
@@ -192,7 +192,7 @@ export const NexusAgri: React.FC = () => {
             return (
               <div
                 key={crop.cropId}
-                className="liquid-glass-panel rounded-2xl p-4 border border-white/10 flex flex-col justify-between space-y-3"
+                className="liquid-glass rounded-2xl p-4 border border-white/10 flex flex-col justify-between space-y-3"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
@@ -262,7 +262,7 @@ export const NexusAgri: React.FC = () => {
       {/* Section 2: Borewell Exploration Suitability & Water Conservation Engineering */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left 7 cols: Borewell & Groundwater Access Assessment */}
-        <div className="lg:col-span-7 liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-4">
+        <div className="lg:col-span-7 liquid-glass rounded-2xl p-5 border border-white/10 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div>
               <span className="text-[10px] font-mono uppercase text-cyan-400">
@@ -313,7 +313,7 @@ export const NexusAgri: React.FC = () => {
         </div>
 
         {/* Right 5 cols: Location-Specific Water Conservation & Recharge Engineering */}
-        <div className="lg:col-span-5 liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3.5">
+        <div className="lg:col-span-5 liquid-glass rounded-2xl p-5 border border-white/10 space-y-3.5">
           <div>
             <span className="text-[10px] font-mono uppercase text-emerald-400">
               Sustainable Aquifer Management

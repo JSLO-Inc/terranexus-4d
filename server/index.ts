@@ -123,7 +123,8 @@ app.get('/api/health', (req, res) => {
     platform: 'TERRANEXUS 4D Backend API',
     status: 'ONLINE',
     timestamp: new Date().toISOString(),
-    geminiConfigured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 5)
+    geminiConfigured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 5),
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-4-hydrogen'
   });
 });
 
@@ -588,8 +589,8 @@ const handleAiExplanationRoute = async (req: express.Request, res: express.Respo
       return res.status(400).json({ success: false, error: 'Query is too short (minimum 2 characters required)' });
     }
 
-    if (cleanQuery.length > 500) {
-      return res.status(400).json({ success: false, error: 'Query exceeds maximum permitted length (500 characters)' });
+    if (cleanQuery.length > 3000) {
+      return res.status(400).json({ success: false, error: 'Query exceeds maximum permitted length (3000 characters)' });
     }
 
     if (!rawContext || typeof rawContext !== 'object' || !rawContext.location) {
@@ -642,8 +643,8 @@ app.post('/api/ai/stream', async (req, res) => {
     }
 
     const cleanQuery = query.trim();
-    if (cleanQuery.length < 2 || cleanQuery.length > 500) {
-      return res.status(400).json({ success: false, error: 'Query length must be between 2 and 500 characters' });
+    if (cleanQuery.length < 2 || cleanQuery.length > 3000) {
+      return res.status(400).json({ success: false, error: 'Query length must be between 2 and 3000 characters' });
     }
 
     if (!context || typeof context !== 'object' || !context.location) {
@@ -704,6 +705,12 @@ app.post('/api/ai/stream', async (req, res) => {
 
 // 404 Fallback Handler (Replaces raw Express "Cannot GET <path>")
 app.use('*', (req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      error: `API endpoint not found: ${req.method} ${req.originalUrl}`
+    });
+  }
   const isHtml = req.accepts('html');
   if (isHtml) {
     return res.status(404).send(`<!DOCTYPE html>
@@ -742,6 +749,17 @@ app.use('*', (req, res) => {
     error: `Endpoint not found: ${req.method} ${req.originalUrl}`,
     apiDashboard: 'http://localhost:3001/',
     clientApp: 'http://localhost:3000'
+  });
+});
+
+// Global Error Handler — guarantees JSON responses for /api/* routes (prevents <!doctype HTML errors)
+app.use((err: any, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const status = typeof err?.status === 'number' ? err.status : 500;
+  console.error('[TERRANEXUS 4D Server Error]', err?.message || err);
+  if (res.headersSent) return;
+  res.status(status).json({
+    success: false,
+    error: err?.message || 'Internal server error'
   });
 });
 

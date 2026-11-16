@@ -5,16 +5,15 @@ import {
   verifyScientificReport,
   buildReportSections,
   generateValidPdf14Document,
-  getReportTypeTitle
+  getReportTypeTitle,
+  buildFallbackEicFromDossier
 } from '../../utils/pdfReportGenerator';
 import {
   FileText,
   Download,
   CheckCircle2,
   X,
-  ShieldCheck,
-  AlertTriangle,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 
 const REPORT_TYPES: Array<{ id: ScientificReportType; label: string; subtitle: string }> = [
@@ -39,21 +38,35 @@ export const ScientificReportModal: React.FC = () => {
 
   const [downloadedNotice, setDownloadedNotice] = useState<string | null>(null);
 
+  const effectiveEic = useMemo(
+    () => eicSynthesis || buildFallbackEicFromDossier(selectedLocation, currentDossier),
+    [eicSynthesis, selectedLocation, currentDossier]
+  );
+
   const verification = useMemo(
-    () => verifyScientificReport(reportModalType, eicSynthesis, currentDossier),
-    [reportModalType, eicSynthesis, currentDossier]
+    () => verifyScientificReport(reportModalType, effectiveEic, currentDossier),
+    [reportModalType, effectiveEic, currentDossier]
   );
 
   const sections = useMemo(
-    () => (eicSynthesis ? buildReportSections(reportModalType, eicSynthesis, currentDossier) : []),
-    [reportModalType, eicSynthesis, currentDossier]
+    () => buildReportSections(reportModalType, effectiveEic, currentDossier),
+    [reportModalType, effectiveEic, currentDossier]
   );
+
+  React.useEffect(() => {
+    if (!showReportModal) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowReportModal(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showReportModal, setShowReportModal]);
 
   if (!showReportModal) return null;
 
   const handleDownloadPdf = () => {
-    if (!eicSynthesis || !verification.overallVerified) return;
-    const pdfContent = generateValidPdf14Document(reportModalType, eicSynthesis, currentDossier);
+    if (!verification.overallVerified) return;
+    const pdfContent = generateValidPdf14Document(reportModalType, effectiveEic, currentDossier);
     const blob = new Blob([pdfContent], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const cleanName = (selectedLocation.name || 'Location')
@@ -73,12 +86,12 @@ export const ScientificReportModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Automated Scientific PDF Report Generator"
     >
-      <div className="liquid-glass-elevated w-full max-w-5xl max-h-[90vh] rounded-2xl border border-cyan-500/40 shadow-2xl flex flex-col overflow-hidden">
+      <div className="liquid-glass-modal w-full max-w-5xl max-h-[90vh] rounded-2xl border border-cyan-500/40 shadow-2xl flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-slate-950/80">
           <div className="flex items-center gap-3">
@@ -106,7 +119,7 @@ export const ScientificReportModal: React.FC = () => {
         </div>
 
         {/* Report Type Selector Strip */}
-        <div className="px-5 py-3 border-b border-white/10 bg-slate-900/70 flex items-center gap-2 overflow-x-auto shrink-0">
+        <div className="px-5 py-3 border-b border-white/10 bg-slate-900/70 flex flex-wrap items-center gap-1.5 shrink-0">
           {REPORT_TYPES.map((rt) => {
             const active = rt.id === reportModalType;
             return (
@@ -117,7 +130,7 @@ export const ScientificReportModal: React.FC = () => {
                   setDownloadedNotice(null);
                   setShowReportModal(true, rt.id);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all cursor-pointer border ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono whitespace-nowrap transition-all cursor-pointer border ${
                   active
                     ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 font-semibold shadow'
                     : 'bg-slate-950/70 border-white/10 text-slate-400 hover:text-white'
@@ -172,14 +185,14 @@ export const ScientificReportModal: React.FC = () => {
                   PUBLICATION PREVIEW • PDF 1.4 VECTOR DOCUMENT
                 </div>
                 <h3 className="text-sm font-bold text-white mt-0.5">
-                  {eicSynthesis?.location.formattedAddress || selectedLocation.name}
+                  {effectiveEic.location.formattedAddress}
                 </h3>
                 <div className="text-[11px] font-mono text-slate-400">
-                  Coordinates: {selectedLocation.latitude.toFixed(4)}°, {selectedLocation.longitude.toFixed(4)}° • Elevation: {selectedLocation.elevationMeters}m ASL
+                  Coordinates: {effectiveEic.location.latitude.toFixed(4)}°, {effectiveEic.location.longitude.toFixed(4)}° • Elevation: {effectiveEic.location.elevationM}m ASL
                 </div>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-amber-300 border border-amber-400/30">
-                {eicSynthesis?.overallAvailabilityState || 'VERIFIED_CACHED'}
+                {effectiveEic.overallAvailabilityState}
               </span>
             </div>
 
@@ -222,7 +235,7 @@ export const ScientificReportModal: React.FC = () => {
               type="button"
               disabled={!verification.overallVerified}
               onClick={handleDownloadPdf}
-              className="px-4 py-1.5 rounded-xl text-xs font-mono font-bold bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+              className="px-4 py-1.5 rounded-xl text-xs font-mono font-bold bg-sky-500 hover:bg-sky-400 text-slate-950 border border-sky-300/60 flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50 transition-colors"
             >
               <Download className="w-4 h-4" />
               <span>Download Verified PDF Report</span>
@@ -233,3 +246,4 @@ export const ScientificReportModal: React.FC = () => {
     </div>
   );
 };
+

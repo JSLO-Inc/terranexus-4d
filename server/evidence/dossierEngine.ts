@@ -7,6 +7,8 @@
  */
 
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import {
   LocationContext,
   DossierResponse,
@@ -27,6 +29,8 @@ import { DataIntegrityGate } from './dataIntegrityGate';
 import { reverseGeocodeCoordinate } from '../services/geocodingService';
 import { isCoordinateWithinIndia } from '../services/coordinateParser';
 import { providerRegistry } from '../providers/providerRegistry';
+import { PROCESSED_DIR } from '../ingestion/cacheManager';
+import { resolveNearestGraceLocationId } from '../ingestion/gracePipeline';
 
 function resolveGlobalWhymapAquiferContext(lat: number, lon: number, primaryLithology: string) {
   if (lat > 14 && lat < 32 && lon > 20 && lon <= 35) {
@@ -254,93 +258,153 @@ export class LocationEvidenceEngine {
       this.soilProvider.getObservations(lat, lon)
     ]);
 
-    // 2.1 Regional surface soil moisture (NASA SMAP 36-km footprint)
-    const smapMoisture = Math.max(0.08, Math.min(0.38, (gpmExec.data.rainfall30dMm / 150) * 0.25 + 0.12));
-    const smapObs: NormalizedObservation = {
-      id: `obs-smap-moisture-${Date.now()}`,
-      kind: 'remote_observation',
-      category: 'remote',
-      parameter: 'regional_surface_soil_moisture_smap',
-      name: 'Regional Surface Soil Moisture (NASA SMAP 36-km Footprint)',
-      value: Math.round(smapMoisture * 100) / 100,
-      displayValue: `${(smapMoisture * 100).toFixed(1)}% vol (${(Math.round(smapMoisture * 100) / 100).toFixed(2)} m³/m³)`,
-      units: 'm³/m³ volumetric soil water',
-      source: 'NASA SMAP Radiometer L3 Enhanced Product',
-      source_url_or_identifier: 'https://smap.jpl.nasa.gov/data/',
-      observation_time: new Date().toISOString(),
-      observed_at: new Date().toISOString(),
-      ingested_at: new Date().toISOString(),
-      geometry: { type: 'Point', coordinates: [lon, lat] },
-      spatial_support_m: 36000, // 36 km footprint
-      distance_to_nearest_measurement_m: 0,
-      method: 'Spaceborne L-band radiometer brightness temperature inversion',
-      quality_flags: ['SATELLITE_GRIDDED', 'PROVISIONAL'],
-      freshness: '36-km global satellite pass',
-      uncertainty: '±0.04 m³/m³ volumetric soil moisture accuracy',
-      do_not_use_for: [
-        'neighborhood_soil_moisture',
-        'field_irrigation_scheduling',
-        'foundation_soil_mechanics'
-      ],
-      datum: 'WGS84',
-      licence_or_terms_ref: 'NASA Open Data Policy (Earthdata)',
-      raw_payload_checksum: crypto.createHash('sha256').update(JSON.stringify({ smapMoisture, lat, lon })).digest('hex'),
-      notes: 'NASA SMAP observes large-scale regional moisture across a 36 km footprint. NEVER use for site-specific or property-level moisture claims.'
-    };
+    // 2.1 Live assimilated surface soil moisture (Open-Meteo ECMWF IFS / ERA5-Land 0-3cm)
+    const liveSoilMoisture = gpmExec.data?.soilMoistureTopCm ?? null;
+    const climateObsDate = gpmExec.data?.observationDate || new Date().toISOString().slice(0, 10);
+    const smapObs: NormalizedObservation = liveSoilMoisture !== null
+      ? {
+          id: `obs-ecmwf-soil-moisture-${Date.now()}`,
+          kind: 'remote_observation',
+          category: 'remote',
+          parameter: 'regional_surface_soil_moisture_ecmwf',
+          name: 'Surface Soil Moisture (0–3 cm ECMWF IFS Assimilation)',
+          value: liveSoilMoisture,
+          displayValue: `${(liveSoilMoisture * 100).toFixed(1)}% vol (${liveSoilMoisture.toFixed(3)} m³/m³)`,
+          units: 'm³/m³ volumetric soil water',
+          source: 'ECMWF IFS / ERA5-Land Soil Moisture Analysis (Open-Meteo)',
+          source_url_or_identifier: 'https://open-meteo.com/en/docs',
+          observation_time: climateObsDate,
+          observed_at: climateObsDate,
+          ingested_at: new Date().toISOString(),
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          spatial_support_m: 9000,
+          distance_to_nearest_measurement_m: 0,
+          method: 'Numerical weather prediction satellite-assimilated 0–3 cm root/surface soil water balance',
+          quality_flags: ['QC_PASSED', 'SATELLITE_GRIDDED'],
+          freshness: `Assimilated as of ${climateObsDate}`,
+          uncertainty: '±0.04 m³/m³ regional grid accuracy',
+          do_not_use_for: [
+            'site_geotechnical_moisture_certification',
+            'precision_drip_irrigation_scheduling'
+          ],
+          datum: 'WGS84',
+          licence_or_terms_ref: 'CC BY 4.0 (Open-Meteo / ECMWF)',
+          raw_payload_checksum: crypto.createHash('sha256').update(JSON.stringify({ liveSoilMoisture, lat, lon, climateObsDate })).digest('hex'),
+          notes: 'Live volumetric topsoil water content at ~9 km grid cell resolution.'
+        }
+      : {
+          id: `obs-ecmwf-soil-moisture-unavail-${Date.now()}`,
+          kind: 'unavailable',
+          category: 'unavailable',
+          parameter: 'regional_surface_soil_moisture_ecmwf',
+          name: 'Surface Soil Moisture (0–3 cm Assimilation)',
+          value: null,
+          displayValue: 'Unavailable (Soil Assimilation Offline)',
+          units: 'm³/m³',
+          source: 'ECMWF IFS / Open-Meteo',
+          source_url_or_identifier: 'https://open-meteo.com/en/docs',
+          observation_time: climateObsDate,
+          observed_at: climateObsDate,
+          ingested_at: new Date().toISOString(),
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          spatial_support_m: 9000,
+          distance_to_nearest_measurement_m: null,
+          method: 'Live API unavailable',
+          quality_flags: ['UNAVAILABLE'],
+          freshness: 'Unavailable',
+          uncertainty: null,
+          do_not_use_for: ['site_geotechnical_moisture_certification'],
+          datum: 'WGS84',
+          licence_or_terms_ref: 'CC BY 4.0',
+          raw_payload_checksum: crypto.createHash('sha256').update(JSON.stringify({ unavail: true, lat, lon })).digest('hex'),
+          notes: 'Live surface soil moisture feed could not be reached.'
+        };
 
-    // 2.2 Basin context and total water storage trend (GRACE-FO ~300 km mascon)
-    const isAridRegion =
-      locationContext.administrativeAreas.state?.toLowerCase().includes('rajasthan') ||
-      (locationContext.isWithinIndia && lon < 75.5 && lat > 24 && lat < 30) ||
-      (!locationContext.isWithinIndia && ((lat > 15 && lat < 32 && lon > 15 && lon < 58) || (lat >= -28 && lat <= -18 && lon >= -71 && lon <= -66)));
-    const isNorthWestAlluvial = locationContext.isWithinIndia && lat > 28.0 && lon > 73.5 && lon < 78.5;
-    const isGangeticAlluvial = locationContext.isWithinIndia && lat > 24.0 && lon >= 78.5 && lon < 89.0;
-    const isCoastalDelta = locationContext.isWithinIndia && ((lat < 18.0 && lon > 80.0) || (lat < 13.0 && lon > 79.0));
-    const isGlacialMassLoss = !locationContext.isWithinIndia && (Math.abs(lat) > 60 || (lat >= 45 && lat <= 48 && lon >= 6 && lon <= 12));
+    // 2.2 GRACE-FO Gravimetry check — ONLY emit numeric trend if genuine processed NASA NetCDF archive is present on disk
+    let graceSecularTrendCmYr: number | null = null;
+    let graceObsDate = new Date().toISOString().slice(0, 7);
+    let graceIsGenuine = false;
 
-    const graceSecularTrendCmYr = isNorthWestAlluvial
-      ? -2.85
-      : isGlacialMassLoss
-      ? -2.40
-      : isAridRegion
-      ? -1.65
-      : isGangeticAlluvial
-      ? -1.35
-      : isCoastalDelta
-      ? 0.24
-      : -0.68;
+    if (locationContext.isWithinIndia) {
+      const graceLocId = resolveNearestGraceLocationId(`${lat.toFixed(4)},${lon.toFixed(4)}`);
+      const histFile = path.join(PROCESSED_DIR, `grace_historical_${graceLocId}.json`);
+      if (fs.existsSync(histFile)) {
+        try {
+          const hist = JSON.parse(fs.readFileSync(histFile, 'utf8'));
+          if (typeof hist?.stats?.trendCmPerYear === 'number' && Array.isArray(hist?.records) && hist.records.length > 0) {
+            graceSecularTrendCmYr = hist.stats.trendCmPerYear;
+            graceObsDate = hist.records[hist.records.length - 1]?.date || graceObsDate;
+            graceIsGenuine = true;
+          }
+        } catch {
+          // Leave unavailable if file corrupt
+        }
+      }
+    }
 
-    const graceObs: NormalizedObservation = {
-      id: `obs-grace-tws-${Date.now()}`,
-      kind: 'remote_observation',
-      category: 'remote',
-      parameter: 'basin_water_storage_trend_grace',
-      name: 'Basin Total Water Storage Trend (NASA/GFZ GRACE-FO Tellus)',
-      value: graceSecularTrendCmYr,
-      displayValue: `${graceSecularTrendCmYr > 0 ? '+' : ''}${graceSecularTrendCmYr} cm/year (Regional Mascon Baseline)`,
-      units: 'cm liquid water equivalent / year',
-      source: 'NASA/GFZ GRACE-FO Tellus Mascon Baseline',
-      source_url_or_identifier: 'https://grace.jpl.nasa.gov/',
-      observation_time: '2024-11',
-      observed_at: '2024-11',
-      ingested_at: new Date().toISOString(),
-      geometry: { type: 'Point', coordinates: [lon, lat] },
-      spatial_support_m: 300000, // 300 km footprint
-      distance_to_nearest_measurement_m: 0,
-      method: 'Regional spherical harmonic gravimetry mascon inversion',
-      quality_flags: ['SATELLITE_GRIDDED', 'REGIONAL_MODEL'],
-      freshness: 'Regional multi-year secular trend',
-      uncertainty: '±1.5 cm regional mass uncertainty',
-      do_not_use_for: [
-        'address_level_water_depletion_prediction',
-        'borewell_depth_estimation',
-        'aquifer_storage_volume'
-      ],
-      datum: 'WGS84',
-      licence_or_terms_ref: 'NASA Earth Science Open Data Policy',
-      raw_payload_checksum: crypto.createHash('sha256').update(JSON.stringify({ graceTws: graceSecularTrendCmYr, lat, lon })).digest('hex'),
-      notes: 'GRACE-FO measures total water-storage change across regional-to-continental scale (~300 km footprint), not well depth or remaining aquifer volume. It should never drive an address-level "water will run out" prediction.'
-    };
+    const graceObs: NormalizedObservation = graceIsGenuine && graceSecularTrendCmYr !== null
+      ? {
+          id: `obs-grace-tws-${Date.now()}`,
+          kind: 'remote_observation',
+          category: 'remote',
+          parameter: 'basin_water_storage_trend_grace',
+          name: 'Basin Total Water Storage Trend (NASA/GFZ GRACE-FO Tellus)',
+          value: graceSecularTrendCmYr,
+          displayValue: `${graceSecularTrendCmYr > 0 ? '+' : ''}${graceSecularTrendCmYr} cm/year (NetCDF RL06 Archive)`,
+          units: 'cm liquid water equivalent / year',
+          source: 'NASA/GFZ GRACE-FO Tellus Level-3 Mass Grids (NetCDF-4)',
+          source_url_or_identifier: 'https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC_L3_JPL_RL06_LND_v04',
+          observation_time: graceObsDate,
+          observed_at: graceObsDate,
+          ingested_at: new Date().toISOString(),
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          spatial_support_m: 300000,
+          distance_to_nearest_measurement_m: 0,
+          method: 'Linear regression on ingested NASA PO.DAAC NetCDF-4 RL06 mascon anomaly series',
+          quality_flags: ['SATELLITE_GRIDDED', 'QC_PASSED'],
+          freshness: `Latest granule: ${graceObsDate}`,
+          uncertainty: '±1.5 cm regional mass uncertainty',
+          do_not_use_for: [
+            'address_level_water_depletion_prediction',
+            'borewell_depth_estimation',
+            'aquifer_storage_volume'
+          ],
+          datum: 'WGS84',
+          licence_or_terms_ref: 'NASA Earth Science Open Data Policy',
+          raw_payload_checksum: crypto.createHash('sha256').update(JSON.stringify({ graceTws: graceSecularTrendCmYr, lat, lon })).digest('hex'),
+          notes: 'Derived strictly from ingested NASA PO.DAAC RL06 NetCDF-4 granules (~300 km footprint).'
+        }
+      : {
+          id: `obs-grace-tws-unavail-${Date.now()}`,
+          kind: 'unavailable',
+          category: 'unavailable',
+          parameter: 'basin_water_storage_trend_grace',
+          name: 'Basin Total Water Storage Trend (NASA GRACE-FO)',
+          value: null,
+          displayValue: 'Unavailable (Requires NASA Earthdata Token & NetCDF Ingest)',
+          units: 'cm LWE / year',
+          source: 'NASA/GFZ GRACE-FO Tellus PO.DAAC',
+          source_url_or_identifier: 'https://grace.jpl.nasa.gov/',
+          observation_time: graceObsDate,
+          observed_at: graceObsDate,
+          ingested_at: new Date().toISOString(),
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          spatial_support_m: 300000,
+          distance_to_nearest_measurement_m: null,
+          method: 'Requires authenticated NASA Earthdata NetCDF-4 granule ingestion',
+          quality_flags: ['NOT_CONFIGURED', 'UNAVAILABLE'],
+          freshness: 'No NetCDF-4 archive ingested for this coordinate',
+          uncertainty: null,
+          do_not_use_for: [
+            'address_level_water_depletion_prediction',
+            'borewell_depth_estimation',
+            'aquifer_storage_volume'
+          ],
+          datum: 'WGS84',
+          licence_or_terms_ref: 'NASA Earth Science Open Data Policy',
+          raw_payload_checksum: crypto.createHash('sha256').update(JSON.stringify({ graceUnavail: true, lat, lon })).digest('hex'),
+          notes: 'Honest availability notice: local NetCDF-4 GRACE granules have not been downloaded for this location; TERRANEXUS refuses to fabricate gravimetry trends.'
+        };
 
     const allObservations: NormalizedObservation[] = [
       ...cgwbObs,
@@ -516,31 +580,31 @@ export class LocationEvidenceEngine {
           ? 'AVAILABLE'
           : groundwaterEstimate.estimate_status === 'sufficient_evidence'
           ? 'MODELLED'
-          : 'PARTIALLY_AVAILABLE',
-        dataTier: nearestObs ? 'measured' : 'remote',
+          : 'UNAVAILABLE',
+        dataTier: nearestObs ? 'measured' : groundwaterEstimate.estimate_status === 'sufficient_evidence' ? 'modelled' : 'unavailable',
         primarySource: nearestObs
-          ? 'CGWB / India-WRIS In-Situ Piezometer + NASA GRACE-FO'
-          : 'NASA/GFZ GRACE-FO Mascon Gravimetry + WHYMAP Global Aquifer',
-        spatialResolution: nearestObs ? 'Point (0m) + 300km Basin' : '300km Mascon Footprint',
-        confidencePercent: nearestObs ? 90 : 58,
+          ? 'CGWB / India-WRIS In-Situ Piezometer'
+          : graceIsGenuine
+          ? 'NASA/GFZ GRACE-FO NetCDF + WHYMAP Regional Context'
+          : 'No Local Piezometer Verified (Global Aquifers via WHYMAP)',
+        spatialResolution: nearestObs ? 'Point (0m)' : 'Regional Context',
+        confidencePercent: nearestObs ? 90 : groundwaterEstimate.estimate_status === 'sufficient_evidence' ? 68 : 30,
         summary: nearestObs
-          ? `Nearest well: ${nearestObs.displayValue} • GRACE-FO: ${graceSecularTrendCmYr > 0 ? '+' : ''}${graceSecularTrendCmYr} cm/yr`
-          : `Local well unavailable • Regional GRACE-FO trend: ${graceSecularTrendCmYr > 0 ? '+' : ''}${graceSecularTrendCmYr} cm/yr`,
+          ? `Nearest well: ${nearestObs.displayValue}${graceSecularTrendCmYr !== null ? ` • GRACE: ${graceSecularTrendCmYr > 0 ? '+' : ''}${graceSecularTrendCmYr} cm/yr` : ''}`
+          : 'No in-situ monitoring well verified inside 50 km search radius',
         limitationNote: nearestObs
           ? 'In-situ well reading applies to the monitored piezometer coordinate, not an unmonitored parcel.'
-          : 'Local borehole depth is intentionally withheld where in-situ monitoring wells are absent.'
+          : 'Local borehole depth is intentionally withheld where verified monitoring wells are absent.'
       },
       {
         categoryId: 'soil',
         categoryName: 'D. Soil & Pedological Intelligence',
-        status: 'MODELLED',
-        dataTier: 'modelled',
-        primarySource: locationContext.isWithinIndia
-          ? 'ISRIC SoilGrids v2.0 (250m) + ICAR-NBSS&LUP'
-          : 'ISRIC World Soil Information SoilGrids v2.0 (250m) + NASA SMAP',
-        spatialResolution: '250m Pedological Grid + 36km SMAP',
-        confidencePercent: 82,
-        summary: `250m topsoil texture, pH, organic carbon & available water capacity + ${(smapMoisture * 100).toFixed(1)}% vol SMAP moisture`,
+        status: soilExec.data?.isLiveApi ? 'MODELLED' : 'PARTIALLY_AVAILABLE',
+        dataTier: soilExec.data?.isLiveApi ? 'modelled' : 'unavailable',
+        primarySource: soilExec.data?.sourceLabel || 'ISRIC SoilGrids v2.0 (250m) + ECMWF IFS',
+        spatialResolution: '250m Pedological Grid + 9km Soil Moisture',
+        confidencePercent: soilExec.data?.isLiveApi ? 86 : 45,
+        summary: `${soilExec.data?.soilTextureClass || 'Soil'} (Clay ${soilExec.data?.clayFractionPercent ?? '—'}%, Sand ${soilExec.data?.sandFractionPercent ?? '—'}%)${liveSoilMoisture !== null ? ` • Moisture ${(liveSoilMoisture * 100).toFixed(1)}% vol` : ''}`,
         limitationNote: 'Digital soil mapping (250m) does not replace geotechnical core assays or lab soil testing.'
       },
       {
@@ -548,11 +612,9 @@ export class LocationEvidenceEngine {
         categoryName: 'E. Geological & Lithostratigraphic Intelligence',
         status: 'AVAILABLE',
         dataTier: 'derived',
-        primarySource: locationContext.isWithinIndia
-          ? 'Geological Survey of India (GSI Bhuvan 1:50k) + CGMW GLiM'
-          : 'CGMW / USGS Global Lithological Map (GLiM) & World Stress Map',
-        spatialResolution: locationContext.isWithinIndia ? '1:50,000 Regional Map' : '1:1,000,000 Global Synthesis',
-        confidencePercent: locationContext.isWithinIndia ? 91 : 80,
+        primarySource: gsiData.geologySourceLabel || 'UW Macrostrat v2 / GSI Bhukosh',
+        spatialResolution: gsiData.isLiveMacrostrat ? 'Mapped Geological Units' : 'Regional Geological Synthesis',
+        confidencePercent: gsiData.isLiveMacrostrat || locationContext.isWithinIndia ? 90 : 75,
         summary: `${gsiData.geologicalProvince} — ${gsiData.primaryLithology} (${gsiData.formations.length} mapped units)`,
         limitationNote: 'Regional lithostratigraphic horizons are generalized and require core logging for engineering design.'
       },
@@ -562,35 +624,44 @@ export class LocationEvidenceEngine {
         status: regionalMineralBelt ? 'AVAILABLE' : 'PARTIALLY_AVAILABLE',
         dataTier: 'derived',
         primarySource: locationContext.isWithinIndia
-          ? 'GSI National Geochemical Mapping (NGCM) + Sentinel-2 SWIR'
-          : 'USGS Mineral Resources Data System (MRDS) + Sentinel-2 SWIR',
-        spatialResolution: 'Regional Metallogenic Belt + 20m Spectral',
+          ? 'GSI National Geochemical Mapping (NGCM) + Sentinel-2 STAC'
+          : 'USGS Mineral Resources Data System (MRDS) + Sentinel-2 STAC',
+        spatialResolution: 'Regional Metallogenic Belt + 20m Optical',
         confidencePercent: regionalMineralBelt ? 86 : 64,
         summary: regionalMineralBelt
           ? `${regionalMineralBelt.name}: ${(((regionalMineralBelt as any).commodities || (regionalMineralBelt as any).primaryCommodities || []) as string[]).slice(0, 4).join(', ')}`
-          : 'No major cataloged metallogenic deposit cluster at locus; Sentinel-2 SWIR clay/iron alteration indices active',
+          : 'No major cataloged metallogenic deposit cluster at locus; Sentinel-2 L2A STAC coverage active',
         limitationNote: 'Surface spectral alteration and belt polygons never prove economic ore grade or reserve tonnage.'
       },
       {
         categoryId: 'satellite',
         categoryName: 'G. Environmental, Climate & Satellite Telemetry',
-        status: 'AVAILABLE',
-        dataTier: 'remote',
-        primarySource: 'NASA GPM IMERG v07B + ESA Sentinel-2 L2A + NASA SMAP',
-        spatialResolution: '10m – 20m Optical / 10km Precipitation',
-        confidencePercent: 92,
-        summary: `30d Rainfall: ${rainfallData.rainfall30dMm} mm (${rainfallData.seasonalAnomalyPercent >= 0 ? '+' : ''}${rainfallData.seasonalAnomalyPercent}% anomaly)`,
-        limitationNote: 'GPM IMERG provides 0.1° (~10 km) gridded satellite precipitation, not point rain-gauge totals.'
+        status: rainfallData.isLive ? 'AVAILABLE' : 'PARTIALLY_AVAILABLE',
+        dataTier: rainfallData.isLive ? 'remote' : 'unavailable',
+        primarySource: rainfallData.sourceLabel || 'Open-Meteo ECMWF IFS + Sentinel-2 L2A STAC',
+        spatialResolution: '20m Optical STAC / 9km Atmospheric Grid',
+        confidencePercent: rainfallData.isLive ? 92 : 40,
+        summary: rainfallData.isLive
+          ? `30d Rain: ${rainfallData.rainfall30dMm} mm • Mean T: ${rainfallData.meanTempC ?? '—'} °C (${climateObsDate})`
+          : 'Live meteorological feed unavailable',
+        limitationNote: 'Atmospheric reanalysis provides ~9 km gridded precipitation estimates, not point rain-gauge totals.'
       }
     ];
 
     // 10. Standard limitations
     const limitations: string[] = [
       'Borehole yield, water potability, drilling depth, and construction safety CANNOT be predicted from public spatial layers.',
-      'Surface spectral indices (Sentinel-2) measure surface outcrop reflectance (top microns) only and cannot detect blind subsurface ore bodies.',
+      'Surface satellite metadata (Sentinel-2 STAC) captures top-of-canopy / outcrop reflectance only and cannot detect subsurface ore bodies.',
       'In-situ monitoring wells represent regional monitoring networks and are explicitly attributed with their distance in km.',
-      'Satellite precipitation (GPM IMERG) provides gridded ~10 km spatial averages, not point rain-gauge measurements.'
+      'Gridded climate & soil products (~9 km ECMWF / 250 m SoilGrids) provide statistical estimates, not site-specific lab or gauge measurements.'
     ];
+
+    const observedDates = allObservations
+      .map(o => o.observed_at)
+      .filter((d): d is string => Boolean(d && /^\d{4}-\d{2}/.test(d)))
+      .sort();
+    const oldestObs = observedDates[0] || new Date().toISOString();
+    const newestObs = observedDates[observedDates.length - 1] || new Date().toISOString();
 
     const dossierHash = crypto
       .createHash('sha256')
@@ -610,12 +681,29 @@ export class LocationEvidenceEngine {
         cgwbStateSummary
       },
       climate: {
-        rainfall7dMm: rainfallData.rainfall7dMm,
-        rainfall30dMm: rainfallData.rainfall30dMm,
-        seasonalAnomalyPercent: rainfallData.seasonalAnomalyPercent,
-        source: 'NASA GPM IMERG 0.1° Multi-Satellite Gridded Precipitation',
-        tier: 'remote',
+        rainfall7dMm: rainfallData.isLive ? rainfallData.rainfall7dMm : null,
+        rainfall30dMm: rainfallData.isLive ? rainfallData.rainfall30dMm : null,
+        et030dMm: rainfallData.et030dMm ?? null,
+        meanTempC: rainfallData.meanTempC ?? null,
+        soilMoistureTopCm: liveSoilMoisture,
+        seasonalAnomalyPercent: rainfallData.isLive ? rainfallData.seasonalAnomalyPercent : null,
+        observationDate: climateObsDate,
+        source: rainfallData.sourceLabel,
+        tier: rainfallData.isLive ? 'remote' : 'unavailable',
         imdStatus: this.imdProvider.isConfigured() ? 'CONFIGURED' : 'NOT_CONFIGURED'
+      },
+      soil: {
+        textureClass: soilExec.data.soilTextureClass,
+        clayPercent: soilExec.data.clayFractionPercent,
+        sandPercent: soilExec.data.sandFractionPercent,
+        siltPercent: soilExec.data.siltFractionPercent,
+        ph: soilExec.data.phWater ?? null,
+        organicCarbonGKg: soilExec.data.organicCarbonGKg,
+        bulkDensityGcm3: soilExec.data.bulkDensityGcm3,
+        drainageClass: soilExec.data.drainageClass,
+        surfaceMoistureM3M3: liveSoilMoisture,
+        source: soilExec.data.sourceLabel,
+        dataTier: soilExec.data.isLiveApi ? 'modelled' : 'unavailable'
       },
       terrain: {
         elevationM: terrainData.elevationM,
@@ -639,8 +727,8 @@ export class LocationEvidenceEngine {
         checksum: dossierHash
       },
       freshness: {
-        oldestObservation: '2024-10-15T00:00:00Z',
-        newestObservation: new Date().toISOString(),
+        oldestObservation: oldestObs,
+        newestObservation: newestObs,
         cacheTtlSeconds: 300
       },
       limitations,

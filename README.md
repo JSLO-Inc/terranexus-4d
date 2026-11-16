@@ -1,77 +1,113 @@
 # TERRANEXUS 4D
-### India's Unified Earth Intelligence Platform — Integrating Groundwater, Geology, Remote Sensing & 4D Subsurface Visualisation
+### Open-Source 4D Earth Digital Twin & Subsurface Intelligence Platform — Unifying Groundwater, Lithostratigraphy, Soil Physics, Satellite Gravimetry & Volumetric 3D Cutouts
 
 [![Platform Status](https://img.shields.io/badge/Platform-Production--Grade-06b6d4.svg)](https://github.com/JSLO-Inc/terranexus-4d)
 [![Data Integrity](https://img.shields.io/badge/Scientific_Data_Integrity-Gated_&_Audited-10b981.svg)](https://github.com/JSLO-Inc/terranexus-4d)
-[![Test Suite](https://img.shields.io/badge/Automated_Tests-3%2C520%20Passed%20(18%2F18%20Suites)-34d399.svg)](https://github.com/JSLO-Inc/terranexus-4d)
-[![License](https://img.shields.io/badge/License-MIT-3b82f6.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/Geographic_Scope-Pan--India%20&%20Global-f59e0b.svg)](https://github.com/JSLO-Inc/terranexus-4d)
+[![Test Suite](https://img.shields.io/badge/Automated_Tests-19%20Suites%20Passed%20(100%25)-34d399.svg)](https://github.com/JSLO-Inc/terranexus-4d)
+[![License](https://img.shields.io/badge/License-MIT%20%2B%20Open%20Data%20Compliant-3b82f6.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/Geographic_Scope-Global%20%26%20Deep%20Pan--India-f59e0b.svg)](https://github.com/JSLO-Inc/terranexus-4d)
+
+> **GitHub Repository Description:**  
+> *TERRANEXUS 4D is an open-source 4D Earth Digital Twin and Subsurface Intelligence Platform that lets anyone—from farmers, civil engineers, and urban planners to hydrogeologists, researchers, and everyday citizens—inspect what lies beneath any coordinate on Earth. It fuses orbital satellite gravimetry (NASA GRACE/GRACE-FO), 90m Copernicus DEM terrain, Esri optical imagery, CGWB/GSI/USGS subsurface frameworks, ISRIC SoilGrids, and FAO-56 agro-meteorology into an interactive 3D planetary globe, a photorealistic 3D geological & water-table cutout engine, and a context-grounded scientific AI copilot.*
 
 ---
 
-> ### ⚠️ Mandatory Scientific Integrity Statement
-> **TERRANEXUS 4D is committed to uncompromising scientific data provenance and honest attribution.**  
-> In Earth observation and subsurface hydrology, different categories of data possess fundamentally different levels of certainty. This platform strictly enforces transparent classification labels across all APIs and visual displays:
-> - **`OBSERVED`**: Direct physical in-situ measurements (e.g. tape/piezometric water table dip at a specific well, drill-hole core lithology, surface optical reflectance).
-> - **`DERIVED`**: Computed deterministically from authoritative spatial models (e.g. Copernicus GLO-90 DEM elevations, HydroSHEDS drainage networks, slope angles).
-> - **`MODELLED`**: Mathematical or statistical models (e.g. regional recharge suitability indices, GSI mineral prospectivity models).
-> - **`REGIONAL_AGGREGATION`**: Macro-scale statistical summaries compiled across administrative units (e.g. Central Ground Water Board GEC-2015 state-level total recharge and extraction). **These macro figures do not represent point borehole measurements for arbitrary addresses.**
-> - **`UNAVAILABLE`**: When data coverage does not exist for a requested coordinate, the platform displays an explicit "Data Unavailable" badge. **We never interpolate across state lines, invent unverified boreholes, or label synthetic estimates as live observations.**
+> ### ⚠️ Mandatory Scientific Integrity & Legal Notice
+> **TERRANEXUS 4D enforces strict scientific provenance and epistemic honesty across every pixel and API response.**  
+> Different Earth observation and subsurface datasets carry fundamentally different levels of physical certainty. Every value in this platform is tagged with an explicit provenance tier:
+> - **`OBSERVED` / `MEASURED`**: Direct physical in-situ measurements or primary satellite telemetry (e.g., piezometric water-level depth at a monitored well, drill-core lithologs, NASA GRACE Level-3 mascon anomalies).
+> - **`DERIVED`**: Computed deterministically from primary physical grids (e.g., Copernicus GLO-90 DEM elevation, slope, and hillshade normals).
+> - **`MODELLED` / `PREDICTED`**: Derived from peer-reviewed statistical, machine-learning, or analytical physics equations (e.g., ISRIC SoilGrids 250m profiles, Thiem-Jacob pumping drawdown cones, Sentinel-2 spectral alteration ratios).
+> - **`REGIONAL_AGGREGATION`**: Macro-scale administrative compilations (e.g., CGWB GEC-2015 state groundwater budgets). **Macro state figures are explicitly labeled so they are never mistaken for local point borewell measurements.**
+> - **`UNAVAILABLE`**: Where verified coverage does not exist, the platform states so transparently. **It never fabricates boreholes, interpolates across state borders, or claims optical satellites can see deep underground ore bodies.**
 
 ---
 
-## 1. Project Overview
+## 1. What is TERRANEXUS 4D & Why Does It Matter to Everyone?
 
-**TERRANEXUS 4D** is an open, scientifically grounded Earth intelligence platform and subsurface digital twin engineered specifically for the Indian subcontinent with global geocoding support. It bridges the critical divide between surface remote sensing and deep underground hydrogeological and mineral systems across four interconnected spatiotemporal dimensions:
+Everything human society builds, grows, or drinks depends on the top 1,200 meters of Earth's crust—yet for most people, the ground beneath their feet is a complete black box. Crucial datasets on groundwater tables, rock formations, soil chemistry, flood/drought risk, and terrain stability are locked away in fragmented government portals, complex NetCDF satellite archives, or static PDF tables that require specialized GIS software to read.
 
-1. **Latitude ($X$)** — High-precision geodetic positioning across sovereign India and international loci.
-2. **Longitude ($Y$)** — Multi-scale territorial navigation from national river basins to local administrative habitations.
-3. **Depth ($Z$)** — Vertical exploration from topographic surface ($0\,\text{m}$) down to $-1,200\,\text{m}$ below ground level ($\text{mbgl}$).
-4. **Time ($T$)** — Decade-long observation trajectories ($2015 - 2024$) capturing seasonal monsoon recharge, water table fluctuations, and multi-year gravitational mass changes.
+**TERRANEXUS 4D turns those fragmented scientific archives into a single, intuitive 4D workstation (`Latitude × Longitude × Depth × Time`).** Type in any city, town, rural village, coordinate pair, or Google Maps link, and you can immediately inspect the surface terrain, lift out a 3D cross-section of the underlying soil, rock strata, and groundwater table, and generate an audited scientific report.
 
----
+### Who Benefits & Practical Real-World Use Cases
 
-## 2. Vision & Objectives
-
-India supports nearly 18% of the world's population with only 4% of global freshwater resources, relying heavily on groundwater for over 60% of irrigated agriculture and 85% of rural drinking water. Despite the availability of vast public datasets from national and international agencies, information remains heavily siloed, inaccessible to field practitioners, or obscured by uncalibrated extrapolations.
-
-The primary objectives of TERRANEXUS 4D are:
-- **Democratise Subsurface Intelligence:** Make complex hydrogeological, geological, and remote sensing data instantly discoverable for any coordinate in India.
-- **Enforce Scientific Provenance:** Ensure every chart, layer, and voxel is traceable to an authoritative open scientific source with transparent certainty tiers.
-- **Prevent Misleading Claims:** Strictly separate surface optical reflectance from underground ore bodies, and regional gravity footprints from point borehole depths.
-- **Unify Dual-Engine 3D Visualisation:** Harmonise orbital planetary exploration in CesiumJS with localized volumetric block cutaway slicing in Three.js.
-- **Provide Extensible Operations Architecture:** Include a built-in Operations Centre and API Gateway with autonomous discovery, health monitoring, SSRF defenses, and credentials protection.
+| User Group | How They Use TERRANEXUS 4D | Concrete Practical Benefit |
+| :--- | :--- | :--- |
+| **Farmers, Agronomists & Rural Communities** | Search any village or agricultural district to inspect **Nexus Agri**, **Nexus Soil**, and the **3D Water Cutout**. | View 7-day crop water balance ($\text{ET}_0$ vs. rainfall), soil pH/organic carbon (`0–60 cm`), local aquifer depth (`mbgl`), and FAO-56 suitability across 6 major crop systems before planning irrigation or borewells. |
+| **Civil, Geotechnical & Infrastructure Engineers** | Extract a **3D Subsurface Cutout** (`2 km` to `20 km` extent) and inspect **Nexus Strata**. | Examine surface relief (Copernicus 90m DEM), regolith overburden thickness, bedrock lithology, structural strike/dip, rock hardness (Mohs), and density ($\text{g/cm}^3$) for preliminary site reconnaissance. |
+| **Hydrogeologists & Water Resource Agencies** | Analyze **Nexus Hydro** and run live **Thiem Pumping Simulations** in the 3D Cutout. | Compare 10-year seasonal piezometer hydrographs (CGWB) against regional NASA GRACE/GRACE-FO terrestrial water storage anomalies ($\text{cm LWE}$) and visualize the 3D cone of depression under active pumping ($Q = 12\,\text{L/s}$). |
+| **Urban Planners & Disaster Management Teams** | Inspect **Nexus Environment**, **Timeline & Cycles**, and **2D/3D Basin Overlays**. | Audit watershed health, RUSLE soil erosion hazard, drought/flood exposure, and multi-year groundwater depletion trends across 25 major river basins. |
+| **Exploration Geologists & Earth Scientists** | Combine **Nexus Mineral**, **Nexus Strata**, and the **Earth Intelligence Core (EIC)**. | Cross-reference Sentinel-2 surface alteration indices (Iron Oxide, Hydroxyl/Clay, Ferrous Silicates) with GSI/USGS metallogenic belts and structural shear zones while maintaining strict physical separation between surface reflectance and deep core validation. |
+| **Educators, Students & Everyday Citizens** | Explore the interactive **3D Planetary Globe**, slice through **3D Rock & Water Cutouts**, and ask **Nexus AI Copilot**. | Understand how aquifers, monsoons, volcanic traps, cratons, and sedimentary basins work in your own hometown through visual 3D cutaways and cited, plain-language scientific explanations. |
 
 ---
 
-## 3. Problems TERRANEXUS 4D Aims to Address
+## 2. How Everything Works Under the Hood (End-to-End Technical Pipeline)
 
-| Conventional Problem | TERRANEXUS 4D Solution |
+TERRANEXUS 4D is engineered as a full-stack TypeScript application pairing a dual-engine 3D WebGL frontend (**CesiumJS** + **Three.js** + **GSAP**) with a hardened **Express Scientific Data & AI Gateway**.
+
+### 2.1 Universal Location Resolution & Multi-Tier Geocoding (`locationResolver.ts` & `geocodingService.ts`)
+1. **Input Parsing:** When a user enters a query in the top search bar—whether a place name (`"Pune"`, `"Zermatt"`), a rural Indian model village (`"Hiware Bazar"`, `"Ralegan Siddhi"`), decimal/DMS coordinates (`"30.9010, 75.8573"`), or a pasted Google Maps URL—the resolver parses and normalizes the request.
+2. **Tiered Gazetteer Lookup:** The backend queries curatorial national benchmarks, a built-in Indian village/district gazetteer, the Open-Meteo global settlement database (11M+ places), and OpenStreetMap Nominatim with circuit-breaker fallback.
+3. **Sovereign & Hydrological Enrichment:** Each resolved coordinate is matched against 25 Central Water Commission (CWC) river basin polygons, Geological Survey of India (GSI) / USGS geological provinces, and a 50 km Haversine search radius for authenticated groundwater monitoring stations.
+
+### 2.2 Synchronized Dual-Engine 3D Architecture (`CesiumGlobe.tsx`, `Subsurface3D.tsx`, `extractionStageTransition.ts`)
+Instead of forcing a single 3D engine to do both planetary orbital rendering and deep underground solid-modeling, TERRANEXUS 4D coordinates two specialized WebGL engines through a deterministic state machine (`extractionStage`):
+1. **Orbital 3D Earth Digital Twin (CesiumJS):**
+   - Streams Esri World Imagery optical satellite tiles, topographic shaded relief, or CARTO basemaps onto the WGS84 ellipsoid.
+   - Renders single-pass political boundaries (`minimumLevel: 4` to prevent low-zoom raster text distortion), CWC river basin boundaries, and collision-suppressed hierarchical labels.
+   - Traces the exact non-circular watershed polygon around the selected target locus.
+2. **Reversible 8-Stage Globe ↔ 3D Cutout Transition (`extractionStageTransition.ts`):**
+   - Clicking **`Extract 3D Cutout`** animates the orbital camera toward the target polygon, extrudes the regional boundary, and cross-fades via GSAP into the Three.js Subsurface Studio (`EXTRACTION_IN_PROGRESS` → `CUTOUT_READY`) while suspending background Cesium rendering to conserve GPU/CPU resources.
+   - Clicking **`Return to Globe`** lowers the 3D block back into its planetary coordinates (`RETURN_IN_PROGRESS` → `GLOBE_RESTORED` → `GLOBE_IDLE`) and restores the orbital camera without losing context or flickering.
+3. **Photorealistic 3D Subsurface & Phreatic Water Cutout Engine (`Subsurface3D.tsx` & `geologicalMaterials.ts`):**
+   - **Real DEM Surface Relief & Optical Drapery:** Fetches a $25 \times 25$ Copernicus GLO-90 Digital Elevation Model (DEM) grid for the active coordinate and extent (`2 km` to `20 km`), computes analytical NW hillshading and Sobel tangent-space normal maps, and drapes a $2 \times 2$ mosaic of real Esri satellite imagery aligned with true North ($-Z$).
+   - **Watertight Dipping Stratigraphy & Cached PBR Rock Shaders:** Constructs continuous, non-overlapping 3D rock formations (`buildIrregularPolygonStratumGeometry`) honoring regional strike, dip, sediment pinch-outs, and basal unconformities. Procedural 512×512 PBR rock textures (albedo, Sobel normal map, roughness map) are synthesized per lithology (alluvium, basalt, granite, gneiss, sandstone, limestone, schist) and cached in memory for sub-millisecond scene rebuilds.
+   - **Volumetric 3D Water Cutout & Thiem Drawdown Physics:** Renders both the saturated aquifer horizon along the outer cliff walls and a dedicated **3D Corner Water Cutout Wedge** inside the excavated front-right quadrant ($\theta \in [0, \pi/2]$). The water cutout features a procedural ripple normal map, physical index of refraction ($\text{IOR} = 1.333$), a glowing cyan phreatic meniscus rim at the exact observed/modelled water table depth ($\text{mbgl}$), and a live **Thiem-Jacob cone of depression** when the **`Pump`** simulation is toggled on:
+     $$s(r) = \frac{Q}{2\pi T} \ln\left(\frac{R}{r}\right)$$
+
+### 2.3 Multi-Source Data Fusion & Earth Intelligence Core (`server/eic/earthIntelligenceCore.ts`)
+When a location is selected, the backend executes a parallel scientific synthesis pipeline:
+- **Hydrogeology (`NexusHydro`):** Combines nearest CGWB piezometer time series (gated strictly to $\le 50\,\text{km}$ and same state) with NASA JPL GRACE/GRACE-FO Tellus Level-3 mascon anomalies ($\Delta\text{TWSA}$) and GPM IMERG precipitation. Preserves the 11-month GRACE-to-GRACE-FO mission gap (`2017-07` to `2018-05`) as honest `null` values without artificial interpolation.
+- **Pedology & Agro-Meteorology (`NexusSoil` & `NexusAgri`):** Synthesizes 4-horizon soil profiles (`0–5`, `5–15`, `15–30`, `30–60 cm`) with USDA texture classes, bulk density, organic carbon, pH, and plant-available water capacity (PAWC), paired with live Open-Meteo 7-day reference evapotranspiration ($\text{ET}_0$) and FAO-56 crop suitability scoring.
+- **Location-Centered Knowledge Graph (`NexusEIC`):** Links 9 domain nodes and 8 physical causal edges (e.g., *Monsoon Precipitation* → *Infiltration & Soil Moisture* → *Unconfined Aquifer Recharge* → *GRACE Gravity Anomaly*) and reconciles cross-scale divergences.
+
+### 2.4 Live Context-Grounded Nexus AI Copilot (`server/aiService.ts`, `NexusAI.tsx`, `Subsurface3D.tsx`)
+- **Live Gemini Inference with Automatic Model Failover:** Queries the official `@google/genai` SDK using `gemini-4-hydrogen` (with `ThinkingLevel.LOW` for fast, responsive reasoning) and automatic failover to `gemini-3.1-flash-lite`.
+- **Deep Telemetry Grounding:** Every prompt—whether from the **Nexus AI Copilot** workstation or the **"Explain Geological Context"** button inside the 3D Cutout inspector—is injected with the active location's exact coordinates, elevation, geological formations, aquifer transmissivity, water table depth, GRACE trend, and soil profile.
+- **Deterministic Offline Scientific Fallback:** If no `GEMINI_API_KEY` is present in the environment or network connectivity is unavailable, the backend seamlessly switches to a deterministic scientific rule engine (`DETERMINISTIC_OFFLINE_RULES`) that synthesizes a structured, citation-backed hydrogeological and terrestrial water balance analysis ($\Delta\text{GWS} = \Delta\text{TWSA} - \Delta\text{SMS} - \Delta\text{SWS} - \Delta\text{SWE}$) so the app never fails or returns HTML/JSON errors.
+
+### 2.5 Audited Binary PDF 1.4 Scientific Report Generator (`pdfReportService.ts`)
+- Generates multi-page, vector-typeset binary `%PDF-1.4` dossiers tailored to the active coordinate (`COMPREHENSIVE`, `HYDRO`, `SOIL`, `AGRI`, `STRATA`, `MINERAL`, `ENVIRONMENT`), verified by an automated 6-point pre-download integrity check.
+
+---
+
+## 3. Problems TERRANEXUS 4D Solves
+
+| Conventional Industry Problem | TERRANEXUS 4D Engineering Solution |
 | :--- | :--- |
-| **Fragmented Geospatial Silos** | Unifies Central Ground Water Board (CGWB), Geological Survey of India (GSI), Central Water Commission (CWC), NASA, Copernicus, and CARTO datasets into a single normalised schema. |
-| **Borehole Over-Extrapolation** | Prevents linking addresses to distant monitoring wells across state boundaries; enforces distance gating ($\le 50\,\text{km}$) and state containment. |
-| **Macro Data Misrepresentation** | Explicitly labels state-wide GEC-2015 administrative compilations (e.g. total state recharge) to avoid confusing them with localized 5 km well depths. |
-| **Satellite Penetration Fallacy** | Enforces physics guardrails: optical and SWIR sensors reflect off the top microns of rock only; they cannot confirm underground ore deposits. |
-| **Zero-Width Rendering Crashes** | Implements robust defensive layout and lifecycle guards inside CesiumJS to eliminate viewport initialisation and resizing exceptions. |
-| **Unrealistic Minecraft Block Cutaways** | High-resolution displaced terrain mesh with physical incised river channels, non-planar dipping geological strata, and lenticular sand bodies. |
+| **Fragmented Geospatial & Subsurface Silos** | Unifies CGWB, GSI, CWC, NASA GRACE/GPM, Copernicus GLO-90 DEM, Sentinel-2, ISRIC SoilGrids, and Open-Meteo into a single normalized 4D schema. |
+| **Borehole Over-Extrapolation Across Borders** | Enforces strict Haversine distance gating ($\le 50\,\text{km}$) and state boundary containment so distant wells are never misattributed to a local site. |
+| **Macro Data Misrepresentation** | Explicitly flags state-wide GEC-2015 administrative compilations so macro budgets are never confused with point borewell measurements. |
+| **Satellite Penetration Fallacy** | Enforces physics guardrails: optical and SWIR sensors measure the top micrometers of surface outcrop only and never claim to prove deep underground ore reserves without core drilling. |
+| **Boxy CAD / "Minecraft" Subsurface Views** | Renders organic watershed-bounded cutouts with real Copernicus DEM relief, Esri optical satellite drapery, smooth dipping rock strata, and a physical 3D corner water cutout wedge. |
+| **Fragile WebGL Context & Transition Stalls** | Reuses WebGL contexts, caches procedural PBR textures, and coordinates Globe ↔ Cutout transitions via a unit-tested GSAP state machine. |
 
 ---
 
-## 4. Core Architecture
-
-TERRANEXUS 4D follows a decoupled, resilient client-server architecture:
+## 4. System Architecture Diagram
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        REACT 18 / TYPESCRIPT CLIENT                   │
 │                                                                        │
 │  ┌───────────────────────┐  ┌───────────────────────┐  ┌─────────────┐ │
-│  │    CesiumGlobe.tsx    │  │   Subsurface3D.tsx    │  │ 2D Map Eng  │ │
-│  │ (3D Earth, Orbit Nav) │  │(Volumetric 3D Cutaway)│  │(23 CWC Basin│ │
+│  │    CesiumGlobe.tsx    │  │   Subsurface3D.tsx    │  │ 2D Dossier  │ │
+│  │ (3D Earth, Orbit Nav) │  │(3D Rock & Water Cutout│  │(25 CWC Basin│ │
 │  └───────────┬───────────┘  └───────────┬───────────┘  └──────┬──────┘ │
 │              └──────────────────────────┼─────────────────────┘        │
 │                                         ▼                              │
-│                      Zustand State Store (useTerranexusStore)          │
+│                External-Sync State Store (useTerranexusStore)          │
 └─────────────────────────────────────────┬──────────────────────────────┘
                                           │ HTTP REST / JSON
                                           ▼
@@ -82,24 +118,25 @@ TERRANEXUS 4D follows a decoupled, resilient client-server architecture:
 │  [API Gateway & Operations Centre: Autonomous Discovery, SSRF Guard]   │
 │                                 │                                      │
 │  ┌──────────────────────────────┴───────────────────────────────────┐  │
-│  │                 DATA INTEGRITY GATEWAY                           │  │
-│  │   - Sovereign Bounding Box Validation (6°-37.5°N, 68°-97.5°E)   │  │
-│  │   - Cross-State Station Isolation (Enforces State Boundaries)    │  │
+│  │                 DATA INTEGRITY & FUSION GATEWAY                  │  │
+│  │   - Sovereign Bounding Box Validation & Global Gazetteer         │  │
+│  │   - Cross-State Station Isolation (Enforces <=50km & State)      │  │
 │  │   - Scale Disclaimer Injection (GEC-2015 Administrative Macro)   │  │
-│  │   - DEM Elevation Physics & Elevation Batch Chunking             │  │
+│  │   - Copernicus GLO-90 DEM Grid & Esri Optical Tile Proxy         │  │
 │  └──────────────────────────────┬───────────────────────────────────┘  │
 │                                 │                                      │
 │  ┌──────────────────────────────┴───────────────────────────────────┐  │
 │  ▼                                  ▼                               ▼  │
 │ Provider Adapters           NASA Satellite Pipeline         Nexus AI   │
 │ - CGWB Groundwater         - GRACE RL06 NetCDF3 Parser     - Gemini    │
-│ - GSI Bhukosh Terranes     - GPM IMERG Precipitation       - Rule Eng  │
-│ - CWC River Basins         - 0.5° Tellus Mass Anomalies                │
-│ - Copernicus DEM GLO-90    - CARTO Basemaps API                        │
+│ - GSI Bhukosh / USGS       - GPM IMERG Precipitation       - Offline   │
+│ - CWC River Basins         - 0.5° Tellus Mass Anomalies      Rule Eng  │
+│ - ISRIC SoilGrids / FAO    - CARTO & Esri Basemap Layers               │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 For complete technical specifications, review [ARCHITECTURE.md](ARCHITECTURE.md).
+
 
 ---
 
@@ -410,17 +447,24 @@ To maintain absolute scientific transparency, implemented capabilities are stric
 
 ---
 
-## 16. Recommended GitHub Repository Metadata & Licensing
+## 16. Legal, Licensing, Open Data Compliance & Professional Liability
 
-- **Recommended Repository Description:** `TERRANEXUS 4D — Global 4D Geospatial, Hydrogeological, Pedological, Agro-Meteorological & Subsurface Earth-Intelligence Platform with Multi-Source Scientific Data Fusion and Knowledge Graph`
-- **Recommended Repository Topics:** `geospatial`, `cesiumjs`, `threejs`, `hydrogeology`, `geology`, `earth-observation`, `knowledge-graph`, `data-fusion`, `remote-sensing`, `typescript`, `react`
-- **Software License:** Distributed under the [MIT License](LICENSE). Copyright © 2026 JSLO-Inc.
-- **Third-Party Software Notices:** Full list of open-source libraries and copyright statements available in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-- **Scientific Data Compliance:** Geospatial layers and government datasets are accessed in compliance with:
-  - Government Open Data License - India (GODL-India) under NDSAP.
-  - NASA Earth Science Open Data Policy (17 U.S.C. § 105).
-  - European Union Copernicus Open Access Regulation (EU Regulation No 377/2014).
-  - CARTO Basemaps Terms of Service and OpenStreetMap ODbL.
-  - Detailed dataset citations and legal terms available in [DATA_LICENSES_AND_ATTRIBUTION.md](DATA_LICENSES_AND_ATTRIBUTION.md).
-- **Contributions:** Contributions adhering to our scientific code of conduct are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting pull requests.
+### 16.1 GitHub Repository Metadata
+- **Repository Name:** `terranexus-4d`
+- **Short GitHub About Description:** `Open-Source 4D Earth Digital Twin & Subsurface Intelligence Platform integrating NASA GRACE/GRACE-FO gravimetry, Copernicus 90m DEM terrain, 3D volumetric geological & water-table cutouts, CGWB/GSI/USGS models, and grounded AI.`
+- **Repository Topics:** `geospatial`, `digital-twin`, `cesiumjs`, `threejs`, `hydrogeology`, `groundwater`, `geology`, `earth-observation`, `remote-sensing`, `knowledge-graph`, `typescript`, `react`
 
+### 16.2 Open-Source Software License (MIT License)
+The **TERRANEXUS 4D** source code, 3D geometry engines, data-fusion pipelines, and user interface components are licensed under the permissive **[MIT License](LICENSE)** (Copyright © 2026 JSLO-Inc). You are free to use, modify, self-host, and distribute the software for academic, civic, government, or commercial applications provided the copyright notice and license terms are preserved. Complete attribution notices (`CesiumJS` Apache-2.0, `Three.js` MIT, `MapLibre GL` BSD-3-Clause, `React` MIT, and scientific data providers) are documented in **[NOTICE.md](NOTICE.md)** and **[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)**.
+
+### 16.3 Governing Scientific Dataset Licenses & Statutory Compliance
+All scientific, cartographic, and satellite datasets accessed or synthesized by TERRANEXUS 4D remain governed by their respective sovereign and international open-data licenses (documented in full in **[DATA_LICENSES_AND_ATTRIBUTION.md](DATA_LICENSES_AND_ATTRIBUTION.md)**):
+1. **Government of India Datasets (CGWB, GSI Bhukosh, CWC India-WRIS):** Accessed under the **Government Open Data License – India (GODL-India)** pursuant to the National Data Sharing and Accessibility Policy (NDSAP).
+2. **NASA Earth Science Telemetry (GRACE/GRACE-FO Tellus RL06, GPM IMERG, SMAP):** Public domain works of the United States Government under **17 U.S.C. § 105** and the **NASA Open Science Data Policy**. In strict compliance with **14 CFR § 1221.1**, TERRANEXUS 4D uses zero NASA insignias, logos, or seals, and NASA does not endorse or sponsor this platform.
+3. **European Union Copernicus Programme (GLO-90 Digital Elevation Model & Sentinel-2 MSI):** Free, full, and open access governed by **Regulation (EU) No 377/2014** and Commission Delegated Regulation (EU) No 1159/2013.
+4. **ISRIC World Soil Information (SoilGrids 250m):** Licensed under **Creative Commons Attribution 4.0 International (CC-BY 4.0)**.
+5. **OpenStreetMap & CARTO Basemaps:** Cartographic vector data © OpenStreetMap contributors under the **Open Database License (ODbL 1.0)**; basemap rendering styles governed by the CARTO Terms of Service and Esri ArcGIS Online Master Agreement.
+
+### 16.4 Professional Engineering, Geotechnical & Hydrogeological Liability Disclaimer
+> **IMPORTANT LEGAL NOTICE:**  
+> TERRANEXUS 4D is a scientific visualization, educational, and preliminary reconnaissance decision-support platform. The 3D subsurface block diagrams, interpolated stratigraphic contacts, modelled phreatic water table surfaces, Thiem pumping drawdown simulations, and AI-generated interpretations do **not** constitute a certified geotechnical engineering report, potable water guarantee, or statutory mineral reserve valuation (e.g., JORC / NI 43-101 / UNFC). Before undertaking civil foundation construction, commercial borewell drilling, dam/tunnel excavation, or mining operations, users must commission site-specific physical diamond core drilling, in-situ pumping tests, laboratory water-quality assays, and review by a licensed professional geologist or civil engineer.

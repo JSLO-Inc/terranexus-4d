@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
-import { AQUIFER_SYSTEMS, HYDRO_TIMESERIES } from '../../data/hydroData';
+import { HYDRO_TIMESERIES } from '../../data/hydroData';
+import { deriveDynamicAquifers } from '../subsurface/Subsurface3D';
 import {
   X,
   Droplet,
   Sprout,
   Wheat,
   Layers,
-  Sparkles,
+  Gem,
   TreePine,
   Network,
   Bot,
@@ -18,6 +19,7 @@ import {
   Box,
   Maximize2
 } from 'lucide-react';
+import { formatCoordinates, formatUniqueAddress } from '../../utils/formatters';
 import { LocationDataAvailability } from '../catalog/LocationDataAvailability';
 
 export const Inspector: React.FC = () => {
@@ -36,11 +38,26 @@ export const Inspector: React.FC = () => {
     activeGroundwaterDepthMbgl,
     terrainElevationGrid,
     explorationExtentKm,
-    setShowReportModal
+    setShowReportModal,
+    currentDossier
   } = useTerranexusStore();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'layers' | 'data' | 'provenance'>('overview');
   const [sparklineData, setSparklineData] = useState<Array<{ year: number; twsa: number | null }>>([]);
+
+  // Collapse floating mobile inspector automatically when crossing below md (768px)
+  useEffect(() => {
+    let prevMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+    const onResize = () => {
+      const isMobileNow = window.innerWidth < 768;
+      if (isMobileNow && !prevMobile) {
+        setInspectorOpen(false);
+      }
+      prevMobile = isMobileNow;
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [setInspectorOpen]);
 
   // Fetch real processed historical observations or fallback to benchmark
   useEffect(() => {
@@ -78,18 +95,19 @@ export const Inspector: React.FC = () => {
       });
   }, [selectedLocation]);
 
-  const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
+  const aquifers = deriveDynamicAquifers(selectedLocation, currentDossier);
   const observedWaterDepth = activeGroundwaterDepthMbgl ?? (selectedBorehole ? selectedBorehole.waterTableDepthMeters : null);
 
   return (
     <aside
-      className={`h-full shrink-0 border-l border-slate-800/80 glass-panel-elevated flex flex-col overflow-hidden z-20 select-none transition-all duration-300 ease-in-out ${
-        inspectorOpen ? 'w-80 md:w-92 lg:w-96 opacity-100' : 'w-0 border-l-0 opacity-0 pointer-events-none'
+      aria-label="Location & Evidence Inspector"
+      className={`fixed right-0 top-14 bottom-14 md:static md:top-auto md:bottom-auto md:h-full shrink-0 border-l border-white/10 liquid-glass-elevated flex flex-col overflow-hidden z-40 md:z-20 select-none transition-all duration-300 ease-in-out ${
+        inspectorOpen ? 'w-[88vw] max-w-[340px] md:w-80 xl:w-96 opacity-100' : 'w-0 border-l-0 opacity-0 pointer-events-none'
       }`}
     >
-      <div className="w-80 md:w-92 lg:w-96 h-full flex flex-col overflow-hidden shrink-0">
+      <div className="w-[88vw] max-w-[340px] md:w-80 xl:w-96 h-full flex flex-col overflow-hidden shrink-0">
         {/* Top 3D Subsurface Land Chunk Preview Header */}
-        <div className="relative h-34 w-full overflow-hidden shrink-0 bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950/60 p-3 flex flex-col justify-between border-b border-slate-800/80">
+        <div className="relative h-36 w-full overflow-hidden shrink-0 bg-slate-950/90 p-3 flex flex-col justify-between border-b border-white/10">
         <div className="flex items-center justify-between z-10">
           <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-[10px]">
             <Box className="w-3.5 h-3.5 text-amber-400" />
@@ -98,8 +116,10 @@ export const Inspector: React.FC = () => {
 
           <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={() => setViewMode(viewMode === 'cutaway' ? 'globe' : 'cutaway')}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-950/90 border border-sky-500/50 hover:bg-sky-900 text-cyan-300 font-mono text-[10px] transition-colors shadow-sm"
+              aria-label={viewMode === 'cutaway' ? 'Switch to Globe View' : 'Open 3D Cutaway View'}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-950/90 border border-sky-500/50 hover:bg-sky-900 text-cyan-300 font-mono text-[10px] transition-colors shadow-sm cursor-pointer"
               title="Toggle Full 3D Underground Cutaway View"
             >
               <Maximize2 className="w-3 h-3" />
@@ -107,8 +127,10 @@ export const Inspector: React.FC = () => {
             </button>
 
             <button
+              type="button"
               onClick={() => setInspectorOpen(false)}
-              className="p-1 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-300 transition-colors border border-slate-700/60"
+              aria-label="Close Inspector"
+              className="p-1 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-300 transition-colors border border-slate-700/60 cursor-pointer"
               title="Close Inspector"
             >
               <X className="w-3.5 h-3.5" />
@@ -137,12 +159,12 @@ export const Inspector: React.FC = () => {
 
         {/* Location Title & Coordinates */}
         <div className="flex items-end justify-between z-10 pt-0.5">
-          <div>
-            <h2 className="text-sm font-extrabold text-white tracking-tight leading-tight">
+          <div className="min-w-0">
+            <h2 className="text-sm font-extrabold text-white tracking-tight leading-tight truncate">
               {selectedLocation.name.split(' - ')[0]}
             </h2>
-            <p className="text-[10px] font-mono text-cyan-300 font-medium">
-              {Math.abs(selectedLocation.latitude).toFixed(4)}° {selectedLocation.latitude >= 0 ? 'N' : 'S'}, {Math.abs(selectedLocation.longitude).toFixed(4)}° {selectedLocation.longitude >= 0 ? 'E' : 'W'} • {selectedLocation.elevationMeters}m ASL
+            <p className="text-[10px] font-mono text-cyan-300 font-medium truncate">
+              {formatCoordinates(selectedLocation.latitude, selectedLocation.longitude)} • {selectedLocation.elevationMeters}m ASL
             </p>
           </div>
         </div>
@@ -214,16 +236,24 @@ export const Inspector: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <span>{selectedLocation.district}, {selectedLocation.state}, India</span>
+                  <span>
+                    {formatUniqueAddress([
+                      selectedLocation.district,
+                      selectedLocation.state,
+                      (selectedLocation as any).isWithinIndia === false ? undefined : 'India'
+                    ])}
+                  </span>
                 )}
               </div>
-              <div className="flex flex-col gap-1 text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-800/80">
-                <div className="flex items-center justify-between">
-                  <span>Spot Elevation: {selectedLocation.elevationMeters}m ASL</span>
-                  <span className="text-slate-500 text-[9px]">{(selectedLocation as any).elevationSource || 'Copernicus GLO-90 DEM'}</span>
+              <div className="flex flex-col gap-1 text-[10px] text-slate-400 font-mono pt-1.5 border-t border-white/10">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="whitespace-nowrap">Elevation: {selectedLocation.elevationMeters}m ASL</span>
+                  <span className="text-slate-400 text-[9px] truncate text-right" title={(selectedLocation as any).elevationSource || 'Copernicus GLO-90'}>
+                    {((selectedLocation as any).elevationSource || 'Copernicus GLO-90').replace('Survey of India Benchmark / WGS84 Ellipsoid', 'SoI Benchmark / WGS84')}
+                  </span>
                 </div>
                 {terrainElevationGrid && (
-                  <div className="flex items-center justify-between text-cyan-400/90 text-[9px] bg-slate-950/40 px-1.5 py-0.5 rounded">
+                  <div className="flex items-center justify-between text-cyan-300/90 text-[9px] bg-slate-950/50 px-1.5 py-0.5 rounded">
                     <span>DEM: {terrainElevationGrid.minElevationM}m – {terrainElevationGrid.maxElevationM}m</span>
                     <span>{terrainElevationGrid.gridResolution}×{terrainElevationGrid.gridResolution} ({explorationExtentKm}km)</span>
                   </div>
@@ -288,270 +318,162 @@ export const Inspector: React.FC = () => {
               </div>
             )}
 
-            {/* Module Status Telemetry Rows */}
-            <div className="flex flex-col gap-2 bg-slate-900/60 rounded-xl p-2.5 border border-slate-800/80">
-              <div
+            {/* TWSA Trend Mini Sparkline Chart — Elevated above the fold */}
+            {(() => {
+              const validTwsa = sparklineData.map(d => d.twsa).filter((v): v is number => v !== null && Number.isFinite(v));
+              const rawMax = validTwsa.length > 0 ? Math.max(...validTwsa) : 20;
+              const rawMin = validTwsa.length > 0 ? Math.min(...validTwsa) : -20;
+              const yTop = Math.max(0, Math.ceil(rawMax / 10) * 10);
+              const yBot = Math.min(-20, Math.floor(rawMin / 10) * 10);
+              const span = Math.max(10, yTop - yBot);
+              const yMid = Math.round((yTop + yBot) / 2);
+              const toY = (val: number) => 6 + ((yTop - val) / span) * 38;
+              const zeroY = toY(0);
+
+              return (
+                <div className="rounded-xl liquid-glass p-3 flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-100 truncate">
+                      TWSA Trend ({selectedLocation.name.split(' - ')[0]})
+                    </span>
+                    <span className="text-[10px] font-mono text-cyan-300 shrink-0 tabular-nums">cm LWE</span>
+                  </div>
+
+                  {/* Sparkline Canvas Area */}
+                  <div className="relative h-16 w-full">
+                    {/* Y-Axis Grid Lines */}
+                    <div className="absolute inset-0 flex flex-col justify-between pointer-events-none text-[9px] font-mono text-slate-500 tabular-nums">
+                      <div className="flex items-center justify-between border-b border-slate-800/40 pb-0.5">
+                        <span>{yTop > 0 ? `+${yTop}` : `${yTop}`}</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-slate-700/40 pb-0.5">
+                        <span>{yMid > 0 ? `+${yMid}` : `${yMid}`}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>{yBot > 0 ? `+${yBot}` : `${yBot}`}</span>
+                      </div>
+                    </div>
+
+                    {/* SVG Sparkline Polyline */}
+                    <svg className="w-full h-full overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
+                      {sparklineData.length > 1 && (
+                        <>
+                          {zeroY >= 4 && zeroY <= 46 && (
+                            <line x1="0" y1={zeroY} x2="100" y2={zeroY} stroke="#334155" strokeDasharray="2 2" strokeWidth="0.8" vectorEffect="non-scaling-stroke" />
+                          )}
+                          <polyline
+                            fill="none"
+                            stroke="#22d3ee"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            vectorEffect="non-scaling-stroke"
+                            points={sparklineData
+                              .map((d, i) => {
+                                const x = (i / (sparklineData.length - 1)) * 100;
+                                const val = d.twsa ?? 0;
+                                return `${x},${toY(val).toFixed(2)}`;
+                              })
+                              .join(' ')}
+                          />
+                        </>
+                      )}
+                    </svg>
+
+                    {/* Circular Non-Stretched Data Markers */}
+                    {sparklineData.length > 1 && sparklineData.map((d, i) => {
+                      const xPct = (i / (sparklineData.length - 1)) * 100;
+                      const yPct = (toY(d.twsa ?? 0) / 50) * 100;
+                      return (
+                        <span
+                          key={i}
+                          style={{ left: `${xPct}%`, top: `${yPct}%` }}
+                          title={`${d.year}: ${(d.twsa ?? 0).toFixed(1)} cm LWE`}
+                          className="absolute w-2 h-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-300 border border-slate-950 shadow-[0_0_6px_rgba(34,211,238,0.65)] pointer-events-none"
+                        />
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 px-0.5 tabular-nums">
+                    <span>2020</span>
+                    <span>2021</span>
+                    <span>2022</span>
+                    <span>2023</span>
+                    <span>2024</span>
+                  </div>
+
+                  <div className="flex justify-end pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveModule('hydro')}
+                      className="flex items-center gap-1 text-[11px] font-medium text-cyan-300 hover:text-cyan-200 transition-colors cursor-pointer"
+                    >
+                      <span>Full GRACE Analysis</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Primary Actions & Compact 2x4 Workstation Matrix */}
+            <div className="flex flex-col gap-2.5 liquid-glass rounded-xl p-2.5">
+              <button
+                type="button"
                 onClick={() => setViewMode(viewMode === 'cutaway' ? 'globe' : 'cutaway')}
-                className="flex items-center justify-between p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 cursor-pointer transition-colors group"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-amber-500/12 border border-amber-400/35 hover:bg-amber-500/20 cursor-pointer transition-colors group text-left"
               >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-600/30">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="p-1.5 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/30 shrink-0">
                     <Box className="w-4 h-4" />
                   </span>
-                  <div>
-                    <div className="font-semibold text-amber-300 group-hover:text-amber-200 transition-colors">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-amber-200 group-hover:text-amber-100 transition-colors truncate">
                       3D Subsurface Cutaway
                     </div>
-                    <div className="text-[10px] text-slate-400">Volumetric Strata & Aquifers</div>
+                    <div className="text-[10px] text-slate-400 truncate">Volumetric Strata & Aquifers</div>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono font-medium text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60">
+                <span className="text-[10px] font-mono font-semibold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-700/60 shrink-0">
                   {viewMode === 'cutaway' ? 'Active' : 'Open 3D'}
                 </span>
-              </div>
+              </button>
 
-              <div
-                onClick={() => setActiveModule('hydro')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-sky-950/80 text-sky-400 border border-sky-600/30">
-                    <Droplet className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
-                      Nexus Hydro
-                    </div>
-                    <div className="text-[10px] text-slate-400">GRACE / GRACE-FO & Piezometers</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('soil')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-600/30">
-                    <Sprout className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">
-                      Nexus Soil
-                    </div>
-                    <div className="text-[10px] text-slate-400">3D Monolith & Horizon Profile</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('agri')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/[0.04] cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-emerald-950/80 text-emerald-400 border border-emerald-600/30">
-                    <Wheat className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-emerald-300 transition-colors">
-                      Nexus Agri
-                    </div>
-                    <div className="text-[10px] text-slate-400">Crop Suitability & Borewell Advisory</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('strata')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-amber-950/80 text-amber-400 border border-amber-600/30">
-                    <Layers className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">
-                      Nexus Strata
-                    </div>
-                    <div className="text-[10px] text-slate-400">Geological Layers & Lithology</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('mineral')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-purple-950/80 text-purple-400 border border-purple-600/30">
-                    <Sparkles className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-purple-300 transition-colors">
-                      Nexus Mineral
-                    </div>
-                    <div className="text-[10px] text-slate-400">Spectral & Deposit Analysis</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('environment')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-teal-950/80 text-teal-400 border border-teal-600/30">
-                    <TreePine className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-teal-300 transition-colors">
-                      Nexus Environment
-                    </div>
-                    <div className="text-[10px] text-slate-400">NDVI/NDWI & Industrial Audit</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('eic')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-600/30">
-                    <Network className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
-                      Intelligence Core (EIC)
-                    </div>
-                    <div className="text-[10px] text-slate-400">Knowledge Graph & 7-Step Fusion</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-              </div>
-
-              <div
-                onClick={() => setActiveModule('ai')}
-                className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-850 cursor-pointer transition-colors group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="p-1.5 rounded-lg bg-indigo-950/80 text-indigo-400 border border-indigo-600/30">
-                    <Bot className="w-4 h-4" />
-                  </span>
-                  <div>
-                    <div className="font-semibold text-slate-200 group-hover:text-indigo-300 transition-colors">
-                      Nexus AI
-                    </div>
-                    <div className="text-[10px] text-slate-400">Grounded Scientific Copilot</div>
-                  </div>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { id: 'hydro' as const, label: 'Hydro', icon: <Droplet className="w-3.5 h-3.5 text-sky-400" /> },
+                  { id: 'strata' as const, label: 'Strata', icon: <Layers className="w-3.5 h-3.5 text-amber-400" /> },
+                  { id: 'mineral' as const, label: 'Mineral', icon: <Gem className="w-3.5 h-3.5 text-purple-400" /> },
+                  { id: 'soil' as const, label: 'Soil', icon: <Sprout className="w-3.5 h-3.5 text-amber-300" /> },
+                  { id: 'agri' as const, label: 'Agri', icon: <Wheat className="w-3.5 h-3.5 text-emerald-400" /> },
+                  { id: 'environment' as const, label: 'Environment', icon: <TreePine className="w-3.5 h-3.5 text-teal-400" /> },
+                  { id: 'eic' as const, label: 'EIC Graph', icon: <Network className="w-3.5 h-3.5 text-cyan-400" /> },
+                  { id: 'ai' as const, label: 'Nexus AI', icon: <Bot className="w-3.5 h-3.5 text-indigo-400" /> }
+                ].map((mod) => (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    onClick={() => setActiveModule(mod.id)}
+                    className="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-cyan-400/40 text-left text-[11px] font-medium text-slate-200 hover:text-white transition-colors cursor-pointer"
+                  >
+                    {mod.icon}
+                    <span className="truncate">{mod.label}</span>
+                  </button>
+                ))}
               </div>
 
               <button
+                type="button"
                 onClick={() => setShowReportModal(true, 'COMPREHENSIVE')}
-                className="mt-1 flex items-center justify-between p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 text-emerald-300 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/40 hover:bg-emerald-500/25 text-emerald-200 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <FileDown className="w-4 h-4 text-emerald-400" />
-                  <span className="font-semibold text-xs">Download Scientific PDF Report</span>
+                  <FileDown className="w-4 h-4 text-emerald-300" />
+                  <span className="font-semibold text-xs">Scientific PDF Report</span>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                <ArrowRight className="w-3.5 h-3.5 text-emerald-300" />
               </button>
-            </div>
-
-            {/* TWSA Trend Mini Sparkline Chart */}
-            <div className="rounded-xl bg-slate-900/60 p-3 border border-slate-800/80 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-slate-200">
-                  TWSA Trend ({selectedLocation.name.split(' - ')[0]})
-                </span>
-                <span className="text-[10px] font-mono text-cyan-400">cm LWE</span>
-              </div>
-
-              {/* Sparkline Canvas Area */}
-              <div className="relative h-20 w-full pt-1">
-                {/* Y-Axis Grid Lines */}
-                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none text-[9px] font-mono text-slate-500">
-                  <div className="flex items-center justify-between border-b border-slate-800/40 pb-0.5">
-                    <span>20</span>
-                  </div>
-                  <div className="flex items-center justify-between border-b border-slate-700/40 pb-0.5">
-                    <span>0</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>-20</span>
-                  </div>
-                </div>
-
-                {/* SVG Sparkline Polyline */}
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
-                  {sparklineData.length > 1 && (
-                    <>
-                      {/* Zero line */}
-                      <line x1="0" y1="25" x2="100" y2="25" stroke="#334155" strokeDasharray="2 2" strokeWidth="0.8" />
-                      {/* Data Trend Path */}
-                      <polyline
-                        fill="none"
-                        stroke="#00e5ff"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        points={sparklineData
-                          .map((d, i) => {
-                            const x = (i / (sparklineData.length - 1)) * 100;
-                            const val = d.twsa ?? 0;
-                            // Clamp value between -25 and +25 cm -> 0 to 50 SVG Y
-                            const y = 25 - (val / 25) * 20;
-                            return `${x},${Math.max(5, Math.min(45, y))}`;
-                          })
-                          .join(' ')}
-                      />
-                      {/* Data points */}
-                      {sparklineData.map((d, i) => {
-                        const x = (i / (sparklineData.length - 1)) * 100;
-                        const val = d.twsa ?? 0;
-                        const y = 25 - (val / 25) * 20;
-                        return (
-                          <circle
-                            key={i}
-                            cx={x}
-                            cy={Math.max(5, Math.min(45, y))}
-                            r="2.5"
-                            className="fill-cyan-400 stroke-slate-950 stroke-1"
-                          />
-                        );
-                      })}
-                    </>
-                  )}
-                </svg>
-              </div>
-
-              {/* X-Axis Year Labels */}
-              <div className="flex items-center justify-between text-[9px] font-mono text-slate-500 px-1 pt-1">
-                <span>2020</span>
-                <span>2021</span>
-                <span>2022</span>
-                <span>2023</span>
-                <span>2024</span>
-              </div>
-
-              {/* View Details Action Link */}
-              <div className="flex justify-end pt-1">
-                <button
-                  onClick={() => setActiveModule('hydro')}
-                  className="flex items-center gap-1 text-[11px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
-                >
-                  <span>View Details</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
             </div>
           </div>
         )}

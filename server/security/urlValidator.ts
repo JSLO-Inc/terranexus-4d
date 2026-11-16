@@ -30,7 +30,13 @@ const APPROVED_HOST_PATTERNS: RegExp[] = [
   /^cgwb\.gov\.in$/i,
   /^gsi\.gov\.in$/i,
   /^([a-z0-9-]+\.)*open-meteo\.com$/i,
-  /^api\.open-elevation\.com$/i
+  /^api\.open-elevation\.com$/i,
+  /^photon\.komoot\.io$/i,
+  /^rest\.isric\.org$/i,
+  /^macrostrat\.org$/i,
+  /^earth-search\.aws\.element84\.com$/i,
+  /^server\.arcgisonline\.com$/i,
+  /^services\.arcgisonline\.com$/i
 ];
 
 /**

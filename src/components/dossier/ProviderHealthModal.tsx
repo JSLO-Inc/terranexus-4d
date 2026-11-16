@@ -67,7 +67,7 @@ export const ProviderHealthModal: React.FC = () => {
       }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="bg-[#0b101e] border border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-sans">
+      <div className="liquid-glass-modal border border-slate-700/80 rounded-2xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden font-sans">
         {/* Modal Header */}
         <div className="p-4 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -182,7 +182,7 @@ export const ProviderHealthModal: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-bold bg-emerald-950/80 border-emerald-500/50 text-emerald-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     <span>{p.state}</span>
                   </div>
                 </div>

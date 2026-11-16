@@ -82,6 +82,9 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
   const [useSvgFallback, setUseSvgFallback] = useState<boolean>(false);
   const [mapLoaded, setMapLoaded] = useState<boolean>(false);
   const [showBasemapMenu, setShowBasemapMenu] = useState<boolean>(false);
+  const [showBasins2D, setShowBasins2D] = useState<boolean>(false);
+  const showBasins2DRef = useRef<boolean>(false);
+  showBasins2DRef.current = showBasins2D;
   const [hoveredStation, setHoveredStation] = useState<GroundwaterStationRecord | null>(null);
   const [hoveredBasin, setHoveredBasin] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -185,9 +188,12 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
           id: 'cwc-basins-fill',
           type: 'fill',
           source: 'cwc-basins',
+          layout: {
+            visibility: showBasins2DRef.current ? 'visible' : 'none'
+          },
           paint: {
             'fill-color': '#0284c7',
-            'fill-opacity': 0.12
+            'fill-opacity': 0.08
           }
         });
 
@@ -195,10 +201,14 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
           id: 'cwc-basins-line',
           type: 'line',
           source: 'cwc-basins',
+          layout: {
+            visibility: showBasins2DRef.current ? 'visible' : 'none'
+          },
           paint: {
             'line-color': '#38bdf8',
-            'line-width': 1.2,
-            'line-opacity': 0.7
+            'line-width': 1.1,
+            'line-dasharray': [3, 2],
+            'line-opacity': 0.55
           }
         });
 
@@ -314,7 +324,7 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
         pinEl.className = 'w-6 h-6 flex items-center justify-center cursor-pointer pointer-events-none';
         pinEl.innerHTML = `
           <div class="relative flex items-center justify-center">
-            <div class="w-6 h-6 rounded-full bg-red-500/30 animate-ping absolute"></div>
+            <div class="w-6 h-6 rounded-full bg-red-500/25 border border-red-400/40 absolute"></div>
             <div class="w-3.5 h-3.5 rounded-full bg-red-500 border-2 border-white shadow-lg relative"></div>
           </div>
         `;
@@ -330,7 +340,7 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
 
           setSelectedLocation({
             id: `custom-pin-${Date.now()}`,
-            name: `Pin (${lat}°N, ${lon}°E)`,
+            name: `Pin (${Math.abs(lat).toFixed(4)}°${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(4)}°${lon >= 0 ? 'E' : 'W'})`,
             state: lat >= 6 && lat <= 38 && lon >= 67 && lon <= 98 ? 'India' : 'Global Locus',
             district: 'Inspected Locus',
             latitude: lat,
@@ -422,6 +432,23 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
     }
   }, [targetLat, targetLon, mapLoaded]);
 
+  // Synchronize CWC River Basins visibility in MapLibre GL
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded) return;
+    const visibility = showBasins2D ? 'visible' : 'none';
+    try {
+      if (map.getLayer('cwc-basins-fill')) {
+        map.setLayoutProperty('cwc-basins-fill', 'visibility', visibility);
+      }
+      if (map.getLayer('cwc-basins-line')) {
+        map.setLayoutProperty('cwc-basins-line', 'visibility', visibility);
+      }
+    } catch {
+      // Layer may be re-mounting during basemap style switch
+    }
+  }, [showBasins2D, mapLoaded]);
+
   // Handle Basemap Style Switching
   const handleStyleSwitch = useCallback((style: CartoBasemapStyle) => {
     setActiveBasemap(style);
@@ -450,21 +477,35 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
   return (
     <div className={`relative flex flex-col h-full w-full bg-[#040814] overflow-hidden select-none border-l border-slate-800/80 ${className}`}>
       {/* 2D Map Control Bar */}
-      <div className="h-10 border-b border-slate-800/80 bg-slate-950/95 px-3 flex items-center justify-between z-20 shrink-0">
-        <div className="flex items-center gap-2">
-          <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
-          <span className="text-xs font-semibold text-slate-200">2D Geospatial Evidence Canvas</span>
-          <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+      <div className="h-10 border-b border-white/10 liquid-glass px-3 flex items-center justify-between gap-2 z-20 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Radio className="w-4 h-4 text-cyan-400 shrink-0" />
+          <span className="text-xs font-semibold text-slate-200 truncate">2D Geospatial Evidence Canvas</span>
+          <span className="text-[10px] text-slate-400 font-mono hidden 2xl:inline truncate">
             (CARTO {CARTO_STYLES[currentCartoStyle].name} • Click to drop pin)
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowBasins2D((v) => !v)}
+            aria-pressed={showBasins2D}
+            className={`px-2 py-1 rounded-lg border text-[11px] font-mono transition-colors cursor-pointer whitespace-nowrap ${
+              showBasins2D
+                ? 'bg-cyan-500/20 border-cyan-400/70 text-cyan-200 font-semibold'
+                : 'liquid-glass-pill text-slate-300 hover:text-cyan-300'
+            }`}
+            title="Toggle CWC Hydrological River Basin Polygons"
+          >
+            CWC Basins
+          </button>
+
           {/* CARTO Basemap Style Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowBasemapMenu(!showBasemapMenu)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-xs font-mono text-cyan-300 transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg liquid-glass-pill hover:border-cyan-400 text-xs font-mono text-cyan-300 transition-colors shadow-sm cursor-pointer whitespace-nowrap shrink-0"
               title="Switch CARTO Basemap Style"
             >
               <Layers className="w-3.5 h-3.5 text-cyan-400" />
@@ -473,7 +514,7 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
             </button>
 
             {showBasemapMenu && (
-              <div className="absolute right-0 top-full mt-1.5 w-52 bg-slate-950/98 border border-slate-800 rounded-xl p-1.5 backdrop-blur-2xl shadow-2xl z-50 flex flex-col gap-1 text-xs font-mono animate-fadeIn">
+              <div className="absolute right-0 top-full mt-1.5 w-52 liquid-glass-elevated rounded-xl p-1.5 shadow-2xl z-50 flex flex-col gap-1 text-xs font-mono animate-fadeIn">
                 <span className="text-[10px] uppercase tracking-wider text-slate-400 px-2 py-0.5 font-semibold">
                   CARTO Basemap Style
                 </span>
@@ -579,17 +620,17 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
                 const svgY = (screenSvg.y - pan.y - HEIGHT / 2) / zoom + HEIGHT / 2;
                 const [clickedLat, clickedLon] = unproject(svgX, svgY);
 
-                if (clickedLat >= 6 && clickedLat <= 38 && clickedLon >= 67 && clickedLon <= 98) {
+                if (clickedLat >= -90 && clickedLat <= 90 && clickedLon >= -180 && clickedLon <= 180) {
                   setSelectedLocation({
                     id: `custom-pin-${Date.now()}`,
-                    name: `Pin (${clickedLat.toFixed(4)}°N, ${clickedLon.toFixed(4)}°E)`,
-                    state: 'India',
+                    name: `Pin (${Math.abs(clickedLat).toFixed(4)}°${clickedLat >= 0 ? 'N' : 'S'}, ${Math.abs(clickedLon).toFixed(4)}°${clickedLon >= 0 ? 'E' : 'W'})`,
+                    state: clickedLat >= 6 && clickedLat <= 38 && clickedLon >= 67 && clickedLon <= 98 ? 'India' : 'Global Locus',
                     district: 'Regional Locus',
                     latitude: clickedLat,
                     longitude: clickedLon,
                     elevationMeters: 250,
-                    basin: 'Indian Catchment Basin',
-                    geologicalProvince: 'Peninsular Basin',
+                    basin: 'Regional Catchment Basin',
+                    geologicalProvince: 'Lithological Formation',
                     description: 'Pin-dropped geographic locus for regional evidence analysis'
                   });
                 }
@@ -604,14 +645,15 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
                 <rect width={WIDTH} height={HEIGHT} fill="url(#grid-pattern)" />
 
                 {/* CWC River Basins */}
-                {CWC_OFFICIAL_BASIN_VECTORS.map((b) => (
+                {showBasins2D && CWC_OFFICIAL_BASIN_VECTORS.map((b) => (
                   <path
                     key={b.code}
                     d={b.path}
                     fill={b.color}
-                    stroke="#1e3a8a"
+                    stroke="#38bdf8"
                     strokeWidth="0.9"
-                    strokeOpacity="0.75"
+                    strokeDasharray="3,2"
+                    strokeOpacity="0.6"
                     className="transition-colors hover:fill-blue-900/60 cursor-pointer"
                   />
                 ))}
@@ -738,10 +780,12 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span className="text-slate-300">CGWB Telemetric Wells</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-3 h-0.5 bg-cyan-400" />
-              <span className="text-slate-300">CWC River Basins</span>
-            </div>
+            {showBasins2D && (
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-0.5 bg-cyan-400" />
+                <span className="text-slate-300">CWC River Basins</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -752,8 +796,8 @@ export const Interactive2DMap: React.FC<Interactive2DMapProps> = ({ className = 
 
         {/* Loading Indicator */}
         {isDossierLoading && (
-          <div className="absolute top-3 right-3 z-20 bg-slate-900/90 border border-cyan-500/40 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-mono text-cyan-300 animate-pulse">
-            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+          <div className="absolute top-3 right-3 z-20 bg-slate-900/90 border border-cyan-500/40 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-mono text-cyan-300">
+            <div className="w-2 h-2 rounded-full bg-cyan-400" />
             <span>Synthesizing Evidence Dossier...</span>
           </div>
         )}

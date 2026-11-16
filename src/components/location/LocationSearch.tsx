@@ -3,12 +3,18 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, X, Loader2, Compass, Link2, Bookmark, History, Sparkles } from 'lucide-react';
+import { Search, MapPin, X, Loader2, Compass, Link2, Bookmark, History } from 'lucide-react';
 import { GeocodingSuggestion, SelectedLocation } from '../../types/location';
 import { resolveUserLocationQuery, searchPlaceSuggestions } from '../../services/locationResolver';
 import { LocationResults } from './LocationResults';
 import { INDIA_LOCATIONS } from '../../data/locationsIndia';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
+import {
+  isGoogleMapsUrlQuery,
+  normalizeSuppressQuery,
+  shouldClearSearchOnExternalLocationChange,
+  shouldSkipAutocomplete
+} from '../../utils/mapAndSearchHelpers';
 
 interface LocationSearchProps {
   onLocationSelected: (location: SelectedLocation) => void;
@@ -29,7 +35,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
   onLocationSelected,
   className = ''
 }) => {
-  const { selectedLocation } = useTerranexusStore();
+  const { selectedLocation, activeModule } = useTerranexusStore();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<GeocodingSuggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
@@ -54,13 +60,31 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const suppressAutocompleteRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const suppressedQueryRef = useRef<string | null>(null);
+  const lastOwnSelectionKeyRef = useRef<string | null>(null);
+
+  const makeSelectionKey = (loc: { id?: string; name?: string; latitude: number; longitude: number }) =>
+    `${loc.latitude.toFixed(4)}:${loc.longitude.toFixed(4)}:${loc.id || loc.name || ''}`;
+
+  const currentSelectionKey = makeSelectionKey(selectedLocation);
+  useEffect(() => {
+    if (shouldClearSearchOnExternalLocationChange(lastOwnSelectionKeyRef.current, currentSelectionKey)) {
+      suppressedQueryRef.current = null;
+      setQuery('');
+      setSuggestions([]);
+      setErrorMessage(null);
+      setIsOpen(false);
+    }
+    lastOwnSelectionKeyRef.current = currentSelectionKey;
+  }, [currentSelectionKey]);
 
   const recordRecentPlace = (loc: { name: string; state?: string; latitude: number; longitude: number }) => {
     const entry: SavedPlaceEntry = {
       name: loc.name.split(' - ')[0],
-      state: loc.state || 'India',
+      state: loc.state || (loc as any).country || 'Global',
       latitude: loc.latitude,
       longitude: loc.longitude
     };
@@ -97,7 +121,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       const next: SavedPlaceEntry[] = [
         {
           name: shortName,
-          state: ('state' in selectedLocation && selectedLocation.state) || 'India',
+          state: ('state' in selectedLocation && selectedLocation.state) || (selectedLocation as any).country || 'Global',
           latitude: selectedLocation.latitude,
           longitude: selectedLocation.longitude
         },
@@ -110,11 +134,19 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     }
   };
 
+  // Close dropdown automatically when user navigates to another workspace module
+  useEffect(() => {
+    setIsOpen(false);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+  }, [activeModule]);
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        if (abortControllerRef.current) abortControllerRef.current.abort();
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
@@ -126,30 +158,30 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     const trimmed = query.trim();
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
-    if (suppressAutocompleteRef.current) {
-      suppressAutocompleteRef.current = false;
-      return;
-    }
-
-    if (trimmed.length < 2) {
-      setSuggestions([]);
-      setErrorMessage(null);
-      return;
-    }
-
-    // Skip autocomplete if user is typing or pasting a full Google Maps URL
-    if (trimmed.includes('google.com/maps') || trimmed.includes('goo.gl/maps')) {
+    if (shouldSkipAutocomplete(trimmed, suppressedQueryRef.current)) {
+      if (trimmed.length < 2) {
+        setSuggestions([]);
+        setErrorMessage(null);
+      }
       return;
     }
 
     debounceTimerRef.current = setTimeout(async () => {
-      const results = await searchPlaceSuggestions(trimmed);
-      setSuggestions(results);
-      setIsOpen(true);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      const results = await searchPlaceSuggestions(trimmed, controller.signal);
+      if (!controller.signal.aborted && document.activeElement === inputRef.current) {
+        setSuggestions(results);
+        setIsOpen(true);
+      }
     }, 220);
 
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
     };
   }, [query]);
 
@@ -159,6 +191,8 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     const clean = query.trim();
     if (!clean || clean.length < 2) return;
 
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    if (abortControllerRef.current) abortControllerRef.current.abort();
     setIsLoading(true);
     setErrorMessage(null);
     setIsOpen(true);
@@ -167,10 +201,11 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       const response = await resolveUserLocationQuery(clean);
       if (response.success && response.location) {
         recordRecentPlace(response.location);
+        lastOwnSelectionKeyRef.current = makeSelectionKey(response.location);
         onLocationSelected(response.location);
-        suppressAutocompleteRef.current = true;
-        setIsOpen(false);
+        suppressedQueryRef.current = normalizeSuppressQuery(response.location.name);
         setQuery(response.location.name);
+        setIsOpen(false);
       } else {
         setErrorMessage(response.error || 'Location could not be resolved. Try a place name or coordinates.');
       }
@@ -185,6 +220,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
   const handleSelectSuggestion = async (item: GeocodingSuggestion) => {
     setIsLoading(true);
     setErrorMessage(null);
+    setIsOpen(true);
     try {
       const response = await resolveUserLocationQuery(item.name, item);
       if (response.success && response.location) {
@@ -194,8 +230,9 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
           displayName: item.displayName || response.location.displayName
         };
         recordRecentPlace(enhancedLocation);
+        lastOwnSelectionKeyRef.current = makeSelectionKey(enhancedLocation);
         onLocationSelected(enhancedLocation);
-        suppressAutocompleteRef.current = true;
+        suppressedQueryRef.current = normalizeSuppressQuery(item.name);
         setQuery(item.name);
         setIsOpen(false);
       } else {
@@ -216,8 +253,9 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
     );
     if (matchedBenchmark) {
       recordRecentPlace(matchedBenchmark);
+      lastOwnSelectionKeyRef.current = makeSelectionKey(matchedBenchmark);
       onLocationSelected(matchedBenchmark as unknown as SelectedLocation);
-      suppressAutocompleteRef.current = true;
+      suppressedQueryRef.current = normalizeSuppressQuery(place.name);
       setQuery(place.name);
       setIsOpen(false);
       return;
@@ -231,8 +269,9 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
           name: place.name
         };
         recordRecentPlace(enhanced);
+        lastOwnSelectionKeyRef.current = makeSelectionKey(enhanced);
         onLocationSelected(enhanced);
-        suppressAutocompleteRef.current = true;
+        suppressedQueryRef.current = normalizeSuppressQuery(place.name);
         setQuery(place.name);
         setIsOpen(false);
       }
@@ -244,7 +283,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
   // Detect input type icon for visual feedback
   const getInputTypeIcon = () => {
     const q = query.trim();
-    if (q.includes('google.com/maps') || q.includes('goo.gl/maps')) {
+    if (isGoogleMapsUrlQuery(q)) {
       return <Link2 className="w-4 h-4 text-cyan-400" />;
     }
     if (/^[0-9.-]+[,\s]+[0-9.-]+/.test(q)) {
@@ -266,8 +305,11 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="relative flex items-center">
-        <div className="absolute left-3 flex items-center pointer-events-none">
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-1.5 liquid-glass-pill hover:border-cyan-400/50 focus-within:border-cyan-400 pl-2.5 pr-1.5 py-1.5 rounded-xl shadow-lg transition-all duration-200"
+      >
+        <div className="flex items-center shrink-0 pointer-events-none">
           {isLoading ? (
             <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
           ) : (
@@ -276,9 +318,14 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
         </div>
 
         <input
+          ref={inputRef}
           type="text"
           value={query}
+          onFocus={() => {
+            setIsOpen(true);
+          }}
           onChange={(e) => {
+            suppressedQueryRef.current = null;
             setQuery(e.target.value);
             setErrorMessage(null);
             setSelectedIndex(-1);
@@ -301,19 +348,18 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
               setIsOpen(false);
             }
           }}
-          onFocus={() => {
-            setIsOpen(true);
-          }}
           aria-label="Search any place on Earth by name, region, coordinates, or Google Maps URL"
           role="combobox"
           aria-expanded={isOpen}
+          aria-controls="terranexus-location-listbox"
+          aria-activedescendant={isOpen && selectedIndex >= 0 ? `location-option-${selectedIndex}` : undefined}
           aria-autocomplete="list"
           aria-haspopup="listbox"
-          placeholder="Search any place on Earth, mountain, river, mineral belt, or coordinates..."
-          className="w-full pl-9 pr-14 py-2 liquid-glass-pill hover:border-cyan-400/50 focus:border-cyan-400 rounded-xl text-xs sm:text-sm font-medium text-white placeholder-slate-400 caret-cyan-400 shadow-lg outline-none transition-all duration-200"
+          placeholder="Search city, village, coordinates, or Maps URL..."
+          className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm font-medium text-white placeholder-slate-400 caret-cyan-400 outline-none"
         />
 
-        <div className="absolute right-2 flex items-center gap-1 z-10">
+        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
           {query && (
             <button
               type="button"
@@ -321,6 +367,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
               title="Clear search input"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
+                suppressedQueryRef.current = null;
                 setQuery('');
                 setSuggestions([]);
                 setErrorMessage(null);
@@ -329,6 +376,19 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
               className="text-slate-400 hover:text-slate-200 focus:outline-none p-1 rounded transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {query.trim().length >= 2 && (
+            <button
+              type="submit"
+              disabled={isLoading}
+              aria-label="Submit location search"
+              title="Search location"
+              onMouseDown={(e) => e.preventDefault()}
+              className="px-1.5 sm:px-2 py-0.5 rounded-md bg-cyan-500/20 hover:bg-cyan-500/35 border border-cyan-400/50 text-cyan-200 text-[10px] sm:text-[11px] font-mono font-semibold transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Go
             </button>
           )}
 
@@ -350,7 +410,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
       </form>
 
       {showQuickDrawer && (
-        <div className="absolute left-0 right-0 top-full mt-2 liquid-glass-elevated rounded-2xl p-3 shadow-2xl z-50 space-y-3 text-xs animate-fadeIn max-h-[75vh] overflow-y-auto">
+        <div className="fixed left-3 right-3 top-14 mt-1.5 sm:mt-2 sm:absolute sm:left-0 sm:right-0 sm:top-full liquid-glass-elevated rounded-2xl p-3 shadow-2xl z-50 space-y-3 text-xs animate-fadeIn max-h-[75vh] overflow-y-auto">
           {savedPlaces.length > 0 && (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-amber-300">
@@ -424,7 +484,7 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400">
-              <Sparkles className="w-3 h-3 text-emerald-400" />
+              <MapPin className="w-3 h-3 text-emerald-400" />
               <span>National High-Density Reference Loci (India)</span>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
@@ -434,9 +494,12 @@ export const LocationSearch: React.FC<LocationSearchProps> = ({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
+                    const shortName = loc.name.split(' - ')[0];
                     recordRecentPlace(loc);
+                    lastOwnSelectionKeyRef.current = makeSelectionKey(loc);
                     onLocationSelected(loc as unknown as SelectedLocation);
-                    setQuery(loc.name.split(' - ')[0]);
+                    suppressedQueryRef.current = normalizeSuppressQuery(shortName);
+                    setQuery(shortName);
                     setIsOpen(false);
                   }}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-cyan-950/60 border border-white/10 hover:border-cyan-400/50 text-left transition-all cursor-pointer"

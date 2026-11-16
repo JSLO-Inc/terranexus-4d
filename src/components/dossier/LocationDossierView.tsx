@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { Interactive2DMap } from './Interactive2DMap';
 import { StatusBadge } from '../common/StatusBadge';
-import { LocationSearch } from '../location/LocationSearch';
+import { formatUniqueAddress } from '../../utils/formatters';
 import {
   MapPin,
   Droplets,
@@ -79,45 +79,45 @@ export const LocationDossierView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row h-full w-full min-h-0 min-w-0 overflow-y-auto lg:overflow-hidden bg-[#030712] text-slate-100">
+    <div className="flex-1 flex flex-col lg:flex-row h-full w-full min-h-0 min-w-0 overflow-y-auto lg:overflow-hidden bg-[#030712] text-slate-100 pb-20 lg:pb-0">
       {/* LEFT COLUMN: Dossier Search, Key Summary & Categorized Tabs */}
       <div className="w-full lg:w-[52%] xl:w-[50%] min-w-0 flex flex-col h-auto lg:h-full border-b lg:border-b-0 lg:border-r border-slate-800/80 bg-[#080d1a] overflow-visible lg:overflow-hidden">
         {/* Top Intelligence Dossier Bar */}
-        <div className="px-4 py-2.5 border-b border-slate-800/80 liquid-glass flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
-            <span className="text-xs font-mono font-bold tracking-wider uppercase text-cyan-300">
-              National Subsurface Evidence Dossier
+        <div className="px-3.5 py-2.5 border-b border-white/10 liquid-glass flex items-center justify-between gap-2 shrink-0 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
+            <span className="text-xs font-mono font-bold tracking-wider uppercase text-cyan-300 truncate">
+              Subsurface Evidence Dossier
             </span>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {d && (
               <button
                 onClick={handleExportDossierReport}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl liquid-glass-pill hover:border-emerald-400 text-emerald-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl liquid-glass-pill hover:border-emerald-400 text-emerald-300 text-xs font-mono transition-colors shadow-sm cursor-pointer whitespace-nowrap"
                 title="Export Structured Scientific Location Intelligence Dossier (JSON)"
               >
                 <FileText className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="hidden sm:inline">{reportExported ? 'Report Exported ✓' : 'Export Report'}</span>
+                <span className="hidden sm:inline">{reportExported ? 'Exported ✓' : 'Export'}</span>
               </button>
             )}
 
             <button
               onClick={() => setShowProviderHealthModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer whitespace-nowrap"
               title="Inspect Provider Health, Circuit Breakers & Validation Release Gates"
             >
               <Activity className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">Provider Health</span>
+              <span className="hidden sm:inline">Health</span>
             </button>
 
             <button
               onClick={() => setMainView('twin3d')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold shadow-md transition-all hover:scale-[1.02] cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 border border-sky-400/50 text-white text-xs font-semibold shadow-md transition-all cursor-pointer whitespace-nowrap"
               title="Switch to Full 3D Cesium Earth Digital Twin & Subsurface Cutaway"
             >
-              <span>Explore 3D Twin</span>
+              <span>Explore 3D</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -126,18 +126,20 @@ export const LocationDossierView: React.FC = () => {
         {/* Location Breadcrumb & Availability Header */}
         {d && (
           <div className="px-4 py-2.5 border-b border-slate-800/80 bg-slate-900/50 flex flex-wrap items-center justify-between gap-3 shrink-0">
-            <div className="flex-1 min-w-[220px]">
+            <div className="flex-1 min-w-[200px]">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-cyan-400 shrink-0" />
                 <h2 className="text-sm font-bold text-slate-100 truncate">
-                  {d.locationContext.administrativeAreas.formattedAddress}
+                  {formatUniqueAddress((d.locationContext.administrativeAreas.formattedAddress || '').split(','))}
                 </h2>
               </div>
-              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
-                <span>{d.locationContext.latitude.toFixed(4)}°N, {d.locationContext.longitude.toFixed(4)}°E</span>
-                <span>•</span>
+              <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span>
+                  {Math.abs(d.locationContext.latitude).toFixed(4)}°{d.locationContext.latitude >= 0 ? 'N' : 'S'}, {Math.abs(d.locationContext.longitude).toFixed(4)}°{d.locationContext.longitude >= 0 ? 'E' : 'W'}
+                </span>
+                <span aria-hidden="true">•</span>
                 <span className="text-cyan-300">{d.locationContext.watershed.basinName}</span>
-                <span>•</span>
+                <span aria-hidden="true">•</span>
                 <span className="text-slate-400">Elevation: {d.terrain.elevationM}m ASL</span>
               </div>
             </div>
@@ -161,22 +163,22 @@ export const LocationDossierView: React.FC = () => {
         {/* Compact 5-Metric Result Card Immediately Under Search */}
         {d && (
           <div className="px-3.5 py-2.5 border-b border-slate-800/80 bg-slate-950/60 shrink-0">
-            <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-5 gap-2.5 font-mono text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-5 gap-2.5 font-mono text-xs tabular-nums">
               {/* 1. Evidence nearby */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-1">
-                  <span className="flex items-center gap-1">
-                    <Droplets className="w-3 h-3 text-cyan-400" />
-                    <span>Evidence Nearby</span>
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 flex flex-col justify-between gap-1">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider gap-1">
+                  <span className="flex items-center gap-1 truncate">
+                    <Droplets className="w-3 h-3 text-cyan-400 shrink-0" />
+                    <span>Evidence</span>
                   </span>
-                  <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${d.groundwater.nearestObservation ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 ${d.groundwater.nearestObservation ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'}`}>
                     {d.groundwater.nearestObservation ? 'MEASURED' : 'SPARSE'}
                   </span>
                 </div>
-                <div className="text-xs font-bold text-slate-100 truncate" title={d.groundwater.nearestObservation?.name || 'No local well'}>
+                <div className="text-xs font-bold text-slate-100 line-clamp-2 leading-tight" title={d.groundwater.nearestObservation?.name || 'No local well'}>
                   {d.groundwater.nearestObservation ? d.groundwater.nearestObservation.name : 'No Local Well'}
                 </div>
-                <div className="text-[11px] text-emerald-400 font-bold mt-0.5 truncate">
+                <div className="text-[11px] text-emerald-400 font-bold truncate">
                   {d.groundwater.nearestObservation
                     ? `${d.groundwater.nearestObservation.displayValue} • ${
                         d.groundwater.nearestObservation.distance_to_nearest_measurement_m != null
@@ -185,85 +187,85 @@ export const LocationDossierView: React.FC = () => {
                           ? `${d.groundwater.estimate.nearestObservationDistanceKm.toFixed(1)} km`
                           : 'Local'
                       }`
-                    : 'Sparse network (> 50 km)'}
+                    : 'Sparse (> 50 km)'}
                 </div>
               </div>
 
               {/* 2. Last rainfall */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-1">
-                  <span className="flex items-center gap-1">
-                    <CloudRain className="w-3 h-3 text-sky-400" />
-                    <span>Last Rainfall</span>
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 flex flex-col justify-between gap-1">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider gap-1">
+                  <span className="flex items-center gap-1 truncate">
+                    <CloudRain className="w-3 h-3 text-sky-400 shrink-0" />
+                    <span>Rainfall</span>
                   </span>
-                  <span className="text-[9px] text-slate-400">GPM IMERG</span>
+                  <span className="text-[9px] text-slate-400 shrink-0">IMERG</span>
                 </div>
                 <div className="text-xs font-bold text-sky-300">
-                  {d.climate.rainfall30dMm !== null ? `${d.climate.rainfall30dMm} mm (30d)` : 'Data Pending'}
+                  {d.climate.rainfall30dMm !== null ? `${d.climate.rainfall30dMm} mm (30d)` : 'Pending'}
                 </div>
-                <div className="text-[11px] text-slate-400 mt-0.5 truncate">
+                <div className="text-[11px] text-slate-400 truncate">
                   Anomaly: <span className={d.climate.seasonalAnomalyPercent && d.climate.seasonalAnomalyPercent > 0 ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
-                    {d.climate.seasonalAnomalyPercent !== null ? `${d.climate.seasonalAnomalyPercent > 0 ? '+' : ''}${d.climate.seasonalAnomalyPercent}% vs 20yr` : 'Normal'}
+                    {d.climate.seasonalAnomalyPercent !== null ? `${d.climate.seasonalAnomalyPercent > 0 ? '+' : ''}${d.climate.seasonalAnomalyPercent}%` : 'Normal'}
                   </span>
                 </div>
               </div>
 
               {/* 3. Groundwater data availability */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-1">
-                  <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                    <span>Availability</span>
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 flex flex-col justify-between gap-1">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider gap-1">
+                  <span className="flex items-center gap-1 truncate">
+                    <ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0" />
+                    <span>Coverage</span>
                   </span>
-                  <span className="text-[9px] font-bold text-emerald-400">{d.dataAvailabilityScore}/100</span>
+                  <span className="text-[9px] font-bold text-emerald-400 shrink-0">{d.dataAvailabilityScore}/100</span>
                 </div>
                 <div className="text-xs font-bold text-slate-200">
                   Tier {d.confidence.tier}
                 </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  <span className="text-emerald-300 font-bold">{d.evidence.measured.length}</span> in-situ • <span className="text-sky-300 font-bold">{d.evidence.remote.length}</span> remote
+                <div className="text-[11px] text-slate-400 truncate">
+                  <span className="text-emerald-300 font-bold">{d.evidence.measured.length}</span> well • <span className="text-sky-300 font-bold">{d.evidence.remote.length}</span> remote
                 </div>
               </div>
 
               {/* 4. Geology */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-1">
-                  <span className="flex items-center gap-1">
-                    <Mountain className="w-3 h-3 text-purple-400" />
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 flex flex-col justify-between gap-1">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider gap-1">
+                  <span className="flex items-center gap-1 truncate">
+                    <Mountain className="w-3 h-3 text-purple-400 shrink-0" />
                     <span>Geology</span>
                   </span>
-                  <span className="text-[9px] text-slate-400">
-                    {d.locationContext.isWithinIndia ? 'GSI 1:50k' : 'CGMW GLiM'}
+                  <span className="text-[9px] text-slate-400 shrink-0">
+                    {d.locationContext.isWithinIndia ? 'GSI' : 'GLiM'}
                   </span>
                 </div>
-                <div className="text-xs font-bold text-slate-100 truncate" title={d.geology.province}>
+                <div className="text-xs font-bold text-slate-100 line-clamp-2 leading-tight" title={d.geology.province}>
                   {d.geology.province}
                 </div>
-                <div className="text-[11px] text-purple-300 truncate mt-0.5">
+                <div className="text-[11px] text-purple-300 truncate">
                   {d.geology.primaryLithology}
                 </div>
               </div>
 
               {/* 5. Confidence & Validation Release Gate */}
-              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between col-span-2 sm:col-span-1">
-                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider mb-1">
-                  <span className="flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-amber-400" />
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 flex flex-col justify-between gap-1 col-span-2 sm:col-span-1">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-wider gap-1">
+                  <span className="flex items-center gap-1 truncate">
+                    <CheckCircle2 className="w-3 h-3 text-amber-400 shrink-0" />
                     <span>Confidence</span>
                   </span>
-                  <span className="text-[9px] font-bold text-amber-300">
+                  <span className="text-[9px] font-bold text-amber-300 shrink-0">
                     {d.confidence.overallScorePercent}%
                   </span>
                 </div>
-                <div className="text-xs font-bold truncate">
+                <div className="text-xs font-bold">
                   {d.groundwater.estimate.validationMetrics.releaseGatePassed ? (
                     <span className="text-emerald-400">Gate: Calibrated</span>
                   ) : (
                     <span className="text-amber-400">Investigation Req.</span>
                   )}
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5 truncate" title={d.groundwater.estimate.validationMetrics.releaseGatePassed ? 'Validation metrics passed release gate' : 'Site investigation required before any drilling'}>
-                  {d.groundwater.estimate.validationMetrics.releaseGatePassed ? 'LOO MAE Passed' : 'Site investigation required'}
+                <div className="text-[10px] text-slate-400 truncate" title={d.groundwater.estimate.validationMetrics.releaseGatePassed ? 'Validation metrics passed release gate' : 'Site investigation required before any drilling'}>
+                  {d.groundwater.estimate.validationMetrics.releaseGatePassed ? 'LOO MAE Passed' : 'Field audit required'}
                 </div>
               </div>
             </div>
@@ -271,10 +273,10 @@ export const LocationDossierView: React.FC = () => {
         )}
 
         {/* Four Stable Dossier Navigation Tabs: Overview • Water • Land & Geology • Sources */}
-        <div className="h-10 border-b border-slate-800/80 bg-slate-950/80 px-4 flex items-center gap-2 shrink-0 select-none overflow-x-auto">
+        <div className="h-10 border-b border-slate-800/80 bg-slate-950/80 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 shrink-0 select-none overflow-x-auto">
           <button
             onClick={() => setDossierActiveTab('overview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               dossierActiveTab === 'overview'
                 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -286,7 +288,7 @@ export const LocationDossierView: React.FC = () => {
 
           <button
             onClick={() => setDossierActiveTab('water')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               dossierActiveTab === 'water'
                 ? 'bg-blue-500/20 text-blue-300 border border-blue-400/50 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -298,7 +300,7 @@ export const LocationDossierView: React.FC = () => {
 
           <button
             onClick={() => setDossierActiveTab('land')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               dossierActiveTab === 'land'
                 ? 'bg-purple-500/20 text-purple-300 border border-purple-400/50 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -310,7 +312,7 @@ export const LocationDossierView: React.FC = () => {
 
           <button
             onClick={() => setDossierActiveTab('sources')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
               isSourcesTab
                 ? 'bg-amber-500/20 text-amber-300 border border-amber-400/50 font-bold'
                 : 'text-slate-400 hover:text-slate-200'
@@ -322,7 +324,7 @@ export const LocationDossierView: React.FC = () => {
         </div>
 
         {/* Tab Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 md:p-5 pb-6 space-y-4">
           {!d ? (
             <div className="h-64 flex flex-col items-center justify-center text-center p-6 text-slate-400 font-mono">
               <Compass className="w-8 h-8 text-cyan-400 animate-spin mb-3" />
@@ -334,10 +336,10 @@ export const LocationDossierView: React.FC = () => {
               {dossierActiveTab === 'overview' && (
                 <div className="space-y-4 animate-fadeIn">
                   {/* Highlights Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
+                  <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 font-mono">
                     {/* Card 1: Nearest Well */}
-                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
-                      <div className="flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <span className="text-[10px] text-slate-400 uppercase tracking-wider">Groundwater Telemetry</span>
                         <StatusBadge status="MEASURED" size="sm" />
                       </div>
@@ -352,8 +354,8 @@ export const LocationDossierView: React.FC = () => {
                     </div>
 
                     {/* Card 2: 30-Day Rainfall */}
-                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
-                      <div className="flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <span className="text-[10px] text-slate-400 uppercase tracking-wider">30-Day Precipitation</span>
                         <StatusBadge status="REMOTE" size="sm" />
                       </div>
@@ -368,8 +370,8 @@ export const LocationDossierView: React.FC = () => {
                     </div>
 
                     {/* Card 3: Terrain & Wetness */}
-                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5">
-                      <div className="flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <span className="text-[10px] text-slate-400 uppercase tracking-wider">Topographic Wetness</span>
                         <StatusBadge status="DERIVED" size="sm" />
                       </div>
@@ -741,17 +743,22 @@ export const LocationDossierView: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Regional Surface Soil Moisture (NASA SMAP L3 36-km Footprint) */}
+                  {/* Regional Surface Soil Moisture (ECMWF IFS 9-km / NASA SMAP L3) */}
                   {(() => {
-                    const smapObs = d.evidence.remote.find(o => o.parameter === 'regional_surface_soil_moisture_smap');
+                    const smapObs = d.evidence.remote.find(
+                      o => o.parameter === 'regional_surface_soil_moisture_ecmwf' || o.parameter === 'regional_surface_soil_moisture_smap'
+                    );
                     if (!smapObs) return null;
+                    const footprintLabel = smapObs.spatial_support_m
+                      ? `~${Math.round(smapObs.spatial_support_m / 1000)} km Assimilated Grid`
+                      : 'Regional Grid Footprint';
                     return (
                       <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3 font-mono text-xs">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Layers className="w-4 h-4 text-emerald-400" />
                             <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-                              Regional Surface Soil Moisture (NASA SMAP L3)
+                              {smapObs.name || 'Regional Surface Soil Moisture'}
                             </h3>
                           </div>
                           <StatusBadge status="REMOTE" size="sm" />
@@ -764,7 +771,7 @@ export const LocationDossierView: React.FC = () => {
                           </div>
                           <div className="p-2 rounded bg-slate-950/80 border border-slate-800">
                             <span className="text-slate-400">Spatial Support / Footprint:</span>
-                            <div className="font-bold text-slate-200">36 km Microwave Footprint</div>
+                            <div className="font-bold text-slate-200">{footprintLabel}</div>
                           </div>
                           <div className="p-2 rounded bg-slate-950/80 border border-slate-800">
                             <span className="text-slate-400">Measurement Protocol:</span>
@@ -779,8 +786,7 @@ export const LocationDossierView: React.FC = () => {
                             <span>Regional Footprint Transparency Notice:</span>
                           </div>
                           <p className="leading-relaxed">
-                            NASA SMAP 36-km daily soil moisture grid is far too coarse for a neighborhood. It is displayed strictly at its
-                            actual footprint and labeled <strong className="text-emerald-300">"regional surface soil moisture"</strong>. Never use for field irrigation scheduling or foundation engineering.
+                            Gridded satellite/reanalysis surface moisture ({footprintLabel}) represents a regional cell average, not a field core sample. Never use for precision drip irrigation certification or geotechnical foundation engineering.
                           </p>
                         </div>
 

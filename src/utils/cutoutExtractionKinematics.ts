@@ -183,6 +183,7 @@ export function interpolateCesiumCameraExtraction(
 export interface GsapCutoutController {
   readonly state: CutoutExtractionPose;
   startExtraction: (options?: { durationSec?: number; enableFloating?: boolean; onUpdate?: (pose: CutoutExtractionPose) => void }) => void;
+  startFloating: (onUpdate?: (pose: CutoutExtractionPose) => void) => void;
   startReturnToGlobe: (options?: { durationSec?: number; onUpdate?: (pose: CutoutExtractionPose) => void; onComplete?: () => void }) => void;
   settleImmediately: () => void;
   kill: () => void;
@@ -223,9 +224,9 @@ export function createGsapCutoutController(initialMode: 'extracting' | 'settled'
   const startFloatingSuspension = (onUpdate?: (pose: CutoutExtractionPose) => void) => {
     // Gentle continuous GSAP harmonic suspension once extracted
     const yTween = gsap.to(state, {
-      cutoutY: 0.36,
-      datumGridOpacity: 0.25,
-      duration: 2.1,
+      cutoutY: 0.24,
+      datumGridOpacity: 0.26,
+      duration: 2.6,
       ease: 'sine.inOut',
       repeat: -1,
       yoyo: true,
@@ -233,9 +234,9 @@ export function createGsapCutoutController(initialMode: 'extracting' | 'settled'
     });
 
     const tiltTween = gsap.to(state, {
-      cutoutTiltX: 0.006,
-      cutoutRollZ: 0.0045,
-      duration: 2.8,
+      cutoutTiltX: 0.004,
+      cutoutRollZ: 0.003,
+      duration: 3.2,
       ease: 'sine.inOut',
       repeat: -1,
       yoyo: true
@@ -246,18 +247,28 @@ export function createGsapCutoutController(initialMode: 'extracting' | 'settled'
 
   return {
     state,
+    startFloating(onUpdate) {
+      killAll();
+      state.progress = 1;
+      state.cutoutY = 0;
+      state.cutoutScale = 1.0;
+      state.cutoutTiltX = 0;
+      state.cutoutRollZ = 0;
+      state.datumGridOpacity = 0.28;
+      startFloatingSuspension(onUpdate);
+    },
     startExtraction(options) {
       killAll();
-      const durationSec = options?.durationSec ?? 0.92;
+      const durationSec = options?.durationSec ?? 0.85;
       const enableFloating = options?.enableFloating ?? true;
       const onUpdate = options?.onUpdate;
 
       state.progress = 0;
-      state.cutoutY = -11.5;
-      state.cutoutScale = 0.86;
-      state.cutoutTiltX = 0.08;
+      state.cutoutY = -7.8;
+      state.cutoutScale = 0.9;
+      state.cutoutTiltX = 0.05;
       state.cutoutRollZ = 0;
-      state.datumGridOpacity = 0.10;
+      state.datumGridOpacity = 0.08;
 
       activeTimeline = gsap.timeline({
         onUpdate: () => onUpdate?.(state),
@@ -274,7 +285,7 @@ export function createGsapCutoutController(initialMode: 'extracting' | 'settled'
         cutoutScale: 1.0,
         cutoutTiltX: 0,
         cutoutRollZ: 0,
-        datumGridOpacity: 0.30,
+        datumGridOpacity: 0.28,
         duration: durationSec,
         ease: 'power3.out'
       });

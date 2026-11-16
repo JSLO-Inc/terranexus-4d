@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTerranexusStore, TIME_STEPS } from '../../state/useTerranexusStore';
-import { AQUIFER_SYSTEMS, HYDRO_TIMESERIES } from '../../data/hydroData';
+import { HYDRO_TIMESERIES } from '../../data/hydroData';
+import { deriveDynamicAquifers } from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
 import {
   ComposedChart,
@@ -153,7 +154,8 @@ export const NexusHydro: React.FC = () => {
     setHeatmapConfig,
     isAreaAnalysisOpen,
     setIsAreaAnalysisOpen,
-    setProviderDataStatus
+    setProviderDataStatus,
+    currentDossier
   } = useTerranexusStore();
   const [activeTab, setActiveTab] = useState<'monthly' | 'seasonal' | 'aquifers' | 'heatmaps'>('monthly');
   const [liveData, setLiveData] = useState<IngestedHydroDataset | null>(null);
@@ -166,7 +168,7 @@ export const NexusHydro: React.FC = () => {
   const [showRollingMean, setShowRollingMean] = useState<boolean>(false);
   const [showUncertaintyBands, setShowUncertaintyBands] = useState<boolean>(true);
 
-  const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
+  const aquifers = deriveDynamicAquifers(selectedLocation, currentDossier);
   const benchmarkTimeseries = HYDRO_TIMESERIES[selectedLocation.id] || [];
 
   const [showProvenanceModal, setShowProvenanceModal] = useState<boolean>(false);
@@ -403,7 +405,7 @@ export const NexusHydro: React.FC = () => {
   const isGenuineTier = isHistoricalTier || isProcessedTier;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Top Banner / Ingestion Pipeline Status */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -1132,7 +1134,7 @@ export const NexusHydro: React.FC = () => {
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
                     <span className="text-slate-500 text-[10px] block">Coordinates:</span>
-                    <span className="text-cyan-300 block">{selectedLocation.latitude.toFixed(2)}°N, {selectedLocation.longitude.toFixed(2)}°E</span>
+                    <span className="text-cyan-300 block">{Math.abs(selectedLocation.latitude).toFixed(2)}°{selectedLocation.latitude >= 0 ? 'N' : 'S'}, {Math.abs(selectedLocation.longitude).toFixed(2)}°{selectedLocation.longitude >= 0 ? 'E' : 'W'}</span>
                   </div>
                   <div className="bg-slate-900/80 p-2 rounded border border-slate-800">
                     <span className="text-slate-500 text-[10px] block">3D Globe Heatmap:</span>
@@ -1174,7 +1176,7 @@ export const NexusHydro: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-300">Coordinates:</span>
-                <span className="font-mono text-slate-400">{selectedLocation.latitude.toFixed(4)}°N, {selectedLocation.longitude.toFixed(4)}°E</span>
+                <span className="font-mono text-slate-400">{Math.abs(selectedLocation.latitude).toFixed(4)}°{selectedLocation.latitude >= 0 ? 'N' : 'S'}, {Math.abs(selectedLocation.longitude).toFixed(4)}°{selectedLocation.longitude >= 0 ? 'E' : 'W'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-slate-300">Data Source Tier:</span>

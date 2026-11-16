@@ -1,15 +1,18 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTerranexusStore, TIME_STEPS } from '../../state/useTerranexusStore';
-import { GEOLOGICAL_FORMATIONS } from '../../data/strataData';
-import { AQUIFER_SYSTEMS } from '../../data/hydroData';
-import { MINERAL_INDICATORS } from '../../data/mineralData';
+import {
+  deriveDynamicFormations,
+  deriveDynamicAquifers,
+  deriveDynamicMinerals
+} from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
 import { MarkdownRenderer } from '../common/MarkdownRenderer';
+import { resolveUserLocationQuery } from '../../services/locationResolver';
+import { parseAiSceneCommands } from '../../utils/aiSceneCommands';
 import { SourceInspectionMetrics, AIMessage } from '../../types';
 import {
   Bot,
   Send,
-  Sparkles,
   AlertTriangle,
   ShieldCheck,
   CheckCircle2,
@@ -25,7 +28,9 @@ import {
   Database,
   Layers,
   Activity,
-  Compass
+  Compass,
+  Sliders,
+  ArrowUpRight
 } from 'lucide-react';
 
 export const NexusAI: React.FC = () => {
@@ -37,7 +42,19 @@ export const NexusAI: React.FC = () => {
     isAiGenerating,
     setIsAiGenerating,
     selectedLocation,
+    setSelectedLocation,
     depthMeters,
+    setDepthMeters,
+    setViewMode,
+    setCutawayPreset,
+    setShowAquiferLayers,
+    setShowMineralLayers,
+    setMineralDisplayMode,
+    setIsPumpingActive,
+    setCutawayExaggeration,
+    setActiveModule,
+    setMainView,
+    setIsInitialSearch,
     currentTimeIndex,
     layers,
     selectedBorehole,
@@ -48,11 +65,34 @@ export const NexusAI: React.FC = () => {
   const [inputQuery, setInputQuery] = useState('');
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
   const [inspectedSources, setInspectedSources] = useState<SourceInspectionMetrics | null>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const [geminiStatus, setGeminiStatus] = useState<{ configured: boolean; model: string }>({
+    configured: true,
+    model: 'gemini-4-hydrogen'
+  });
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    fetch('/api/health')
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data?.geminiConfigured === 'boolean') {
+          setGeminiStatus({
+            configured: data.geminiConfigured,
+            model: data.geminiModel || 'gemini-4-hydrogen'
+          });
+        }
+      })
+      .catch(() => {
+        setGeminiStatus((prev) => ({ ...prev, configured: false }));
+      });
+  }, []);
+
+  useEffect(() => {
+    const scroller = messagesScrollRef.current;
+    if (scroller) {
+      scroller.scrollTop = scroller.scrollHeight;
+    }
   }, [aiMessages, isAiGenerating]);
 
   // Clean up abort controller on unmount
@@ -64,11 +104,9 @@ export const NexusAI: React.FC = () => {
     };
   }, []);
 
-  const formations = currentDossier?.geology?.formations?.length
-    ? currentDossier.geology.formations
-    : (GEOLOGICAL_FORMATIONS[selectedLocation.id] || []);
-  const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
-  const mineralIndicators = MINERAL_INDICATORS[selectedLocation.id] || null;
+  const formations = deriveDynamicFormations(selectedLocation, currentDossier);
+  const aquifers = deriveDynamicAquifers(selectedLocation, currentDossier);
+  const mineralIndicators = deriveDynamicMinerals(selectedLocation, currentDossier) || null;
 
   const isWithinIndia = (selectedLocation as any).isWithinIndia !== false;
 
@@ -182,10 +220,68 @@ export const NexusAI: React.FC = () => {
     }
   };
 
-  // Send message and stream response from backend
+  // Send message, execute any structured 3D scene commands, and stream response from backend
   const handleSendMessage = async (queryText?: string) => {
     const text = (queryText || inputQuery).trim();
     if (!text || isAiGenerating) return;
+
+    const scenePlan = parseAiSceneCommands(text);
+    const appliedSceneActions: string[] = [];
+    let effectiveLocation = selectedLocation;
+    let effectiveDepth = depthMeters;
+
+    if (scenePlan.hasAnyCommand) {
+      if (scenePlan.locationQuery) {
+        try {
+          const resolved = await resolveUserLocationQuery(scenePlan.locationQuery);
+          if (resolved.success && resolved.location) {
+            effectiveLocation = resolved.location;
+            setSelectedLocation(resolved.location);
+            appliedSceneActions.push(`Target: ${resolved.location.name.split(' - ')[0]}`);
+          }
+        } catch {
+          // Keep active location cleanly if offline or geocode lookup fails
+        }
+      }
+      if (typeof scenePlan.depthMeters === 'number') {
+        effectiveDepth = scenePlan.depthMeters;
+        setDepthMeters(scenePlan.depthMeters);
+        appliedSceneActions.push(`Slice: -${scenePlan.depthMeters}m`);
+      }
+      if (scenePlan.viewMode) {
+        setViewMode(scenePlan.viewMode);
+        appliedSceneActions.push(
+          scenePlan.viewMode === 'cutaway'
+            ? 'Mode: 3D Cutout'
+            : scenePlan.viewMode === 'split'
+            ? 'Mode: Split Twin'
+            : 'Mode: 3D Globe'
+        );
+      }
+      if (scenePlan.cutawayPreset) {
+        setCutawayPreset(scenePlan.cutawayPreset);
+        appliedSceneActions.push(`Block: ${scenePlan.cutawayPreset}`);
+      }
+      if (typeof scenePlan.showAquiferLayers === 'boolean') {
+        setShowAquiferLayers(scenePlan.showAquiferLayers);
+        appliedSceneActions.push(scenePlan.showAquiferLayers ? 'Aquifers & Water Cutout: ON' : 'Aquifers: OFF');
+      }
+      if (typeof scenePlan.isPumpingActive === 'boolean') {
+        setIsPumpingActive(scenePlan.isPumpingActive);
+        appliedSceneActions.push(scenePlan.isPumpingActive ? 'Thiem Pump: ON' : 'Thiem Pump: OFF');
+      }
+      if (typeof scenePlan.showMineralLayers === 'boolean') {
+        setShowMineralLayers(scenePlan.showMineralLayers);
+        if (scenePlan.mineralDisplayMode) {
+          setMineralDisplayMode(scenePlan.mineralDisplayMode);
+        }
+        appliedSceneActions.push(scenePlan.showMineralLayers ? 'Minerals: Highlighted' : 'Minerals: OFF');
+      }
+      if (typeof scenePlan.cutawayExaggeration === 'number') {
+        setCutawayExaggeration(scenePlan.cutawayExaggeration);
+        appliedSceneActions.push(`Relief: ${scenePlan.cutawayExaggeration}x`);
+      }
+    }
 
     const userMsgId = `user-${Date.now()}`;
     addAiMessage({
@@ -193,22 +289,28 @@ export const NexusAI: React.FC = () => {
       sender: 'user',
       content: text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      groundedLocation: selectedLocation.name
+      groundedLocation: effectiveLocation.name
     });
 
     setInputQuery('');
     setIsAiGenerating(true);
 
+    const effectiveDossier = effectiveLocation.id === selectedLocation.id ? currentDossier : null;
+    const effectiveFormations = deriveDynamicFormations(effectiveLocation, effectiveDossier);
+    const effectiveAquifers = deriveDynamicAquifers(effectiveLocation, effectiveDossier);
+    const effectiveMinerals = deriveDynamicMinerals(effectiveLocation, effectiveDossier) || null;
+
     const payloadContext = {
-      location: selectedLocation,
-      depthMeters,
+      location: effectiveLocation,
+      depthMeters: effectiveDepth,
       timeStep: TIME_STEPS[currentTimeIndex] || '2024-11',
       activeLayers: layers.filter(l => l.enabled).map(l => l.name),
-      borehole: selectedBorehole,
-      aquifers,
-      formations,
-      mineralIndicators,
-      dossier: currentDossier,
+      borehole: effectiveLocation.id === selectedLocation.id ? selectedBorehole : null,
+      aquifers: effectiveAquifers,
+      formations: effectiveFormations,
+      mineralIndicators: effectiveMinerals,
+      dossier: effectiveDossier,
+      executedSceneActions: appliedSceneActions,
       history: aiMessages.slice(-6).map(m => ({ sender: m.sender, content: m.content }))
     };
 
@@ -225,9 +327,10 @@ export const NexusAI: React.FC = () => {
       sender: 'assistant',
       content: '',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      groundedLocation: selectedLocation.name,
+      groundedLocation: effectiveLocation.name,
       isStreaming: true,
-      sources: resolveFallbackSources()
+      sources: resolveFallbackSources(),
+      ...(appliedSceneActions.length > 0 ? { appliedSceneActions } : {})
     });
 
     try {
@@ -279,6 +382,10 @@ export const NexusAI: React.FC = () => {
                 content: accumulatedContent,
                 limitationsNoted: finalResultData.limitationsNoted,
                 sources: finalResultData.sources || resolveFallbackSources(),
+                isLiveGemini: Boolean(finalResultData.isLiveGemini),
+                modelUsed: finalResultData.modelUsed,
+                dataTier: finalResultData.dataTier,
+                fallbackReason: finalResultData.fallbackReason,
                 isStreaming: false
               });
             }
@@ -294,6 +401,10 @@ export const NexusAI: React.FC = () => {
           content: accumulatedContent,
           limitationsNoted: finalResultData.limitationsNoted,
           sources: finalResultData.sources || resolveFallbackSources(),
+          isLiveGemini: Boolean(finalResultData.isLiveGemini),
+          modelUsed: finalResultData.modelUsed,
+          dataTier: finalResultData.dataTier,
+          fallbackReason: finalResultData.fallbackReason,
           isStreaming: false
         });
       } else if (accumulatedContent) {
@@ -312,38 +423,19 @@ export const NexusAI: React.FC = () => {
           isStreaming: false
         });
       } else {
-        // High-fidelity scientific offline fallback
-        const waterDepth = currentDossier?.groundwater?.nearestObservation?.value
-          ?? selectedBorehole?.waterTableDepthMeters
-          ?? '32.4';
-        const lithoDesc = formations.map(f => f.name).join(', ') || 'Bedrock lithological succession';
-        const densityVal = (formations[0] as any)?.densityGcm3 ?? 2.65;
-        const stationCode = resolveFallbackSources().cgwbStationCode;
-        const sheetCode = resolveFallbackSources().gsiQuadrangleSheet;
-
-        const fallbackMarkdown =
-          `### Grounded Scientific Assessment for ${selectedLocation.name}\n\n` +
-          `**Geotectonic Province:** ${selectedLocation.geologicalProvince || 'Indian Cratonic / Mobile Belt'}\n` +
-          `**Depth Focus:** -${depthMeters} meters | **Temporal Coordinate:** ${TIME_STEPS[currentTimeIndex]}\n\n` +
-          `#### 1. Hydrological & Piezometric Evidence\n` +
-          `- **Central Ground Water Board (CGWB):** Telemetry station \`${stationCode}\` records in-situ water table at **${waterDepth} mbgl**.\n` +
-          `- **NASA GRACE/GRACE-FO Gravimetry:** Regional Terrestrial Water Storage Anomaly (TWSA) reflects mass balance column changes. Column mass decoupling demonstrates continuous agricultural overdraft.\n` +
-          `- **Hydraulic Governing Laws:** Unconfined drawdown follows the Dupuit-Thiem solution $s = \\frac{Q}{2\\pi T} \\ln\\left(\\frac{R}{r}\\right)$.\n\n` +
-          `#### 2. Lithostratigraphy & Subsurface Structure\n` +
-          `- **GSI Quadrangle Sheet:** \`${sheetCode}\` indicates regional succession: **${lithoDesc}**.\n` +
-          `- **Physical Rock Properties:** Mean bulk density is **${densityVal} g/cm³** with structural dip and strike aligned with tectonic fabric.\n\n` +
-          `#### 3. Remote Sensing & Spectral Indicators\n` +
-          `- **Copernicus Sentinel-2 Surface Alteration:** Ferric Iron (B4/B2) and Hydroxyl/Clay (B11/B12) spectral indices map surface weathering halos.\n` +
-          `- **Physical Sensing Limitation:** Optical satellite reflectance observes the outermost crustal microns only; confirmatory subsurface mineral appraisal requires diamond core drilling.`;
-
+        const errMessage = err?.message || 'Unable to reach Gemini AI service.';
         updateAiMessage(assistantMsgId, {
-          content: fallbackMarkdown,
+          content:
+            `### Connection Issue Reaching Nexus AI\n\n` +
+            `Could not complete the live Gemini request for **${selectedLocation.name}** (${errMessage}).\n\n` +
+            `Click **Regenerate** below to retry once the API connection is ready.`,
           isStreaming: false,
+          isLiveGemini: false,
+          dataTier: 'DETERMINISTIC_OFFLINE_RULES',
+          fallbackReason: errMessage,
           sources: resolveFallbackSources(),
           limitationsNoted: [
-            'Calculated from ground-truthed CGWB and GSI dataset registry.',
-            'Satellite optical imagery observes surface reflectance only, not deep subsurface ore bodies.',
-            'GRACE TWSA reflects regional gravity anomalies (~300 km Gaussian envelope), not localized single-well depth.'
+            'Live Gemini API request failed; no fabricated subsurface answer was substituted.'
           ]
         });
       }
@@ -354,9 +446,9 @@ export const NexusAI: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#020617] text-slate-100 overflow-hidden relative">
+    <div className="flex-1 flex flex-col h-full min-h-0 bg-[#020617] text-slate-100 overflow-hidden relative">
       {/* Copilot Header */}
-      <div className="p-4 border-b border-slate-800/80 glass-panel flex items-center justify-between shrink-0">
+      <div className="p-4 border-b border-slate-800/80 glass-panel flex items-center justify-between shrink-0 z-10">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-indigo-950/80 border border-indigo-500/50 text-indigo-300 flex items-center justify-center shadow-md">
             <Bot className="w-5 h-5" />
@@ -366,10 +458,18 @@ export const NexusAI: React.FC = () => {
               <h2 className="font-bold text-sm tracking-wide text-slate-100 flex items-center gap-1.5">
                 NEXUS AI <span className="text-[11px] font-normal text-indigo-400 font-mono">Gemini Grounded Copilot</span>
               </h2>
-              <StatusBadge status="MODELLED" size="sm" />
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border ${
+                  geminiStatus.configured
+                    ? 'bg-emerald-500/15 border-emerald-400/50 text-emerald-300'
+                    : 'bg-amber-500/15 border-amber-400/50 text-amber-300'
+                }`}
+              >
+                {geminiStatus.configured ? `Live · ${geminiStatus.model}` : 'Offline Rules'}
+              </span>
             </div>
             <p className="text-[11px] text-slate-400">
-              Grounded in curated CGWB, GSI, NASA PO.DAAC, and Copernicus Sentinel-2 datasets.
+              Interactive AI reasoning grounded in live location context, NASA PO.DAAC, CGWB, GSI &amp; Copernicus datasets.
             </p>
           </div>
         </div>
@@ -383,6 +483,7 @@ export const NexusAI: React.FC = () => {
           {/* Stop Generation Button */}
           {isAiGenerating && (
             <button
+              type="button"
               onClick={handleStopGeneration}
               title="Stop response generation"
               className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-red-950/70 hover:bg-red-900 border border-red-700/60 text-red-300 rounded-lg transition-all shadow-sm cursor-pointer"
@@ -394,6 +495,7 @@ export const NexusAI: React.FC = () => {
 
           {/* Clear History Button */}
           <button
+            type="button"
             onClick={handleClearHistory}
             title="Clear chat conversation"
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-slate-900 hover:bg-slate-800 border border-slate-700/70 text-slate-300 hover:text-rose-300 rounded-lg transition-all shadow-sm cursor-pointer"
@@ -405,10 +507,11 @@ export const NexusAI: React.FC = () => {
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+      <div ref={messagesScrollRef} className="flex-1 min-h-0 overflow-y-auto bg-[#020617] p-4 md:p-6 space-y-4">
         {aiMessages.map((msg, index) => {
           const isUser = msg.sender === 'user';
           const isCopied = copiedMsgId === msg.id;
+          const isAwaitingFirstToken = !isUser && Boolean(msg.isStreaming) && !msg.content.trim();
 
           return (
             <div
@@ -437,6 +540,21 @@ export const NexusAI: React.FC = () => {
                     {isUser ? 'Explorer Query' : 'Nexus AI Scientific Copilot'}
                   </span>
                   <div className="flex items-center gap-2">
+                    {!isUser && msg.isLiveGemini === true && (
+                      <span className="inline-flex items-center gap-1 text-emerald-300 font-mono text-[9px] bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-700/50">
+                        <CheckCircle2 className="w-2.5 h-2.5" />
+                        Live · {msg.modelUsed || 'gemini-4-hydrogen'}
+                      </span>
+                    )}
+                    {!isUser && msg.isLiveGemini === false && (
+                      <span
+                        title={msg.fallbackReason || 'Deterministic offline scientific rules'}
+                        className="inline-flex items-center gap-1 text-amber-300 font-mono text-[9px] bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-700/50"
+                      >
+                        <AlertTriangle className="w-2.5 h-2.5" />
+                        Offline Rules
+                      </span>
+                    )}
                     {msg.isStreaming && (
                       <span className="inline-flex items-center gap-1 text-cyan-400 font-mono text-[9px] bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-800/40">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
@@ -447,9 +565,57 @@ export const NexusAI: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="font-sans text-xs">
-                  <MarkdownRenderer content={msg.content} />
-                </div>
+                {!isUser && msg.appliedSceneActions && msg.appliedSceneActions.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-sky-500/10 border border-sky-500/35 text-[10px] font-mono text-sky-200">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1 text-sky-300 font-semibold">
+                        <Sliders className="w-3 h-3" />
+                        3D Scene Updated:
+                      </span>
+                      {msg.appliedSceneActions.map((act, idx) => (
+                        <span
+                          key={idx}
+                          className="px-1.5 py-0.5 rounded bg-slate-900/90 border border-sky-400/30 text-sky-100"
+                        >
+                          {act}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsInitialSearch(false);
+                        setMainView('twin3d');
+                        setActiveModule('globe');
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-600/80 hover:bg-sky-500 text-white font-semibold transition-colors cursor-pointer shrink-0"
+                    >
+                      <span>View 3D Scene</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
+                {!isUser && msg.isLiveGemini === false && msg.fallbackReason && (
+                  <div className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-200/90">
+                    Fallback reason: {msg.fallbackReason}
+                  </div>
+                )}
+
+                {isAwaitingFirstToken ? (
+                  <div className="flex items-center gap-2.5 text-xs text-indigo-300 font-mono py-1.5">
+                    <div className="w-3.5 h-3.5 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin shrink-0" />
+                    <span>
+                      {isWithinIndia
+                        ? 'Synthesizing CGWB, GSI, NASA GRACE-FO & Sentinel-2 context via Gemini...'
+                        : 'Synthesizing regional geoscience, NASA GRACE-FO & Copernicus context via Gemini...'}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="font-sans text-xs">
+                    <MarkdownRenderer content={msg.content} />
+                  </div>
+                )}
 
                 {/* Assistant Limitations & Scientific Guardrails */}
                 {!isUser && msg.limitationsNoted && msg.limitationsNoted.length > 0 && (
@@ -467,11 +633,12 @@ export const NexusAI: React.FC = () => {
                 )}
 
                 {/* Interactive Action Bar for Assistant Messages */}
-                {!isUser && (
+                {!isUser && !isAwaitingFirstToken && (
                   <div className="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-between gap-2 text-[11px]">
                     <div className="flex items-center gap-1.5">
                       {/* Copy Action */}
                       <button
+                        type="button"
                         onClick={() => handleCopy(msg.id, msg.content)}
                         className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
                         title="Copy message content"
@@ -491,6 +658,7 @@ export const NexusAI: React.FC = () => {
 
                       {/* Regenerate Action */}
                       <button
+                        type="button"
                         onClick={() => handleRegenerate(index)}
                         disabled={isAiGenerating}
                         className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-900/80 hover:bg-slate-800 disabled:opacity-40 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
@@ -503,6 +671,7 @@ export const NexusAI: React.FC = () => {
 
                     {/* Source Inspection Modal Trigger */}
                     <button
+                      type="button"
                       onClick={() => setInspectedSources(msg.sources || resolveFallbackSources())}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-700/50 text-indigo-300 hover:text-indigo-200 transition-all font-mono text-[10px] cursor-pointer shadow-sm"
                       title="Inspect scientific sources and data provenance"
@@ -516,28 +685,21 @@ export const NexusAI: React.FC = () => {
             </div>
           );
         })}
-
-        {isAiGenerating && !aiMessages.some(m => m.isStreaming && m.content) && (
-          <div className="flex items-center gap-2 text-xs text-indigo-400 font-mono p-3 rounded-xl bg-indigo-950/30 border border-indigo-800/30 w-fit backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
-            <span>Consulting CGWB, GSI, and Sentinel-2 verified catalogs...</span>
-          </div>
-        )}
-        <div ref={chatEndRef} />
       </div>
 
       {/* Suggested Quick Queries */}
-      <div className="px-4 py-2.5 glass-panel border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs shrink-0 select-none">
-        <span className="text-[10px] font-mono text-slate-500 uppercase shrink-0 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-cyan-400" />
+      <div className="px-4 py-2.5 liquid-glass border-t border-white/10 flex items-center gap-2 overflow-x-auto md:flex-wrap md:overflow-visible text-xs shrink-0 select-none">
+        <span className="text-[10px] font-mono text-slate-400 uppercase shrink-0 flex items-center gap-1">
+          <Compass className="w-3 h-3 text-cyan-400" />
           Suggested:
         </span>
         {quickPrompts.map((p, i) => (
           <button
             key={i}
+            type="button"
             onClick={() => handleSendMessage(p)}
             disabled={isAiGenerating}
-            className="glass-pill px-3 py-1 text-[11px] whitespace-nowrap hover:border-cyan-400/70 text-slate-300 hover:text-cyan-200 disabled:opacity-40 transition-all shadow-sm cursor-pointer"
+            className="liquid-glass-pill px-3 py-1 text-[11px] whitespace-nowrap hover:border-cyan-400/70 text-slate-300 hover:text-cyan-200 disabled:opacity-40 transition-all shadow-sm cursor-pointer shrink-0"
           >
             {p}
           </button>
@@ -545,7 +707,7 @@ export const NexusAI: React.FC = () => {
       </div>
 
       {/* Input Form */}
-      <div className="p-3 md:p-4 glass-panel border-t border-slate-800/80 shrink-0">
+      <div className="p-3 md:p-4 pb-20 md:pb-4 liquid-glass border-t border-white/10 shrink-0">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -558,13 +720,13 @@ export const NexusAI: React.FC = () => {
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             disabled={isAiGenerating}
-            placeholder={`Ask Nexus AI about ${selectedLocation.name}'s hydrogeology, aquifers, or spectral alteration...`}
-            className="flex-1 bg-slate-900/90 border border-slate-700/80 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none disabled:opacity-50"
+            placeholder={`Ask about ${selectedLocation.name} or command 3D scene (e.g. "Fly to Deccan Traps and slice to 400m")...`}
+            className="flex-1 liquid-glass-input rounded-xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 outline-none disabled:opacity-50"
           />
           <button
             type="submit"
             disabled={!inputQuery.trim() || isAiGenerating}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 disabled:opacity-50 text-white font-medium text-xs flex items-center gap-1.5 shadow-lg transition-all shrink-0 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 border border-sky-400/50 disabled:opacity-50 text-white font-medium text-xs flex items-center gap-1.5 shadow-lg transition-all shrink-0 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Ask Copilot</span>
@@ -575,7 +737,7 @@ export const NexusAI: React.FC = () => {
       {/* Scientific Source & Provenance Inspection Modal */}
       {inspectedSources && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="liquid-glass-modal rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden animate-fadeIn">
             {/* Modal Header */}
             <div className="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
               <div className="flex items-center gap-2.5">
@@ -590,8 +752,10 @@ export const NexusAI: React.FC = () => {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setInspectedSources(null)}
-                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                aria-label="Close Provenance Modal"
+                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -618,36 +782,40 @@ export const NexusAI: React.FC = () => {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-slate-200 flex items-center gap-1.5">
                       <Activity className="w-3.5 h-3.5 text-cyan-400" />
-                      CGWB Monitoring Piezometer
+                      {isWithinIndia ? 'CGWB Monitoring Piezometer' : 'BGR / WHYMAP Hydrological Reference'}
                     </span>
                     <span className="text-[10px] font-mono bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-800/40">
-                      OBSERVED
+                      {isWithinIndia ? 'OBSERVED' : 'REGIONAL'}
                     </span>
                   </div>
                   <div className="font-mono text-[11px] text-slate-300 bg-slate-900/90 px-2 py-1 rounded border border-slate-800 mt-1">
                     Station Code: <strong className="text-cyan-400">{inspectedSources.cgwbStationCode}</strong>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1">
-                    Central Ground Water Board national telemetry network reporting automated DWLR water table depth.
+                    {isWithinIndia
+                      ? 'Central Ground Water Board national telemetry network reporting automated DWLR water table depth.'
+                      : 'Global BGR/UNESCO WHYMAP hydrogeological framework & regional piezometric baseline.'}
                   </p>
                 </div>
 
-                {/* GSI Quadrangle Geological Sheet */}
+                {/* GSI / CGMW Geological Map Sheet */}
                 <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-slate-200 flex items-center gap-1.5">
                       <Compass className="w-3.5 h-3.5 text-amber-400" />
-                      GSI Quadrangle Geological Sheet
+                      {isWithinIndia ? 'GSI Quadrangle Geological Sheet' : 'CGMW GLiM Lithological Quadrangle'}
                     </span>
                     <span className="text-[10px] font-mono bg-amber-950 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800/40">
-                      1:50,000 MAP
+                      {isWithinIndia ? '1:50,000 MAP' : '1:1M GLOBAL'}
                     </span>
                   </div>
                   <div className="font-mono text-[11px] text-slate-300 bg-slate-900/90 px-2 py-1 rounded border border-slate-800 mt-1">
                     Quadrangle Sheet: <strong className="text-amber-400">{inspectedSources.gsiQuadrangleSheet}</strong>
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1">
-                    Geological Survey of India field mapping quadrangle documenting lithological intervals and attitudes.
+                    {isWithinIndia
+                      ? 'Geological Survey of India field mapping quadrangle documenting lithological intervals and attitudes.'
+                      : 'Commission for the Geological Map of the World (CGMW) lithostratigraphic quadrangle reference.'}
                   </p>
                 </div>
 

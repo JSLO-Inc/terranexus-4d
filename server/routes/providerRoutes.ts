@@ -6,9 +6,13 @@
  */
 
 import { Router, Request, Response } from 'express';
+import fs from 'fs';
+import path from 'path';
 import { providerRegistry } from '../providers/providerRegistry';
+import { resolveAndValidateOutboundUrl } from '../security/urlValidator';
 
 export const providerRouter = Router();
+const TILE_CACHE_DIR = path.resolve(process.cwd(), 'server/data/cache/tiles');
 
 /**
  * GET /api/providers/status
@@ -278,4 +282,71 @@ providerRouter.get('/elevation/grid', async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+/**
+ * GET /api/providers/imagery/tile/:z/:y/:x
+ * Same-origin CORS-safe Esri World Imagery satellite tile proxy with local disk cache.
+ */
+providerRouter.get('/imagery/tile/:z/:y/:x', async (req: Request, res: Response) => {
+  try {
+    const z = parseInt(req.params.z, 10);
+    const y = parseInt(req.params.y, 10);
+    const x = parseInt(req.params.x, 10);
+
+    if (!Number.isInteger(z) || !Number.isInteger(y) || !Number.isInteger(x) || z < 0 || z > 18 || x < 0 || y < 0) {
+      return res.status(400).json({ success: false, error: 'Invalid tile coordinates.' });
+    }
+    const maxCoord = Math.pow(2, z);
+    if (x >= maxCoord || y >= maxCoord) {
+      return res.status(400).json({ success: false, error: 'Tile coordinates out of bounds for zoom level.' });
+    }
+
+    if (!fs.existsSync(TILE_CACHE_DIR)) {
+      fs.mkdirSync(TILE_CACHE_DIR, { recursive: true });
+    }
+    const cacheFile = path.join(TILE_CACHE_DIR, `${z}_${y}_${x}.jpg`);
+    if (fs.existsSync(cacheFile)) {
+      const cachedBuf = fs.readFileSync(cacheFile);
+      if (cachedBuf.length > 256) {
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        return res.send(cachedBuf);
+      }
+    }
+
+    const tileUrl = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
+    const check = await resolveAndValidateOutboundUrl(tileUrl, false);
+    if (!check.isValid) {
+      return res.status(403).json({ success: false, error: check.error || 'Tile destination blocked' });
+    }
+
+    const upstream = await fetch(tileUrl, {
+      method: 'GET',
+      headers: { 'User-Agent': 'TERRANEXUS-4D-GeoEngine/1.0' },
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (!upstream.ok) {
+      return res.status(upstream.status).json({ success: false, error: `Upstream imagery tile error (${upstream.status})` });
+    }
+
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    if (buf.length < 128) {
+      return res.status(502).json({ success: false, error: 'Empty tile buffer from imagery provider.' });
+    }
+
+    try {
+      fs.writeFileSync(cacheFile, buf);
+    } catch {
+      // Non-fatal if cache write fails
+    }
+
+    res.setHeader('Content-Type', upstream.headers.get('content-type') || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(buf);
+  } catch (error: any) {
+    return res.status(504).json({ success: false, error: error?.message || 'Satellite tile proxy failed' });
+  }
+});
+
 

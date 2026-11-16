@@ -80,7 +80,7 @@ export const AreaAnalysisTool: React.FC<AreaAnalysisToolProps> = ({
 
       {/* Target Coordinates */}
       <div className="flex justify-between text-[11px] font-mono text-slate-300 bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-        <span>Center: {centerLat.toFixed(4)}°N, {centerLon.toFixed(4)}°E</span>
+        <span>Center: {Math.abs(centerLat).toFixed(4)}°{centerLat >= 0 ? 'N' : 'S'}, {Math.abs(centerLon).toFixed(4)}°{centerLon >= 0 ? 'E' : 'W'}</span>
         <span className="text-cyan-400">{timeStep}</span>
       </div>
 
@@ -110,7 +110,7 @@ export const AreaAnalysisTool: React.FC<AreaAnalysisToolProps> = ({
       <button
         onClick={handleComputeStats}
         disabled={isLoading}
-        className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl font-medium flex items-center justify-center space-x-2 shadow-lg shadow-cyan-900/30 transition-all disabled:opacity-50"
+        className="w-full py-2 bg-sky-600 hover:bg-sky-500 border border-sky-400/50 text-white rounded-xl font-medium flex items-center justify-center space-x-2 shadow-lg shadow-sky-950/30 transition-all disabled:opacity-50"
       >
         {isLoading ? (
           <>

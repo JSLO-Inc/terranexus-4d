@@ -5,7 +5,7 @@ import { INDIA_LOCATIONS } from '../../data/locationsIndia';
 import { Subsurface3D } from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
 import { GeologicalFormation } from '../../types';
-import { Mountain, FileText, Layers, GitCompare, ShieldAlert, ArrowDown, Box, Sparkles } from 'lucide-react';
+import { Mountain, FileText, Layers, GitCompare, ShieldAlert, ArrowDown, Box } from 'lucide-react';
 
 export const NexusStrata: React.FC = () => {
   const { selectedLocation, depthMeters, setDepthMeters, strataMode, setStrataMode, currentDossier } = useTerranexusStore();
@@ -126,7 +126,7 @@ export const NexusStrata: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -160,7 +160,7 @@ export const NexusStrata: React.FC = () => {
                 : 'text-slate-400 hover:text-slate-200 border border-transparent'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
             <span>Combined Twin</span>
           </button>
 
@@ -209,7 +209,7 @@ export const NexusStrata: React.FC = () => {
       {(strataMode === 'both' || strataMode === 'litholog') && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Stratigraphic Column Visualizer */}
-        <div className="glass-panel rounded-2xl p-4 flex flex-col gap-3 shadow-xl">
+        <div className="liquid-glass rounded-2xl p-4 flex flex-col gap-3 shadow-xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-200">
               <Layers className="w-4 h-4 text-amber-400" />
@@ -254,7 +254,7 @@ export const NexusStrata: React.FC = () => {
         <div className="lg:col-span-2 flex flex-col gap-4">
           {/* Detailed Borehole Record */}
           {borehole ? (
-            <div className="glass-panel rounded-2xl p-5 flex flex-col gap-3 shadow-xl">
+            <div className="liquid-glass rounded-2xl p-5 flex flex-col gap-3 shadow-xl">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="w-4 h-4 text-amber-400" />

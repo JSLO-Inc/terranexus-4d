@@ -1,14 +1,17 @@
 /**
- * TERRANEXUS 4D — Copernicus Sentinel STAC Scene Discovery & Surface Index Provider
- * 
- * Complies with strict rule:
- * Discovers Sentinel-2 & Sentinel-1 scenes via STAC catalog metadata.
- * Computes lightweight precomputed surface reflectance indices (NDVI, NDWI, Radar wetness).
- * NEVER fetches heavy full raster scenes or large GeoTIFFs in the user request path.
+ * TERRANEXUS 4D — Copernicus Sentinel-2 L2A Live STAC Metadata Provider
+ *
+ * Queries Element84 Earth Search STAC v1 API (`earth-search.aws.element84.com/v1/search`)
+ * via safeOutboundFetch (with disk cache) for genuine Sentinel-2 Level-2A scene discovery:
+ * exact scene ID, acquisition timestamp, cloud cover percentage, MGRS tile ID, and
+ * Sentinel-2 Scene Classification Layer (SCL) vegetation / water / bare-soil percentages.
  */
 
+import fs from 'fs';
+import path from 'path';
 import { BaseEvidenceProvider } from './BaseEvidenceProvider';
 import { NormalizedObservation } from '../types';
+import { safeOutboundFetch } from '../../security/urlValidator';
 
 export interface StacSceneDiscovery {
   latestSceneId: string;
@@ -16,64 +19,138 @@ export interface StacSceneDiscovery {
   acquisitionDate: string;
   cloudCoverPercent: number;
   tileIdentifier: string;
-  precomputedIndices: {
-    ndvi: number; // Normalized Difference Vegetation Index (-1 to +1)
-    ndwi: number; // Normalized Difference Water Index (-1 to +1)
-    radarSurfaceWetnessDb: number; // Sentinel-1 VV/VH backscatter (dB)
-  };
+  vegetationPercent: number | null;
+  waterPercent: number | null;
+  notVegetatedPercent: number | null;
+  isLiveStac: boolean;
 }
 
 export class SentinelStacEvidenceProvider extends BaseEvidenceProvider {
   readonly id = 'copernicus-sentinel-stac';
-  readonly name = 'Copernicus Sentinel-1/2 SpatioTemporal Asset Catalog (STAC)';
+  readonly name = 'Copernicus Sentinel-2 L2A Earth Search STAC';
   readonly category = 'SATELLITE';
-  readonly providerAgency = 'European Space Agency (ESA) / Copernicus Open Access';
-  readonly sourceUrl = 'https://browser.dataspace.copernicus.eu/';
+  readonly providerAgency = 'European Space Agency (ESA) / Element84 Earth Search';
+  readonly sourceUrl = 'https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a';
   readonly licence = 'Copernicus Open Access Policy (Free, Full, and Open)';
   readonly defaultDataCategory = 'remote' as const;
 
+  private diskCacheDir: string;
+
+  constructor() {
+    super({ timeoutMs: 4500, maxRetries: 1, failureThreshold: 4 });
+    this.cacheTtlSeconds = 1800;
+    this.diskCacheDir = path.resolve(process.cwd(), 'server', 'data', 'cache', 'stac');
+    try {
+      if (!fs.existsSync(this.diskCacheDir)) {
+        fs.mkdirSync(this.diskCacheDir, { recursive: true });
+      }
+    } catch {
+      // Ignore error
+    }
+  }
+
   isConfigured(): boolean {
-    return true; // Copernicus STAC metadata discovery available
+    return true;
   }
 
   protected async fetchRawData(lat: number, lon: number): Promise<StacSceneDiscovery> {
-    // Generate deterministic STAC tile code from MGRS/UTM latitude band
-    const utmZone = Math.floor((lon + 180) / 6) + 1;
-    const tileId = `T${utmZone}Q${String.fromCharCode(65 + Math.floor(lat % 20))}${String.fromCharCode(65 + Math.floor(lon % 20))}`;
-
-    // Precomputed vegetation and water indices based on seasonality and latitude
-    // In November (post-monsoon), agricultural plains have moderate-to-high NDVI
-    const isPeninsularOrPlains = lat < 32 && lat > 12;
-    const ndvi = Math.round((isPeninsularOrPlains ? 0.48 : 0.22) * 100) / 100;
-    const ndwi = Math.round((isPeninsularOrPlains ? 0.12 : -0.18) * 100) / 100;
-    const radarSurfaceWetnessDb = Math.round((isPeninsularOrPlains ? -11.4 : -16.8) * 10) / 10;
-
-    return {
-      latestSceneId: `S2B_MSIL2A_20241028_${tileId}_R019`,
-      collection: 'sentinel-2-l2a',
-      acquisitionDate: '2024-10-28T05:32:10Z',
-      cloudCoverPercent: 2.4,
-      tileIdentifier: tileId,
-      precomputedIndices: {
-        ndvi,
-        ndwi,
-        radarSurfaceWetnessDb
+    const cacheFile = path.join(this.diskCacheDir, `s2_${lat.toFixed(2)}_${lon.toFixed(2)}.json`);
+    try {
+      if (fs.existsSync(cacheFile)) {
+        const stat = fs.statSync(cacheFile);
+        if (Date.now() - stat.mtimeMs < 6 * 3600 * 1000) {
+          const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+          if (cached && cached.latestSceneId && cached.isLiveStac) {
+            return cached;
+          }
+        }
       }
+    } catch {
+      // Continue
+    }
+
+    const payload = JSON.stringify({
+      collections: ['sentinel-2-l2a'],
+      intersects: {
+        type: 'Point',
+        coordinates: [lon, lat]
+      },
+      limit: 3,
+      sortby: [{ field: 'properties.datetime', direction: 'desc' }]
+    });
+
+    const res = await safeOutboundFetch('https://earth-search.aws.element84.com/v1/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/geo+json, application/json',
+        'User-Agent': 'Terranexus4D/0.6.0'
+      },
+      body: payload,
+      timeoutMs: 4000,
+      maxResponseSizeBytes: 512 * 1024
+    });
+
+    if (res.status !== 200) {
+      throw new Error(`Element84 STAC HTTP ${res.status}`);
+    }
+
+    const json = JSON.parse(res.data);
+    const features: any[] = Array.isArray(json?.features) ? json.features : [];
+    if (features.length === 0) {
+      throw new Error('No Sentinel-2 L2A STAC scene found at coordinate');
+    }
+
+    // Pick lowest cloud cover among the 3 most recent passes
+    const best = [...features].sort(
+      (a, b) => Number(a?.properties?.['eo:cloud_cover'] ?? 100) - Number(b?.properties?.['eo:cloud_cover'] ?? 100)
+    )[0];
+    const p = best?.properties || {};
+
+    const result: StacSceneDiscovery = {
+      latestSceneId: String(best.id),
+      collection: String(best.collection || 'sentinel-2-l2a'),
+      acquisitionDate: String(p.datetime || new Date().toISOString()),
+      cloudCoverPercent: typeof p['eo:cloud_cover'] === 'number' ? Math.round(p['eo:cloud_cover'] * 10) / 10 : 0,
+      tileIdentifier: String(p['grid:code'] || 'MGRS-TILE'),
+      vegetationPercent: typeof p['s2:vegetation_percentage'] === 'number' ? Math.round(p['s2:vegetation_percentage'] * 10) / 10 : null,
+      waterPercent: typeof p['s2:water_percentage'] === 'number' ? Math.round(p['s2:water_percentage'] * 10) / 10 : null,
+      notVegetatedPercent: typeof p['s2:not_vegetated_percentage'] === 'number' ? Math.round(p['s2:not_vegetated_percentage'] * 10) / 10 : null,
+      isLiveStac: true
     };
+
+    try {
+      fs.writeFileSync(cacheFile, JSON.stringify(result), 'utf8');
+    } catch {
+      // Ignore cache error
+    }
+
+    return result;
   }
 
   protected async getFallbackData(lat: number, lon: number): Promise<StacSceneDiscovery> {
-    return {
-      latestSceneId: 'S2_COMPOSITE_ARCHIVE',
-      collection: 'sentinel-2-l2a',
-      acquisitionDate: '2024-10-15',
-      cloudCoverPercent: 5.0,
-      tileIdentifier: 'REGIONAL-STAC',
-      precomputedIndices: {
-        ndvi: 0.35,
-        ndwi: 0.05,
-        radarSurfaceWetnessDb: -13.5
+    const cacheFile = path.join(this.diskCacheDir, `s2_${lat.toFixed(2)}_${lon.toFixed(2)}.json`);
+    try {
+      if (fs.existsSync(cacheFile)) {
+        const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+        if (cached && cached.latestSceneId) {
+          return { ...cached, isLiveStac: false };
+        }
       }
+    } catch {
+      // Ignore
+    }
+
+    return {
+      latestSceneId: 'SENTINEL2_STAC_UNAVAILABLE',
+      collection: 'sentinel-2-l2a',
+      acquisitionDate: new Date().toISOString().slice(0, 10),
+      cloudCoverPercent: 0,
+      tileIdentifier: 'UNAVAILABLE',
+      vegetationPercent: null,
+      waterPercent: null,
+      notVegetatedPercent: null,
+      isLiveStac: false
     };
   }
 
@@ -82,49 +159,79 @@ export class SentinelStacEvidenceProvider extends BaseEvidenceProvider {
     const d = data as StacSceneDiscovery;
     const geom = { type: 'Point' as const, coordinates: [lon, lat] };
 
-    return [
+    if (!d.isLiveStac && d.latestSceneId === 'SENTINEL2_STAC_UNAVAILABLE') {
+      return [
+        this.createObservation({
+          parameter: 'sentinel2_stac_discovery',
+          name: 'Copernicus Sentinel-2 L2A Scene Discovery',
+          value: null,
+          displayValue: 'Unavailable (STAC Query Timed Out / Polar Gap)',
+          units: 'STAC item ID',
+          category: 'unavailable',
+          geometry: geom,
+          spatialSupportM: 20,
+          qualityFlags: ['UNAVAILABLE'],
+          observedAt: d.acquisitionDate,
+          notes: 'Live Copernicus Sentinel-2 L2A STAC search returned no active scene.'
+        })
+      ];
+    }
+
+    const obs: NormalizedObservation[] = [
       this.createObservation({
-        parameter: 'surface_vegetation_ndvi',
-        name: 'Surface Vegetation Greenness (NDVI)',
-        value: d.precomputedIndices.ndvi,
-        displayValue: `${d.precomputedIndices.ndvi} NDVI (Cloud: ${d.cloudCoverPercent}%)`,
-        units: 'index (-1 to +1)',
-        category: 'remote',
-        geometry: geom,
-        spatialSupportM: 20, // 20m Sentinel-2 band resolution
-        qualityFlags: ['QC_PASSED', 'SATELLITE_GRIDDED'],
-        observedAt: d.acquisitionDate,
-        sourceIdentifier: d.latestSceneId,
-        notes: `Sentinel-2 MSI Level-2A surface reflectance (Scene: ${d.latestSceneId}). Reflects surface canopy and crop vigor.`
-      }),
-      this.createObservation({
-        parameter: 'surface_water_ndwi',
-        name: 'Normalized Difference Water Index (NDWI)',
-        value: d.precomputedIndices.ndwi,
-        displayValue: `${d.precomputedIndices.ndwi} NDWI`,
-        units: 'index (-1 to +1)',
+        parameter: 'sentinel2_stac_scene',
+        name: 'Latest Copernicus Sentinel-2 L2A Granule',
+        value: d.latestSceneId,
+        displayValue: `${d.tileIdentifier} · Cloud ${d.cloudCoverPercent}% (${d.acquisitionDate.slice(0, 10)})`,
+        units: 'STAC granule / cloud %',
         category: 'remote',
         geometry: geom,
         spatialSupportM: 20,
         qualityFlags: ['QC_PASSED', 'SATELLITE_GRIDDED'],
         observedAt: d.acquisitionDate,
         sourceIdentifier: d.latestSceneId,
-        notes: 'Green / NIR band ratio (Gao 1996) sensitive to surface ponding and soil water content.'
-      }),
-      this.createObservation({
-        parameter: 'radar_surface_wetness',
-        name: 'Sentinel-1 C-Band Radar Surface Wetness',
-        value: d.precomputedIndices.radarSurfaceWetnessDb,
-        displayValue: `${d.precomputedIndices.radarSurfaceWetnessDb} dB (VV backscatter)`,
-        units: 'decibels (dB)',
-        category: 'remote',
-        geometry: geom,
-        spatialSupportM: 10,
-        qualityFlags: ['QC_PASSED', 'SATELLITE_GRIDDED'],
-        observedAt: d.acquisitionDate,
-        sourceIdentifier: d.latestSceneId,
-        notes: 'Copernicus Sentinel-1 Synthetic Aperture Radar (SAR) backscatter sensitive to top 5 cm dielectric soil moisture.'
+        notes: `Verified Element84 Earth Search STAC item ${d.latestSceneId} acquired ${d.acquisitionDate}.`
       })
     ];
+
+    if (d.vegetationPercent !== null) {
+      obs.push(
+        this.createObservation({
+          parameter: 'sentinel2_vegetation_fraction',
+          name: 'Sentinel-2 Scene Vegetation Cover (SCL)',
+          value: d.vegetationPercent,
+          displayValue: `${d.vegetationPercent}% vegetated (${d.tileIdentifier})`,
+          units: '% of MGRS tile',
+          category: 'remote',
+          geometry: geom,
+          spatialSupportM: 20,
+          qualityFlags: ['QC_PASSED', 'SATELLITE_GRIDDED'],
+          observedAt: d.acquisitionDate,
+          sourceIdentifier: d.latestSceneId,
+          notes: 'Official ESA Sen2Cor Scene Classification Layer (SCL) vegetated fraction across intersecting MGRS tile.'
+        })
+      );
+    }
+
+    if (d.waterPercent !== null) {
+      obs.push(
+        this.createObservation({
+          parameter: 'sentinel2_water_fraction',
+          name: 'Sentinel-2 Scene Surface Water Fraction (SCL)',
+          value: d.waterPercent,
+          displayValue: `${d.waterPercent}% surface water`,
+          units: '% of MGRS tile',
+          category: 'remote',
+          geometry: geom,
+          spatialSupportM: 20,
+          qualityFlags: ['QC_PASSED', 'SATELLITE_GRIDDED'],
+          observedAt: d.acquisitionDate,
+          sourceIdentifier: d.latestSceneId,
+          notes: 'Official ESA Sen2Cor Scene Classification Layer (SCL) surface water fraction across intersecting MGRS tile.'
+        })
+      );
+    }
+
+    return obs;
   }
 }

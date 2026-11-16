@@ -215,7 +215,13 @@ export function computeTangentSpaceNormalMapFromHeightCanvas(
 
   const srcCtx = heightCanvas.getContext('2d');
   const dstCtx = normalCanvas.getContext('2d');
-  if (!srcCtx || !dstCtx) {
+  if (
+    !srcCtx ||
+    !dstCtx ||
+    typeof srcCtx.getImageData !== 'function' ||
+    typeof dstCtx.createImageData !== 'function' ||
+    typeof dstCtx.putImageData !== 'function'
+  ) {
     return new THREE.CanvasTexture(normalCanvas);
   }
 
@@ -412,6 +418,17 @@ export function generatePlanetaryEarthTextures(centerLat: number = 25, centerLon
   return { map, bumpMap, roughnessMap };
 }
 
+interface CachedLithologyCanvases {
+  colorCanvas: HTMLCanvasElement;
+  bumpCanvas: HTMLCanvasElement;
+  normalCanvas: HTMLCanvasElement;
+  roughCanvas: HTMLCanvasElement;
+  roughness: number;
+  metalness: number;
+}
+
+const lithologyPbrCanvasCache = new Map<string, CachedLithologyCanvases>();
+
 export function generateLithologyPbrTextures(
   formationCode: string,
   lithologyText: string,
@@ -424,6 +441,36 @@ export function generateLithologyPbrTextures(
   roughness: number;
   metalness: number;
 } {
+  const cacheKey = `${formationCode}|${lithologyText}|${baseColorHex}`;
+  const cached = lithologyPbrCanvasCache.get(cacheKey);
+  if (cached) {
+    const mapTexture = new THREE.CanvasTexture(cached.colorCanvas);
+    mapTexture.colorSpace = THREE.SRGBColorSpace;
+    mapTexture.wrapS = THREE.RepeatWrapping;
+    mapTexture.wrapT = THREE.RepeatWrapping;
+
+    const bumpTexture = new THREE.CanvasTexture(cached.bumpCanvas);
+    bumpTexture.wrapS = THREE.RepeatWrapping;
+    bumpTexture.wrapT = THREE.RepeatWrapping;
+
+    const normalTexture = new THREE.CanvasTexture(cached.normalCanvas);
+    normalTexture.wrapS = THREE.RepeatWrapping;
+    normalTexture.wrapT = THREE.RepeatWrapping;
+
+    const roughTexture = new THREE.CanvasTexture(cached.roughCanvas);
+    roughTexture.wrapS = THREE.RepeatWrapping;
+    roughTexture.wrapT = THREE.RepeatWrapping;
+
+    return {
+      map: mapTexture,
+      bumpMap: bumpTexture,
+      normalMap: normalTexture,
+      roughnessMap: roughTexture,
+      roughness: cached.roughness,
+      metalness: cached.metalness
+    };
+  }
+
   const width = 512;
   const height = 512;
 
@@ -475,8 +522,8 @@ export function generateLithologyPbrTextures(
     materialRoughness = 0.72;
     materialMetalness = 0.18;
 
-    // Dark microcrystalline basalt background
-    colorCtx.fillStyle = '#1e293b';
+    // Natural weathered basalt charcoal-slate background (preserves fracture & mineral contrast)
+    colorCtx.fillStyle = '#333d4b';
     colorCtx.fillRect(0, 0, width, height);
 
     // Vertical columnar cooling joints
@@ -907,7 +954,22 @@ export function generateLithologyPbrTextures(
     colorCtx.fill();
   }
 
-  // 3. Create Three.js Textures
+  // 3. Create Three.js Textures & Populate Canvas Cache
+  const normalTexture = computeTangentSpaceNormalMapFromHeightCanvas(bumpCanvas, 2.2);
+
+  if (lithologyPbrCanvasCache.size > 48) {
+    const firstKey = lithologyPbrCanvasCache.keys().next().value;
+    if (firstKey) lithologyPbrCanvasCache.delete(firstKey);
+  }
+  lithologyPbrCanvasCache.set(cacheKey, {
+    colorCanvas,
+    bumpCanvas,
+    normalCanvas: (normalTexture.image as HTMLCanvasElement) || bumpCanvas,
+    roughCanvas,
+    roughness: materialRoughness,
+    metalness: materialMetalness
+  });
+
   const mapTexture = new THREE.CanvasTexture(colorCanvas);
   mapTexture.colorSpace = THREE.SRGBColorSpace;
   mapTexture.wrapS = THREE.RepeatWrapping;
@@ -920,8 +982,6 @@ export function generateLithologyPbrTextures(
   const roughTexture = new THREE.CanvasTexture(roughCanvas);
   roughTexture.wrapS = THREE.RepeatWrapping;
   roughTexture.wrapT = THREE.RepeatWrapping;
-
-  const normalTexture = computeTangentSpaceNormalMapFromHeightCanvas(bumpCanvas, 2.2);
 
   return {
     map: mapTexture,
@@ -1308,19 +1368,27 @@ export function getGeographicalBoundaryRadius(
  */
 export function buildIrregularPolygonTerrainGeometry(
   topYFunc: (x: number, z: number) => number,
-  width: number,
-  length: number,
+  widthOrRadiusFn: number | ((theta: number) => number),
+  lengthOrExtent: number = 44,
   angularSegs: number = 72,
   radialRings: number = 20,
-  seed: number = 101,
-  cornerCut: boolean = true
+  seedOrCornerCut: number | boolean = 101,
+  cornerCutArg: boolean = true
 ): THREE.BufferGeometry {
   const positions: number[] = [];
   const uvs: number[] = [];
 
+  const isRadiusCallback = typeof widthOrRadiusFn === 'function';
+  const width = isRadiusCallback ? lengthOrExtent : widthOrRadiusFn;
+  const length = lengthOrExtent;
+  const seed = typeof seedOrCornerCut === 'number' ? seedOrCornerCut : 101;
+  const cornerCut = typeof seedOrCornerCut === 'boolean' ? seedOrCornerCut : cornerCutArg;
+
   const baseRadius = Math.min(width, length) * 0.49;
   const halfW = width / 2;
   const halfL = length / 2;
+  const getRadiusAt = (theta: number) =>
+    isRadiusCallback ? widthOrRadiusFn(theta) : baseRadius * getGeographicalBoundaryRadius(theta, seed);
 
   const startAngle = cornerCut ? Math.PI * 0.5 : 0;
   const endAngle = Math.PI * 2;
@@ -1334,8 +1402,8 @@ export function buildIrregularPolygonTerrainGeometry(
       const th0 = startAngle + ia * dTheta;
       const th1 = th0 + dTheta;
 
-      const b0 = baseRadius * getGeographicalBoundaryRadius(th0, seed);
-      const b1 = baseRadius * getGeographicalBoundaryRadius(th1, seed);
+      const b0 = getRadiusAt(th0);
+      const b1 = getRadiusAt(th1);
 
       const x00 = Math.cos(th0) * (rFrac0 * b0);
       const z00 = Math.sin(th0) * (rFrac0 * b0);
@@ -1392,20 +1460,29 @@ export function buildIrregularPolygonTerrainGeometry(
 export function buildIrregularPolygonStratumGeometry(
   topYFunc: (x: number, z: number) => number,
   botYFunc: (x: number, z: number) => number,
-  width: number,
-  length: number,
+  widthOrRadiusFn: number | ((theta: number) => number),
+  lengthOrRings: number = 44,
   angularSegs: number = 72,
-  radialRings: number = 20,
-  meterScale: number = 4.0,
+  radialRingsOrScale: number = 20,
+  meterScaleOrCornerCut: number | boolean = 4.0,
   seed: number = 101,
-  cornerCut: boolean = true
+  cornerCutArg: boolean = true
 ): THREE.BufferGeometry {
   const positions: number[] = [];
   const uvs: number[] = [];
 
+  const isRadiusCallback = typeof widthOrRadiusFn === 'function';
+  const width = isRadiusCallback ? 48 : widthOrRadiusFn;
+  const length = isRadiusCallback ? 48 : lengthOrRings;
+  const radialRings = isRadiusCallback ? lengthOrRings : radialRingsOrScale;
+  const meterScale = isRadiusCallback ? radialRingsOrScale : (typeof meterScaleOrCornerCut === 'number' ? meterScaleOrCornerCut : 4.0);
+  const cornerCut = typeof meterScaleOrCornerCut === 'boolean' ? meterScaleOrCornerCut : cornerCutArg;
+
   const baseRadius = Math.min(width, length) * 0.49;
   const halfW = width / 2;
   const halfL = length / 2;
+  const getRadiusAt = (theta: number) =>
+    isRadiusCallback ? widthOrRadiusFn(theta) : baseRadius * getGeographicalBoundaryRadius(theta, seed);
 
   const startAngle = cornerCut ? Math.PI * 0.5 : 0;
   const endAngle = Math.PI * 2;
@@ -1420,8 +1497,8 @@ export function buildIrregularPolygonStratumGeometry(
       const th0 = startAngle + ia * dTheta;
       const th1 = th0 + dTheta;
 
-      const b0 = baseRadius * getGeographicalBoundaryRadius(th0, seed);
-      const b1 = baseRadius * getGeographicalBoundaryRadius(th1, seed);
+      const b0 = getRadiusAt(th0);
+      const b1 = getRadiusAt(th1);
 
       const x00 = Math.cos(th0) * (rFrac0 * b0);
       const z00 = Math.sin(th0) * (rFrac0 * b0);
@@ -1489,8 +1566,8 @@ export function buildIrregularPolygonStratumGeometry(
     const th0 = startAngle + ia * dTheta;
     const th1 = th0 + dTheta;
 
-    const b0 = baseRadius * getGeographicalBoundaryRadius(th0, seed);
-    const b1 = baseRadius * getGeographicalBoundaryRadius(th1, seed);
+    const b0 = getRadiusAt(th0);
+    const b1 = getRadiusAt(th1);
 
     const x0 = Math.cos(th0) * b0;
     const z0 = Math.sin(th0) * b0;
@@ -1530,7 +1607,7 @@ export function buildIrregularPolygonStratumGeometry(
   // 3. INTERNAL RADIAL CROSS-SECTION WALLS WHEN CORNER-CUT IS ACTIVE
   if (cornerCut) {
     // Wall A: theta = PI/2 (along +Z axis, x = 0, z from 0 to bStart, normal facing +X)
-    const bStart = baseRadius * getGeographicalBoundaryRadius(startAngle, seed);
+    const bStart = getRadiusAt(startAngle);
     for (let ir = 0; ir < radialRings; ir++) {
       const z0 = (ir / radialRings) * bStart;
       const z1 = ((ir + 1) / radialRings) * bStart;
@@ -1563,7 +1640,7 @@ export function buildIrregularPolygonStratumGeometry(
     }
 
     // Wall B: theta = 2*PI (along +X axis, z = 0, x from 0 to bEnd, normal facing +Z)
-    const bEnd = baseRadius * getGeographicalBoundaryRadius(endAngle, seed);
+    const bEnd = getRadiusAt(endAngle);
     for (let ir = 0; ir < radialRings; ir++) {
       const x0 = (ir / radialRings) * bEnd;
       const x1 = ((ir + 1) / radialRings) * bEnd;
@@ -1602,5 +1679,33 @@ export function buildIrregularPolygonStratumGeometry(
   geometry.computeVertexNormals();
   return geometry;
 }
+
+/**
+ * Clamps a subsurface hydrological surface (e.g. phreatic water table) strictly beneath
+ * the displaced DEM terrain surface so water never pokes out into valleys or onto dry land.
+ */
+export function computeClampedHydroSurfaceY(
+  surfaceY: number,
+  desiredY: number,
+  minClearance: number = 0.85
+): number {
+  return Math.min(desiredY, surfaceY - Math.max(0.25, minClearance));
+}
+
+/**
+ * Clamps an aquifer top and bottom elevation interval beneath local terrain relief
+ * while maintaining positive thickness.
+ */
+export function clampAquiferInterval(
+  surfaceY: number,
+  topY: number,
+  botY: number,
+  minClearance: number = 0.95
+): { topY: number; botY: number } {
+  const clampedTop = Math.min(topY, surfaceY - Math.max(0.35, minClearance));
+  const clampedBot = Math.min(botY, clampedTop - 0.5);
+  return { topY: clampedTop, botY: clampedBot };
+}
+
 
 

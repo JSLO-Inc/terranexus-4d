@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { GeoLocation, BoreholeRecord, AIMessage } from '../types';
 import { SelectedLocation } from '../types/location';
 import { LayerDefinition } from '../types/datasets';
@@ -398,8 +398,6 @@ function loadStoredPreferences(): Partial<TerranexusState> {
     const parsed: StoredPreferences = JSON.parse(raw);
     if (parsed && parsed.version === 2) {
       const result: Partial<TerranexusState> = {};
-      if (parsed.viewMode) result.viewMode = parsed.viewMode;
-      if (parsed.mainView) result.mainView = parsed.mainView;
       if (parsed.globeBasemap) result.globeBasemap = parsed.globeBasemap;
       if (parsed.activeBasemap) result.activeBasemap = parsed.activeBasemap;
       if (parsed.cutawayPreset) result.cutawayPreset = parsed.cutawayPreset;
@@ -443,13 +441,13 @@ const storedPrefs = loadStoredPreferences();
 // Simple reactive state hook for React
 let globalState: TerranexusState = {
   activeModule: 'globe',
-  viewMode: storedPrefs.viewMode || 'globe', // DEFAULT 1: 3D Globe is the primary homepage
+  viewMode: 'globe', // DEFAULT 1: 3D Globe is always the primary homepage on startup
   selectedLocation: INITIAL_SELECTED_LOCATION,
   depthMeters: 45,
   currentTimeIndex: TIME_STEPS.length - 1,
   layers: INITIAL_LAYERS,
   selectedBorehole: AUTHENTIC_BOREHOLES[1],
-  inspectorOpen: true,
+  inspectorOpen: typeof window !== 'undefined' ? window.innerWidth >= 768 : true,
   heatmapConfig: {
     layerId: 'layer-grace-twsa',
     isVisible: false,
@@ -470,7 +468,7 @@ let globalState: TerranexusState = {
   terrainElevationGrid: null,
   strataMode: 'both',
   providerDataStatus: 'CACHED',
-  mainView: storedPrefs.mainView || 'twin3d', // Earth 3D Twin is the primary centerpiece
+  mainView: 'twin3d', // Earth 3D Twin is the primary centerpiece
   isInitialSearch: false,
   currentDossier: null,
   isDossierLoading: false,
@@ -584,7 +582,21 @@ function runExtractionSequence(stages: Array<{ stage: ExtractionAnimationStage; 
   }
 }
 
-export const fetchEicSynthesisImpl = async (lat?: number, lon?: number) => {
+let activeLocationRequestSeq = 0;
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot() {
+  return globalState;
+}
+
+export const fetchEicSynthesisImpl = async (lat?: number, lon?: number, reqSeq?: number) => {
+  const expectedSeq = typeof reqSeq === 'number' ? reqSeq : activeLocationRequestSeq;
   const targetLat = typeof lat === 'number' && Number.isFinite(lat) ? lat : globalState.selectedLocation.latitude;
   const targetLon = typeof lon === 'number' && Number.isFinite(lon) ? lon : globalState.selectedLocation.longitude;
   globalState = { ...globalState, isEicLoading: true };
@@ -593,6 +605,7 @@ export const fetchEicSynthesisImpl = async (lat?: number, lon?: number) => {
     const res = await fetch(`/api/eic/synthesize?lat=${targetLat}&lon=${targetLon}&radiusKm=50`);
     if (res.ok) {
       const json = await res.json();
+      if (expectedSeq !== activeLocationRequestSeq) return;
       if (json.success && json.data) {
         globalState = {
           ...globalState,
@@ -606,19 +619,38 @@ export const fetchEicSynthesisImpl = async (lat?: number, lon?: number) => {
   } catch (err) {
     console.error('Failed to fetch EIC synthesis:', err);
   }
+  if (expectedSeq !== activeLocationRequestSeq) return;
   globalState = { ...globalState, isEicLoading: false };
   notify();
 };
 
-export const fetchLocationDossierImpl = async (lat: number, lon: number, radiusKm: number = 50) => {
+export const fetchLocationDossierImpl = async (lat: number, lon: number, radiusKm: number = 50, reqSeq?: number) => {
+  const expectedSeq = typeof reqSeq === 'number' ? reqSeq : activeLocationRequestSeq;
   globalState = { ...globalState, isDossierLoading: true };
   notify();
-  // Trigger parallel EIC synthesis
-  fetchEicSynthesisImpl(lat, lon);
+  // Trigger parallel EIC synthesis bound to the same monotonic sequence
+  fetchEicSynthesisImpl(lat, lon, expectedSeq);
+
+  // Prefetch Copernicus GLO-90 DEM grid in parallel so 3D Cutout mounts with DEM already ready
+  const extentKm = globalState.explorationExtentKm || 5;
+  fetch(`/api/providers/elevation/grid?lat=${lat}&lon=${lon}&extentKm=${extentKm}&resolution=25`)
+    .then(r => (r.ok ? r.json() : null))
+    .then(gridJson => {
+      if (expectedSeq !== activeLocationRequestSeq) return;
+      if (gridJson?.success && gridJson?.grid) {
+        globalState = { ...globalState, terrainElevationGrid: gridJson.grid };
+        notify();
+      }
+    })
+    .catch(() => {
+      // Non-fatal in offline/unit test environments
+    });
+
   try {
     const res = await fetch(`/api/location-dossier?lat=${lat}&lon=${lon}&radiusKm=${radiusKm}`);
     if (res.ok) {
       const json = await res.json();
+      if (expectedSeq !== activeLocationRequestSeq) return;
       if (json.success && json.data) {
         const nearestObs = json.data.groundwater?.nearestObservation;
         const matchedBh = AUTHENTIC_BOREHOLES.find(b => b.locationId === globalState.selectedLocation.id);
@@ -638,325 +670,340 @@ export const fetchLocationDossierImpl = async (lat: number, lon: number, radiusK
   } catch (err) {
     console.error('Failed to fetch location dossier:', err);
   }
+  if (expectedSeq !== activeLocationRequestSeq) return;
   globalState = { ...globalState, isDossierLoading: false };
   notify();
 };
 
-globalState.fetchLocationDossier = fetchLocationDossierImpl;
-globalState.fetchEicSynthesis = fetchEicSynthesisImpl;
+const storeActions: Partial<TerranexusState> = {
+  setGeologicalDisplayMode: (geologicalDisplayMode) => {
+    if (globalState.geologicalDisplayMode === geologicalDisplayMode) return;
+    globalState = { ...globalState, geologicalDisplayMode };
+    notify();
+  },
+  setIsPumpingActive: (isPumpingActive) => {
+    if (globalState.isPumpingActive === isPumpingActive) return;
+    globalState = { ...globalState, isPumpingActive };
+    notify();
+  },
+  setActivePumpingWell: (activePumpingWell) => {
+    globalState = { ...globalState, activePumpingWell };
+    notify();
+  },
+  setCutawayPreset: (cutawayPreset) => {
+    if (globalState.cutawayPreset === cutawayPreset) return;
+    globalState = { ...globalState, cutawayPreset };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setIsInitialSearch: (isInitialSearch) => {
+    if (globalState.isInitialSearch === isInitialSearch) return;
+    globalState = { ...globalState, isInitialSearch };
+    notify();
+  },
+  setMainView: (mainView) => {
+    if (globalState.mainView === datasetOrView(mainView)) return;
+    globalState = { ...globalState, mainView };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setCurrentDossier: (currentDossier) => {
+    globalState = { ...globalState, currentDossier };
+    notify();
+  },
+  setIsDossierLoading: (isDossierLoading) => {
+    globalState = { ...globalState, isDossierLoading };
+    notify();
+  },
+  setDossierActiveTab: (dossierActiveTab) => {
+    globalState = { ...globalState, dossierActiveTab };
+    notify();
+  },
+  setShowProviderHealthModal: (showProviderHealthModal) => {
+    globalState = { ...globalState, showProviderHealthModal };
+    notify();
+  },
+  setIsGlobeFullscreen: (isGlobeFullscreen) => {
+    if (globalState.isGlobeFullscreen === isGlobeFullscreen) return;
+    globalState = { ...globalState, isGlobeFullscreen };
+    notify();
+  },
+  setIsNavCollapsed: (isNavCollapsed) => {
+    globalState = { ...globalState, isNavCollapsed };
+    notify();
+  },
+  setGlobeBasemap: (globeBasemap) => {
+    if (globalState.globeBasemap === globeBasemap) return;
+    globalState = { ...globalState, globeBasemap };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setActiveBasemap: (activeBasemap) => {
+    globalState = {
+      ...globalState,
+      activeBasemap,
+      globeBasemap: activeBasemap as any
+    };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  fetchLocationDossier: fetchLocationDossierImpl,
+  fetchEicSynthesis: fetchEicSynthesisImpl,
+  setShowReportModal: (showReportModal, reportModalType) => {
+    globalState = {
+      ...globalState,
+      showReportModal,
+      ...(reportModalType ? { reportModalType } : {})
+    };
+    notify();
+  },
+  setExtractionStage: (extractionStage) => {
+    clearExtractionTimers();
+    if (globalState.extractionStage === extractionStage) return;
+    globalState = { ...globalState, extractionStage };
+    notify();
+  },
+  setActiveModule: (activeModule) => {
+    if (globalState.activeModule === activeModule) return;
+    globalState = { ...globalState, activeModule };
+    notify();
+  },
+  setViewMode: (viewMode) => {
+    const prevMode = globalState.viewMode;
+    clearExtractionTimers();
+    let nextStage = globalState.extractionStage;
+    if (viewMode === 'split' && prevMode === 'globe') {
+      nextStage = 'SUBSURFACE_REVEAL';
+    } else if ((viewMode === 'cutaway' || viewMode === 'underground') && prevMode === 'globe') {
+      nextStage = 'EXTRACTION_IN_PROGRESS';
+    } else if (viewMode === 'globe' && prevMode !== 'globe') {
+      nextStage = 'RETURN_IN_PROGRESS';
+    } else if (viewMode !== 'globe' && prevMode !== 'globe') {
+      nextStage = 'CUTOUT_READY';
+    }
+    globalState = { ...globalState, viewMode, extractionStage: nextStage };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setSelectedLocation: (selectedLocation) => {
+    activeLocationRequestSeq += 1;
+    const reqSeq = activeLocationRequestSeq;
+    const bh = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id) || null;
+    const loc = selectedLocation as SelectedLocation;
+    const isNearbyWell = loc.coverage?.nearestGroundwaterStation && loc.coverage.nearestGroundwaterStation.distanceKm <= 50;
+    const depth = isNearbyWell
+      ? (loc.coverage?.nearestGroundwaterStation?.lastWaterTableDepthMbgl ?? null)
+      : (bh ? bh.waterTableDepthMeters : null);
+    globalState = {
+      ...globalState,
+      selectedLocation,
+      selectedBorehole: bh,
+      activeGroundwaterDepthMbgl: depth,
+      terrainElevationGrid: null,
+      currentDossier: null,
+      eicSynthesis: null,
+      isDossierLoading: true,
+      isEicLoading: true,
+      isInitialSearch: false
+    };
+    notify();
+    if (globalState.viewMode === 'globe') {
+      runExtractionSequence([
+        { stage: 'LOCATION_SELECTED', delayMs: 0 },
+        { stage: 'CAMERA_APPROACH', delayMs: 250 },
+        { stage: 'REGION_HIGHLIGHTED', delayMs: 750 },
+        { stage: 'GLOBE_IDLE', delayMs: 1500 }
+      ]);
+    } else {
+      runExtractionSequence([
+        { stage: 'LOCATION_SELECTED', delayMs: 0 },
+        { stage: 'EXTRACTION_START', delayMs: 220 },
+        { stage: 'SUBSURFACE_REVEAL', delayMs: 550 },
+        { stage: 'CUTOUT_READY', delayMs: 950 }
+      ]);
+    }
+    if (typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
+      fetchLocationDossierImpl(loc.latitude, loc.longitude, 50, reqSeq);
+    }
+  },
+  setDepthMeters: (depthMeters) => {
+    if (globalState.depthMeters === depthMeters) return;
+    globalState = { ...globalState, depthMeters };
+    notify();
+  },
+  setWaterIntensity: (waterIntensity) => {
+    globalState = { ...globalState, waterIntensity: Math.max(0, Math.min(1, waterIntensity)) };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setWaterOpacity: (waterOpacity) => {
+    globalState = { ...globalState, waterOpacity: Math.max(0, Math.min(1, waterOpacity)) };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setActiveGroundwaterDepthMbgl: (activeGroundwaterDepthMbgl) => {
+    globalState = { ...globalState, activeGroundwaterDepthMbgl };
+    notify();
+  },
+  setIsCrossSection2D: (isCrossSection2D) => {
+    globalState = { ...globalState, isCrossSection2D };
+    notify();
+  },
+  setShowMineralLayers: (showMineralLayers) => {
+    globalState = { ...globalState, showMineralLayers };
+    notify();
+  },
+  setShowAquiferLayers: (showAquiferLayers) => {
+    globalState = { ...globalState, showAquiferLayers };
+    notify();
+  },
+  setMineralDisplayMode: (mineralDisplayMode) => {
+    globalState = { ...globalState, mineralDisplayMode };
+    notify();
+  },
+  setIsolatedLayerId: (isolatedLayerId) => {
+    globalState = { ...globalState, isolatedLayerId };
+    notify();
+  },
+  setCutawayExaggeration: (cutawayExaggeration) => {
+    globalState = { ...globalState, cutawayExaggeration: Math.max(0.5, Math.min(4.0, cutawayExaggeration)) };
+    saveUserPreferences(globalState);
+    notify();
+  },
+  setExplorationExtentKm: (explorationExtentKm) => {
+    if (globalState.explorationExtentKm === explorationExtentKm) return;
+    globalState = { ...globalState, explorationExtentKm, terrainElevationGrid: null };
+    notify();
+  },
+  setTerrainElevationGrid: (terrainElevationGrid) => {
+    globalState = { ...globalState, terrainElevationGrid };
+    notify();
+  },
+  setStrataMode: (strataMode) => {
+    globalState = { ...globalState, strataMode };
+    notify();
+  },
+  setProviderDataStatus: (providerDataStatus) => {
+    globalState = { ...globalState, providerDataStatus };
+    notify();
+  },
+  setCurrentTimeIndex: (currentTimeIndex) => {
+    globalState = { ...globalState, currentTimeIndex };
+    notify();
+  },
+  toggleLayer: (layerId) => {
+    const layers = globalState.layers.map(l => l.id === layerId ? { ...l, enabled: !l.enabled } : l);
+    globalState = { ...globalState, layers };
+    notify();
+  },
+  setLayerOpacity: (layerId, opacity) => {
+    const layers = globalState.layers.map(l => l.id === layerId ? { ...l, opacity } : l);
+    globalState = { ...globalState, layers };
+    notify();
+  },
+  setSelectedBorehole: (selectedBorehole) => {
+    globalState = { ...globalState, selectedBorehole };
+    notify();
+  },
+  setInspectorOpen: (inspectorOpen) => {
+    globalState = { ...globalState, inspectorOpen };
+    notify();
+  },
+  addAiMessage: (msg) => {
+    globalState = { ...globalState, aiMessages: [...globalState.aiMessages, msg] };
+    notify();
+  },
+  updateAiMessage: (id, partial) => {
+    globalState = {
+      ...globalState,
+      aiMessages: globalState.aiMessages.map(m => m.id === id ? { ...m, ...partial } : m)
+    };
+    notify();
+  },
+  clearAiMessages: () => {
+    globalState = {
+      ...globalState,
+      aiMessages: [
+        {
+          id: 'welcome-msg',
+          sender: 'assistant',
+          content: 'Welcome to TERRANEXUS 4D — Global & National Subsurface Intelligence & Earth Digital Twin Platform. I am Nexus AI, your scientific copilot. Select any location on Earth (including deep Indian national survey benchmarks), adjust depth beneath the surface, scrub through time, or ask me to explain the verified hydrological, geological, pedological, and mineral evidence.',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          groundedLocation: 'Global & Pan-India',
+          limitationsNoted: [
+            'All scientific layers are classified as OBSERVED, MODELLED, PREDICTED, or SIMULATED.',
+            'Remote sensing alteration indices reflect surface reflectance only, not deep ore deposits.',
+            'GRACE data measures regional gravity anomalies, not localized well water depths.'
+          ]
+        }
+      ]
+    };
+    notify();
+  },
+  setIsAiGenerating: (isAiGenerating) => {
+    globalState = { ...globalState, isAiGenerating };
+    notify();
+  },
+  setHeatmapConfig: (partial) => {
+    globalState = { ...globalState, heatmapConfig: { ...globalState.heatmapConfig, ...partial } };
+    notify();
+  },
+  setIsAreaAnalysisOpen: (isAreaAnalysisOpen) => {
+    globalState = { ...globalState, isAreaAnalysisOpen };
+    notify();
+  },
+  resetToDefaults: () => {
+    try {
+      localStorage.removeItem('terranexus_user_preferences_v2');
+    } catch (e) {
+      console.warn('Failed to clear stored preferences:', e);
+    }
+    activeLocationRequestSeq += 1;
+    const reqSeq = activeLocationRequestSeq;
+    globalState = {
+      ...globalState,
+      activeModule: 'globe',
+      viewMode: 'globe',
+      mainView: 'twin3d',
+      globeBasemap: 'satellite',
+      activeBasemap: 'satellite',
+      cutawayPreset: 'corner-cut',
+      mineralDisplayMode: 'geological-context',
+      selectedLocation: INITIAL_SELECTED_LOCATION,
+      selectedBorehole: AUTHENTIC_BOREHOLES.find(b => b.locationId === INITIAL_SELECTED_LOCATION.id) || null,
+      activeGroundwaterDepthMbgl: 32.4,
+      depthMeters: 45,
+      waterIntensity: 0.65,
+      waterOpacity: 0.65,
+      cutawayExaggeration: 1.5,
+      isPumpingActive: false,
+      currentDossier: null,
+      eicSynthesis: null
+    };
+    notify();
+    fetchLocationDossierImpl(INITIAL_SELECTED_LOCATION.latitude, INITIAL_SELECTED_LOCATION.longitude, 50, reqSeq);
+  }
+};
+
+function datasetOrView<T>(v: T): T {
+  return v;
+}
+
+Object.assign(globalState, storeActions);
 
 export function useTerranexusStore(): TerranexusState {
-  const [, setTick] = useState(0);
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   useEffect(() => {
-    const listener = () => setTick((t: number) => t + 1);
-    listeners.add(listener);
-    
     // Auto-fetch initial location dossier on startup if not already loaded
     if (!globalState.currentDossier && !globalState.isDossierLoading) {
       const loc = globalState.selectedLocation;
       if (loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
-        fetchLocationDossierImpl(loc.latitude, loc.longitude);
+        fetchLocationDossierImpl(loc.latitude, loc.longitude, 50, activeLocationRequestSeq);
       }
     }
-
-    return () => {
-      listeners.delete(listener);
-    };
   }, []);
 
-  return {
-    ...globalState,
-    setGeologicalDisplayMode: (geologicalDisplayMode) => {
-      globalState = { ...globalState, geologicalDisplayMode };
-      notify();
-    },
-    setIsPumpingActive: (isPumpingActive) => {
-      globalState = { ...globalState, isPumpingActive };
-      notify();
-    },
-    setActivePumpingWell: (activePumpingWell) => {
-      globalState = { ...globalState, activePumpingWell };
-      notify();
-    },
-    setCutawayPreset: (cutawayPreset) => {
-      globalState = { ...globalState, cutawayPreset };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    setIsInitialSearch: (isInitialSearch) => {
-      globalState = { ...globalState, isInitialSearch };
-      notify();
-    },
-    setMainView: (mainView) => {
-      globalState = { ...globalState, mainView };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    setCurrentDossier: (currentDossier) => {
-      globalState = { ...globalState, currentDossier };
-      notify();
-    },
-    setIsDossierLoading: (isDossierLoading) => {
-      globalState = { ...globalState, isDossierLoading };
-      notify();
-    },
-    setDossierActiveTab: (dossierActiveTab) => {
-      globalState = { ...globalState, dossierActiveTab };
-      notify();
-    },
-    setShowProviderHealthModal: (showProviderHealthModal) => {
-      globalState = { ...globalState, showProviderHealthModal };
-      notify();
-    },
-    setIsGlobeFullscreen: (isGlobeFullscreen) => {
-      globalState = { ...globalState, isGlobeFullscreen };
-      notify();
-    },
-    setIsNavCollapsed: (isNavCollapsed) => {
-      globalState = { ...globalState, isNavCollapsed };
-      notify();
-    },
-    setGlobeBasemap: (globeBasemap) => {
-      globalState = { ...globalState, globeBasemap };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    setActiveBasemap: (activeBasemap) => {
-      globalState = {
-        ...globalState,
-        activeBasemap,
-        globeBasemap: activeBasemap as any
-      };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    fetchLocationDossier: fetchLocationDossierImpl,
-    fetchEicSynthesis: fetchEicSynthesisImpl,
-    setShowReportModal: (showReportModal, reportModalType) => {
-      globalState = {
-        ...globalState,
-        showReportModal,
-        ...(reportModalType ? { reportModalType } : {})
-      };
-      notify();
-    },
-    setExtractionStage: (extractionStage) => {
-      clearExtractionTimers();
-      globalState = { ...globalState, extractionStage };
-      notify();
-    },
-    setActiveModule: (activeModule) => {
-      globalState = { ...globalState, activeModule };
-      notify();
-    },
-    setViewMode: (viewMode) => {
-      const prevMode = globalState.viewMode;
-      globalState = { ...globalState, viewMode };
-      saveUserPreferences(globalState);
-      notify();
-
-      if ((viewMode === 'cutaway' || viewMode === 'split' || viewMode === 'underground') && prevMode === 'globe') {
-        runExtractionSequence([
-          { stage: 'REGION_HIGHLIGHTED', delayMs: 0 },
-          { stage: 'EXTRACTION_START', delayMs: 180 },
-          { stage: 'EXTRACTION_IN_PROGRESS', delayMs: 420 },
-          { stage: 'SUBSURFACE_REVEAL', delayMs: 700 },
-          { stage: 'FOREGROUND_TRANSITION', delayMs: 980 },
-          { stage: 'CUTOUT_READY', delayMs: 1280 }
-        ]);
-      } else if (viewMode === 'globe' && prevMode !== 'globe') {
-        runExtractionSequence([
-          { stage: 'RETURN_IN_PROGRESS', delayMs: 0 },
-          { stage: 'GLOBE_RESTORED', delayMs: 480 },
-          { stage: 'GLOBE_IDLE', delayMs: 960 }
-        ]);
-      }
-    },
-    setSelectedLocation: (selectedLocation) => {
-      const bh = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id) || null;
-      const loc = selectedLocation as SelectedLocation;
-      const isNearbyWell = loc.coverage?.nearestGroundwaterStation && loc.coverage.nearestGroundwaterStation.distanceKm <= 50;
-      const depth = isNearbyWell
-        ? (loc.coverage?.nearestGroundwaterStation?.lastWaterTableDepthMbgl ?? null)
-        : (bh ? bh.waterTableDepthMeters : null);
-      globalState = {
-        ...globalState,
-        selectedLocation,
-        selectedBorehole: bh,
-        activeGroundwaterDepthMbgl: depth,
-        terrainElevationGrid: null,
-        isInitialSearch: false
-      };
-      notify();
-      if (globalState.viewMode === 'globe') {
-        runExtractionSequence([
-          { stage: 'LOCATION_SELECTED', delayMs: 0 },
-          { stage: 'CAMERA_APPROACH', delayMs: 250 },
-          { stage: 'REGION_HIGHLIGHTED', delayMs: 750 },
-          { stage: 'GLOBE_IDLE', delayMs: 1500 }
-        ]);
-      } else {
-        runExtractionSequence([
-          { stage: 'LOCATION_SELECTED', delayMs: 0 },
-          { stage: 'EXTRACTION_START', delayMs: 220 },
-          { stage: 'SUBSURFACE_REVEAL', delayMs: 550 },
-          { stage: 'CUTOUT_READY', delayMs: 950 }
-        ]);
-      }
-      if (typeof loc.latitude === 'number' && typeof loc.longitude === 'number') {
-        fetchLocationDossierImpl(loc.latitude, loc.longitude);
-      }
-    },
-    setDepthMeters: (depthMeters) => {
-      globalState = { ...globalState, depthMeters };
-      notify();
-    },
-    setWaterIntensity: (waterIntensity) => {
-      globalState = { ...globalState, waterIntensity: Math.max(0, Math.min(1, waterIntensity)) };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    setWaterOpacity: (waterOpacity) => {
-      globalState = { ...globalState, waterOpacity: Math.max(0, Math.min(1, waterOpacity)) };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    setActiveGroundwaterDepthMbgl: (activeGroundwaterDepthMbgl) => {
-      globalState = { ...globalState, activeGroundwaterDepthMbgl };
-      notify();
-    },
-    setIsCrossSection2D: (isCrossSection2D) => {
-      globalState = { ...globalState, isCrossSection2D };
-      notify();
-    },
-    setShowMineralLayers: (showMineralLayers) => {
-      globalState = { ...globalState, showMineralLayers };
-      notify();
-    },
-    setShowAquiferLayers: (showAquiferLayers) => {
-      globalState = { ...globalState, showAquiferLayers };
-      notify();
-    },
-    setMineralDisplayMode: (mineralDisplayMode) => {
-      globalState = { ...globalState, mineralDisplayMode };
-      notify();
-    },
-    setIsolatedLayerId: (isolatedLayerId) => {
-      globalState = { ...globalState, isolatedLayerId };
-      notify();
-    },
-    setCutawayExaggeration: (cutawayExaggeration) => {
-      globalState = { ...globalState, cutawayExaggeration: Math.max(0.5, Math.min(4.0, cutawayExaggeration)) };
-      saveUserPreferences(globalState);
-      notify();
-    },
-    setExplorationExtentKm: (explorationExtentKm) => {
-      globalState = { ...globalState, explorationExtentKm, terrainElevationGrid: null };
-      notify();
-    },
-    setTerrainElevationGrid: (terrainElevationGrid) => {
-      globalState = { ...globalState, terrainElevationGrid };
-      notify();
-    },
-    setStrataMode: (strataMode) => {
-      globalState = { ...globalState, strataMode };
-      notify();
-    },
-    setProviderDataStatus: (providerDataStatus) => {
-      globalState = { ...globalState, providerDataStatus };
-      notify();
-    },
-    setCurrentTimeIndex: (currentTimeIndex) => {
-      globalState = { ...globalState, currentTimeIndex };
-      notify();
-    },
-    toggleLayer: (layerId) => {
-      const layers = globalState.layers.map(l => l.id === layerId ? { ...l, enabled: !l.enabled } : l);
-      globalState = { ...globalState, layers };
-      notify();
-    },
-    setLayerOpacity: (layerId, opacity) => {
-      const layers = globalState.layers.map(l => l.id === layerId ? { ...l, opacity } : l);
-      globalState = { ...globalState, layers };
-      notify();
-    },
-    setSelectedBorehole: (selectedBorehole) => {
-      globalState = { ...globalState, selectedBorehole };
-      notify();
-    },
-    setInspectorOpen: (inspectorOpen) => {
-      globalState = { ...globalState, inspectorOpen };
-      notify();
-    },
-    addAiMessage: (msg) => {
-      globalState = { ...globalState, aiMessages: [...globalState.aiMessages, msg] };
-      notify();
-    },
-    updateAiMessage: (id, partial) => {
-      globalState = {
-        ...globalState,
-        aiMessages: globalState.aiMessages.map(m => m.id === id ? { ...m, ...partial } : m)
-      };
-      notify();
-    },
-    clearAiMessages: () => {
-      globalState = {
-        ...globalState,
-        aiMessages: [
-          {
-            id: 'welcome-msg',
-            sender: 'assistant',
-            content: 'Welcome to TERRANEXUS 4D — Global & National Subsurface Intelligence & Earth Digital Twin Platform. I am Nexus AI, your scientific copilot. Select any location on Earth (including deep Indian national survey benchmarks), adjust depth beneath the surface, scrub through time, or ask me to explain the verified hydrological, geological, pedological, and mineral evidence.',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            groundedLocation: 'Global & Pan-India',
-            limitationsNoted: [
-              'All scientific layers are classified as OBSERVED, MODELLED, PREDICTED, or SIMULATED.',
-              'Remote sensing alteration indices reflect surface reflectance only, not deep ore deposits.',
-              'GRACE data measures regional gravity anomalies, not localized well water depths.'
-            ]
-          }
-        ]
-      };
-      notify();
-    },
-    setIsAiGenerating: (isAiGenerating) => {
-      globalState = { ...globalState, isAiGenerating };
-      notify();
-    },
-    setHeatmapConfig: (partial) => {
-      globalState = { ...globalState, heatmapConfig: { ...globalState.heatmapConfig, ...partial } };
-      notify();
-    },
-    setIsAreaAnalysisOpen: (isAreaAnalysisOpen) => {
-      globalState = { ...globalState, isAreaAnalysisOpen };
-      notify();
-    },
-    resetToDefaults: () => {
-      try {
-        localStorage.removeItem('terranexus_user_preferences_v2');
-      } catch (e) {
-        console.warn('Failed to clear stored preferences:', e);
-      }
-      globalState = {
-        ...globalState,
-        viewMode: 'globe',
-        mainView: 'twin3d',
-        globeBasemap: 'satellite',
-        activeBasemap: 'satellite',
-        cutawayPreset: 'corner-cut',
-        mineralDisplayMode: 'geological-context',
-        selectedLocation: INITIAL_SELECTED_LOCATION,
-        selectedBorehole: AUTHENTIC_BOREHOLES.find(b => b.locationId === INITIAL_SELECTED_LOCATION.id) || null,
-        activeGroundwaterDepthMbgl: 32.4,
-        depthMeters: 45,
-        waterIntensity: 0.65,
-        waterOpacity: 0.65,
-        cutawayExaggeration: 1.5,
-        isPumpingActive: false
-      };
-      notify();
-      fetchLocationDossierImpl(INITIAL_SELECTED_LOCATION.latitude, INITIAL_SELECTED_LOCATION.longitude);
-    }
-  };
+  return snapshot;
 }
+

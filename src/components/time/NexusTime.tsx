@@ -150,9 +150,9 @@ export const NexusTime: React.FC = () => {
   }, [timeSeriesData]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#030712] text-slate-100 overflow-y-auto font-sans select-none">
+    <div className="flex-1 flex flex-col h-full bg-[#030712] text-slate-100 overflow-y-auto pb-20 md:pb-6 font-sans select-none">
       {/* Top Banner: Workstation Title & Locus Metadata */}
-      <div className="px-6 py-4 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="px-6 py-4 border-b border-white/10 liquid-glass shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">

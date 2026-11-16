@@ -41,20 +41,32 @@ export class CopernicusDemEvidenceProvider extends BaseEvidenceProvider {
   }
 
   protected async fetchRawData(lat: number, lon: number): Promise<TerrainMetrics> {
-    // 1. Fetch real spot elevation from ElevationProvider
-    const elevRes = await providerRegistry.getElevation().getElevationForCoordinate(lat, lon);
-    const elevationM = elevRes.elevationM;
-
-    // 2. Fetch local 3x3 / 5x5 neighborhood elevations to compute spatial derivatives
-    // In a regional setting, we compute slope from regional relief gradient
-    // We compute finite differences around the coordinate (dx = 0.001 deg ~ 111m)
+    // 1. Fetch center + N/S/E/W finite-difference stencil in one batched DEM request
     const delta = 0.0015; // ~160m
-    const [eNorth, eSouth, eEast, eWest] = await Promise.all([
-      providerRegistry.getElevation().getElevationForCoordinate(lat + delta, lon).then(r => r.elevationM).catch(() => elevationM + 2),
-      providerRegistry.getElevation().getElevationForCoordinate(lat - delta, lon).then(r => r.elevationM).catch(() => elevationM - 2),
-      providerRegistry.getElevation().getElevationForCoordinate(lat, lon + delta).then(r => r.elevationM).catch(() => elevationM + 1),
-      providerRegistry.getElevation().getElevationForCoordinate(lat, lon - delta).then(r => r.elevationM).catch(() => elevationM - 1)
-    ]);
+    const elevProvider = providerRegistry.getElevation();
+    let elevationM: number;
+    let eNorth: number;
+    let eSouth: number;
+    let eEast: number;
+    let eWest: number;
+
+    if (elevProvider.getElevationsForCoordinates) {
+      const batch = await elevProvider.getElevationsForCoordinates([
+        { lat, lon },
+        { lat: lat + delta, lon },
+        { lat: lat - delta, lon },
+        { lat, lon: lon + delta },
+        { lat, lon: lon - delta }
+      ]);
+      [elevationM, eNorth, eSouth, eEast, eWest] = batch.elevationsM;
+    } else {
+      const center = await elevProvider.getElevationForCoordinate(lat, lon);
+      elevationM = center.elevationM;
+      eNorth = elevationM;
+      eSouth = elevationM;
+      eEast = elevationM;
+      eWest = elevationM;
+    }
 
     // Distances in meters
     const distY = delta * 111320;

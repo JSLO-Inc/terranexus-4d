@@ -307,5 +307,6 @@ export interface ElevationGridResult {
 
 export interface IElevationProvider extends BaseDataProvider {
   getElevationForCoordinate(lat: number, lon: number): Promise<{ elevationM: number; status: DataClassificationTier; source: string }>;
+  getElevationsForCoordinates?(coords: Array<{ lat: number; lon: number }>): Promise<{ elevationsM: number[]; status: DataClassificationTier; source: string }>;
   getElevationGrid(lat: number, lon: number, extentKm?: number, resolution?: number): Promise<ElevationGridResult>;
 }

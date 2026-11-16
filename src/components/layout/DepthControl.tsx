@@ -1,14 +1,17 @@
 import React from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
-import { GEOLOGICAL_FORMATIONS, AUTHENTIC_BOREHOLES } from '../../data/strataData';
-import { AQUIFER_SYSTEMS } from '../../data/hydroData';
-import { MINERAL_INDICATORS } from '../../data/mineralData';
+import { AUTHENTIC_BOREHOLES } from '../../data/strataData';
+import {
+  deriveDynamicFormations,
+  deriveDynamicAquifers,
+  deriveDynamicMinerals
+} from '../subsurface/Subsurface3D';
 import { StatusBadge } from '../common/StatusBadge';
 import {
   ArrowDown,
   Layers,
   Droplet,
-  Sparkles,
+  Gem,
   ShieldAlert,
   Sliders,
   CheckCircle2
@@ -31,12 +34,13 @@ export const DepthControl: React.FC = () => {
     setShowMineralLayers,
     mineralDisplayMode,
     setMineralDisplayMode,
-    selectedLocation
+    selectedLocation,
+    currentDossier
   } = useTerranexusStore();
 
-  const formations = GEOLOGICAL_FORMATIONS[selectedLocation.id] || [];
-  const aquifers = AQUIFER_SYSTEMS[selectedLocation.id] || [];
-  const minerals = MINERAL_INDICATORS[selectedLocation.id];
+  const formations = deriveDynamicFormations(selectedLocation, currentDossier);
+  const aquifers = deriveDynamicAquifers(selectedLocation, currentDossier);
+  const minerals = deriveDynamicMinerals(selectedLocation, currentDossier);
   const borehole = AUTHENTIC_BOREHOLES.find(b => b.locationId === selectedLocation.id);
 
   // Find intercepted formation at current depth
@@ -230,7 +234,7 @@ export const DepthControl: React.FC = () => {
                 : 'bg-slate-900 border-slate-800 text-slate-500'
             }`}
           >
-            <Sparkles className="w-3 h-3 text-purple-400" />
+            <Gem className="w-3 h-3 text-purple-400" />
             <span>Mineral Layers</span>
           </button>
         )}
@@ -306,7 +310,7 @@ export const DepthControl: React.FC = () => {
 
         {interceptedAquifer ? (
           <div className="flex items-center gap-1.5 text-[11px] text-cyan-300 bg-cyan-950/50 border border-cyan-800/50 rounded-lg px-2 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <Droplet className="w-3 h-3 text-cyan-400 shrink-0" />
             <span className="truncate">Active Aquifer: {interceptedAquifer.name} ({interceptedAquifer.aquiferType})</span>
           </div>
         ) : (

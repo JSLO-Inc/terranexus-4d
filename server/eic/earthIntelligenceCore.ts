@@ -339,40 +339,61 @@ export class EarthIntelligenceCore {
   ): SoilIntelligenceProfile {
     const { latitude: lat, longitude: lon } = dossier.locationContext;
     const isIndia = dossier.locationContext.isWithinIndia;
+    const elevM = dossier.terrain.elevationM ?? 250;
     const litho = (dossier.geology.primaryLithology || '').toLowerCase();
     const prov = (dossier.geology.province || '').toLowerCase();
+    const realSoil = dossier.soil;
 
-    // Determine soil classification from actual lithology & climate zone
+    // Determine soil baseline from real SoilGrids dossier values first, refined by lithology/biome
     let wrbClass = 'Haplic Cambisols (Eutric)';
-    let orderName = 'Inceptisols / Alluvial Cambisols';
-    let texture = 'Sandy Loam';
-    let clay = 18;
-    let silt = 28;
-    let sand = 54;
-    let ph = 7.4;
-    let oc = 5.6;
-    let bd = 1.46;
-    let cec = 14.5;
-    let depthCm = 180;
-    let infil = 22.0;
-    let drainage = 'Well Drained / Moderately Permeable';
-    let ec = 0.65;
+    let orderName = 'Inceptisols / Regional Cambisols';
+    let texture = realSoil?.textureClass || 'Sandy Loam';
+    let clay = realSoil?.clayPercent ?? 18;
+    let silt = realSoil?.siltPercent ?? 28;
+    let sand = realSoil?.sandPercent ?? 54;
+    let ph = (realSoil?.ph ?? (realSoil as any)?.phH2O ?? 7.1) as number;
+    let oc = realSoil?.organicCarbonGKg ?? 7.4;
+    let bd = realSoil?.bulkDensityGcm3 ?? 1.42;
+    let cec = Math.round((clay * 0.48 + oc * 0.62 + 4.5) * 10) / 10;
+    let depthCm = elevM > 2200 ? 65 : 170;
+    let infil = realSoil ? Math.max(2.5, Math.round((sand * 0.58 + (100 - clay) * 0.14 - 4) * 10) / 10) : 22.0;
+    let drainage = realSoil?.drainageClass || (infil > 28 ? 'Excessively Drained / Rapid Infiltration' : infil < 7 ? 'Slow Internal Drainage' : 'Well Drained / Moderately Permeable');
+    let ec = 0.55;
     let topColors = ['#6b4f35', '#7c5d3f', '#8e6b49', '#a37e58', '#b8946e'];
 
-    if (litho.includes('basalt') || prov.includes('deccan')) {
+    if (elevM > 2200 || Math.abs(lat) > 62) {
+      wrbClass = 'Skeletic Leptosols / Cryosols';
+      orderName = 'Alpine Entisols & Cryic Lithosols';
+      if (!realSoil) {
+        texture = 'Gravelly Sandy Loam (Alpine Cryic)';
+        clay = 12;
+        silt = 30;
+        sand = 58;
+        ph = 6.2;
+        oc = 24.5;
+        bd = 1.18;
+        cec = Math.round((clay * 0.48 + oc * 0.62 + 4.5) * 10) / 10;
+        infil = 32.0;
+        drainage = 'Rapidly Drained Glacial / Talus Regolith';
+      }
+      ec = 0.25;
+      topColors = ['#3b3a36', '#4c4b46', '#615f59', '#77746d', '#8e8b84'];
+    } else if (litho.includes('basalt') || prov.includes('deccan')) {
       wrbClass = 'Pellic Vertisols (Calcaric)';
       orderName = 'Vertisols (Black Cotton Soil / Regur)';
-      texture = 'Clay (Smectitic Montmorillonite)';
-      clay = 52;
-      silt = 26;
-      sand = 22;
-      ph = 7.9;
-      oc = 8.2;
-      bd = 1.34;
-      cec = 38.4;
+      if (!realSoil) {
+        texture = 'Clay (Smectitic Montmorillonite)';
+        clay = 52;
+        silt = 26;
+        sand = 22;
+        ph = 7.9;
+        oc = 8.2;
+        bd = 1.34;
+        cec = 38.4;
+        infil = 4.5;
+        drainage = 'Slow Internal Drainage / High Shrink-Swell';
+      }
       depthCm = 140;
-      infil = 4.5;
-      drainage = 'Slow Internal Drainage / High Shrink-Swell';
       ec = 0.85;
       topColors = ['#2d2926', '#38332f', '#46403b', '#575049', '#6e655c'];
     } else if (
@@ -382,76 +403,93 @@ export class EarthIntelligenceCore {
     ) {
       wrbClass = 'Eutric Fluvisols / Mollic Gleysols';
       orderName = 'Deltaic Alluvial Fluvisols';
-      texture = 'Silty Clay Loam (Deltaic Alluvium)';
-      clay = 36;
-      silt = 44;
-      sand = 20;
-      ph = 7.2;
-      oc = 9.4;
-      bd = 1.38;
-      cec = 26.8;
+      if (!realSoil) {
+        texture = 'Silty Clay Loam (Deltaic Alluvium)';
+        clay = 36;
+        silt = 44;
+        sand = 20;
+        ph = 7.2;
+        oc = 9.4;
+        bd = 1.38;
+        cec = 26.8;
+        infil = 9.5;
+        drainage = 'Imperfectly Drained / High Water Table Delta';
+      }
       depthCm = 200;
-      infil = 9.5;
-      drainage = 'Imperfectly Drained / High Water Table Delta';
       ec = 1.45;
       topColors = ['#3d352e', '#4c433a', '#5c5247', '#6f6458', '#84786b'];
     } else if (
+      sand >= 64 ||
       prov.includes('arid') ||
+      prov.includes('desert') ||
+      prov.includes('sahara') ||
       prov.includes('rajasthan') ||
       prov.includes('khetri') ||
-      prov.includes('atacama') ||
-      prov.includes('colorado')
+      prov.includes('atacama')
     ) {
       wrbClass = 'Haplic Calcisols / Arenosols';
       orderName = 'Aridisols & Calcic Entisols';
-      texture = 'Loamy Sand / Calcareous Sandy Loam';
-      clay = 11;
-      silt = 17;
-      sand = 72;
-      ph = 8.2;
-      oc = 2.4;
-      bd = 1.58;
-      cec = 8.2;
+      if (!realSoil) {
+        texture = 'Loamy Sand / Calcareous Sandy Loam';
+        clay = 11;
+        silt = 17;
+        sand = 72;
+        ph = 8.2;
+        oc = 2.4;
+        bd = 1.58;
+        cec = 8.2;
+        infil = 42.0;
+        drainage = 'Excessively Drained / Low Water Holding Capacity';
+      }
       depthCm = 95;
-      infil = 42.0;
-      drainage = 'Excessively Drained / Low Water Holding Capacity';
       ec = 1.95;
       topColors = ['#b5895a', '#c2986b', '#cfa67b', '#dbb58d', '#e6c5a1'];
     } else if (litho.includes('volcan') || prov.includes('etna') || prov.includes('fuji') || prov.includes('iceland')) {
       wrbClass = 'Vitric Andosols';
       orderName = 'Andisols (Volcanic Tephra & Ash Derived)';
-      texture = 'Silt Loam (Andic Volcanic Horizon)';
-      clay = 16;
-      silt = 54;
-      sand = 30;
-      ph = 6.3;
-      oc = 18.5;
-      bd = 0.98;
-      cec = 31.0;
+      if (!realSoil) {
+        texture = 'Silt Loam (Andic Volcanic Horizon)';
+        clay = 16;
+        silt = 54;
+        sand = 30;
+        ph = 6.3;
+        oc = 18.5;
+        bd = 0.98;
+        cec = 31.0;
+        infil = 28.0;
+        drainage = 'Well Drained / High Porosity Andic Matrix';
+      }
       depthCm = 135;
-      infil = 28.0;
-      drainage = 'Well Drained / High Porosity Andic Matrix';
       ec = 0.42;
       topColors = ['#332d2b', '#423a37', '#544a46', '#685c57', '#7d706a'];
     } else if (isIndia && lat > 24 && lat < 32) {
       wrbClass = 'Endocalcic Fluvisols / Cambisols';
       orderName = 'Indo-Gangetic Quaternary Alluvial Loam';
-      texture = 'Sandy Loam to Silt Loam';
-      clay = 18;
-      silt = 30;
-      sand = 52;
-      ph = 7.6;
-      oc = 5.4;
-      bd = 1.48;
-      cec = 15.2;
+      if (!realSoil) {
+        texture = 'Sandy Loam to Silt Loam';
+        clay = 18;
+        silt = 30;
+        sand = 52;
+        ph = 7.6;
+        oc = 5.4;
+        bd = 1.48;
+        cec = 15.2;
+        infil = 21.0;
+        drainage = 'Well Drained / Deep Alluvial Profile';
+      }
       depthCm = 200;
-      infil = 21.0;
-      drainage = 'Well Drained / Deep Alluvial Profile';
       ec = 0.72;
       topColors = ['#6e5339', '#7f6246', '#917254', '#a48465', '#b89778'];
+    } else if (Math.abs(lat) >= 38) {
+      wrbClass = oc >= 14 ? 'Umbric Luvisols / Podzols' : 'Haplic Luvisols (Temperate Loam)';
+      orderName = 'Temperate Forest & Grassland Alfisols';
+      ec = 0.45;
+      topColors = ['#3d3326', '#4f4232', '#635340', '#796751', '#917d65'];
     }
 
-    const smapObs = dossier.evidence.remote.find(o => o.parameter === 'regional_surface_soil_moisture_smap');
+    const smapObs = dossier.evidence.remote.find(
+      o => o.parameter === 'regional_surface_soil_moisture_ecmwf' || o.parameter === 'regional_surface_soil_moisture_smap'
+    );
     const surfaceMoistureVolPercent =
       liveMeteo.soilMoisture0to1cm !== null
         ? Math.round(liveMeteo.soilMoisture0to1cm * 1000) / 10
@@ -600,6 +638,7 @@ export class EarthIntelligenceCore {
     liveMeteo: LiveMeteoTelemetry
   ): AgriIntelligenceSummary {
     const { latitude: lat, isWithinIndia } = dossier.locationContext;
+    const elevM = dossier.terrain.elevationM ?? 250;
     const rain30d = dossier.climate.rainfall30dMm ?? 45;
     const slope = dossier.terrain.slopeDegrees;
     const twi = dossier.terrain.topographicWetnessIndex;
@@ -613,26 +652,36 @@ export class EarthIntelligenceCore {
 
     const cgwbExtraction = dossier.groundwater.cgwbStateSummary?.stageOfExtractionPercent ?? null;
 
-    // Estimate annual rainfall from regional climate zone
+    // Estimate annual rainfall from real 30d meteo + latitude/elevation regime
     const annualRainMm =
-      soil.sandPercent > 65
-        ? 410
+      rain30d <= 5 && soil.sandPercent > 65
+        ? Math.max(85, Math.round(rain30d * 10 + 75))
         : isWithinIndia && lat < 18
         ? 1120
-        : isWithinIndia && lat > 28
+        : isWithinIndia && lat > 28 && elevM < 1200
         ? 710
-        : Math.max(380, Math.min(1850, Math.round(rain30d * 9.5 + 320)));
+        : Math.max(180, Math.min(2200, Math.round(rain30d * 10.5 + 240)));
 
     const meanTempC =
       liveMeteo.temperatureC !== null
         ? Math.round(liveMeteo.temperatureC * 10) / 10
-        : Math.abs(lat) > 40
-        ? 14.5
-        : Math.abs(lat) > 28
-        ? 24.8
+        : elevM > 2200
+        ? Math.round((16 - (elevM / 1000) * 6.2) * 10) / 10
+        : Math.abs(lat) > 45
+        ? 11.2
+        : Math.abs(lat) > 35
+        ? 16.5
+        : Math.abs(lat) > 25
+        ? 23.8
         : 27.6;
 
-    const agroZone = isWithinIndia
+    const isAlpineBiome = elevM >= 1650 || Math.abs(lat) >= 58 || meanTempC < 7.5;
+    const isHyperAridBiome = !isAlpineBiome && annualRainMm < 260 && soil.sandPercent >= 56;
+    const isTemperateBiome = !isWithinIndia && !isAlpineBiome && !isHyperAridBiome && Math.abs(lat) >= 35;
+
+    const agroZone = isAlpineBiome
+      ? `Alpine & High-Mountain Agro-Pastoral Zone (${elevM}m ASL • FAO GAEZ)`
+      : isWithinIndia
       ? lat > 28
         ? 'Trans-Gangetic Plains Region (ICAR Zone VI)'
         : lat < 18 && dossier.locationContext.longitude > 79
@@ -642,219 +691,435 @@ export class EarthIntelligenceCore {
         : soil.sandPercent > 65
         ? 'Western Dry / Semi-Arid Region (ICAR Zone XIV)'
         : 'Peninsular Plateau & Mixed Red/Black Region (ICAR Zone X)'
+      : isHyperAridBiome
+      ? 'Hyper-Arid Desert & Oasis Zone (FAO GAEZ)'
+      : isTemperateBiome
+      ? 'Temperate Continental / Maritime Zone (FAO GAEZ)'
       : Math.abs(lat) < 23.5
-      ? 'Tropical / Sub-Tropical Agro-Ecological Zone (FAO GAEZ)'
-      : Math.abs(lat) < 38
-      ? 'Sub-Tropical / Warm Temperate Agro-Ecological Zone (FAO GAEZ)'
-      : 'Temperate Continental Agro-Ecological Zone (FAO GAEZ)';
+      ? 'Tropical / Humid Lowland Zone (FAO GAEZ)'
+      : 'Sub-Tropical / Mediterranean Agro-Ecological Zone (FAO GAEZ)';
 
     const isHighWaterStress =
       (cgwbExtraction !== null && cgwbExtraction > 100) ||
       (nearestWellDepth !== null && nearestWellDepth > 25) ||
-      annualRainMm < 500;
+      annualRainMm < 420;
 
-    const crops: CropSuitabilityItem[] = [
-      {
-        cropId: 'crop-wheat-mustard',
-        cropName: isWithinIndia ? 'Wheat (Triticum aestivum) / Mustard Rotation' : 'Winter Wheat / Oilseed Rape',
-        regionalNames: isWithinIndia ? 'Gehun / Kanak (गेंहू / ਕਣਕ) & Sarson' : 'Winter Cereal & Canola',
-        season: 'Rabi (Winter)',
-        suitabilityClass:
-          soil.sandPercent > 75 || slope > 12
-            ? 'MARGINAL_WITH_CONSTRAINTS'
-            : soil.clayPercent <= 45
-            ? 'HIGHLY_SUITABLE'
-            : 'MODERATELY_SUITABLE',
-        evidenceClass: 'Strong supporting evidence',
-        durationDays: '120–145 days',
-        waterRequirementMm: '380–450 mm (4–5 critical irrigations)',
-        optimalPhRange: '6.0 – 7.8',
-        preferredSoilTexture: 'Sandy Loam, Loam, or Clay Loam',
-        whySuitable: `Matches local ${soil.surfaceTextureClass} texture (pH ${soil.phH2O}) and moderate winter evaporative demand with lower groundwater depletion than summer paddy.`,
-        keyConstraints: [
-          isHighWaterStress
-            ? 'Regional aquifer faces high irrigation extraction; zero-tillage and micro-sprinkler scheduling are strongly advised.'
-            : 'Ensure well-drained root zone during crown-root initiation stage.',
-          `Topsoil organic carbon is ${soil.organicCarbonGKg} g/kg — incorporate crop residue instead of burning.`
-        ],
-        managementPractices: [
-          'Zero-till Happy Seeder sowing to conserve residual soil moisture by 15–20%.',
-          'Split nitrogen application aligned with Leaf Colour Chart (LCC) and laboratory Soil Health Card results.'
-        ],
-        yieldEstimate: {
-          rangeTonnesPerHa: soil.sandPercent > 70 ? '2.4 – 3.4 t/ha' : '4.2 – 5.4 t/ha',
-          modelName: 'FAO GAEZ v4 Agro-Climatic Envelope + ICAR Regional Benchmark',
-          inputDatasets: ['ISRIC SoilGrids 250m', 'Copernicus GLO-30 Slope', 'NASA GPM IMERG Precipitation'],
-          uncertaintyNote: '±18% regional weather & management variance; NOT a guaranteed field harvest.',
-          availabilityState: 'MODELLED'
+    let crops: CropSuitabilityItem[];
+
+    if (isAlpineBiome) {
+      crops = [
+        {
+          cropId: 'crop-alpine-pasture',
+          cropName: 'Alpine Forage Meadow & Timothy / Clover Pasture',
+          regionalNames: 'High-Altitude Silage & Transhumance Grazing',
+          season: 'Summer (Jun–Sep Frost-Free Window)',
+          suitabilityClass: slope > 26 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: '85–115 snow-free growing days',
+          waterRequirementMm: '350–500 mm (Snowmelt & summer precipitation fed)',
+          optimalPhRange: '5.5 – 7.4',
+          preferredSoilTexture: 'Gravelly Loam / Humic Alpine Cambisol',
+          whySuitable: `Short frost-free thermal window at ${elevM}m ASL (${meanTempC}°C) favors perennial cold-hardy C3 grasses and alpine pastoralism over row-crop agriculture.`,
+          keyConstraints: [
+            `Steep alpine relief (${slope}° slope) limits mechanized cultivation and poses erosion risk.`,
+            'Sub-zero frost episodes restrict frost-sensitive annual cereals.'
+          ],
+          managementPractices: [
+            'Rotational summer grazing to protect alpine turf and prevent slope gullying.',
+            'Conserve natural snowmelt spring seepage channels without disturbing permafrost/scree horizons.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '2.2 – 3.8 t/ha (Dry Matter Forage)',
+            modelName: 'FAO GAEZ v4 Mountain Thermal Envelope',
+            inputDatasets: ['Copernicus GLO-30 Elevation/Slope', 'Open-Meteo Thermal Profile', 'ISRIC SoilGrids 250m'],
+            uncertaintyNote: '±22% snowpack duration and summer frost sensitivity.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-alpine-barley-rye',
+          cropName: 'Cold-Hardy Mountain Barley / Buckwheat / Rye',
+          regionalNames: 'Highland Hordeum & Fagopyrum (Valley Terraces Only)',
+          season: 'Short Summer Terrace Cycle',
+          suitabilityClass: slope > 18 || elevM > 2600 ? 'MARGINAL_WITH_CONSTRAINTS' : 'MODERATELY_SUITABLE',
+          evidenceClass: 'Moderate supporting evidence',
+          durationDays: '95–120 days',
+          waterRequirementMm: '280–360 mm (Rainfed / Meltwater furrow)',
+          optimalPhRange: '5.8 – 7.5',
+          preferredSoilTexture: 'Well-Drained Terrace Sandy Loam',
+          whySuitable: `Short-season cold-tolerant small grains succeed only on sheltered south-facing valley terraces below ~2,300m ASL.`,
+          keyConstraints: [
+            `High elevation (${elevM}m ASL) sharply truncates growing degree days (GDD).`,
+            'Requires terraced stone bunds to retain thin skeletic topsoil.'
+          ],
+          managementPractices: [
+            'Restrict sowing to low-slope alluvial terraces (<12°) with southern solar aspect.',
+            'Use farmyard manure compost to stabilize organic carbon in stony regolith.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '1.4 – 2.3 t/ha',
+            modelName: 'FAO GAEZ v4 Cold-Thermal Crop Model',
+            inputDatasets: ['Copernicus GLO-30 DEM', 'ISRIC SoilGrids 250m'],
+            uncertaintyNote: 'High micro-climate aspect variance across mountain valleys.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-warm-cereals-excluded',
+          cropName: 'Sub-Tropical Row Crops (Rice / Cotton / Maize)',
+          regionalNames: 'Thermally Excluded Above Snowline / Mountain Belt',
+          season: 'Not Applicable (Thermal Deficit)',
+          suitabilityClass: 'NOT_RECOMMENDED',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: 'N/A (Insufficient Growing Degree Days)',
+          waterRequirementMm: 'N/A',
+          optimalPhRange: 'N/A',
+          preferredSoilTexture: 'N/A',
+          whySuitable: `Insufficient accumulated growing degree days at ${elevM}m ASL (${meanTempC}°C) makes warm-season crops agronomically unviable.`,
+          keyConstraints: ['Severe freeze/frost injury and steep mountain topography.'],
+          managementPractices: ['Maintain natural alpine forest, scree stabilization, and sustainable eco-watershed cover.'],
+          yieldEstimate: {
+            rangeTonnesPerHa: '0.0 t/ha (Thermally Unsuitable)',
+            modelName: 'FAO GAEZ v4 Thermal Exclusion Gate',
+            inputDatasets: ['Copernicus GLO-30 Elevation', 'Open-Meteo Temperature'],
+            uncertaintyNote: 'Physical thermal limit.',
+            availabilityState: 'MODELLED'
+          }
         }
-      },
-      {
-        cropId: 'crop-pulses-millet',
-        cropName: isWithinIndia ? 'Pearl Millet (Bajra) / Pigeon Pea (Arhar) / Chickpea' : 'Sorghum / Pearl Millet & Legume Intercrop',
-        regionalNames: isWithinIndia ? 'Bajra, Jowar, Tur/Arhar, Chana (बाजरा / चना / కందులు)' : 'Drought-Tolerant Millets & Pulses',
-        season: 'Kharif (Monsoon)',
-        suitabilityClass: slope > 18 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
-        evidenceClass: 'Strong supporting evidence',
-        durationDays: '85–130 days',
-        waterRequirementMm: '250–380 mm (Rainfed or 1–2 supplemental irrigations)',
-        optimalPhRange: '6.0 – 8.2',
-        preferredSoilTexture: 'Loamy Sand, Sandy Loam, Black/Red Loam',
-        whySuitable: `High water-use efficiency and biological nitrogen fixation ideally suited for ${
-          isHighWaterStress ? 'groundwater-stressed aquifers' : 'sustainable crop diversification'
-        } and pH ${soil.phH2O}.`,
-        keyConstraints: [
-          soil.clayPercent > 45
-            ? 'Avoid waterlogging in heavy clay horizons during peak monsoon downpours; use raised-bed planting.'
-            : 'Susceptible to terminal moisture stress if monsoon withdrawal is early.'
-        ],
-        managementPractices: [
-          'Broad-bed and furrow (BBF) or ridge-furrow planting to drain excess rain and harvest runoff.',
-          'Rhizobium + PSB seed treatment to enhance root nodulation and soil organic carbon.'
-        ],
-        yieldEstimate: {
-          rangeTonnesPerHa: '1.6 – 2.8 t/ha (Grain) + Nitrogen Credit',
-          modelName: 'FAO GAEZ v4 Water-Limited Yield Model',
-          inputDatasets: ['ISRIC SoilGrids 250m', 'NASA GPM IMERG', 'NASA SMAP Soil Moisture'],
-          uncertaintyNote: '±20% rainfall distribution sensitivity; requires local seed variety selection.',
-          availabilityState: 'MODELLED'
+      ];
+    } else if (isHyperAridBiome) {
+      crops = [
+        {
+          cropId: 'crop-date-oasis',
+          cropName: 'Drip-Irrigated Date Palm (Phoenix dactylifera) & Oasis Figs',
+          regionalNames: 'Arid Oasis Agroforestry',
+          season: 'Perennial Oasis Cycle',
+          suitabilityClass: 'MODERATELY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: 'Perennial (High heat-unit requirement met)',
+          waterRequirementMm: '650–900 mm (Subsurface drip / falaj only)',
+          optimalPhRange: '6.5 – 8.4',
+          preferredSoilTexture: 'Calcareous Sand / Oasis Alluvium',
+          whySuitable: `High solar radiation and tolerance to calcareous/saline sands (${soil.surfaceTextureClass}, pH ${soil.phH2O}) make drip-fed oasis trees viable only where renewable wadi/spring water exists.`,
+          keyConstraints: [
+            `Extreme aridity (~${annualRainMm} mm/yr) precludes rainfed agriculture.`,
+            'Fossil aquifer mining carries irreversible drawdown risk.'
+          ],
+          managementPractices: [
+            'Subsurface bubbler/drip irrigation buried below 30 cm to eliminate surface evaporation.',
+            'Windbreak tamarisk or acacia belts to stop sand dune encroachment.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '6.0 – 11.0 t/ha (Irrigated Oasis Only)',
+            modelName: 'FAO Arid Oasis Water-Balance Model',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'NASA GPM IMERG', 'ERA5 Aridity'],
+            uncertaintyNote: 'Strictly contingent on verified local irrigation allocation.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-arid-millet',
+          cropName: 'Drought-Hardened Pearl Millet / Desert Moth Bean',
+          regionalNames: 'Episodic Ephemeral Wadi-Bed Rainfed',
+          season: 'Post-Rain Episodic',
+          suitabilityClass: 'MARGINAL_WITH_CONSTRAINTS',
+          evidenceClass: 'Moderate supporting evidence',
+          durationDays: '65–80 days',
+          waterRequirementMm: '200–280 mm',
+          optimalPhRange: '6.5 – 8.3',
+          preferredSoilTexture: 'Loamy Sand',
+          whySuitable: `Only viable in localized runoff-harvesting wadi depressions during sporadic seasonal storm events.`,
+          keyConstraints: [
+            `Very low soil water holding capacity (${soil.sandPercent}% sand) and high infiltration (${soil.infiltrationRateMmHr} mm/hr).`
+          ],
+          managementPractices: ['Micro-catchment contour bunding (khuls/zaï pits) to concentrate rare rainfall.'],
+          yieldEstimate: {
+            rangeTonnesPerHa: '0.4 – 1.1 t/ha',
+            modelName: 'FAO GAEZ v4 Arid Marginal Model',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'NASA GPM IMERG'],
+            uncertaintyNote: '±40% inter-annual rainfall variability.',
+            availabilityState: 'MODELLED'
+          }
         }
-      },
-      {
-        cropId: 'crop-rice-cotton',
-        cropName:
-          soil.clayPercent > 42
-            ? isWithinIndia
-              ? 'Cotton (Gossypium) / Soybean Intercrop'
-              : 'Cotton / Oilseed Rotation'
-            : isWithinIndia
-            ? 'Paddy Rice (Direct-Seeded DSR / System of Rice Intensification)'
-            : 'Irrigated Maize / Lowland Rice',
-        regionalNames:
-          soil.clayPercent > 42
-            ? 'Kapas & Soyabean (कपास / सोयाबीन)'
-            : 'Dhan / Vari (धान / వరి / ਝੋਨਾ)',
-        season: 'Kharif (Monsoon)',
-        suitabilityClass:
-          isHighWaterStress && soil.clayPercent < 30
-            ? 'MARGINAL_WITH_CONSTRAINTS'
-            : slope > 8
-            ? 'NOT_RECOMMENDED'
-            : 'MODERATELY_SUITABLE',
-        evidenceClass: 'Moderate supporting evidence',
-        durationDays: '115–150 days',
-        waterRequirementMm: soil.clayPercent > 42 ? '550–700 mm' : '950–1,350 mm',
-        optimalPhRange: '5.8 – 8.0',
-        preferredSoilTexture: soil.clayPercent > 42 ? 'Deep Black Clay (Vertisol)' : 'Clay Loam / Alluvial Silt Loam',
-        whySuitable:
-          soil.clayPercent > 42
-            ? 'High moisture-holding capacity of smectitic clay supports deep-rooted cotton/soybean.'
-            : isHighWaterStress
-            ? `WARNING: High infiltrative losses (${soil.infiltrationRateMmHr} mm/hr) and regional groundwater overdraft make flooded puddle-transplanted rice unsustainable without Direct-Seeded Rice (DSR) and Alternate Wetting & Drying (AWD).`
-            : `Flat deltaic/alluvial terrain (${slope}° slope) and high TWI (${twi.toFixed(1)}) support wet-season cultivation.`,
-        keyConstraints: [
-          isHighWaterStress
-            ? 'CRITICAL CONSTRAINT: Conventional flooded paddy accelerates aquifer depletion in over-exploited blocks.'
-            : 'Requires careful drainage management and salinity monitoring.'
-        ],
-        managementPractices: [
-          'Adopt Direct-Seeded Rice (DSR) and Alternate Wetting & Drying (AWD) field water tubes to cut irrigation pumping by 25–30%.',
-          'Laser land levelling prior to sowing to improve irrigation uniformity.'
-        ],
-        yieldEstimate: {
-          rangeTonnesPerHa: soil.clayPercent > 42 ? '2.0 – 3.2 t/ha' : '4.8 – 6.5 t/ha',
-          modelName: 'FAO AquaCrop / GAEZ v4 Irrigated Envelope',
-          inputDatasets: ['ISRIC SoilGrids 250m', 'CGWB NAQUIM Aquifer Stress', 'NASA GRACE-FO'],
-          uncertaintyNote: 'Subject to irrigation water availability and pest/salinity management.',
-          availabilityState: 'MODELLED'
+      ];
+    } else if (isTemperateBiome) {
+      crops = [
+        {
+          cropId: 'crop-temp-wheat-barley',
+          cropName: 'Winter Wheat (Triticum aestivum) & Malting Barley',
+          regionalNames: 'Temperate Winter / Spring Small Grains',
+          season: 'Autumn-Sown / Summer Harvest',
+          suitabilityClass: slope > 14 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: '210–250 days (Including winter vernalization)',
+          waterRequirementMm: '420–550 mm (Primarily rainfed)',
+          optimalPhRange: '6.0 – 7.8',
+          preferredSoilTexture: 'Loam, Silt Loam, or Luvisol',
+          whySuitable: `Temperate thermal regime (${meanTempC}°C) and ${soil.surfaceTextureClass} soil (pH ${soil.phH2O}, ${soil.organicCarbonGKg} g/kg OC) provide ideal winter vernalization and grain-fill moisture.`,
+          keyConstraints: [
+            slope > 10 ? `Moderate slope (${slope}°) requires contour strip-cropping to avoid sheet erosion.` : 'Monitor autumn drainage to prevent waterlogging during winter rains.'
+          ],
+          managementPractices: [
+            'Conservation minimum-tillage with winter cover-crop rotation (clover/radish) to build soil organic matter.',
+            'Precision variable-rate nitrogen management guided by laboratory topsoil sampling.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '5.5 – 8.2 t/ha',
+            modelName: 'FAO GAEZ v4 Temperate Cereal Envelope',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'Copernicus GLO-30 Slope', 'NASA GPM IMERG'],
+            uncertaintyNote: '±15% seasonal precipitation and frost variance.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-temp-canola-legume',
+          cropName: 'Oilseed Rape (Canola) & Field Pea / Faba Bean Rotation',
+          regionalNames: 'Temperate Break Crop & Protein Legume',
+          season: 'Spring / Autumn Break Rotation',
+          suitabilityClass: slope > 15 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: '120–160 days',
+          waterRequirementMm: '340–450 mm (Rainfed)',
+          optimalPhRange: '6.0 – 7.5',
+          preferredSoilTexture: 'Sandy Loam to Clay Loam',
+          whySuitable: `Breaks cereal disease cycles while biologically fixing 50–80 kg N/ha in temperate ${soil.regionalSoilOrder}.`,
+          keyConstraints: ['Requires well-structured seedbed and balanced sulphur/boron availability.'],
+          managementPractices: ['3-to-4 year rotation alternating cereals with legumes and brassicas.'],
+          yieldEstimate: {
+            rangeTonnesPerHa: '3.0 – 4.2 t/ha',
+            modelName: 'FAO GAEZ v4 Temperate Oilseed/Legume Model',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'Open-Meteo Thermal Regime'],
+            uncertaintyNote: '±16% pollination and spring moisture sensitivity.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-temp-orchard-root',
+          cropName: 'Temperate Orchard Fruit (Apple/Pear) & Forage Maize / Potato',
+          regionalNames: 'Temperate Horticulture & Root Crops',
+          season: 'Spring–Autumn Growing Season',
+          suitabilityClass: soil.clayPercent > 48 ? 'MODERATELY_SUITABLE' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Moderate supporting evidence',
+          durationDays: '110–170 days',
+          waterRequirementMm: '450–620 mm',
+          optimalPhRange: '5.8 – 7.2',
+          preferredSoilTexture: 'Deep Well-Drained Loam / Sandy Loam',
+          whySuitable: `Cool winter chill hours and deep soil horizon (${soil.effectiveSoilDepthCm} cm) support high-value pome orchards and tuber crops.`,
+          keyConstraints: ['Late spring blossom frost risk in valley floor frost pockets.'],
+          managementPractices: ['Drip fertigation with inter-row grassed alleyways to prevent topsoil runoff.'],
+          yieldEstimate: {
+            rangeTonnesPerHa: '25.0 – 40.0 t/ha',
+            modelName: 'FAO GAEZ v4 Temperate Horticulture Envelope',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'Copernicus GLO-30 Aspect'],
+            uncertaintyNote: '±20% frost and irrigation management variance.',
+            availabilityState: 'MODELLED'
+          }
         }
-      },
-      {
-        cropId: 'crop-oilseeds-mustard',
-        cropName: isWithinIndia ? 'Indian Mustard (Sarson) / Groundnut / Rapeseed' : 'Canola / Rapeseed & Sunflower Oilseeds',
-        regionalNames: isWithinIndia ? 'Sarson, Rai, Mungfali (सरसों / मूंगफली)' : 'Low-Water Winter Oilseeds',
-        season: 'Rabi (Winter)',
-        suitabilityClass: slope > 14 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
-        evidenceClass: 'Strong supporting evidence',
-        durationDays: '110–135 days',
-        waterRequirementMm: '220–320 mm (Requires 40–50% less water than wheat)',
-        optimalPhRange: '6.0 – 8.0',
-        preferredSoilTexture: 'Sandy Loam to Loam',
-        whySuitable: `Requires only 2 light irrigations (at branching and pod formation), making it an ideal profitable alternative in ${soil.surfaceTextureClass} soils.`,
-        keyConstraints: [
-          'Requires basal Sulphur (20–40 kg S/ha via Gypsum or SSP) for oil synthesis.',
-          'Frost or aphid incidence during late January flowering requires timely scouting.'
-        ],
-        managementPractices: [
-          'Apply Gypsum (250 kg/ha) at last ploughing to supply Sulphur and improve soil aggregation.',
-          'Intercrop with autumn chickpea (4:1 ratio) to stabilize farm income and fix atmospheric nitrogen.'
-        ],
-        yieldEstimate: {
-          rangeTonnesPerHa: '1.8 – 2.6 t/ha (38–42% oil content)',
-          modelName: 'FAO GAEZ v4 + ICAR-DRMR Oilseed Model',
-          inputDatasets: ['ISRIC SoilGrids 250m', 'ERA5 Winter Temperature', 'NASA GPM IMERG'],
-          uncertaintyNote: '±15% thermal and winter rainfall sensitivity.',
-          availabilityState: 'MODELLED'
+      ];
+    } else {
+      crops = [
+        {
+          cropId: 'crop-wheat-mustard',
+          cropName: isWithinIndia ? 'Wheat (Triticum aestivum) / Mustard Rotation' : 'Winter Wheat / Oilseed Rape',
+          regionalNames: isWithinIndia ? 'Gehun / Kanak (गेंहू / ਕਣਕ) & Sarson' : 'Winter Cereal & Canola',
+          season: 'Rabi (Winter)',
+          suitabilityClass:
+            soil.sandPercent > 75 || slope > 12
+              ? 'MARGINAL_WITH_CONSTRAINTS'
+              : soil.clayPercent <= 45
+              ? 'HIGHLY_SUITABLE'
+              : 'MODERATELY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: '120–145 days',
+          waterRequirementMm: '380–450 mm (4–5 critical irrigations)',
+          optimalPhRange: '6.0 – 7.8',
+          preferredSoilTexture: 'Sandy Loam, Loam, or Clay Loam',
+          whySuitable: `Matches local ${soil.surfaceTextureClass} texture (pH ${soil.phH2O}) and moderate winter evaporative demand with lower groundwater depletion than summer paddy.`,
+          keyConstraints: [
+            isHighWaterStress
+              ? 'Regional aquifer faces high irrigation extraction; zero-tillage and micro-sprinkler scheduling are strongly advised.'
+              : 'Ensure well-drained root zone during crown-root initiation stage.',
+            `Topsoil organic carbon is ${soil.organicCarbonGKg} g/kg — incorporate crop residue instead of burning.`
+          ],
+          managementPractices: [
+            'Zero-till Happy Seeder sowing to conserve residual soil moisture by 15–20%.',
+            'Split nitrogen application aligned with Leaf Colour Chart (LCC) and laboratory Soil Health Card results.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: soil.sandPercent > 70 ? '2.4 – 3.4 t/ha' : '4.2 – 5.4 t/ha',
+            modelName: isWithinIndia ? 'FAO GAEZ v4 Agro-Climatic Envelope + ICAR Regional Benchmark' : 'FAO GAEZ v4 Agro-Climatic Envelope',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'Copernicus GLO-30 Slope', 'NASA GPM IMERG Precipitation'],
+            uncertaintyNote: '±18% regional weather & management variance; NOT a guaranteed field harvest.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-pulses-millet',
+          cropName: isWithinIndia ? 'Pearl Millet (Bajra) / Pigeon Pea (Arhar) / Chickpea' : 'Sorghum / Pearl Millet & Legume Intercrop',
+          regionalNames: isWithinIndia ? 'Bajra, Jowar, Tur/Arhar, Chana (बाजरा / चना / కందులు)' : 'Drought-Tolerant Millets & Pulses',
+          season: 'Kharif (Rainy Season)',
+          suitabilityClass: slope > 18 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: '85–130 days',
+          waterRequirementMm: '250–380 mm (Rainfed or 1–2 supplemental irrigations)',
+          optimalPhRange: '6.0 – 8.2',
+          preferredSoilTexture: 'Loamy Sand, Sandy Loam, Black/Red Loam',
+          whySuitable: `High water-use efficiency and biological nitrogen fixation ideally suited for ${
+            isHighWaterStress ? 'groundwater-stressed aquifers' : 'sustainable crop diversification'
+          } and pH ${soil.phH2O}.`,
+          keyConstraints: [
+            soil.clayPercent > 45
+              ? 'Avoid waterlogging in heavy clay horizons during peak downpours; use raised-bed planting.'
+              : 'Susceptible to terminal moisture stress if rainy season withdraws early.'
+          ],
+          managementPractices: [
+            'Broad-bed and furrow (BBF) or ridge-furrow planting to drain excess rain and harvest runoff.',
+            'Rhizobium + PSB seed treatment to enhance root nodulation and soil organic carbon.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '1.6 – 2.8 t/ha (Grain) + Nitrogen Credit',
+            modelName: 'FAO GAEZ v4 Water-Limited Yield Model',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'NASA GPM IMERG', 'NASA SMAP Soil Moisture'],
+            uncertaintyNote: '±20% rainfall distribution sensitivity; requires local seed variety selection.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-rice-cotton',
+          cropName:
+            soil.clayPercent > 42
+              ? isWithinIndia
+                ? 'Cotton (Gossypium) / Soybean Intercrop'
+                : 'Cotton / Oilseed Rotation'
+              : isWithinIndia
+              ? 'Paddy Rice (Direct-Seeded DSR / System of Rice Intensification)'
+              : 'Irrigated Maize / Lowland Rice',
+          regionalNames:
+            soil.clayPercent > 42
+              ? isWithinIndia ? 'Kapas & Soyabean (कपास / सोयाबीन)' : 'Upland Fibre & Oilseed'
+              : isWithinIndia ? 'Dhan / Vari (धान / వరి / ਝੋਨਾ)' : 'Summer Cereal',
+          season: 'Wet / Summer Season',
+          suitabilityClass:
+            isHighWaterStress && soil.clayPercent < 30
+              ? 'MARGINAL_WITH_CONSTRAINTS'
+              : slope > 8
+              ? 'NOT_RECOMMENDED'
+              : 'MODERATELY_SUITABLE',
+          evidenceClass: 'Moderate supporting evidence',
+          durationDays: '115–150 days',
+          waterRequirementMm: soil.clayPercent > 42 ? '550–700 mm' : '950–1,350 mm',
+          optimalPhRange: '5.8 – 8.0',
+          preferredSoilTexture: soil.clayPercent > 42 ? 'Deep Black Clay (Vertisol)' : 'Clay Loam / Alluvial Silt Loam',
+          whySuitable:
+            soil.clayPercent > 42
+              ? 'High moisture-holding capacity of smectitic clay supports deep-rooted cotton/soybean.'
+              : isHighWaterStress
+              ? `WARNING: High infiltrative losses (${soil.infiltrationRateMmHr} mm/hr) and regional groundwater overdraft make flooded puddle-transplanted rice unsustainable without Direct-Seeded Rice (DSR) and Alternate Wetting & Drying (AWD).`
+              : `Flat alluvial terrain (${slope}° slope) and high TWI (${twi.toFixed(1)}) support wet-season cultivation.`,
+          keyConstraints: [
+            isHighWaterStress
+              ? 'CRITICAL CONSTRAINT: Conventional flooded paddy accelerates aquifer depletion in over-exploited blocks.'
+              : 'Requires careful drainage management and salinity monitoring.'
+          ],
+          managementPractices: [
+            'Adopt Direct-Seeded Rice (DSR) and Alternate Wetting & Drying (AWD) field water tubes to cut irrigation pumping by 25–30%.',
+            'Laser land levelling prior to sowing to improve irrigation uniformity.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: soil.clayPercent > 42 ? '2.0 – 3.2 t/ha' : '4.8 – 6.5 t/ha',
+            modelName: 'FAO AquaCrop / GAEZ v4 Irrigated Envelope',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'WHYMAP Aquifer Stress', 'NASA GRACE-FO'],
+            uncertaintyNote: 'Subject to irrigation water availability and pest/salinity management.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-oilseeds-mustard',
+          cropName: isWithinIndia ? 'Indian Mustard (Sarson) / Groundnut / Rapeseed' : 'Canola / Rapeseed & Sunflower Oilseeds',
+          regionalNames: isWithinIndia ? 'Sarson, Rai, Mungfali (सरसों / मूंगफली)' : 'Low-Water Winter Oilseeds',
+          season: 'Cool / Dry Season',
+          suitabilityClass: slope > 14 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Strong supporting evidence',
+          durationDays: '110–135 days',
+          waterRequirementMm: '220–320 mm (Requires 40–50% less water than wheat)',
+          optimalPhRange: '6.0 – 8.0',
+          preferredSoilTexture: 'Sandy Loam to Loam',
+          whySuitable: `Requires only 2 light irrigations (at branching and pod formation), making it an ideal profitable alternative in ${soil.surfaceTextureClass} soils.`,
+          keyConstraints: [
+            'Requires basal Sulphur (20–40 kg S/ha via Gypsum or SSP) for oil synthesis.',
+            'Frost or aphid incidence during flowering requires timely scouting.'
+          ],
+          managementPractices: [
+            'Apply Gypsum (250 kg/ha) at last ploughing to supply Sulphur and improve soil aggregation.',
+            'Intercrop with chickpea (4:1 ratio) to stabilize farm income and fix atmospheric nitrogen.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '1.8 – 2.6 t/ha (38–42% oil content)',
+            modelName: 'FAO GAEZ v4 Oilseed Model',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'ERA5 Temperature', 'NASA GPM IMERG'],
+            uncertaintyNote: '±15% thermal and seasonal rainfall sensitivity.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-perennial-horticulture',
+          cropName: isWithinIndia ? 'Drip-Irrigated Guava / Kinnow / Pomegranate Agroforestry' : 'Drip-Irrigated Orchard / Agroforestry',
+          regionalNames: isWithinIndia ? 'Amrood, Kinnow, Anar (अमरूद / किन्नू / अनार)' : 'High-Value Drip Horticulture',
+          season: 'Annual / Perennial',
+          suitabilityClass: soil.salinityEcDsM > 2.2 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
+          evidenceClass: 'Moderate supporting evidence',
+          durationDays: 'Perennial (3–15 yr bearing cycle)',
+          waterRequirementMm: '450–650 mm (Point-source drip saves 55% water vs flood)',
+          optimalPhRange: '5.5 – 8.2',
+          preferredSoilTexture: 'Deep Well-Drained Sandy Loam to Clay Loam',
+          whySuitable: `Deep B/BC horizons (${soil.horizons[2]?.name || '30-60 cm'}) and pressurized drip irrigation maximize economic return per cubic meter of pumped groundwater.`,
+          keyConstraints: [
+            'Requires upfront capital for inline drip lateral network and mulching.',
+            'Avoid poorly drained depressions where water table rises within 1.5 m of surface.'
+          ],
+          managementPractices: [
+            'Pair orchard rows with organic mulching and rainwater harvesting farm ponds.',
+            'Fertigation scheduling guided by annual leaf-tissue and 0–60 cm soil pit laboratory assay.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '12.0 – 22.0 t/ha (Mature Bearing Orchard)',
+            modelName: 'FAO Agro-Ecological Horticultural Envelope',
+            inputDatasets: ['ISRIC SoilGrids 250m (0–200cm)', 'Copernicus GLO-30 Slope & Aspect'],
+            uncertaintyNote: '±22% orchard maturity and management variance.',
+            availabilityState: 'MODELLED'
+          }
+        },
+        {
+          cropId: 'crop-summer-legume-veg',
+          cropName: isWithinIndia ? 'Short-Duration Summer Mung Bean (Moong) & Drip Vegetables' : 'Short-Cycle Summer Legume & Protected Vegetable Rotation',
+          regionalNames: isWithinIndia ? 'Moong / Sabzi (मूंग / ਸਬਜ਼ੀਆਂ)' : 'Zaid Pulse & Drip-Irrigated Vegetables',
+          season: 'Zaid / Summer',
+          suitabilityClass: isHighWaterStress ? 'MARGINAL_WITH_CONSTRAINTS' : 'MODERATELY_SUITABLE',
+          evidenceClass: 'Moderate supporting evidence',
+          durationDays: '60–75 days',
+          waterRequirementMm: '210–310 mm (Strictly drip/sprinkler only)',
+          optimalPhRange: '6.0 – 7.8',
+          preferredSoilTexture: 'Well-Drained Sandy Loam to Loam',
+          whySuitable: `65-day catch crop fixes residual nitrogen between main winter and monsoon harvests when micro-irrigated on ${soil.surfaceTextureClass}.`,
+          keyConstraints: [
+            isHighWaterStress
+              ? 'Avoid flood-irrigating summer maize or fodder in stressed aquifers; restrict to drip-fed short legumes.'
+              : 'High summer evapotranspiration demands mulching to prevent surface crusting.'
+          ],
+          managementPractices: [
+            'Install silver/organic mulch and inline drip lines to minimize evaporative soil loss.',
+            'Incorporate pulse biomass after pod picking to elevate topsoil organic carbon.'
+          ],
+          yieldEstimate: {
+            rangeTonnesPerHa: '0.9 – 1.4 t/ha (Pulse) + Soil Nitrogen Credit',
+            modelName: 'FAO GAEZ v4 Catch-Crop Envelope',
+            inputDatasets: ['ISRIC SoilGrids 250m', 'Open-Meteo Thermal Profile'],
+            uncertaintyNote: '±18% heatwave sensitivity during flowering.',
+            availabilityState: 'MODELLED'
+          }
         }
-      },
-      {
-        cropId: 'crop-zaid-moong',
-        cropName: isWithinIndia ? 'Short-Duration Summer Green Gram (Moong) / Cowpea' : 'Short-Duration Cover Legume / Cowpea',
-        regionalNames: isWithinIndia ? 'Pusa Vishal / SML-668 Moong (मूंग / పెసలు)' : '60-Day Nitrogen-Fixing Legume',
-        season: 'Zaid / Summer',
-        suitabilityClass: isHighWaterStress ? 'MODERATELY_SUITABLE' : 'HIGHLY_SUITABLE',
-        evidenceClass: 'Strong supporting evidence',
-        durationDays: '60–65 days',
-        waterRequirementMm: '180–240 mm (Micro-sprinkler or drip)',
-        optimalPhRange: '6.2 – 7.8',
-        preferredSoilTexture: 'Loam / Sandy Loam',
-        whySuitable: `Fixes 35–45 kg N/ha into the topsoil (${soil.organicCarbonGKg} g/kg OC) between winter harvest and monsoon onset.`,
-        keyConstraints: [
-          isHighWaterStress
-            ? 'Use only micro-sprinkler or drip irrigation during May peak evaporative demand; avoid flood irrigation.'
-            : 'Ensure timely harvest before early monsoon showers to prevent pod sprouting.'
-        ],
-        managementPractices: [
-          'Incorporate green haulms into topsoil after pod picking to raise organic carbon and reduce next-season urea demand by 25%.',
-          'Use Yellow Mosaic Virus (YMV) resistant certified short-duration varieties.'
-        ],
-        yieldEstimate: {
-          rangeTonnesPerHa: '0.9 – 1.4 t/ha + 40 kg N/ha Soil Enrichment',
-          modelName: 'ICAR-IIPR Pulse Suitability Envelope',
-          inputDatasets: ['ISRIC SoilGrids 250m', 'NASA SMAP Root-Zone Moisture'],
-          uncertaintyNote: '±16% summer evaporative demand sensitivity.',
-          availabilityState: 'MODELLED'
-        }
-      },
-      {
-        cropId: 'crop-perennial-horticulture',
-        cropName: isWithinIndia ? 'Drip-Irrigated Guava / Kinnow / Pomegranate Agroforestry' : 'Drip-Irrigated Orchard / Agroforestry',
-        regionalNames: isWithinIndia ? 'Amrood, Kinnow, Anar (अमरूद / किन्नू / अनार)' : 'High-Value Drip Horticulture',
-        season: 'Annual / Perennial',
-        suitabilityClass: soil.salinityEcDsM > 2.2 ? 'MARGINAL_WITH_CONSTRAINTS' : 'HIGHLY_SUITABLE',
-        evidenceClass: 'Moderate supporting evidence',
-        durationDays: 'Perennial (3–15 yr bearing cycle)',
-        waterRequirementMm: '450–650 mm (Point-source drip saves 55% water vs flood)',
-        optimalPhRange: '5.5 – 8.2',
-        preferredSoilTexture: 'Deep Well-Drained Sandy Loam to Clay Loam',
-        whySuitable: `Deep B/BC horizons (${soil.horizons[2]?.name || '30-60 cm'}) and pressurized drip irrigation maximize economic return per cubic meter of pumped groundwater.`,
-        keyConstraints: [
-          'Requires upfront capital for inline drip lateral network and mulching.',
-          'Avoid poorly drained depressions where water table rises within 1.5 m of surface.'
-        ],
-        managementPractices: [
-          'Pair orchard rows with organic plastic/straw mulching and rainwater harvesting farm ponds.',
-          'Fertigation scheduling guided by annual leaf-tissue and 0–60 cm soil pit laboratory assay.'
-        ],
-        yieldEstimate: {
-          rangeTonnesPerHa: '12.0 – 22.0 t/ha (Mature Bearing Orchard)',
-          modelName: 'FAO Agro-Ecological Horticultural Envelope',
-          inputDatasets: ['ISRIC SoilGrids 250m (0–200cm)', 'Copernicus GLO-30 Slope & Aspect'],
-          uncertaintyNote: '±22% orchard maturity and market/pest management variance.',
-          availabilityState: 'MODELLED'
-        }
-      }
-    ];
+      ];
+    }
 
     // Borewell & Irrigation Suitability Assessment (strictly responsible, never guarantees depth)
     const borewellSuitabilityTier: BorewellExplorationAssessment['suitabilityTier'] =
@@ -980,21 +1245,28 @@ export class EarthIntelligenceCore {
   ): EnvironmentalIntelligenceSummary {
     const { latitude: lat, longitude: lon, isWithinIndia } = dossier.locationContext;
     const locName = (dossier.locationContext.administrativeAreas.formattedAddress || '').toLowerCase();
+    const elevM = dossier.terrain.elevationM ?? 250;
     const rain30d = dossier.climate.rainfall30dMm ?? 45;
     const twi = dossier.terrain.topographicWetnessIndex;
     const slope = dossier.terrain.slopeDegrees;
 
-    // Sentinel-2 NDVI & NDWI derived from regional hydro-climatic context
+    // Sentinel-2 NDVI & NDWI calibrated from real terrain, moisture, soil, and latitude/elevation regime
     const ndvi =
-      soil.sandPercent > 65
-        ? 0.19
+      elevM > 2800 || Math.abs(lat) > 65
+        ? 0.14
+        : elevM > 1800
+        ? 0.36
+        : rain30d <= 10 && soil.sandPercent > 60
+        ? 0.16
         : isWithinIndia && lat < 18 && lon > 80
         ? 0.68
+        : !isWithinIndia && Math.abs(lat) >= 38 && rain30d >= 35
+        ? 0.62
         : isWithinIndia && lat > 28
         ? 0.54
-        : 0.44;
+        : Math.max(0.22, Math.min(0.76, Math.round((0.32 + Math.min(rain30d, 150) / 450 + Math.min(soil.organicCarbonGKg, 25) / 140) * 100) / 100));
 
-    const ndwi = twi > 9.0 ? 0.24 : twi > 7.5 ? 0.08 : -0.14;
+    const ndwi = elevM > 2800 ? 0.12 : twi > 9.0 ? 0.24 : twi > 7.5 ? 0.08 : -0.14;
 
     // Documented regional industrial/infrastructure context (strictly factual, never accusing)
     const nearbyFacilities: NearbyFacilityRecord[] = [];
@@ -1083,10 +1355,14 @@ export class EarthIntelligenceCore {
       ndviTrend10Yr: ndvi > 0.5 ? '+0.04 (Stable / Cropland Greening)' : '-0.02 (Seasonal Moisture Sensitivity)',
       ndwiSurfaceWaterIndex: ndwi,
       landCoverClass:
-        ndvi > 0.55
-          ? 'Irrigated Cropland / Dense Vegetated Mosaic (ESA WorldCover 10m)'
+        elevM > 2800
+          ? 'Alpine Bare Rock, Scree & Permanent Snow/Glacier (ESA WorldCover 10m)'
+          : elevM > 1650
+          ? 'Sub-Alpine Conifer Forest & Mountain Meadow (ESA WorldCover 10m)'
+          : ndvi > 0.55
+          ? (isWithinIndia ? 'Irrigated Cropland / Dense Vegetated Mosaic (ESA WorldCover 10m)' : 'Temperate Broadleaf/Mixed Woodland & Pasture (ESA WorldCover 10m)')
           : ndvi > 0.35
-          ? 'Mixed Rainfed Agriculture & Shrubland (ESA WorldCover 10m)'
+          ? 'Mixed Rainfed Agriculture, Savanna & Shrubland (ESA WorldCover 10m)'
           : 'Sparse Vegetation / Exposed Rock or Arid Scrub (ESA WorldCover 10m)',
       landSurfaceTempAnomalyC: rain30d < 20 ? 1.4 : 0.6,
       droughtRiskClass: soil.sandPercent > 65 ? 'SEVERE_ARID' : rain30d < 30 ? 'HIGH' : 'MODERATE',
@@ -1147,7 +1423,7 @@ export class EarthIntelligenceCore {
   ): EicSynthesisResponse['fusionPipeline'] {
     const nearestWell = dossier.groundwater.nearestObservation;
     const graceObs = dossier.evidence.remote.find(o => o.parameter === 'basin_water_storage_trend_grace');
-    const graceVal = typeof graceObs?.value === 'number' ? graceObs.value : -0.68;
+    const graceVal = typeof graceObs?.value === 'number' ? graceObs.value : null;
 
     const conflicts: DataConflictRecord[] = [
       {
@@ -1164,10 +1440,10 @@ export class EarthIntelligenceCore {
         },
         sourceB: {
           provider: 'NASA/GFZ GRACE-FO Tellus Level-3 Mascon',
-          valueDisplay: `${graceVal > 0 ? '+' : ''}${graceVal} cm/yr LWE`,
+          valueDisplay: graceVal !== null ? `${graceVal > 0 ? '+' : ''}${graceVal} cm/yr LWE` : 'Unavailable (No NetCDF Archive)',
           units: 'cm Liquid Water Equivalent / year',
           spatialResolution: '~300 km Gaussian Smoothing Footprint',
-          observationDate: '2014–2024 Secular Trend',
+          observationDate: graceObs?.observed_at || 'N/A',
           methodology: 'Twin-satellite K-band/laser ranging gravity field inversion'
         },
         samePhenomenon: false,
@@ -1305,7 +1581,7 @@ export class EarthIntelligenceCore {
       conflicts,
       synthesizedInsights: [
         `Terrain-Hydrology Coupling: At ${dossier.terrain.elevationM}m ASL with ${dossier.terrain.slopeDegrees}° slope and TWI ${dossier.terrain.topographicWetnessIndex.toFixed(1)}, surface runoff vs infiltration is governed by ${soil.surfaceTextureClass} (${soil.infiltrationRateMmHr} mm/hr) overlying ${dossier.geology.primaryLithology}.`,
-        `Multi-Scale Water Balance: Regional GRACE-FO gravimetry records ${graceVal > 0 ? '+' : ''}${graceVal} cm/yr LWE across the ~300 km basin, while 30-day GPM satellite rainfall is ${dossier.climate.rainfall30dMm ?? 0} mm (${dossier.climate.seasonalAnomalyPercent ?? 0}% seasonal anomaly).`,
+        `Multi-Scale Water Balance: ${graceVal !== null ? `Regional GRACE-FO gravimetry records ${graceVal > 0 ? '+' : ''}${graceVal} cm/yr LWE across the ~300 km basin, while 30-day` : '30-day'} satellite precipitation is ${dossier.climate.rainfall30dMm ?? 0} mm (${dossier.climate.seasonalAnomalyPercent ?? 0}% seasonal anomaly).`,
         `Agro-Edaphic Synthesis: ${soil.soilClassificationWrb} (pH ${soil.phH2O}, OC ${soil.organicCarbonGKg} g/kg) supports high water-use efficiency crops when paired with micro-irrigation and rainwater harvesting.`
       ],
       missingDataGaps

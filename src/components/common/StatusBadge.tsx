@@ -173,13 +173,13 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'sm', s
     description: 'Scientific Data Classification'
   };
 
-  const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs';
+  const sizeClass = size === 'sm' ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-0.5 text-xs';
 
   return (
     <div className="inline-flex flex-col items-start gap-1">
       <span
         title={item.description}
-        className={`inline-flex items-center gap-1.5 font-mono font-medium rounded-full border ${item.bg} ${item.border} ${item.text} ${sizeClass} transition-colors`}
+        className={`inline-flex items-center gap-1.5 font-mono font-medium rounded border ${item.bg} ${item.border} ${item.text} ${sizeClass} transition-colors`}
       >
         {item.icon}
         <span>{item.label}</span>

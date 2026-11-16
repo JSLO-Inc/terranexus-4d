@@ -36,9 +36,9 @@ export const NexusEnvironment: React.FC = () => {
   const audit = env.industrialCausationAudit;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#060a12] text-slate-100">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 space-y-5 bg-[#060a12] text-slate-100">
       {/* Header */}
-      <div className="liquid-glass-panel rounded-2xl p-4 md:p-5 border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="liquid-glass rounded-2xl p-4 md:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-teal-500/20 text-teal-300 border border-teal-400/40">
@@ -59,7 +59,7 @@ export const NexusEnvironment: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowReportModal(true, 'ENVIRONMENT')}
-          className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-gradient-to-r from-teal-500/25 to-cyan-500/20 border border-teal-400/60 text-teal-200 hover:border-teal-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg self-start lg:self-auto"
+          className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-teal-500/15 hover:bg-teal-500/25 border border-teal-400/60 text-teal-200 hover:border-teal-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg self-start lg:self-auto"
         >
           <FileText className="w-3.5 h-3.5 text-teal-300" />
           <span>Generate Environment PDF Report</span>
@@ -68,7 +68,7 @@ export const NexusEnvironment: React.FC = () => {
 
       {/* Environmental Satellite KPI Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Vegetation (NDVI)</div>
           <div className="text-base font-bold text-emerald-300 mt-1 font-mono">{env.ndviVegetationIndex}</div>
           <div className="text-[11px] text-slate-400 mt-0.5 truncate" title={env.ndviTrend10Yr}>
@@ -76,13 +76,13 @@ export const NexusEnvironment: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Surface Water (NDWI)</div>
           <div className="text-base font-bold text-cyan-300 mt-1 font-mono">{env.ndwiSurfaceWaterIndex}</div>
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">Sentinel-2 10m/20m</div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Drought Risk Class</div>
           <div className="text-sm font-bold text-amber-300 mt-1 font-mono">{env.droughtRiskClass}</div>
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
@@ -90,7 +90,7 @@ export const NexusEnvironment: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Flood Susceptibility</div>
           <div className="text-xs font-bold text-sky-300 mt-1 font-mono">
             {env.floodSusceptibilityClass.replace(/_/g, ' ')}
@@ -98,7 +98,7 @@ export const NexusEnvironment: React.FC = () => {
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">DEM Slope & TWI</div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Regional TDS Baseline</div>
           <div className="text-base font-bold text-white mt-1 font-mono">
             {env.waterQualityIndicators.regionalTdsMgL ?? 'N/A'} mg/L
@@ -108,7 +108,7 @@ export const NexusEnvironment: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Geogenic / Nitrate Risk</div>
           <div className="text-xs font-bold text-slate-200 mt-1 truncate" title={env.waterQualityIndicators.fluorideRisk}>
             {env.waterQualityIndicators.fluorideRisk.split('(')[0].trim()}
@@ -122,7 +122,7 @@ export const NexusEnvironment: React.FC = () => {
       {/* Responsible Industrial Activity & Causation vs Proximity Audit */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left 7 cols: Nearby Facilities & Causation Analysis */}
-        <div className="lg:col-span-7 liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-4">
+        <div className="lg:col-span-7 liquid-glass rounded-2xl p-5 border border-white/10 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
             <div>
               <span className="text-[10px] font-mono uppercase text-amber-400">
@@ -179,7 +179,7 @@ export const NexusEnvironment: React.FC = () => {
 
         {/* Right 5 cols: 4-Factor Hydrogeological Causation Checklist & Actionable Steps */}
         <div className="lg:col-span-5 flex flex-col gap-4">
-          <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
+          <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3">
             <h3 className="text-xs font-mono uppercase tracking-wider text-cyan-300 font-bold">
               4-Factor Causation Verification Matrix
             </h3>
@@ -198,7 +198,7 @@ export const NexusEnvironment: React.FC = () => {
             </div>
           </div>
 
-          <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3 flex-1">
+          <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3 flex-1">
             <h3 className="text-xs font-mono uppercase tracking-wider text-emerald-300 font-bold flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Recommended Scientific & Regulatory Actions</span>

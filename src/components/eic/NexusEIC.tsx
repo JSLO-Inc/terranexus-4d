@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTerranexusStore } from '../../state/useTerranexusStore';
 import { KnowledgeGraphNode } from '../../types/eic';
+import { formatAttributeLabel, formatUniqueAddress } from '../../utils/formatters';
 import {
   Network,
   GitMerge,
@@ -30,7 +31,7 @@ export const NexusEIC: React.FC = () => {
   if (isEicLoading || !eicSynthesis) {
     return (
       <div className="flex-1 flex items-center justify-center p-8 bg-[#060a12] text-slate-300 font-mono text-sm">
-        <div className="flex flex-col items-center gap-3 liquid-glass-panel p-6 rounded-2xl border border-cyan-500/30">
+        <div className="flex flex-col items-center gap-3 liquid-glass p-6 rounded-2xl border border-cyan-500/30">
           <div className="w-7 h-7 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
           <span>Orchestrating Earth Intelligence Core (EIC) & Knowledge Graph for {selectedLocation.name}...</span>
         </div>
@@ -55,9 +56,9 @@ export const NexusEIC: React.FC = () => {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#060a12] text-slate-100">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 space-y-5 bg-[#060a12] text-slate-100">
       {/* Header */}
-      <div className="liquid-glass-panel rounded-2xl p-4 md:p-5 border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="liquid-glass rounded-2xl p-4 md:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
@@ -68,7 +69,7 @@ export const NexusEIC: React.FC = () => {
             </span>
           </div>
           <h1 className="text-lg md:text-xl font-bold text-white tracking-tight">
-            {eicSynthesis.location.formattedAddress}
+            {formatUniqueAddress((eicSynthesis.location.formattedAddress || '').split(','))}
           </h1>
           <p className="text-xs text-slate-400 font-mono">
             Graph Version: {knowledgeGraph.version} • {knowledgeGraph.nodes.length} Entities • {knowledgeGraph.edges.length} Evidence-Backed Edges • {sourceConnectors.length} Source Connectors
@@ -88,7 +89,7 @@ export const NexusEIC: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowReportModal(true, 'COMPREHENSIVE')}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-gradient-to-r from-cyan-500/25 to-blue-500/20 border border-cyan-400/60 text-cyan-200 hover:border-cyan-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/60 text-sky-200 hover:border-sky-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
           >
             <FileText className="w-3.5 h-3.5 text-cyan-300" />
             <span>Generate Comprehensive EIC PDF</span>
@@ -142,8 +143,8 @@ export const NexusEIC: React.FC = () => {
       {activeTab === 'KNOWLEDGE_GRAPH' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left 7 cols: Interactive Knowledge Graph Node Matrix */}
-          <div className="lg:col-span-7 liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="lg:col-span-7 liquid-glass rounded-2xl p-5 space-y-4">
+            <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="text-sm font-bold text-white uppercase font-mono flex items-center gap-2">
                   <Network className="w-4 h-4 text-cyan-400" />
@@ -153,12 +154,12 @@ export const NexusEIC: React.FC = () => {
                   Select any entity node to inspect its verified attributes and evidence-backed relationships.
                 </p>
               </div>
-              <span className="text-[11px] font-mono text-cyan-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+              <span className="text-[11px] font-mono text-cyan-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-cyan-500/30 shrink-0 hidden sm:inline">
                 Zero Proximity-Only Inference
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3">
               {knowledgeGraph.nodes.map((node) => {
                 const isSelected = node.id === selectedNode.id;
                 const stateBadgeColor =
@@ -167,25 +168,36 @@ export const NexusEIC: React.FC = () => {
                     : node.availabilityState === 'UNAVAILABLE'
                     ? 'text-rose-300 border-rose-500/40 bg-rose-500/15'
                     : 'text-amber-300 border-amber-500/40 bg-amber-500/15';
+                const compactTypeLabel: Record<string, string> = {
+                  GEOLOGICAL_PROVINCE: 'GEOLOGY',
+                  GROUNDWATER_STATION: 'WELL STATION',
+                  SOIL_UNIT: 'SOIL UNIT',
+                  WATERSHED_BASIN: 'WATERSHED',
+                  AQUIFER_SYSTEM: 'AQUIFER',
+                  CLIMATE_GRID: 'CLIMATE GRID',
+                  LAND_USE: 'LAND USE',
+                  LOCATION: 'LOCUS',
+                };
+                const shortType = compactTypeLabel[node.type] || node.type.replace(/_/g, ' ');
 
                 return (
                   <button
                     key={node.id}
                     type="button"
                     onClick={() => setSelectedNodeId(node.id)}
-                    className={`p-3.5 rounded-xl text-left transition-all cursor-pointer border flex flex-col justify-between gap-2 ${
+                    className={`p-3.5 rounded-xl text-left transition-all cursor-pointer border flex flex-col justify-between gap-2 min-w-0 ${
                       isSelected
                         ? 'bg-cyan-950/50 border-cyan-400 ring-2 ring-cyan-400/30 shadow-lg'
                         : 'bg-slate-900/75 border-white/10 hover:border-cyan-400/50'
                     }`}
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-[9px] font-mono uppercase text-cyan-400 font-bold">
-                          {node.type.replace(/_/g, ' ')}
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1.5 min-w-0">
+                        <span className="text-[9px] font-mono uppercase text-cyan-400 font-bold tracking-wide truncate">
+                          {shortType}
                         </span>
-                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${stateBadgeColor}`}>
-                          {node.availabilityState}
+                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border whitespace-nowrap shrink-0 ${stateBadgeColor}`}>
+                          {node.availabilityState.replace('VERIFIED_', '')}
                         </span>
                       </div>
                       <div className="text-xs font-bold text-white leading-snug">{node.label}</div>
@@ -216,30 +228,32 @@ export const NexusEIC: React.FC = () => {
 
           {/* Right 5 cols: Selected Node Attributes & Evidence-Backed Edges */}
           <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                <div>
+            <div className="liquid-glass rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+                <div className="min-w-0">
                   <span className="text-[10px] font-mono uppercase text-cyan-400">
-                    Entity Inspector ({selectedNode.type})
+                    Entity Inspector ({selectedNode.type.replace(/_/g, ' ')})
                   </span>
-                  <h3 className="text-base font-bold text-white">{selectedNode.label}</h3>
+                  <h3 className="text-base font-bold text-white truncate">{selectedNode.label}</h3>
                 </div>
-                <span className="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-900 text-cyan-300 border border-cyan-500/30">
+                <span className="text-[10px] font-mono px-2.5 py-1 rounded bg-slate-900 text-cyan-300 border border-cyan-500/30 shrink-0 whitespace-nowrap">
                   {selectedNode.spatialScope}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs font-mono">
                 {Object.entries(selectedNode.attributes).map(([k, v]) => (
-                  <div key={k} className="p-2.5 rounded-lg bg-slate-900/70 border border-white/5">
-                    <div className="text-[10px] text-slate-400 uppercase">{k}</div>
-                    <div className="text-white font-semibold truncate">{v !== null ? String(v) : 'Unavailable'}</div>
+                  <div key={k} className="p-2.5 rounded-lg bg-slate-900/70 border border-white/5 min-w-0">
+                    <div className="text-[10px] text-slate-400 truncate">{formatAttributeLabel(k)}</div>
+                    <div className="text-white font-semibold truncate" title={v !== null ? String(v) : 'Unavailable'}>
+                      {v !== null ? String(v) : 'Unavailable'}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3 flex-1">
+            <div className="liquid-glass rounded-2xl p-5 space-y-3 flex-1">
               <h3 className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold">
                 Evidence-Backed Knowledge Graph Edges ({connectedEdges.length})
               </h3>
@@ -279,7 +293,7 @@ export const NexusEIC: React.FC = () => {
       {activeTab === 'DATA_FUSION' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left 6 cols: 7-Step Fusion Pipeline */}
-          <div className="lg:col-span-6 liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3.5">
+          <div className="lg:col-span-6 liquid-glass rounded-2xl p-5 border border-white/10 space-y-3.5">
             <h2 className="text-sm font-bold text-white uppercase font-mono flex items-center gap-2">
               <GitMerge className="w-4 h-4 text-amber-400" />
               <span>7-Step Scientific Data Fusion Pipeline</span>
@@ -308,7 +322,7 @@ export const NexusEIC: React.FC = () => {
 
           {/* Right 6 cols: Cross-Scale Conflict Reconciliation + Missing Data Gap Analysis */}
           <div className="lg:col-span-6 flex flex-col gap-5">
-            <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3.5">
+            <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3.5">
               <h2 className="text-sm font-bold text-white uppercase font-mono flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
                 <span>Cross-Source Conflict Detection & Scale Reconciliation</span>
@@ -339,7 +353,7 @@ export const NexusEIC: React.FC = () => {
               ))}
             </div>
 
-            <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
+            <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3">
               <h2 className="text-sm font-bold text-white uppercase font-mono">
                 Intelligent Data Coverage & Missing Information Gap Analysis
               </h2>
@@ -359,7 +373,7 @@ export const NexusEIC: React.FC = () => {
       {activeTab === 'CONNECTORS_MEMORY' && (
         <div className="space-y-5">
           {/* Scheduler Status Strip */}
-          <div className="liquid-glass-panel rounded-2xl p-4 border border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+          <div className="liquid-glass rounded-2xl p-4 border border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
             <div className="flex items-center gap-2.5">
               <Clock className="w-4 h-4 text-emerald-400" />
               <span>Ingestion Scheduler: <strong className="text-emerald-300">{ingestionScheduler.schedulerStatus}</strong></span>
@@ -379,7 +393,7 @@ export const NexusEIC: React.FC = () => {
           </div>
 
           {/* Prediction Evaluation Cards */}
-          <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
+          <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3">
             <h2 className="text-sm font-bold text-white uppercase font-mono">
               Predictive Earth Analytics & Leave-One-Out Cross-Validation (LOO-CV) Audit
             </h2>
@@ -403,7 +417,7 @@ export const NexusEIC: React.FC = () => {
           </div>
 
           {/* 10-Provider Source Connector Table */}
-          <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3">
+          <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h2 className="text-sm font-bold text-white uppercase font-mono flex items-center gap-2">
                 <Database className="w-4 h-4 text-cyan-400" />

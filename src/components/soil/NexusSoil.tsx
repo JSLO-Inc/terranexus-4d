@@ -40,9 +40,9 @@ export const NexusSoil: React.FC = () => {
     soil.horizons.find(h => h.horizonCode === selectedHorizonCode) || soil.horizons[0];
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 bg-[#060a12] text-slate-100">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 space-y-5 bg-[#060a12] text-slate-100">
       {/* Top Header Bar */}
-      <div className="liquid-glass-panel rounded-2xl p-4 md:p-5 border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="liquid-glass rounded-2xl p-4 md:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/40">
@@ -75,7 +75,7 @@ export const NexusSoil: React.FC = () => {
 
           <button
             onClick={() => setShowReportModal(true, 'SOIL')}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-gradient-to-r from-amber-500/25 to-orange-500/20 border border-amber-400/60 text-amber-200 hover:border-amber-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-semibold bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/60 text-amber-200 hover:border-amber-300 transition-all cursor-pointer flex items-center gap-1.5 shadow-lg"
           >
             <FileText className="w-3.5 h-3.5 text-amber-300" />
             <span>Generate Soil PDF Report</span>
@@ -98,7 +98,7 @@ export const NexusSoil: React.FC = () => {
 
       {/* Top KPI Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Surface Texture</div>
           <div className="text-sm font-bold text-white mt-1 truncate" title={soil.surfaceTextureClass}>
             {soil.surfaceTextureClass}
@@ -108,7 +108,7 @@ export const NexusSoil: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Soil Reaction (pH H₂O)</div>
           <div className="text-base font-bold text-cyan-300 mt-1 font-mono">{soil.phH2O}</div>
           <div className="text-[11px] text-slate-300 mt-0.5 truncate" title={soil.phClassification}>
@@ -116,7 +116,7 @@ export const NexusSoil: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Organic Carbon (SOC)</div>
           <div className="text-base font-bold text-emerald-300 mt-1 font-mono">{soil.organicCarbonGKg} g/kg</div>
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
@@ -124,7 +124,7 @@ export const NexusSoil: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Bulk Density & CEC</div>
           <div className="text-base font-bold text-white mt-1 font-mono">{soil.bulkDensityGcm3} g/cm³</div>
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
@@ -132,7 +132,7 @@ export const NexusSoil: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Infiltration Rate (Ksat)</div>
           <div className="text-base font-bold text-sky-300 mt-1 font-mono">{soil.infiltrationRateMmHr} mm/hr</div>
           <div className="text-[11px] text-slate-400 mt-0.5 truncate" title={soil.drainageClass}>
@@ -140,7 +140,7 @@ export const NexusSoil: React.FC = () => {
           </div>
         </div>
 
-        <div className="liquid-glass-panel p-3.5 rounded-xl border border-white/10">
+        <div className="liquid-glass p-3.5 rounded-xl border border-white/10">
           <div className="text-[10px] font-mono text-slate-400 uppercase">Surface Moisture (SMAP)</div>
           <div className="text-base font-bold text-cyan-300 mt-1 font-mono">{soil.surfaceMoistureVolPercent}% vol</div>
           <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
@@ -152,7 +152,7 @@ export const NexusSoil: React.FC = () => {
       {/* Main Grid: Interactive 3D Soil Monolith Cutout + Horizon Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left 7 cols: Interactive 3D Volumetric Soil Horizon Column */}
-        <div className="lg:col-span-7 liquid-glass-panel rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-7 liquid-glass rounded-2xl p-5 border border-white/10 flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
@@ -174,7 +174,7 @@ export const NexusSoil: React.FC = () => {
             <div className="flex items-center justify-between text-[11px] font-mono text-emerald-300 pb-2 border-b border-emerald-500/30 mb-2">
               <span>▲ SURFACE CANOPY & TOPSOIL INTERFACE (0 cm)</span>
               {showInfiltrationSim && (
-                <span className="text-cyan-300 animate-pulse">
+                <span className="text-cyan-300">
                   ↓ Percolation Flux: {soil.infiltrationRateMmHr} mm/hr ({soil.drainageClass.split('/')[0].trim()})
                 </span>
               )}
@@ -270,7 +270,7 @@ export const NexusSoil: React.FC = () => {
         {/* Right 5 cols: Active Horizon Deep Forensic Details + Lab Testing Protocol */}
         <div className="lg:col-span-5 flex flex-col gap-5">
           {/* Active Horizon Card */}
-          <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-4">
+          <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div>
                 <span className="text-[10px] font-mono uppercase text-cyan-400">
@@ -314,7 +314,7 @@ export const NexusSoil: React.FC = () => {
           </div>
 
           {/* Field Sampling & Soil Health Card Protocol */}
-          <div className="liquid-glass-panel rounded-2xl p-5 border border-white/10 space-y-3 flex-1">
+          <div className="liquid-glass rounded-2xl p-5 border border-white/10 space-y-3 flex-1">
             <h3 className="text-xs font-mono uppercase tracking-wider text-emerald-300 flex items-center gap-2 font-bold">
               <FlaskConical className="w-4 h-4 text-emerald-400" />
               <span>Recommended Field Verification & Lab Assays</span>

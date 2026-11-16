@@ -209,10 +209,27 @@ export interface DossierResponse {
   climate: {
     rainfall7dMm: number | null;
     rainfall30dMm: number | null;
+    et030dMm?: number | null;
+    meanTempC?: number | null;
+    soilMoistureTopCm?: number | null;
     seasonalAnomalyPercent: number | null;
+    observationDate?: string;
     source: string;
     tier: DataCategory;
     imdStatus: 'CONFIGURED' | 'NOT_CONFIGURED';
+  };
+  soil?: {
+    textureClass: string;
+    clayPercent: number;
+    sandPercent: number;
+    siltPercent: number;
+    ph: number | null;
+    organicCarbonGKg: number;
+    bulkDensityGcm3: number;
+    drainageClass: string;
+    surfaceMoistureM3M3: number | null;
+    source: string;
+    dataTier: DataCategory;
   };
   terrain: {
     elevationM: number;
@@ -232,6 +249,7 @@ export interface DossierResponse {
       lithology: string;
       thicknessM: number;
       densityGcm3: number;
+      colorHex?: string;
     }>;
     boreholeLog: any | null;
     mineralProspectivity: any | null;

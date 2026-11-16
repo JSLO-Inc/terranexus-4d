@@ -7,23 +7,35 @@
 import cors, { CorsOptions } from 'cors';
 
 const ALLOWED_ORIGIN_PATTERNS = [
-  /^http:\/\/localhost:(3000|5173|3001)$/,
-  /^http:\/\/127\.0\.0\.1:(3000|5173|3001)$/,
-  /^https:\/\/terranexus\.internal$/
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+  /^https:\/\/terranexus\.internal$/,
+  /^https:\/\/[a-zA-Z0-9-]+\.[a-zA-Z0-9.-]+\.run\.app$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.a\.run\.app$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.web\.app$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.firebaseapp\.com$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.googleusercontent\.com$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.usercontent\.goog$/,
+  /^https:\/\/[a-zA-Z0-9.-]+\.aistudio\.google\.com$/
 ];
 
 export const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    // Allow non-browser requests (e.g. curl, server-to-server, unit tests)
+    // Allow non-browser / same-origin requests without an Origin header
     if (!origin) {
       return callback(null, true);
     }
 
-    const isAllowed = ALLOWED_ORIGIN_PATTERNS.some(pattern => pattern.test(origin));
+    const extraOrigin = process.env.ALLOWED_ORIGIN;
+    const isAllowed =
+      (extraOrigin && origin === extraOrigin) ||
+      ALLOWED_ORIGIN_PATTERNS.some(pattern => pattern.test(origin));
+
     if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS blocked: Origin ${origin} is not allowed.`));
+      console.warn(`[CORS] Rejected disallowed origin: ${origin}`);
+      callback(null, false);
     }
   },
   methods: ['GET', 'POST', 'OPTIONS'],

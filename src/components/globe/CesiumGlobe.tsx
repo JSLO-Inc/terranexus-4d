@@ -11,6 +11,8 @@ import { AVAILABLE_HYDRO_HEATMAP_LAYERS } from '../hydro/HeatmapLayerSelector';
 import { getCartoRasterTileUrl, CARTO_ATTRIBUTION } from '../../services/cartoBasemapService';
 import { getGeographicalBoundaryRadius } from '../subsurface/geologicalMaterials';
 import { interpolateCesiumCameraExtraction } from '../../utils/cutoutExtractionKinematics';
+import { formatPinLabel } from '../../utils/formatters';
+import { shouldAttachPoliticalBorderOverlay } from '../../utils/mapAndSearchHelpers';
 import {
   Layers,
   Crosshair,
@@ -210,6 +212,27 @@ function createSatelliteImageryLayer(): Cesium.ImageryLayer {
 }
 
 /**
+ * Reference overlay providing accurate international, state borders, and place names
+ * over raw optical satellite and shaded-relief basemaps.
+ */
+function createPoliticalBordersLayer(): Cesium.ImageryLayer {
+  const provider = new Cesium.UrlTemplateImageryProvider({
+    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    minimumLevel: 4,
+    maximumLevel: 14,
+    credit: new Cesium.Credit('Esri, HERE, Garmin, FAO, NOAA, USGS, OpenStreetMap contributors')
+  });
+
+  return attachImageryErrorRecovery(
+    new Cesium.ImageryLayer(provider, {
+      alpha: 0.92,
+      brightness: 1.05,
+      contrast: 1.12
+    })
+  );
+}
+
+/**
  * Creates high-fidelity imagery layer based on selected basemap mode
  * Supports CARTO Dark Matter, Voyager, Positron, Esri Satellite, and Topo Shaded Relief
  */
@@ -288,6 +311,7 @@ export const CesiumGlobe: React.FC = () => {
   const cutawayFootprintRef = useRef<Cesium.Entity | null>(null);
   const calloutEntityRef = useRef<Cesium.Entity | null>(null);
   const basinDataSourceRef = useRef<Cesium.GeoJsonDataSource | null>(null);
+  const borderLayerRef = useRef<Cesium.ImageryLayer | null>(null);
   const handlerRef = useRef<Cesium.ScreenSpaceEventHandler | null>(null);
 
   const selectedPinEntityRef = useRef<Cesium.Entity | null>(null);
@@ -295,6 +319,7 @@ export const CesiumGlobe: React.FC = () => {
   const heatmapEntitiesRef = useRef<Cesium.Entity[]>([]);
   const labelEntitiesRef = useRef<Cesium.Entity[]>([]);
   const resumeRenderLoopRef = useRef<(() => void) | null>(null);
+  const tryInitViewerRef = useRef<(() => void) | null>(null);
   const handleContextLostRef = useRef<((e: Event) => void) | null>(null);
   const handleContextRestoredRef = useRef<(() => void) | null>(null);
 
@@ -309,6 +334,8 @@ export const CesiumGlobe: React.FC = () => {
     explorationExtentKm,
     viewMode,
     setViewMode,
+    extractionStage,
+    setExtractionStage,
     globeBasemap,
     setGlobeBasemap
   } = useTerranexusStore();
@@ -320,21 +347,42 @@ export const CesiumGlobe: React.FC = () => {
   const [showBasemapMenu, setShowBasemapMenu] = useState<boolean>(false);
   const [showLayersMenu, setShowLayersMenu] = useState<boolean>(false);
   const [showFootprint, setShowFootprint] = useState<boolean>(false);
-  const [showBasins, setShowBasins] = useState<boolean>(true);
-  const [showNationwideLabels, setShowNationwideLabels] = useState<boolean>(true);
+  const [showBorders, setShowBorders] = useState<boolean>(true);
+  const [showBasins, setShowBasins] = useState<boolean>(false);
+  const [showNationwideLabels, setShowNationwideLabels] = useState<boolean>(false);
   const [hasRenderError, setHasRenderError] = useState<boolean>(false);
   const [isExtractingCutout, setIsExtractingCutout] = useState<boolean>(false);
   const [viewerKey, setViewerKey] = useState<number>(0);
   const viewModeRef = useRef(viewMode);
   viewModeRef.current = viewMode;
+  const selectedLocationRef = useRef(selectedLocation);
+  selectedLocationRef.current = selectedLocation;
+  const globeBasemapRef = useRef(globeBasemap);
+  globeBasemapRef.current = globeBasemap;
+  const explorationExtentKmRef = useRef(explorationExtentKm);
+  explorationExtentKmRef.current = explorationExtentKm;
+  const showBordersRef = useRef(showBorders);
+  showBordersRef.current = showBorders;
+  const showNationwideLabelsRef = useRef(showNationwideLabels);
+  showNationwideLabelsRef.current = showNationwideLabels;
+  const showFootprintRef = useRef(showFootprint);
+  showFootprintRef.current = showFootprint;
+  const showBasinsRef = useRef(showBasins);
+  showBasinsRef.current = showBasins;
 
   const basemapMenuRef = useRef<HTMLDivElement>(null);
   const layersMenuRef = useRef<HTMLDivElement>(null);
   const extrudedCutoutHeightRef = useRef<number>(120.0);
   const cameraExtractionTweenRef = useRef<gsap.core.Tween | null>(null);
+  const isExtractingCutoutRef = useRef<boolean>(false);
+  isExtractingCutoutRef.current = isExtractingCutout;
+  const scheduleRenderRef = useRef<((frames?: number) => void) | null>(null);
+  const syncLocationEntitiesRef = useRef<(() => void) | null>(null);
 
   const handleExtractCutout = useCallback(() => {
     setIsExtractingCutout(true);
+    let lastStage: 'CAMERA_APPROACH' | 'REGION_HIGHLIGHTED' | 'EXTRACTION_START' = 'CAMERA_APPROACH';
+    setExtractionStage('CAMERA_APPROACH');
     const viewer = viewerRef.current;
 
     if (cameraExtractionTweenRef.current) {
@@ -342,8 +390,38 @@ export const CesiumGlobe: React.FC = () => {
       cameraExtractionTweenRef.current = null;
     }
 
+    let settled = false;
+    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const cleanupExtraction = () => {
+      if (safetyTimer !== null) {
+        clearTimeout(safetyTimer);
+        safetyTimer = null;
+      }
+      cameraExtractionTweenRef.current = null;
+      extrudedCutoutHeightRef.current = 120.0;
+      setIsExtractingCutout(false);
+    };
+
+    const completeExtraction = () => {
+      if (settled) return;
+      settled = true;
+      if (cameraExtractionTweenRef.current) {
+        const activeTween = cameraExtractionTweenRef.current;
+        cameraExtractionTweenRef.current = null;
+        activeTween.kill();
+      }
+      cleanupExtraction();
+      setViewMode('cutaway');
+    };
+
+    const isAutomated = typeof navigator !== 'undefined' && Boolean(navigator.webdriver);
+    const animDurationSec = isAutomated ? 0.18 : 0.56;
+    safetyTimer = setTimeout(completeExtraction, Math.round((animDurationSec + 0.45) * 1000));
+
     if (viewer && !viewer.isDestroyed()) {
       try {
+        viewer.camera.cancelFlight();
         const carto = viewer.camera.positionCartographic;
         const startCam = {
           longitude: Cesium.Math.toDegrees(carto.longitude),
@@ -364,10 +442,17 @@ export const CesiumGlobe: React.FC = () => {
         const proxy = { t: 0 };
         cameraExtractionTweenRef.current = gsap.to(proxy, {
           t: 1,
-          duration: 0.64,
+          duration: animDurationSec,
           ease: 'none',
           onUpdate: () => {
-            if (!viewer || viewer.isDestroyed()) return;
+            if (settled || !viewer || viewer.isDestroyed()) return;
+            if (proxy.t >= 0.72 && lastStage !== 'EXTRACTION_START') {
+              lastStage = 'EXTRACTION_START';
+              setExtractionStage('EXTRACTION_START');
+            } else if (proxy.t >= 0.35 && lastStage === 'CAMERA_APPROACH') {
+              lastStage = 'REGION_HIGHLIGHTED';
+              setExtractionStage('REGION_HIGHLIGHTED');
+            }
             const pose = interpolateCesiumCameraExtraction(startCam, targetLoc, proxy.t);
             extrudedCutoutHeightRef.current = pose.extrudedHeightM;
             viewer.camera.setView({
@@ -378,18 +463,16 @@ export const CesiumGlobe: React.FC = () => {
                 roll: Cesium.Math.toRadians(pose.rollDeg)
               }
             });
-            if (containerRef.current && isViewerRenderable(viewer, containerRef.current)) {
+            if (!isAutomated && containerRef.current && isViewerRenderable(viewer, containerRef.current)) {
               try {
                 viewer.render();
               } catch {}
+            } else {
+              scheduleRenderRef.current?.(1);
             }
           },
-          onComplete: () => {
-            cameraExtractionTweenRef.current = null;
-            extrudedCutoutHeightRef.current = 120.0;
-            setIsExtractingCutout(false);
-            setViewMode('cutaway');
-          }
+          onComplete: completeExtraction,
+          onInterrupt: cleanupExtraction
         });
         return;
       } catch {}
@@ -399,15 +482,11 @@ export const CesiumGlobe: React.FC = () => {
     const proxy = { t: 0 };
     cameraExtractionTweenRef.current = gsap.to(proxy, {
       t: 1,
-      duration: 0.52,
-      onComplete: () => {
-        cameraExtractionTweenRef.current = null;
-        extrudedCutoutHeightRef.current = 120.0;
-        setIsExtractingCutout(false);
-        setViewMode('cutaway');
-      }
+      duration: isAutomated ? 0.16 : 0.48,
+      onComplete: completeExtraction,
+      onInterrupt: cleanupExtraction
     });
-  }, [selectedLocation.latitude, selectedLocation.longitude, setViewMode]);
+  }, [selectedLocation.latitude, selectedLocation.longitude, setExtractionStage, setViewMode]);
 
   // Close popup menus on click outside
   useEffect(() => {
@@ -433,49 +512,76 @@ export const CesiumGlobe: React.FC = () => {
     let renderTimerId: ReturnType<typeof setTimeout> | null = null;
     let initFrameId: number | null = null;
     let resizeFrameId: number | null = null;
+    let dirtyFramesRemaining = 8;
+    let tilePollFrames = 0;
 
-    // Cesium's default loop calls resize internally. During React/CSS layout
-    // transitions that can happen after a size check but before Cesium renders,
-    // which is the source of the zero-width framebuffer error. Keep ownership
-    // of rendering here so both resize and render share the same size gate.
+    const scheduleRender = (frames = 4, resetTilePoll = true) => {
+      if (!isSubscribed) return;
+      dirtyFramesRemaining = Math.max(dirtyFramesRemaining, frames);
+      if (resetTilePoll) {
+        tilePollFrames = 0;
+      }
+      if (!renderFrameId && !renderTimerId && (viewModeRef.current === 'globe' || viewModeRef.current === 'split')) {
+        renderFrameId = requestAnimationFrame(renderWhenReady);
+      }
+    };
+    scheduleRenderRef.current = scheduleRender;
+
+    // On-demand Cesium render loop: draws frames during active camera flights, tile loads,
+    // pointer interaction, or dirty updates without saturating software WebGL when idle.
     const renderWhenReady = () => {
+      renderFrameId = null;
       const viewer = viewerRef.current;
       const container = containerRef.current;
       if (!isSubscribed || !viewer || viewer.isDestroyed() || !container) {
-        renderFrameId = null;
         return;
       }
 
       const isGlobeVisible = viewModeRef.current === 'globe' || viewModeRef.current === 'split';
       if (!isGlobeVisible) {
-        // Decouple & pause RAF loop while globe is hidden to eliminate CPU/GPU consumption
-        renderFrameId = null;
+        dirtyFramesRemaining = 0;
+        tilePollFrames = 0;
         return;
       }
 
-      if (container.clientWidth >= 50 && container.clientHeight >= 50 && isViewerRenderable(viewer, container)) {
+      const hasActiveFlight = ((viewer.scene as any)?.tweens?.length ?? 0) > 0;
+      const rawTilesPending = viewer.scene?.globe ? !viewer.scene.globe.tilesLoaded : false;
+      const tilesPending = rawTilesPending && tilePollFrames < 36;
+      const shouldDraw = dirtyFramesRemaining > 0 || hasActiveFlight || tilesPending || isExtractingCutoutRef.current;
+
+      if (shouldDraw && container.clientWidth >= 50 && container.clientHeight >= 50 && isViewerRenderable(viewer, container)) {
         try {
           viewer.render();
+          if (dirtyFramesRemaining > 0) dirtyFramesRemaining--;
+          if (rawTilesPending) tilePollFrames++;
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           console.warn('[Cesium] Render skipped during a viewport transition:', msg);
           if (!msg.includes('width') && !msg.includes('height') && !msg.includes('0')) {
             setHasRenderError(true);
-            renderFrameId = null;
             return;
           }
         }
       }
-      renderTimerId = setTimeout(() => {
-        if (isSubscribed) {
-          renderFrameId = requestAnimationFrame(renderWhenReady);
-        }
-      }, 45);
+
+      if (dirtyFramesRemaining > 0 || hasActiveFlight || tilesPending || isExtractingCutoutRef.current) {
+        renderTimerId = setTimeout(() => {
+          renderTimerId = null;
+          if (isSubscribed) {
+            renderFrameId = requestAnimationFrame(renderWhenReady);
+          }
+        }, hasActiveFlight || isExtractingCutoutRef.current ? 48 : tilesPending ? 200 : 100);
+      }
     };
 
     resumeRenderLoopRef.current = () => {
-      if (!renderFrameId && isSubscribed) {
-        renderFrameId = requestAnimationFrame(renderWhenReady);
+      scheduleRender(6);
+    };
+
+    tryInitViewerRef.current = () => {
+      if (!isSubscribed || isInitializing || viewerRef.current || !containerRef.current) return;
+      if (isElementMeasurable(containerRef.current)) {
+        initViewer();
       }
     };
 
@@ -491,6 +597,10 @@ export const CesiumGlobe: React.FC = () => {
       }
 
       isInitializing = true;
+      const initLoc = selectedLocationRef.current;
+      const initBasemap = globeBasemapRef.current || 'satellite';
+      const initShowLabels = showNationwideLabelsRef.current;
+      const initShowFootprint = showFootprintRef.current;
 
       // Optional Cesium Ion token configuration
       const token = import.meta.env.VITE_CESIUM_ION_TOKEN;
@@ -499,7 +609,7 @@ export const CesiumGlobe: React.FC = () => {
       }
 
       // Initialize Viewer with High-Resolution Satellite Imagery as default (or active preference)
-      const baseImageryLayer = createBasemapLayer(globeBasemap || 'satellite');
+      const baseImageryLayer = createBasemapLayer(initBasemap);
 
       const viewer = new Cesium.Viewer(containerRef.current, {
         // Do not let Cesium resize/render asynchronously outside our dimension
@@ -528,11 +638,18 @@ export const CesiumGlobe: React.FC = () => {
       });
 
       viewerRef.current = viewer;
+      borderLayerRef.current = null;
+      if (shouldAttachPoliticalBorderOverlay(initBasemap, showBordersRef.current)) {
+        const borderOverlay = createPoliticalBordersLayer();
+        viewer.imageryLayers.add(borderOverlay);
+        borderLayerRef.current = borderOverlay;
+      }
 
       if (viewer.scene?.globe) {
         viewer.scene.globe.tileCacheSize = 250;
-        viewer.scene.globe.loadingDescendantLimit = 16;
-        viewer.scene.globe.maximumScreenSpaceError = 2.0;
+        viewer.scene.globe.loadingDescendantLimit = 8;
+        viewer.scene.globe.preloadAncestors = false;
+        viewer.scene.globe.maximumScreenSpaceError = 2.8;
       }
 
       // WebGL Context Loss & Restoration Handlers (QA-03)
@@ -634,29 +751,41 @@ export const CesiumGlobe: React.FC = () => {
 
     // Ingest Official 25 CWC / India-WRIS River Basins via Cesium.GeoJsonDataSource (GEO-03)
     Cesium.GeoJsonDataSource.load('/data/cwc_basins.geojson', {
-      stroke: Cesium.Color.fromCssColorString('#00e5ff').withAlpha(0.65),
-      fill: Cesium.Color.fromCssColorString('#00e5ff').withAlpha(0.08),
-      strokeWidth: 2,
+      stroke: Cesium.Color.fromCssColorString('#38bdf8').withAlpha(0.5),
+      fill: Cesium.Color.fromCssColorString('#0ea5e9').withAlpha(0.06),
+      strokeWidth: 1.5,
       clampToGround: true
     }).then(dataSource => {
       if (isSubscribed && viewerRef.current && !viewerRef.current.isDestroyed()) {
+        dataSource.show = showBasinsRef.current;
         basinDataSourceRef.current = dataSource;
         viewerRef.current.dataSources.add(dataSource);
         
-        // Scientific Thematic Palette across all 25 CWC River Basins
+        // Cohesive dashed cyan hydrological delineation (never mistaken for political borders)
+        const basinColor = Cesium.Color.fromCssColorString('#0ea5e9').withAlpha(0.06);
+        const outlineColor = Cesium.Color.fromCssColorString('#38bdf8').withAlpha(0.55);
         const entities = dataSource.entities.values;
         for (let i = 0; i < entities.length; i++) {
           const entity = entities[i];
           if (entity.polygon) {
-            const hue = (i * 14.4) % 360;
-            const basinColor = Cesium.Color.fromHsl(hue / 360, 0.75, 0.45, 0.12);
-            const outlineColor = Cesium.Color.fromHsl(hue / 360, 0.85, 0.65, 0.85);
             entity.polygon.material = new Cesium.ColorMaterialProperty(basinColor);
-            entity.polygon.outline = new Cesium.ConstantProperty(true);
-            entity.polygon.outlineColor = new Cesium.ConstantProperty(outlineColor);
-            entity.polygon.outlineWidth = new Cesium.ConstantProperty(2);
-            entity.polygon.heightReference = new Cesium.ConstantProperty(Cesium.HeightReference.CLAMP_TO_GROUND);
+            // Disable polygon.outline with ClassificationType.TERRAIN (triggers Cesium WebGL warning); use clamped polyline instead
+            entity.polygon.outline = new Cesium.ConstantProperty(false);
             entity.polygon.classificationType = new Cesium.ConstantProperty(Cesium.ClassificationType.TERRAIN);
+
+            const hierarchy = entity.polygon.hierarchy?.getValue(Cesium.JulianDate.now());
+            if (hierarchy?.positions && hierarchy.positions.length > 2 && !entity.polyline) {
+              const loopPositions = [...hierarchy.positions, hierarchy.positions[0]];
+              entity.polyline = new Cesium.PolylineGraphics({
+                positions: loopPositions,
+                clampToGround: true,
+                width: 1.25,
+                material: new Cesium.PolylineDashMaterialProperty({
+                  color: outlineColor,
+                  dashLength: 12.0
+                })
+              });
+            }
           }
         }
       }
@@ -664,12 +793,19 @@ export const CesiumGlobe: React.FC = () => {
       console.warn('[GeoJsonDataSource] Official CWC Basins fetch failed, falling back to local study basins:', err);
       if (isSubscribed && viewerRef.current && !viewerRef.current.isDestroyed()) {
         Cesium.GeoJsonDataSource.load(INDIAN_STUDY_BASINS_GEOJSON, {
-          stroke: Cesium.Color.fromCssColorString('#00e5ff').withAlpha(0.65),
-          fill: Cesium.Color.fromCssColorString('#00e5ff').withAlpha(0.08),
-          strokeWidth: 2,
+          stroke: Cesium.Color.fromCssColorString('#38bdf8').withAlpha(0.5),
+          fill: Cesium.Color.fromCssColorString('#0ea5e9').withAlpha(0.06),
+          strokeWidth: 1.5,
           clampToGround: true
         }).then(fallbackSource => {
           if (isSubscribed && viewerRef.current && !viewerRef.current.isDestroyed()) {
+            const entities = fallbackSource.entities.values;
+            for (let i = 0; i < entities.length; i++) {
+              if (entities[i].polygon) {
+                entities[i].polygon!.outline = new Cesium.ConstantProperty(false);
+              }
+            }
+            fallbackSource.show = showBasinsRef.current;
             basinDataSourceRef.current = fallbackSource;
             viewerRef.current.dataSources.add(fallbackSource);
           }
@@ -679,6 +815,8 @@ export const CesiumGlobe: React.FC = () => {
 
     // Ingest Nationwide Hierarchical Place Labels (States, Cities, Districts, Field Stations)
     labelEntitiesRef.current = [];
+    const selectedCartesianInit = Cesium.Cartesian3.fromDegrees(initLoc.longitude, initLoc.latitude, 200);
+    const activeBaseNameInit = initLoc.name.split(' - ')[0].trim().toLowerCase();
     NATIONWIDE_HIERARCHICAL_LABELS.forEach((lbl) => {
       const color = lbl.type === 'STATE'
         ? Cesium.Color.fromCssColorString('#38bdf8') // Sky blue
@@ -688,10 +826,15 @@ export const CesiumGlobe: React.FC = () => {
         ? Cesium.Color.fromCssColorString('#34d399') // Emerald
         : Cesium.Color.fromCssColorString('#a78bfa'); // Purple
 
+      const lblPos = Cesium.Cartesian3.fromDegrees(lbl.longitude, lbl.latitude, 200);
+      const distToSelected = Cesium.Cartesian3.distance(lblPos, selectedCartesianInit);
+      const collidesWithPin = distToSelected < 22000 || lbl.name.trim().toLowerCase() === activeBaseNameInit;
+
       const ent = viewer.entities.add({
         id: `geo-lbl-${lbl.id}`,
         name: lbl.name,
-        position: Cesium.Cartesian3.fromDegrees(lbl.longitude, lbl.latitude, 200),
+        show: initShowLabels && !collidesWithPin,
+        position: lblPos,
         point: {
           pixelSize: lbl.type === 'STATE' ? 6 : lbl.type === 'CITY' ? 5 : 4,
           color: color.withAlpha(0.85),
@@ -723,7 +866,7 @@ export const CesiumGlobe: React.FC = () => {
     // Add High-Tech Pin Entities for all 7 Indian Regional Study Loci
     markersRef.current = [];
     INDIA_LOCATIONS.forEach((loc) => {
-      const isSelected = loc.id === selectedLocation.id;
+      const isSelected = loc.id === initLoc.id;
       const entity = viewer.entities.add({
         id: loc.id,
         name: loc.name,
@@ -737,7 +880,7 @@ export const CesiumGlobe: React.FC = () => {
         },
         label: {
           text: isSelected
-            ? `${loc.name.split(' - ')[0]}  |  ${loc.district}`
+            ? formatPinLabel(loc.name, loc.district || loc.state)
             : loc.name.split(' - ')[0],
           font: isSelected ? 'bold 12px "JetBrains Mono", sans-serif' : '10px "JetBrains Mono", sans-serif',
           style: isSelected ? Cesium.LabelStyle.FILL : Cesium.LabelStyle.FILL_AND_OUTLINE,
@@ -758,29 +901,29 @@ export const CesiumGlobe: React.FC = () => {
     // Dedicated callout reference - hidden by default to avoid duplicate overlapping text with unified pin badge
     const callout = viewer.entities.add({
       id: 'india-regional-callout-pin',
-      name: 'India - National Digital Twin Center',
+      name: 'Global Earth Digital Twin Center',
       show: false,
-      position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 1200)
+      position: Cesium.Cartesian3.fromDegrees(initLoc.longitude, initLoc.latitude, 1200)
     });
     calloutEntityRef.current = callout;
 
     // Scientific ~300 km Gaussian Smoothing Footprint (Zero cyan wash, subtle boundary stroke, center label suppressed to prevent collision)
     const footprint = viewer.entities.add({
       id: 'spatial-footprint-300km',
-      name: `Illustrative ~300 km Spatial Smoothing Footprint (${selectedLocation.name})`,
-      show: showFootprint,
-      position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude),
+      name: `Illustrative ~300 km Spatial Smoothing Footprint (${initLoc.name})`,
+      show: initShowFootprint,
+      position: Cesium.Cartesian3.fromDegrees(initLoc.longitude, initLoc.latitude),
       ellipse: {
         semiMajorAxis: 300000.0, // 300 km radius in meters
         semiMinorAxis: 300000.0,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         classificationType: Cesium.ClassificationType.TERRAIN,
         material: Cesium.Color.TRANSPARENT,
         outline: false
       },
       polyline: {
         positions: new Cesium.CallbackProperty(() => {
-          return generateCirclePositions(selectedLocation.longitude, selectedLocation.latitude, 300000.0);
+          const cur = selectedLocationRef.current;
+          return generateCirclePositions(cur.longitude, cur.latitude, 300000.0);
         }, false),
         clampToGround: true,
         width: 1.5,
@@ -789,27 +932,30 @@ export const CesiumGlobe: React.FC = () => {
     });
     footprintEntityRef.current = footprint;
 
-    // Initial Camera Setup: Optimised Earth view showing true planetary curvature and the subcontinent
-    viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude - 8.0, 3800000),
-      orientation: {
-        heading: Cesium.Math.toRadians(0.0),
-        pitch: Cesium.Math.toRadians(-62.0),
-        roll: 0.0
+    // Trigger frame render when tile queue drains so newly downloaded high-zoom tiles appear without starving CPU
+    viewer.scene.globe.tileLoadProgressEvent.addEventListener((queuedTileCount: number) => {
+      if (!isSubscribed) return;
+      if (queuedTileCount === 0) {
+        scheduleRender(3, false);
       }
     });
+    viewer.camera.changed.addEventListener(() => {
+      if (isSubscribed) scheduleRender(4, true);
+    });
 
-    // Smooth orbital transition into the selected regional locus on initial load
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 650000),
+    // Ensure non-7 global locations (e.g., Zermatt, Hiware Bazar) receive their orange pin & boundary right at init
+    syncLocationEntitiesRef.current?.();
+
+    // Camera framing directly centered on the active target location (south offset compensates for -72 deg oblique tilt)
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(initLoc.longitude, Math.max(-85, initLoc.latitude - 1.25), 520000),
       orientation: {
         heading: Cesium.Math.toRadians(0.0),
         pitch: Cesium.Math.toRadians(-72.0),
         roll: 0.0
-      },
-      duration: 2.4,
-      easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
+      }
     });
+    isFirstMountRef.current = false;
 
     // Setup ScreenSpaceEventHandler for Mouse Hover and Left Click
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -919,6 +1065,7 @@ export const CesiumGlobe: React.FC = () => {
           (viewer.cesiumWidget as any)._canRender = true;
         }
         viewer.scene.requestRender();
+        scheduleRenderRef.current?.(6);
       } catch (err) {
         console.warn('[Cesium] Safe resize skipped during layout shift:', err);
       }
@@ -971,6 +1118,16 @@ export const CesiumGlobe: React.FC = () => {
       isSubscribed = false;
       isInitializing = false;
       resumeRenderLoopRef.current = null;
+      tryInitViewerRef.current = null;
+      scheduleRenderRef.current = null;
+      if (renderTimerId !== null) {
+        clearTimeout(renderTimerId);
+        renderTimerId = null;
+      }
+      if (renderFrameId !== null) {
+        cancelAnimationFrame(renderFrameId);
+        renderFrameId = null;
+      }
       if (cameraExtractionTweenRef.current) {
         cameraExtractionTweenRef.current.kill();
         cameraExtractionTweenRef.current = null;
@@ -1001,6 +1158,7 @@ export const CesiumGlobe: React.FC = () => {
         viewerRef.current.dataSources.remove(basinDataSourceRef.current, true);
         basinDataSourceRef.current = null;
       }
+      borderLayerRef.current = null;
       heatmapEntitiesRef.current.forEach(e => {
         if (viewerRef.current && !viewerRef.current.isDestroyed()) {
           viewerRef.current.entities.remove(e);
@@ -1019,43 +1177,131 @@ export const CesiumGlobe: React.FC = () => {
     };
   }, [viewerKey]);
 
-  // Mode Transition Handler: Restore on visible (Globe vs Split vs Cutaway)
-  useEffect(() => {
-    viewModeRef.current = viewMode;
-    const isGlobeVisible = viewMode === 'globe' || viewMode === 'split';
-    const viewer = viewerRef.current;
-    if (!viewer || viewer.isDestroyed()) return;
+  // Mode Transition Handler: Suspend WebGL only after GSAP finishes settling into CUTOUT_READY
+  const prevEffectViewModeRef = useRef(viewMode);
+  const prevGlobeActiveRef = useRef<boolean>(true);
+  const prevEffectLocationKeyRef = useRef<string>(`${selectedLocation.latitude.toFixed(4)}:${selectedLocation.longitude.toFixed(4)}`);
 
-    if (!isGlobeVisible) {
-      if (viewer.cesiumWidget) {
+  useEffect(() => {
+    const prevMode = prevEffectViewModeRef.current;
+    const wasGlobeActive = prevGlobeActiveRef.current;
+    const currentLocationKey = `${selectedLocation.latitude.toFixed(4)}:${selectedLocation.longitude.toFixed(4)}`;
+    const locationChanged = prevEffectLocationKeyRef.current !== currentLocationKey;
+    const modeChanged = prevMode !== viewMode;
+
+    prevEffectViewModeRef.current = viewMode;
+    prevEffectLocationKeyRef.current = currentLocationKey;
+
+    const isGlobeVisible = viewMode === 'globe' || viewMode === 'split';
+    const isGlobeActive = isGlobeVisible || extractionStage !== 'CUTOUT_READY';
+    prevGlobeActiveRef.current = isGlobeActive;
+
+    const viewer = viewerRef.current;
+
+    if (!isGlobeActive) {
+      if (viewer && !viewer.isDestroyed() && viewer.cesiumWidget) {
         (viewer.cesiumWidget as any)._canRender = false;
       }
       return;
     }
 
-    // Globe became visible again: resume render loop and refresh viewport
-    resumeRenderLoopRef.current?.();
-
-    // Wait for layout commit, then verify dimensions, resize safely, and request render
-    const frameId = requestAnimationFrame(() => {
-      const container = containerRef.current;
-      if (!viewer || viewer.isDestroyed() || !container) return;
-
-      if (isViewerRenderable(viewer, container)) {
+    // Settling from RETURN_IN_PROGRESS -> GLOBE_RESTORED -> GLOBE_IDLE after mode switch already began:
+    // keep the active return-flight untouched and just ensure a clean resize/render tick.
+    if (!modeChanged && wasGlobeActive && !locationChanged) {
+      if (viewer && !viewer.isDestroyed() && containerRef.current && isViewerRenderable(viewer, containerRef.current)) {
         try {
           viewer.resize();
           if (viewer.cesiumWidget) {
             (viewer.cesiumWidget as any)._canRender = true;
           }
-          viewer.scene.requestRender();
+          scheduleRenderRef.current?.(6);
+        } catch {
+          // Ignore transient resize errors during cleanup
+        }
+      }
+      return;
+    }
+
+    let settledTimerId: number | null = null;
+    const returningFromCutout = !wasGlobeActive || prevMode === 'cutaway' || prevMode === 'underground';
+
+    const restoreGlobeViewport = (allowCameraFlight: boolean) => {
+      // If Cesium was mounted while hidden in Cutout mode, initialize it now that container is visible
+      if (!viewerRef.current || viewerRef.current.isDestroyed()) {
+        tryInitViewerRef.current?.();
+      }
+      const activeViewer = viewerRef.current;
+      const container = containerRef.current;
+      if (!activeViewer || activeViewer.isDestroyed() || !container) return;
+
+      resumeRenderLoopRef.current?.();
+
+      if (isViewerRenderable(activeViewer, container)) {
+        try {
+          activeViewer.resize();
+          if (activeViewer.cesiumWidget) {
+            (activeViewer.cesiumWidget as any)._canRender = true;
+          }
+          syncLocationEntitiesRef.current?.();
+          if (allowCameraFlight) {
+            // Ensure camera is centered on the active locus & pulled back from 38km extraction zoom
+            const curTarget = selectedLocationRef.current;
+            const desiredOrbitalPos = Cesium.Cartesian3.fromDegrees(
+              curTarget.longitude,
+              Math.max(-85, curTarget.latitude - 1.15),
+              480000
+            );
+            const groundPos = Cesium.Cartesian3.fromDegrees(curTarget.longitude, curTarget.latitude, 0);
+            const distFromTargetGround = Cesium.Cartesian3.distance(activeViewer.camera.position, groundPos);
+            if (
+              returningFromCutout ||
+              activeViewer.camera.positionCartographic.height < 120000 ||
+              distFromTargetGround > 1200000
+            ) {
+              const isAutomated = typeof navigator !== 'undefined' && Boolean(navigator.webdriver);
+              activeViewer.camera.cancelFlight();
+              if (distFromTargetGround > 900000 || isAutomated) {
+                activeViewer.camera.setView({
+                  destination: desiredOrbitalPos,
+                  orientation: {
+                    heading: Cesium.Math.toRadians(0.0),
+                    pitch: Cesium.Math.toRadians(-72.0),
+                    roll: 0.0
+                  }
+                });
+              } else {
+                activeViewer.camera.flyTo({
+                  destination: desiredOrbitalPos,
+                  orientation: {
+                    heading: Cesium.Math.toRadians(0.0),
+                    pitch: Cesium.Math.toRadians(-72.0),
+                    roll: 0.0
+                  },
+                  duration: 0.55,
+                  easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
+                });
+              }
+            }
+          }
+          scheduleRenderRef.current?.(8);
+          activeViewer.scene.requestRender();
+          activeViewer.render();
         } catch (err) {
           console.warn('[Cesium] Restore on visible resize skipped:', err);
         }
       }
+    };
+
+    const frameId = requestAnimationFrame(() => {
+      restoreGlobeViewport(true);
+      settledTimerId = window.setTimeout(() => restoreGlobeViewport(false), 240);
     });
 
-    return () => cancelAnimationFrame(frameId);
-  }, [viewMode]);
+    return () => {
+      cancelAnimationFrame(frameId);
+      if (settledTimerId !== null) clearTimeout(settledTimerId);
+    };
+  }, [viewMode, extractionStage, selectedLocation.latitude, selectedLocation.longitude]);
 
   // Synchronize Cesium Clock & Solar Lighting when Time Slider changes
   useEffect(() => {
@@ -1069,34 +1315,22 @@ export const CesiumGlobe: React.FC = () => {
       const month = parseInt(match[2], 10);
       const simDate = new Date(Date.UTC(year, month - 1, 15, 12, 0, 0));
       viewer.clock.currentTime = Cesium.JulianDate.fromDate(simDate);
+      scheduleRenderRef.current?.(3);
     }
   }, [currentTimeIndex]);
 
-  // Synchronize Camera, Markers, Footprint, and Callout Pin when selectedLocation changes
-  useEffect(() => {
+  // Shared helper to synchronize pins, global selected marker, label collisions & cutaway boundary
+  const syncLocationEntities = useCallback(() => {
     const viewer = viewerRef.current;
     if (!viewer || viewer.isDestroyed()) return;
+    const locObj = selectedLocationRef.current;
+    const extentKm = explorationExtentKmRef.current || 5;
+    const showLabels = showNationwideLabelsRef.current;
+    const extracting = isExtractingCutoutRef.current;
 
-    if (isFirstMountRef.current) {
-      isFirstMountRef.current = false;
-    } else {
-      // Smooth Camera Transition to Active Locus
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 450000),
-        orientation: {
-          heading: Cesium.Math.toRadians(0.0),
-          pitch: Cesium.Math.toRadians(-72.0),
-          roll: 0.0
-        },
-        duration: 1.8,
-        easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
-      });
-    }
-
-    // Update marker styling and selection highlight
-    const isStandardLocus = INDIA_LOCATIONS.some(l => l.id === selectedLocation.id);
+    const isStandardLocus = INDIA_LOCATIONS.some(l => l.id === locObj.id);
     markersRef.current.forEach((entity) => {
-      const isSelected = entity.id === selectedLocation.id;
+      const isSelected = entity.id === locObj.id;
       if (entity.point) {
         entity.point.color = new Cesium.ConstantProperty(
           Cesium.Color.fromCssColorString(isSelected ? '#f59e0b' : '#38bdf8')
@@ -1105,10 +1339,9 @@ export const CesiumGlobe: React.FC = () => {
       }
       if (entity.label) {
         const loc = INDIA_LOCATIONS.find(l => l.id === entity.id);
-        const name = loc ? loc.name.split(' - ')[0] : entity.id;
-        const district = loc?.district || '';
+        const shortName = loc ? loc.name.split(' - ')[0] : entity.id;
         entity.label.text = new Cesium.ConstantProperty(
-          isSelected ? `${name}  |  ${district}` : name
+          isSelected ? formatPinLabel(loc ? loc.name : entity.id, loc?.district || loc?.state) : shortName
         );
         entity.label.font = new Cesium.ConstantProperty(
           isSelected ? 'bold 12px "JetBrains Mono", sans-serif' : '10px "JetBrains Mono", sans-serif'
@@ -1126,13 +1359,27 @@ export const CesiumGlobe: React.FC = () => {
       }
     });
 
-    // If selected location is an arbitrary nationwide point (not standard 7), maintain dedicated pin
+    const selectedCartesian = Cesium.Cartesian3.fromDegrees(locObj.longitude, locObj.latitude, 200);
+    const activeBaseName = locObj.name.split(' - ')[0].trim().toLowerCase();
+    labelEntitiesRef.current.forEach((lblEnt) => {
+      if (!showLabels) {
+        lblEnt.show = false;
+        return;
+      }
+      const pos = lblEnt.position?.getValue(Cesium.JulianDate.now());
+      const dist = pos ? Cesium.Cartesian3.distance(pos, selectedCartesian) : Number.POSITIVE_INFINITY;
+      const lblName = (lblEnt.name || '').trim().toLowerCase();
+      const collidesWithPin = dist < 22000 || (lblName && activeBaseName && lblName === activeBaseName);
+      lblEnt.show = !collidesWithPin;
+    });
+
     if (!isStandardLocus) {
+      const formattedPinText = formatPinLabel(locObj.name, locObj.district || locObj.state);
       if (!selectedPinEntityRef.current) {
         selectedPinEntityRef.current = viewer.entities.add({
           id: 'dynamic-selected-location-pin',
-          name: selectedLocation.name,
-          position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 600),
+          name: locObj.name,
+          position: Cesium.Cartesian3.fromDegrees(locObj.longitude, locObj.latitude, 600),
           point: {
             pixelSize: 16,
             color: Cesium.Color.fromCssColorString('#f59e0b'),
@@ -1141,7 +1388,7 @@ export const CesiumGlobe: React.FC = () => {
             disableDepthTestDistance: Number.POSITIVE_INFINITY
           },
           label: {
-            text: `${selectedLocation.name.split(' - ')[0]}  |  ${selectedLocation.district || selectedLocation.state}`,
+            text: formattedPinText,
             font: 'bold 12px "JetBrains Mono", sans-serif',
             style: Cesium.LabelStyle.FILL,
             fillColor: Cesium.Color.fromCssColorString('#f8fafc'),
@@ -1155,43 +1402,35 @@ export const CesiumGlobe: React.FC = () => {
         });
       } else {
         selectedPinEntityRef.current.position = new Cesium.ConstantPositionProperty(
-          Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 600)
+          Cesium.Cartesian3.fromDegrees(locObj.longitude, locObj.latitude, 600)
         );
         if (selectedPinEntityRef.current.label) {
-          selectedPinEntityRef.current.label.text = new Cesium.ConstantProperty(
-            `${selectedLocation.name.split(' - ')[0]}  |  ${selectedLocation.district || selectedLocation.state}`
-          );
+          selectedPinEntityRef.current.label.text = new Cesium.ConstantProperty(formattedPinText);
         }
         selectedPinEntityRef.current.show = true;
       }
-    } else {
-      if (selectedPinEntityRef.current) {
-        selectedPinEntityRef.current.show = false;
-      }
+    } else if (selectedPinEntityRef.current) {
+      selectedPinEntityRef.current.show = false;
     }
 
-    // Update Scientific Footprint Entity Position (suppress center label to prevent marker collision)
     if (footprintEntityRef.current) {
       footprintEntityRef.current.position = new Cesium.ConstantPositionProperty(
-        Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude)
+        Cesium.Cartesian3.fromDegrees(locObj.longitude, locObj.latitude)
       );
       if (footprintEntityRef.current.label) {
         footprintEntityRef.current.label.show = new Cesium.ConstantProperty(false);
       }
     }
 
-    // Callout entity remains hidden to prevent text collisions
     if (calloutEntityRef.current) {
       calloutEntityRef.current.show = false;
     }
 
-    // Update 3D Subsurface Cutaway Natural Geographical Boundary Polygon
-    const extentKm = explorationExtentKm || 5;
     const polyPositions = generateIrregularRegionPositions(
-      selectedLocation.longitude,
-      selectedLocation.latitude,
+      locObj.longitude,
+      locObj.latitude,
       extentKm,
-      selectedLocation.id,
+      locObj.id,
       64,
       false
     );
@@ -1201,27 +1440,21 @@ export const CesiumGlobe: React.FC = () => {
       cutawayFootprintRef.current = viewer.entities.add({
         id: 'cutaway-block-footprint',
         name: `3D Extracted Geographical Region (${extentKm} km Watershed Boundary)`,
-        position: Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 120),
+        position: Cesium.Cartesian3.fromDegrees(locObj.longitude, locObj.latitude, 120),
         polygon: {
           hierarchy: new Cesium.ConstantProperty(polyHierarchy),
           material: Cesium.Color.fromCssColorString('#22d3ee').withAlpha(0.18),
           outline: false,
           height: 80.0,
           extrudedHeight: new Cesium.CallbackProperty(() => {
-            return isExtractingCutout ? extrudedCutoutHeightRef.current : 120.0;
+            return isExtractingCutoutRef.current ? extrudedCutoutHeightRef.current : 120.0;
           }, false)
         },
         polyline: {
           positions: new Cesium.CallbackProperty(() => {
-            const ext = explorationExtentKm || 5;
-            return generateIrregularRegionPositions(
-              selectedLocation.longitude,
-              selectedLocation.latitude,
-              ext,
-              selectedLocation.id,
-              64,
-              true
-            );
+            const ext = explorationExtentKmRef.current || 5;
+            const cur = selectedLocationRef.current;
+            return generateIrregularRegionPositions(cur.longitude, cur.latitude, ext, cur.id, 64, true);
           }, false),
           clampToGround: true,
           width: 3.0,
@@ -1241,7 +1474,7 @@ export const CesiumGlobe: React.FC = () => {
       });
     } else {
       cutawayFootprintRef.current.position = new Cesium.ConstantPositionProperty(
-        Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 120)
+        Cesium.Cartesian3.fromDegrees(locObj.longitude, locObj.latitude, 120)
       );
       if (cutawayFootprintRef.current.polygon) {
         cutawayFootprintRef.current.polygon.hierarchy = new Cesium.ConstantProperty(polyHierarchy);
@@ -1249,16 +1482,77 @@ export const CesiumGlobe: React.FC = () => {
       if (cutawayFootprintRef.current.label) {
         cutawayFootprintRef.current.label.text = new Cesium.ConstantProperty(`3D REGION BOUNDARY (${extentKm} km)`);
       }
-      cutawayFootprintRef.current.show = true;
+      cutawayFootprintRef.current.show = !extracting || true;
     }
-  }, [selectedLocation, explorationExtentKm, isExtractingCutout]);
 
-  // Toggle Nationwide Labels Visibility
+    scheduleRenderRef.current?.(6);
+  }, []);
+  syncLocationEntitiesRef.current = syncLocationEntities;
+
+  // Synchronize Markers, Footprint, and Callout Pin when entities or extent change
   useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+    syncLocationEntities();
+  }, [selectedLocation, explorationExtentKm, isExtractingCutout, showNationwideLabels, syncLocationEntities]);
+
+  // Fly or set camera ONLY when selectedLocation coordinates actually change
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+
+    if (isFirstMountRef.current) {
+      isFirstMountRef.current = false;
+      return;
+    }
+
+    const isAutomated = typeof navigator !== 'undefined' && Boolean(navigator.webdriver);
+    const dest = Cesium.Cartesian3.fromDegrees(
+      selectedLocation.longitude,
+      Math.max(-85, selectedLocation.latitude - 1.1),
+      450000
+    );
+    viewer.camera.cancelFlight();
+    if (isAutomated) {
+      viewer.camera.setView({
+        destination: dest,
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-72.0),
+          roll: 0.0
+        }
+      });
+      scheduleRenderRef.current?.(6);
+    } else {
+      viewer.camera.flyTo({
+        destination: dest,
+        orientation: {
+          heading: Cesium.Math.toRadians(0.0),
+          pitch: Cesium.Math.toRadians(-72.0),
+          roll: 0.0
+        },
+        duration: 0.85,
+        easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
+      });
+      scheduleRenderRef.current?.(16);
+    }
+  }, [selectedLocation.latitude, selectedLocation.longitude]);
+
+  // Toggle Nationwide Labels Visibility (preserving active-pin collision suppression)
+  useEffect(() => {
+    const selectedCartesian = Cesium.Cartesian3.fromDegrees(selectedLocation.longitude, selectedLocation.latitude, 200);
+    const activeBaseName = selectedLocation.name.split(' - ')[0].trim().toLowerCase();
     labelEntitiesRef.current.forEach(entity => {
-      entity.show = showNationwideLabels;
+      if (!showNationwideLabels) {
+        entity.show = false;
+        return;
+      }
+      const pos = entity.position?.getValue(Cesium.JulianDate.now());
+      const dist = pos ? Cesium.Cartesian3.distance(pos, selectedCartesian) : Number.POSITIVE_INFINITY;
+      const lblName = (entity.name || '').trim().toLowerCase();
+      entity.show = !(dist < 22000 || (lblName && activeBaseName && lblName === activeBaseName));
     });
-  }, [showNationwideLabels]);
+  }, [showNationwideLabels, selectedLocation]);
 
   // Synchronize Thematic Multi-Layer Heatmap Grid
   useEffect(() => {
@@ -1375,6 +1669,7 @@ export const CesiumGlobe: React.FC = () => {
   useEffect(() => {
     if (footprintEntityRef.current) {
       footprintEntityRef.current.show = showFootprint;
+      scheduleRenderRef.current?.(3);
     }
   }, [showFootprint]);
 
@@ -1382,8 +1677,31 @@ export const CesiumGlobe: React.FC = () => {
   useEffect(() => {
     if (basinDataSourceRef.current) {
       basinDataSourceRef.current.show = showBasins;
+      scheduleRenderRef.current?.(3);
     }
   }, [showBasins]);
+
+  // Synchronize Political Borders & Place Reference Overlay
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || viewer.isDestroyed()) return;
+    const layers = viewer.imageryLayers;
+    const shouldShow = shouldAttachPoliticalBorderOverlay(basemapMode, showBorders);
+
+    if (shouldShow) {
+      if (!borderLayerRef.current || !layers.contains(borderLayerRef.current)) {
+        const borderOverlay = createPoliticalBordersLayer();
+        layers.add(borderOverlay);
+        borderLayerRef.current = borderOverlay;
+      }
+    } else if (borderLayerRef.current) {
+      if (layers.contains(borderLayerRef.current)) {
+        layers.remove(borderLayerRef.current, true);
+      }
+      borderLayerRef.current = null;
+    }
+    scheduleRenderRef.current?.(6);
+  }, [showBorders, basemapMode]);
 
   // Imagery Layer Switcher (Satellite, CARTO Dark Matter, Voyager, Positron, Terrain)
   const handleSwitchBasemap = useCallback((mode: string) => {
@@ -1392,11 +1710,18 @@ export const CesiumGlobe: React.FC = () => {
 
     const layers = viewer.imageryLayers;
     layers.removeAll();
+    borderLayerRef.current = null;
     const newLayer = createBasemapLayer(mode);
     layers.add(newLayer);
+    if (shouldAttachPoliticalBorderOverlay(mode, showBordersRef.current)) {
+      const borderOverlay = createPoliticalBordersLayer();
+      layers.add(borderOverlay);
+      borderLayerRef.current = borderOverlay;
+    }
     setBasemapMode(mode);
     setGlobeBasemap(mode as any);
     setShowBasemapMenu(false);
+    scheduleRenderRef.current?.(12);
   }, [setGlobeBasemap]);
 
   // Synchronize external changes to globeBasemap (e.g., Reset to Defaults)
@@ -1412,6 +1737,7 @@ export const CesiumGlobe: React.FC = () => {
     if (viewer && !viewer.isDestroyed()) {
       const height = viewer.camera.positionCartographic.height;
       viewer.camera.zoomIn(height * 0.35);
+      scheduleRenderRef.current?.(8);
     }
   };
 
@@ -1420,6 +1746,7 @@ export const CesiumGlobe: React.FC = () => {
     if (viewer && !viewer.isDestroyed()) {
       const height = viewer.camera.positionCartographic.height;
       viewer.camera.zoomOut(height * 0.35);
+      scheduleRenderRef.current?.(8);
     }
   };
 
@@ -1436,6 +1763,7 @@ export const CesiumGlobe: React.FC = () => {
         duration: 1.8,
         easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
       });
+      scheduleRenderRef.current?.(36);
     }
   };
 
@@ -1451,6 +1779,7 @@ export const CesiumGlobe: React.FC = () => {
         },
         duration: 0.8
       });
+      scheduleRenderRef.current?.(18);
     }
   };
 
@@ -1469,6 +1798,7 @@ export const CesiumGlobe: React.FC = () => {
       duration: 1.0,
       easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT
     });
+    scheduleRenderRef.current?.(24);
   };
 
   const toggleFullscreen = () => {
@@ -1489,7 +1819,7 @@ export const CesiumGlobe: React.FC = () => {
       {hasRenderError && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-6">
           <div className="max-w-md w-full bg-slate-900 border border-amber-500/40 rounded-xl p-5 shadow-2xl text-center flex flex-col items-center gap-3">
-            <AlertTriangle className="w-10 h-10 text-amber-400 animate-pulse" />
+            <AlertTriangle className="w-10 h-10 text-amber-400" />
             <h3 className="text-base font-semibold text-slate-100 font-mono">Globe Viewport Suspended</h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               The 3D Cesium viewport encountered a layout transition or zero-dimension state. The WebGL context was safely preserved.
@@ -1508,65 +1838,69 @@ export const CesiumGlobe: React.FC = () => {
         </div>
       )}
 
-      {/* Animated Cutout Extraction Overlay when zooming into 3D Geological Cutout */}
-      {isExtractingCutout && (
-        <div className="absolute inset-0 z-30 pointer-events-none flex items-center justify-center bg-cyan-950/20 backdrop-blur-[2px] animate-fadeIn">
-          <div className="liquid-glass-elevated px-6 py-4 rounded-2xl border border-cyan-400/60 flex flex-col items-center gap-2 shadow-2xl">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center">
-              <Layers className="w-6 h-6 text-cyan-300 animate-bounce" />
-            </div>
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-300">
-              Extracting 3D Geological Cutout...
-            </span>
-            <span className="text-[11px] font-mono text-slate-300">
-              {selectedLocation.name.split(' - ')[0]} ({explorationExtentKm} km × {explorationExtentKm} km Block)
+      {/* Top Floating Overlay Bar: Locus Readout + Extract Trigger (Left) & GIS Controls Dock (Right) */}
+      <div className="absolute top-3 left-3 right-3 z-20 flex items-start justify-between gap-2 pointer-events-none">
+        {/* Top-Left: Clean Locus Readout & Extract 3D Cutout Trigger */}
+        <div className="pointer-events-auto min-w-0 flex-1 flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 py-1.5 px-3 rounded-md liquid-glass-hud text-xs pointer-events-none shadow-lg max-w-full min-w-0">
+            <span className="w-1.5 h-1.5 rounded-sm bg-sky-400 shrink-0" />
+            <span className="font-semibold text-slate-100 truncate max-w-[140px] sm:max-w-[180px]">{selectedLocation.name.split(' - ')[0]}</span>
+            {selectedLocation.state && (
+              <>
+                <span className={`text-slate-600 shrink-0 ${viewMode === 'split' ? 'hidden 2xl:inline' : 'hidden sm:inline'}`}>/</span>
+                <span
+                  className={`text-[11px] font-mono text-slate-300 truncate max-w-[145px] lg:max-w-[175px] ${
+                    viewMode === 'split' ? 'hidden 2xl:inline' : 'hidden sm:inline'
+                  }`}
+                >
+                  {selectedLocation.district && selectedLocation.district.toLowerCase() !== selectedLocation.name.split(' - ')[0].trim().toLowerCase()
+                    ? `${selectedLocation.district}, ${selectedLocation.state}`
+                    : selectedLocation.state}
+                </span>
+              </>
+            )}
+            <span className={`text-slate-700 shrink-0 ${viewMode === 'split' ? 'hidden 2xl:inline' : 'hidden lg:inline'}`}>|</span>
+            <span
+              className={`font-mono text-[10px] text-emerald-300 shrink-0 ${
+                viewMode === 'split' ? 'hidden 2xl:inline' : 'hidden lg:inline'
+              }`}
+            >
+              COPERNICUS DEM
             </span>
           </div>
+
+          {viewMode === 'globe' && (
+            <button
+              type="button"
+              onClick={handleExtractCutout}
+              disabled={isExtractingCutout}
+              className="shrink-0 flex items-center gap-1.5 py-1.5 px-3 rounded-md bg-slate-900/90 hover:bg-slate-800 border border-sky-500/45 hover:border-sky-400 text-slate-100 text-xs font-mono font-medium transition-colors shadow-lg cursor-pointer disabled:opacity-70"
+              title="Extract 3D Subsurface Geological Cutout for Selected Location"
+            >
+              <Layers className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+              <span>{isExtractingCutout ? 'Extracting Block...' : 'Extract 3D Cutout'}</span>
+            </button>
+          )}
         </div>
-      )}
 
-      {/* Top-Left: Locus Pill & Extract 3D Cutout Action */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-2 py-1.5 px-3.5 rounded-full liquid-glass-hud text-xs pointer-events-none shadow-xl">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-          <span className="font-semibold text-slate-100">{selectedLocation.name.split(' - ')[0]}</span>
-          <span className="text-slate-600">•</span>
-          <span className="text-[11px] font-mono text-cyan-300/90 hidden sm:inline">{selectedLocation.district}, {selectedLocation.state}</span>
-          <span className="text-slate-600 hidden sm:inline">•</span>
-          <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-mono text-[9px]">
-            RL06 + DEM
-          </span>
-        </div>
-
-        {viewMode === 'globe' && (
-          <button
-            type="button"
-            onClick={handleExtractCutout}
-            className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-full liquid-glass-elevated hover:border-cyan-400 text-cyan-300 hover:text-white text-xs font-mono font-semibold transition-all shadow-xl cursor-pointer glow-cyan-sm"
-            title="Extract 3D Subsurface Geological Cutout for Selected Location"
-          >
-            <Layers className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Extract 3D Cutout</span>
-          </button>
-        )}
-      </div>
-
-      {/* Top-Right: Floating GIS Controls Dock */}
-      <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 p-1.5 rounded-2xl liquid-glass-hud shadow-2xl">
+        {/* Top-Right: Floating GIS Controls Dock */}
+        <div className="pointer-events-auto shrink-0 flex items-center gap-1.5 p-1.5 rounded-2xl liquid-glass-hud shadow-2xl">
         {/* Basemap Picker Dropdown */}
         <div className="relative" ref={basemapMenuRef}>
           <button
+            type="button"
             onClick={() => setShowBasemapMenu(!showBasemapMenu)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
             title="Change Basemap Imagery Layer"
+            aria-label="Change Basemap Imagery Layer"
           >
             <Satellite className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="capitalize hidden md:inline">{basemapMode}</span>
+            <span className={`capitalize ${viewMode === 'split' ? 'hidden 2xl:inline' : 'hidden md:inline'}`}>{basemapMode}</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
 
           {showBasemapMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 liquid-glass-elevated rounded-xl p-1.5 shadow-2xl z-50 flex flex-col gap-1 text-xs font-mono animate-fadeIn">
+            <div className="absolute right-0 top-full mt-2 w-48 liquid-glass-hud rounded-xl p-1.5 shadow-2xl z-50 flex flex-col gap-1 text-xs font-mono animate-fadeIn">
               <span className="text-[10px] uppercase tracking-wider text-slate-400 px-2 py-1 font-semibold">
                 Basemap Imagery
               </span>
@@ -1632,20 +1966,32 @@ export const CesiumGlobe: React.FC = () => {
         {/* Layers & Overlays Dropdown */}
         <div className="relative" ref={layersMenuRef}>
           <button
+            type="button"
             onClick={() => setShowLayersMenu(!showLayersMenu)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-slate-200 hover:text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-slate-200 hover:text-cyan-300 text-xs font-mono transition-colors shadow-sm cursor-pointer"
             title="Toggle Geospatial Layers & Heatmaps"
+            aria-label="Toggle Geospatial Layers and Heatmaps"
           >
             <Layers className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden md:inline">Layers</span>
+            <span className={viewMode === 'split' ? 'hidden 2xl:inline' : 'hidden md:inline'}>Layers</span>
             <ChevronDown className="w-3 h-3 text-slate-400" />
           </button>
 
           {showLayersMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 liquid-glass-elevated rounded-xl p-2 shadow-2xl z-50 flex flex-col gap-1.5 text-xs font-mono animate-fadeIn">
+            <div className="absolute right-0 top-full mt-2 w-60 liquid-glass-hud rounded-xl p-2 shadow-2xl z-50 flex flex-col gap-1.5 text-xs font-mono animate-fadeIn">
               <span className="text-[10px] uppercase tracking-wider text-slate-400 px-2 py-0.5 font-semibold">
                 Geospatial Overlays
               </span>
+
+              <label className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-900 cursor-pointer">
+                <span className="text-slate-200">Country &amp; State Borders</span>
+                <input
+                  type="checkbox"
+                  checked={showBorders}
+                  onChange={(e) => setShowBorders(e.target.checked)}
+                  className="rounded border-slate-700 text-cyan-500 focus:ring-0 accent-cyan-400 cursor-pointer"
+                />
+              </label>
 
               <label className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-900 cursor-pointer">
                 <span className="text-slate-300">~300km Footprint</span>
@@ -1668,7 +2014,7 @@ export const CesiumGlobe: React.FC = () => {
               </label>
 
               <label className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-slate-900 cursor-pointer">
-                <span className="text-slate-300">National Labels</span>
+                <span className="text-slate-300">Study Region Labels</span>
                 <input
                   type="checkbox"
                   checked={showNationwideLabels}
@@ -1690,36 +2036,45 @@ export const CesiumGlobe: React.FC = () => {
           )}
         </div>
       </div>
+      </div>
 
-      {/* Bottom-Left: Real-Time Coordinate & Telemetry HUD (Positioned above Cesium credits) */}
-      <div className="absolute bottom-8 left-3 z-10 liquid-glass-hud rounded-full px-3.5 py-1.5 font-mono text-xs text-slate-300 flex items-center gap-2.5 shadow-xl pointer-events-none">
-        <div className="flex items-center gap-1.5 text-cyan-400">
+      {/* Bottom-Left: Real-Time Coordinate & Telemetry HUD (Clearance above mobile/split Navigation Deck) */}
+      <div
+        className={`absolute left-2.5 sm:left-3 z-10 liquid-glass-hud rounded-full px-2.5 sm:px-3 py-1.5 font-mono text-xs text-slate-300 flex items-center gap-2 shadow-xl pointer-events-none ${
+          viewMode === 'split'
+            ? 'bottom-14 2xl:bottom-8 max-w-[calc(100%-24px)] 2xl:max-w-[calc(100%-265px)]'
+            : 'bottom-14 sm:bottom-8 max-w-[calc(100%-24px)] sm:max-w-[calc(100%-265px)]'
+        }`}
+      >
+        <div className="flex items-center gap-1.5 text-cyan-400 shrink-0">
           <Crosshair className="w-3.5 h-3.5" />
-          <span className="text-[10px] uppercase tracking-wider text-slate-400">COORDINATES:</span>
+          <span className="text-[10px] uppercase tracking-wider text-slate-400 hidden sm:inline">Coordinates:</span>
         </div>
         {mouseCoords ? (
-          <span className="text-cyan-300 font-semibold text-[11px]">
-            {mouseCoords.lat.toFixed(4)}°N, {mouseCoords.lon.toFixed(4)}°E ({mouseCoords.height}m ASL)
+          <span className="text-cyan-300 font-semibold text-[11px] tabular-nums truncate">
+            {Math.abs(mouseCoords.lat).toFixed(4)}°{mouseCoords.lat >= 0 ? 'N' : 'S'}, {Math.abs(mouseCoords.lon).toFixed(4)}°{mouseCoords.lon >= 0 ? 'E' : 'W'} ({mouseCoords.height}m)
           </span>
         ) : (
-          <span className="text-slate-400 text-[11px]">Point cursor to read coordinates</span>
+          <span className="text-slate-400 text-[11px] truncate">Point cursor to read coords</span>
         )}
       </div>
 
       {/* Bottom-Right: High-Precision Camera Navigation Deck */}
-      <div className="absolute bottom-3 right-3 flex items-center gap-1 z-10 liquid-glass-hud p-1.5 rounded-2xl shadow-2xl">
+      <div className="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 flex items-center gap-0.5 sm:gap-1 z-10 liquid-glass-hud p-1 sm:p-1.5 rounded-2xl shadow-2xl">
         <button
+          type="button"
           onClick={handleResetCompassNorth}
           className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"
           title="Orient Compass North (Heading 0°)"
           aria-label="Orient Compass North"
         >
-          <Compass className="w-4 h-4 text-cyan-400" />
+          <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
         </button>
 
         <button
+          type="button"
           onClick={handleToggleTilt}
-          className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer text-xs font-mono font-bold"
+          className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer text-[11px] sm:text-xs font-mono font-bold"
           title="Toggle 3D Oblique Tilt Angle (-40° / -88°)"
           aria-label="Toggle 3D Tilt"
         >
@@ -1727,51 +2082,61 @@ export const CesiumGlobe: React.FC = () => {
         </button>
 
         <button
+          type="button"
           onClick={handleResetPanIndia}
           className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-amber-300 transition-colors cursor-pointer"
           title="Reset to All-India Overview"
           aria-label="Reset to All-India Overview"
         >
-          <RotateCcw className="w-4 h-4 text-amber-400" />
+          <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
         </button>
 
         <div className="h-4 w-px bg-slate-800 mx-0.5" />
 
         <button
+          type="button"
           onClick={handleZoomIn}
           className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
           title="Zoom In"
           aria-label="Zoom In"
         >
-          <ZoomIn className="w-4 h-4" />
+          <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
         <button
+          type="button"
           onClick={handleZoomOut}
           className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
           title="Zoom Out"
           aria-label="Zoom Out"
         >
-          <ZoomOut className="w-4 h-4" />
+          <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
         <button
+          type="button"
           onClick={toggleFullscreen}
           className="p-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
         >
-          {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
         </button>
       </div>
-      {/* Persistent Basemap Licensing Attribution */}
-      <div className="absolute bottom-1 right-28 z-10 text-[9px] font-mono text-slate-400 bg-slate-950/80 px-2 py-0.5 rounded border border-slate-800 pointer-events-auto backdrop-blur-sm">
+      {/* Persistent Basemap Licensing Attribution (Bottom-Left clear of Zoom Deck on all widths) */}
+      <div className="absolute bottom-2 left-2.5 sm:left-3 z-10 text-[9px] font-mono text-slate-400 liquid-glass-hud px-2 py-0.5 rounded pointer-events-auto max-w-[calc(100%-225px)] sm:max-w-[calc(100%-265px)] truncate">
         {basemapMode === 'satellite' ? (
-          <span>Imagery &copy; Esri, Maxar, Earthstar Geographics, USDA, USGS</span>
+          <>
+            <span className="sm:hidden">CesiumJS • &copy; Esri, Maxar</span>
+            <span className="hidden sm:inline">CesiumJS • Imagery &copy; Esri, Maxar, Earthstar, USDA, USGS</span>
+          </>
         ) : basemapMode === 'terrain' ? (
-          <span>Relief &copy; Esri, USGS, NOAA</span>
+          <>
+            <span className="sm:hidden">CesiumJS • &copy; Esri, USGS</span>
+            <span className="hidden sm:inline">CesiumJS • Relief &copy; Esri, USGS, NOAA</span>
+          </>
         ) : (
-          <span dangerouslySetInnerHTML={{ __html: CARTO_ATTRIBUTION.html }} />
+          <span dangerouslySetInnerHTML={{ __html: `CesiumJS • ${CARTO_ATTRIBUTION.html}` }} />
         )}
       </div>
     </div>

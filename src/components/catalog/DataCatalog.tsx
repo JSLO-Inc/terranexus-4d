@@ -30,7 +30,7 @@ export const DataCatalog: React.FC = () => {
   });
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6 bg-[#020617] text-slate-100 flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
@@ -76,9 +76,45 @@ export const DataCatalog: React.FC = () => {
         </div>
       </div>
 
+      {/* Official Legal Compliance, Software Licensing, Open Data Policies & Professional Liability Charter */}
+      <div className="p-5 rounded-2xl liquid-glass text-xs space-y-3.5 shadow-xl border border-sky-500/20">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+          <div className="flex items-center gap-2 text-slate-100 font-bold text-sm">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Software Licensing, Statutory Open-Data Compliance &amp; Professional Liability Charter</span>
+          </div>
+          <span className="px-2.5 py-0.5 rounded-md bg-sky-500/15 border border-sky-400/40 text-sky-300 font-mono text-[10px] font-semibold">
+            MIT Open-Source Software License · GODL-India · 17 U.S.C. § 105 · EU 377/2014
+          </span>
+        </div>
+
+        <p className="text-slate-300 text-xs leading-relaxed">
+          <strong className="text-white">TERRANEXUS 4D</strong> is an open-source 4D Earth Digital Twin and subsurface decision-support platform distributed under the permissive <strong className="text-cyan-300">MIT License</strong> (Copyright © 2026 JSLO-Inc). All third-party engines (<code className="text-slate-200">CesiumJS</code> Apache-2.0, <code className="text-slate-200">Three.js</code> MIT, <code className="text-slate-200">MapLibre GL</code> BSD-3-Clause) and sovereign/international scientific datasets are integrated in strict accordance with their governing statutory licenses:
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] text-slate-400 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800/80">
+          <div>
+            <strong className="text-slate-200 block mb-1">1. NASA Open Science Policy &amp; 14 CFR § 1221.1 Non-Endorsement:</strong>
+            NASA Level-3 GRACE/GRACE-FO gravimetry and GPM IMERG precipitation products are U.S. Government public-domain works (<code className="text-slate-300">17 U.S.C. § 105</code>). NASA has not partnered with, certified, sponsored, or endorsed TERRANEXUS 4D, and zero NASA logos or insignias are used (<code className="text-slate-300">14 CFR § 1221.1</code>).
+          </div>
+          <div>
+            <strong className="text-slate-200 block mb-1">2. Government of India Open Data License (GODL-India / NDSAP):</strong>
+            CGWB NAQUIM aquifer frameworks, India-WRIS piezometer records, CWC river basin delineations, and GSI Bhukosh lithostratigraphic syntheses are attributed under the National Data Sharing and Accessibility Policy (GODL-India).
+          </div>
+          <div>
+            <strong className="text-slate-200 block mb-1">3. EU Copernicus, ISRIC SoilGrids &amp; OpenStreetMap Rights:</strong>
+            Copernicus GLO-90 DEM and Sentinel-2 MSI spectral ratios are governed by <code className="text-slate-300">EU Regulation No 377/2014</code>. ISRIC SoilGrids 250m profiles are licensed under <code className="text-slate-300">CC-BY 4.0</code>. Vector cartography is © OpenStreetMap contributors under <code className="text-slate-300">ODbL 1.0</code>.
+          </div>
+          <div>
+            <strong className="text-amber-300 block mb-1">4. Geotechnical, Hydrogeological &amp; Engineering Liability Disclaimer:</strong>
+            3D subsurface cutouts, interpolated stratigraphic horizons, modelled phreatic water tables, and AI interpretations are for scientific reconnaissance and education only. They do not replace licensed site-specific core drilling, pumping tests, or certified engineering surveys.
+          </div>
+        </div>
+      </div>
+
       {/* Operational Provider Health Grid */}
       {providers.length > 0 && (
-        <div className="p-5 rounded-2xl glass-panel flex flex-col gap-3 shadow-xl">
+        <div className="p-5 rounded-2xl liquid-glass flex flex-col gap-3 shadow-xl">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
               <Activity className="w-4 h-4 text-emerald-400" />
@@ -91,7 +127,7 @@ export const DataCatalog: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {providers.map((p) => (
-              <div key={p.id} className="p-3.5 rounded-xl glass-panel flex flex-col justify-between gap-2 shadow-sm hover:border-slate-700/80 transition-all">
+              <div key={p.id} className="p-3.5 rounded-xl liquid-glass flex flex-col justify-between gap-2 shadow-sm hover:border-slate-700/80 transition-all">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] font-mono text-cyan-400 font-medium">{p.category}</span>
@@ -124,7 +160,7 @@ export const DataCatalog: React.FC = () => {
         {filtered.map((dataset) => (
           <div
             key={dataset.id}
-            className="p-5 rounded-2xl glass-panel flex flex-col justify-between gap-4 shadow-xl hover:border-slate-700/80 transition-all"
+            className="p-5 rounded-2xl liquid-glass flex flex-col justify-between gap-4 shadow-xl hover:border-slate-700/80 transition-all"
           >
             <div>
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -192,7 +228,7 @@ export const DataCatalog: React.FC = () => {
             {dataset.citation && (
               <div className="text-xs text-slate-300 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60 font-mono text-[10px]">
                 <span className="text-slate-400 uppercase block mb-1 font-bold">
-                  Official Dataset Citation & Attribution:
+                  Official Dataset Citation &amp; Attribution:
                 </span>
                 <p className="text-slate-300 leading-relaxed font-sans text-[11px]">
                   {dataset.citation}
@@ -229,32 +265,6 @@ export const DataCatalog: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Official Legal Compliance, Non-Endorsement & Attribution Charter */}
-      <div className="p-5 rounded-2xl glass-panel text-xs space-y-3 shadow-xl">
-        <div className="flex items-center gap-2 text-slate-200 font-bold text-sm">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Legal Compliance, Open Data Policies & Non-Endorsement Disclaimers</span>
-        </div>
-        <p className="text-slate-400 text-xs leading-relaxed">
-          TERRANEXUS 4D is an independent scientific geospatial research and visualization system developed by JSLO-Inc. 
-          Scientific datasets from NASA, PO.DAAC, CGWB, India-WRIS, GSI, and the European Space Agency are integrated strictly 
-          in compliance with their individual governing open data policies (NASA Open Data Policy / 17 U.S.C. § 105, Government of India 
-          National Data Sharing and Accessibility Policy / GODL-India, and EU Copernicus Regulation No 377/2014).
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] text-slate-400 bg-slate-900/80 p-3 rounded-xl border border-slate-800/80">
-          <div>
-            <strong className="text-slate-300 block mb-1">1. NASA Non-Endorsement & Logo Restriction (14 CFR § 1221.1):</strong>
-            NASA has not endorsed, certified, approved, partnered with, or sponsored TERRANEXUS 4D. No NASA logos, insignias, or seals 
-            are used. Original NASA Level-3 satellite observations are strictly segregated from processed, interpolated, or simulated models.
-          </div>
-          <div>
-            <strong className="text-slate-300 block mb-1">2. Third-Party & Indian Government Data Rights:</strong>
-            CGWB and GSI materials are utilized in accordance with GODL-India. Demonstration benchmark hydrographs and boreholes are 
-            explicitly marked to prevent misrepresentation. Third-party rights are evaluated independently.
-          </div>
-        </div>
       </div>
     </div>
   );
